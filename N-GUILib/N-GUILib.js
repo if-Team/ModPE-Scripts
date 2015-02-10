@@ -2,10 +2,10 @@ var elements = new Array();
 var currentLength = 0;
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var pectx = ctx.createPackageContext("com.mojang.minecraftpe", android.content.Context.CONTEXT_IGNORE_SECURITY);
-const four = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
 var shorts = "jkltIJT".split("");
 var shorts2 = "!i:;".split("");
 var affogatoman = true;
+const FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
 
 var GUILib = {};
 GUILib.TODAY_HUMOR = "Copyright";
@@ -15,25 +15,25 @@ GUILib.HUMOR_UNIV = "all";
 GUILib.DOG_DRIP = "rights";
 GUILib.MCPE_KOREA = "reserved.";
 var wthnhet = [ctx.getWindowManager().getDefaultDisplay().getWidth(), ctx.getWindowManager().getDefaultDisplay().getHeight()];
-GUILib.deviceWidth = Math.max.apply(null, wthnhet)/four;
-GUILib.deviceHeight = Math.min.apply(null, wthnhet)/four;
+GUILib.deviceWidth = Math.max.apply(null, wthnhet)/FOUR;
+GUILib.deviceHeight = Math.min.apply(null, wthnhet)/FOUR;
 
 //BUTTON
 GUILib.GUIButton = function(x, y, width, height, msg, callback) {
 	this.pw = true;
 	var spritesheet = getImage("gui", "spritesheet", '');
 	var bm = android.graphics.Bitmap.createBitmap(spritesheet, 0, 32, 16, 8);
-	var off = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bm, 0, 0, 8, 8), 8*four, 8*four, false);
-	var on = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bm, 8, 0, 8, 8), 8*four, 8*four, false);
-	this.x = x*four;
-	this.y = y*four;
-	this.width = width*four;
-	this.height = height*four;
+	var off = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bm, 0, 0, 8, 8), 8*FOUR, 8*FOUR, false);
+	var on = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bm, 8, 0, 8, 8), 8*FOUR, 8*FOUR, false);
+	this.x = x*FOUR;
+	this.y = y*FOUR;
+	this.width = width*FOUR;
+	this.height = height*FOUR;
 	this.msg = msg;
 	this.callback = callback;
 	this.mainplate = new android.widget.RelativeLayout(ctx);
 	var btn = new android.widget.Button(ctx);
-	btn.setBackgroundDrawable(ninePatch(on, 3*four, 3*four, 5*four, 4*four));
+	btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
 	btn.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
 	this.mainplate.addView(btn);
 	var text = new android.widget.ImageView(ctx);
@@ -45,40 +45,40 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback) {
 			switch(event.getAction()) {
 				case MotionEvent.ACTION_DOWN:
 					if(that.msg != "") {
-						shadow.setPadding(four*2, four*4, 0, 0);
-				 	text.setPadding(0, four*2, 0, 0);
+						shadow.setPadding(FOUR*2, FOUR*4, 0, 0);
+				 	text.setPadding(0, FOUR*2, 0, 0);
 						text.setColorFilter(android.graphics.Color.parseColor("#ffff9c"), android.graphics.PorterDuff.Mode.MULTIPLY);
 					}
-				 btn.setBackgroundDrawable(ninePatch(off, 3*four, 3*four, 5*four, 4*four));
+				 btn.setBackgroundDrawable(ninePatch(off, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
 				break;
 				case MotionEvent.ACTION_UP:
 					if(that.msg != "") {
-					shadow.setPadding(four*2, four*2, 0, 0);
+					shadow.setPadding(FOUR*2, FOUR*2, 0, 0);
 					text.setPadding(0, 0, 0, 0);
 					text.setColorFilter(android.graphics.Color.parseColor("#ffffff"), android.graphics.PorterDuff.Mode.MULTIPLY);
 					}
-				 btn.setBackgroundDrawable(ninePatch(on, 3*four, 3*four, 5*four, 4*four));
-					if(!(event.getX()<0 || event.getY()<0 || event.getX()>width*four || event.getY()>height*four)&&affogatoman) {
+				 btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
+					if(!(event.getX()<0 || event.getY()<0 || event.getX()>width*FOUR || event.getY()>height*FOUR)&&affogatoman) {
 						if(callback != null)
 							that.callback(that);
 						Level.playSound(getPlayerX(), getPlayerY(), getPlayerZ(), "random.click", 7, 7);
 					}
 				break;
 				case MotionEvent.ACTION_MOVE:
-				if(event.getX()<0 || event.getY()<0 || event.getX()>width*four || event.getY()>height*four) {
+				if(event.getX()<0 || event.getY()<0 || event.getX()>width*FOUR || event.getY()>height*FOUR) {
 					if(that.msg != "") {
-						shadow.setPadding(four*2, four*2, 0, 0);
+						shadow.setPadding(FOUR*2, FOUR*2, 0, 0);
 						text.setPadding(0, 0, 0, 0);
 					 text.setColorFilter(android.graphics.Color.parseColor("#ffffff"), android.graphics.PorterDuff.Mode.MULTIPLY);
 					}
-					btn.setBackgroundDrawable(ninePatch(on, 3*four, 3*four, 5*four, 4*four));
+					btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
 					} else {
 						if(that.msg != "") {
-						 text.setPadding(0, four*2, 0, 0);
-					 	shadow.setPadding(four*2, four*4, 0, 0);
+						 text.setPadding(0, FOUR*2, 0, 0);
+					 	shadow.setPadding(FOUR*2, FOUR*4, 0, 0);
 						 text.setColorFilter(android.graphics.Color.parseColor("#ffff9c"), android.graphics.PorterDuff.Mode.MULTIPLY);
 					 }
-						btn.setBackgroundDrawable(ninePatch(off, 3*four, 3*four, 5*four, 4*four));
+						btn.setBackgroundDrawable(ninePatch(off, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
 					}
 				break;
 			}
@@ -89,10 +89,10 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback) {
 	text.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
 	text.setScaleType(android.widget.ImageView.ScaleType.CENTER);
 	if(this.msg != "")
-		getBitmap(msg, text, shadow);
+		drawFont(msg, text, shadow);
 	shadow.setScaleType(android.widget.ImageView.ScaleType.CENTER);
 	shadow.setColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY);
-	shadow.setPadding(four*2, four*2, 0, 0);
+	shadow.setPadding(FOUR*2, FOUR*2, 0, 0);
 	shadow.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
 	this.mainplate.addView(shadow);
 	this.btn = text;
@@ -103,8 +103,8 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback) {
 //BUTTON METHODS
 GUILib.GUIButton.prototype = {};
 GUILib.GUIButton.prototype.setXY = function(x, y) {
-	this.x = (x == -1 ? this.x : x*four);
-	this.y = (y == -1 ? this.y : y*four);
+	this.x = (x == -1 ? this.x : x*FOUR);
+	this.y = (y == -1 ? this.y : y*FOUR);
 	 var that = this;
 		ctx.runOnUiThread(new java.lang.Runnable({run: function() {
 		if(that.pw != null)
@@ -112,8 +112,8 @@ GUILib.GUIButton.prototype.setXY = function(x, y) {
 	}}));
 };
 GUILib.GUIButton.prototype.setWH = function(width, height) {
-	this.width = (width == -1 ? this.width : width*four);
-	this.height = (height == -1 ? this.height : height*four);
+	this.width = (width == -1 ? this.width : width*FOUR);
+	this.height = (height == -1 ? this.height : height*FOUR);
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
 		if(that.pw != null)
@@ -122,7 +122,7 @@ GUILib.GUIButton.prototype.setWH = function(width, height) {
 };
 GUILib.GUIButton.prototype.setMessage = function(msg) {
 	this.msg = msg;
-	getBitmap(this.msg, this.btn, this.shadow);
+	drawFont(this.msg, this.btn, this.shadow);
 };
 GUILib.GUIButton.prototype.getMessage = function() {
 	return this.msg;
@@ -158,8 +158,8 @@ GUILib.ImageButton = function(x, y, width, height, bm, callback) {
 //IMAGEBUTTON METHODS
 GUILib.ImageButton.prototype = {};
 GUILib.ImageButton.prototype.setXY = function(x, y) {
-	this.x = (x == -1 ? this.x : x*four);
-	this.y = (y == -1 ? this.y : y*four);
+	this.x = (x == -1 ? this.x : x*FOUR);
+	this.y = (y == -1 ? this.y : y*FOUR);
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
 		if(that.pw != null)
@@ -167,8 +167,8 @@ GUILib.ImageButton.prototype.setXY = function(x, y) {
 	}}));
 };
 GUILib.ImageButton.prototype.setWH = function(width, height) {
-	this.width = (width == -1 ? this.width : width*four);
-	this.height = (height == -1 ? this.height : height*four);
+	this.width = (width == -1 ? this.width : width*FOUR);
+	this.height = (height == -1 ? this.height : height*FOUR);
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
 		if(that.pw != null)
@@ -188,7 +188,7 @@ GUILib.ImageButton.prototype.stop = function() {
 };
 
 var _ = function(bitmap, x, y, width, height) {
-	return android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bitmap, x, y, width, height), width*four, height*four, false);
+	return android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bitmap, x, y, width, height), width*FOUR, height*FOUR, false);
 };
 //mcpe internal images
 var images = {};
@@ -301,7 +301,7 @@ function ninePatch(bitmap, top, left, bottom, right) {
 //drawing font source
 //I want someone to upgrade this source...
 //It is very very slow
-function getBitmap(string, iv, shdow) {
+function drawFont(string, iv, shdow) {
 	new java.lang.Thread(new java.lang.Runnable({run: function() {
 	var has = hasNonAscii(string);
 	var divide = function(a) {
@@ -351,8 +351,8 @@ function getBitmap(string, iv, shdow) {
 		});
 	var cbm = android.graphics.Bitmap.createBitmap(bm, 0, 0, width, bm.getHeight());
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
-		iv.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*four/2, cbm.getHeight()*four/2, false));
-		shdow.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*four/2, cbm.getHeight()*four/2, false));
+		iv.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2, cbm.getHeight()*FOUR/2, false));
+		shdow.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2, cbm.getHeight()*FOUR/2, false));
 	}}));
 	}})).start();
 }
@@ -368,4 +368,3 @@ function selectLevelHook() {
 		org.mozilla.javascript.ScriptableObject.putProperty(scope, "GUILib", GUILib);
 	}
 }
-
