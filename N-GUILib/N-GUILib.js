@@ -3,7 +3,7 @@ var currentLength = 0;
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var pectx = ctx.createPackageContext("com.mojang.minecraftpe", android.content.Context.CONTEXT_IGNORE_SECURITY);
 var shorts = "jkltIJT".split("");
-var shorts2 = "!i:;".split("");
+var shorts2 = ".,!i:;".split("");
 var affogatoman = true;
 const FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
 var reader = new java.io.BufferedReader(new java.io.InputStreamReader(pectx.getAssets().open("images/items.meta")));
@@ -241,7 +241,7 @@ new java.lang.Thread(new java.lang.Runnable({run: function() {
 				 	return (i.isBack ? -1 : 0);
 				 }).forEach(function(element) {
 					ctx.runOnUiThread(new java.lang.Runnable({run: function() {
-						if(element.pw) {
+						if(element.pw == true) {
 							var pw = new android.widget.PopupWindow(ctx);
 							element.pw = pw;
 							pw.setContentView(element.mainplate);
