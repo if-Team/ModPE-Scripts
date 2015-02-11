@@ -157,6 +157,12 @@ GUILib.ImageButton = function(x, y, width, height, bm, callback) {
 
 //IMAGEBUTTON METHODS
 GUILib.ImageButton.prototype = {};
+GUILib.ImageButton.prototype.setImage = function(bm) {
+	if(typeof(bm) != "string")
+		this.image.setImageBitmap(bm);
+	else
+		this.image.setImageBitmap(eval(bm));
+};
 GUILib.ImageButton.prototype.setXY = function(x, y) {
 	this.x = (x == -1 ? this.x : x*FOUR);
 	this.y = (y == -1 ? this.y : y*FOUR);
@@ -210,7 +216,7 @@ new java.lang.Thread(new java.lang.Runnable({run: function() {
 				 	return (i.isBack ? -1 : 0);
 				 }).forEach(function(element) {
 					ctx.runOnUiThread(new java.lang.Runnable({run: function() {
-						if(element.pw == true) {
+						if(element.pw) {
 							var pw = new android.widget.PopupWindow(ctx);
 							element.pw = pw;
 							pw.setContentView(element.mainplate);
@@ -223,7 +229,7 @@ new java.lang.Thread(new java.lang.Runnable({run: function() {
 				});
 				 currentLength = elements.length;
 			}
-		 if(currentLength > elements.length)
+		 if(currentLength>elements.length)
 			 currentLength = elements.length;
 		}
 	}
@@ -234,7 +240,7 @@ function getImage(parent, file, add) {
 	var prefs = ctx.getSharedPreferences("mcpelauncherprefs",0);
 	var prefs2 = ctx.getSharedPreferences(ctx.getPackageName()+"_preferences",0);
 	var mcimg = android.graphics.BitmapFactory.decodeStream(pectx.getAssets().open("images/"+parent+"/"+file+add+".png"));
-	if(prefs.getString("texturePack","")!=""&&prefs2.getBoolean("zz_texture_pack_enable", false)) {
+	if(prefs.getString("texturePack","NULL")!="NULL"&&prefs2.getBoolean("zz_texture_pack_enable", false)) {
 		var path = prefs.getString("texturePack","");
 		if(!new java.io.File(path).exists())
 			return mcimg;
@@ -244,7 +250,7 @@ function getImage(parent, file, add) {
 			//if folder is shorter
 			if(zf.getEntry(parent+"/"+file+add+".png") != null)
 				tpimg = zf.getEntry(parent+"/"+file+add+".png");
-				//or shortest
+			//or shortest
 			else if(zf.getEntry(file+add+".png") != null)
 				tpimg = zf.getEntry(file+add+".png");
 			else
@@ -259,7 +265,7 @@ function getImage(parent, file, add) {
 function hasNonAscii(str) {
 	return str.split('').some(function(e){
 		return e >= String.fromCharCode(256);
-});
+	});
 }
 
 //making ninepatch drawable source
