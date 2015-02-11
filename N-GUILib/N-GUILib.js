@@ -6,6 +6,12 @@ var shorts = "jkltIJT".split("");
 var shorts2 = "!i:;".split("");
 var affogatoman = true;
 const FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
+var reader = new java.io.BufferedReader(new java.io.InputStreamReader(pectx.getAssets().open("images/items.meta")));
+eval("meta = "+reader.readLine()+";");
+reader.close();
+var items_opaque = getImage("", "items-opaque", "");
+var width = items_opaque.getWidth();
+var height = items_opaque.getHeight();
 
 var GUILib = {};
 GUILib.TODAY_HUMOR = "Copyright";
@@ -149,7 +155,9 @@ GUILib.ImageButton = function(x, y, width, height, bm, callback) {
 	this.image = this.main.btn;
 	this.callback = this.main.callback;
 	this.pw = true;
-	if(typeof(bm) != "string")
+	if(Array.isArray(bm))
+		this.image.setImageBitmap(getItemBitmap(bm));
+	else if(typeof(bm) != "string")
 		this.image.setImageBitmap(bm);
 	else
 		this.image.setImageBitmap(eval(bm));
@@ -158,7 +166,9 @@ GUILib.ImageButton = function(x, y, width, height, bm, callback) {
 //IMAGEBUTTON METHODS
 GUILib.ImageButton.prototype = {};
 GUILib.ImageButton.prototype.setImage = function(bm) {
-	if(typeof(bm) != "string")
+	if(Array.isArray(bm))
+		this.image.setImageBitmap(getItemBitmap(bm));
+	else if(typeof(bm) != "string")
 		this.image.setImageBitmap(bm);
 	else
 		this.image.setImageBitmap(eval(bm));
@@ -206,6 +216,21 @@ images.option4
 images.chatting
 images.mapdelete*/
 
+//get item image from meta source
+function getItemBitmap(data) {
+	var result = null;
+	meta.forEach(function(element) {
+		if(element.name == data[0]&&element.uvs[data[1]] != null) {
+			var bgnX = element.uvs[data[1]][0]*width;
+			var bgnY = element.uvs[data[1]][1]*height;
+			var endX = element.uvs[data[1]][2]*width;
+			var endY = element.uvs[data[1]][3]*height;
+			result = android.graphics.Bitmap.createBitmap(items_opaque, bgnX, bgnY, endX-bgnX, endY-bgnY);
+		}
+	});
+	return android.graphics.Bitmap.createScaledBitmap(result, result.getWidth()*FOUR, result.getHeight()*FOUR, false);
+}
+
 //reder checking source
 new java.lang.Thread(new java.lang.Runnable({run: function() {
 	while(1) {
@@ -239,17 +264,17 @@ new java.lang.Thread(new java.lang.Runnable({run: function() {
 function getImage(parent, file, add) {
 	var prefs = ctx.getSharedPreferences("mcpelauncherprefs",0);
 	var prefs2 = ctx.getSharedPreferences(ctx.getPackageName()+"_preferences",0);
-	var mcimg = android.graphics.BitmapFactory.decodeStream(pectx.getAssets().open("images/"+parent+"/"+file+add+".png"));
+	var mcimg = android.graphics.BitmapFactory.decodeStream(pectx.getAssets().open("images/"+parent+(parent == "" ? "" : "/")+file+add+".png"));
 	if(prefs.getString("texturePack","NULL")!="NULL"&&prefs2.getBoolean("zz_texture_pack_enable", false)) {
 		var path = prefs.getString("texturePack","");
 		if(!new java.io.File(path).exists())
 			return mcimg;
 		var zf = new java.util.zip.ZipFile(new java.io.File(path));
-		var tpimg = zf.getEntry("images/"+parent+"/"+file+add+".png");
+		var tpimg = zf.getEntry("images/"+parent+(parent == "" ? "" : "/")+file+add+".png");
 		if(tpimg == null) {
 			//if folder is shorter
-			if(zf.getEntry(parent+"/"+file+add+".png") != null)
-				tpimg = zf.getEntry(parent+"/"+file+add+".png");
+			if(zf.getEntry(parent+(parent == "" ? "" : "/")+file+add+".png") != null)
+				tpimg = zf.getEntry(parent+(parent == "" ? "" : "/")+file+add+".png");
 			//or shortest
 			else if(zf.getEntry(file+add+".png") != null)
 				tpimg = zf.getEntry(file+add+".png");
