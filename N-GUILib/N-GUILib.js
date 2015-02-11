@@ -309,19 +309,19 @@ function ninePatch(bitmap, top, left, bottom, right) {
 //It is very very slow
 function drawFont(string, iv, shdow) {
 	new java.lang.Thread(new java.lang.Runnable({run: function() {
-	var has = hasNonAscii(string);
-	var divide = function(a) {
-		var b = 0;
-		if (a > 256)
-			b = a % 256;
-		else
-			b = a;
-		return b + ":" + Math.floor(a / 256);
-	};
-	var bm = android.graphics.Bitmap.createBitmap(string.length*16+2, 18, android.graphics.Bitmap.Config.ARGB_8888);
-	var canvas = new android.graphics.Canvas(bm);
-	var width = 0;
-	var p = new android.graphics.Paint();
+		var has = hasNonAscii(string);
+		var divide = function(a) {
+			var b = 0;
+			if (a > 256)
+				b = a % 256;
+			else
+				b = a;
+			return b + ":" + Math.floor(a / 256);
+		};
+		var bm = android.graphics.Bitmap.createBitmap(string.length*16+2, 18, android.graphics.Bitmap.Config.ARGB_8888);
+		var canvas = new android.graphics.Canvas(bm);
+		var width = 0;
+		var p = new android.graphics.Paint();
 		string.split('').forEach(function(element) {
 			if(element != " ") {
 				var i = divide(element.charCodeAt(0)).split(":");
@@ -337,9 +337,9 @@ function drawFont(string, iv, shdow) {
 					width-=8;
 				} else
 					canvas.drawBitmap(android.graphics.Bitmap.createBitmap(glyph, x, y, 16, 16), width, 0, p);
-				if(has) {
+				if(has)
 					width+=16;
-				} else {
+				else {
 					width+=12;
 					if(shorts.indexOf(element)>=0)
 						width-=4;
@@ -351,15 +351,15 @@ function drawFont(string, iv, shdow) {
 						width+=2;
 					if(element == "j")
 						width+=4;
-					}
+				}
 			} else
 				width+=8;
 		});
-	var cbm = android.graphics.Bitmap.createBitmap(bm, 0, 0, width, bm.getHeight());
-	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
-		iv.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2, cbm.getHeight()*FOUR/2, false));
-		shdow.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2, cbm.getHeight()*FOUR/2, false));
-	}}));
+		var cbm = android.graphics.Bitmap.createBitmap(bm, 0, 0, width, bm.getHeight());
+		ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+			iv.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2, cbm.getHeight()*FOUR/2, false));
+			shdow.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2, cbm.getHeight()*FOUR/2, false));
+		}}));
 	}})).start();
 }
 
