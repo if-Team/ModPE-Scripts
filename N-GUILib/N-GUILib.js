@@ -394,8 +394,9 @@ function selectLevelHook() {
 	for(var i = 0; i<scripts.size(); i++) {
 		var script = scripts.get(i);
 		var scope = script.scope;
-		if(script.name == "N-GUILib.js")
+		if(org.mozilla.javascript.ScriptableObject.hasProperty(scope, "GUILib"))
 			continue;
 		org.mozilla.javascript.ScriptableObject.putProperty(scope, "GUILib", GUILib);
 	}
 }
+
