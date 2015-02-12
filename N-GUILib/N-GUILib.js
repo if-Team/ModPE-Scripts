@@ -1,25 +1,27 @@
+////////////////////////////////////////////////      /* Copyright
+//@@@@@@@//@@////@@//@@//@@//////@@//@@/////////       * 2015.
+//@@///////@@////@@//@@//@@//////////@@/////////       * Affogatoman
+//@@//@@@//@@////@@//@@//@@//////@@//@@@@@@@@///       * all
+//@@///@@//@@////@@//@@//@@//////@@//@@////@@@//       * rights
+//@@@@@@@//@@@@@@@@//@@//@@@@@@//@@//@@@@@@@@///       * reserved.
+////////////////////////////////////////////////       */
+
 var elements = new Array();
 var currentLength = 0;
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var pectx = ctx.createPackageContext("com.mojang.minecraftpe", android.content.Context.CONTEXT_IGNORE_SECURITY);
 var shorts = "jkltIJT".split("");
 var shorts2 = ".,!i:;".split("");
-var affogatoman = true;
-const FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
 var reader = new java.io.BufferedReader(new java.io.InputStreamReader(pectx.getAssets().open("images/items.meta")));
 eval("meta = "+reader.readLine()+";");
 reader.close();
 var items_opaque = getImage("", "items-opaque", "");
 var width = items_opaque.getWidth();
 var height = items_opaque.getHeight();
+const FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
+
 
 var GUILib = {};
-GUILib.TODAY_HUMOR = "Copyright";
-GUILib.DAILY_BEST = "2015.";
-GUILib.RULI_WEB = "Affogatoman";
-GUILib.HUMOR_UNIV = "all";
-GUILib.DOG_DRIP = "rights";
-GUILib.MCPE_KOREA = "reserved.";
 var wthnhet = [ctx.getWindowManager().getDefaultDisplay().getWidth(), ctx.getWindowManager().getDefaultDisplay().getHeight()];
 GUILib.deviceWidth = Math.max.apply(null, wthnhet)/FOUR;
 GUILib.deviceHeight = Math.min.apply(null, wthnhet)/FOUR;
@@ -64,7 +66,7 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback) {
 					text.setColorFilter(android.graphics.Color.parseColor("#ffffff"), android.graphics.PorterDuff.Mode.MULTIPLY);
 					}
 				 btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
-					if(!(event.getX()<0 || event.getY()<0 || event.getX()>width*FOUR || event.getY()>height*FOUR)&&affogatoman) {
+					if(!(event.getX()<0 || event.getY()<0 || event.getX()>width*FOUR || event.getY()>height*FOUR)) {
 						if(callback != null)
 							that.callback(that);
 						Level.playSound(getPlayerX(), getPlayerY(), getPlayerZ(), "random.click", 7, 7);
@@ -202,6 +204,8 @@ GUILib.ImageButton.prototype.stop = function() {
 			that.pw = null;
 		}}));
 };
+
+//
 
 var _ = function(bitmap, x, y, width, height) {
 	return android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bitmap, x, y, width, height), width*FOUR, height*FOUR, false);
@@ -399,4 +403,3 @@ function selectLevelHook() {
 		org.mozilla.javascript.ScriptableObject.putProperty(scope, "GUILib", GUILib);
 	}
 }
-
