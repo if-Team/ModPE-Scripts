@@ -1,25 +1,30 @@
-////////////////////////////////////////////////      /* Copyright
-//@@@@@@@//@@////@@//@@//@@//////@@//@@/////////       * 2015.
-//@@///////@@////@@//@@//@@//////////@@/////////       * Affogatoman
-//@@//@@@//@@////@@//@@//@@//////@@//@@@@@@@@///       * all
-//@@///@@//@@////@@//@@//@@//////@@//@@////@@@//       * rights
-//@@@@@@@//@@@@@@@@//@@//@@@@@@//@@//@@@@@@@@///       * reserved.
-////////////////////////////////////////////////       */
+///////////////////////////////////////////////      /* Copyright
+//@@@@@@@//@@////@@//@@//@@//////@@//@@////////       * 2015.
+//@@///////@@////@@//@@//@@//////////@@////////       * Affogatoman
+//@@//@@@//@@////@@//@@//@@//////@@//@@@@@@@///       * all
+//@@///@@//@@////@@//@@//@@//////@@//@@///@@@//       * rights
+//@@@@@@@//@@@@@@@@//@@//@@@@@@//@@//@@@@@@@///       * reserved.
+///////////////////////////////////////////////       */
+
+var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
+var pectx = ctx.createPackageContext("com.mojang.minecraftpe", android.content.Context.CONTEXT_IGNORE_SECURITY);
+
+const FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
 
 var elements = new Array();
 var currentLength = 0;
-var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
-var pectx = ctx.createPackageContext("com.mojang.minecraftpe", android.content.Context.CONTEXT_IGNORE_SECURITY);
-var shorts = "jkltIJT".split("");
+var shorts = "jkltIJ".split("");
 var shorts2 = ".,!i:;".split("");
-var reader = new java.io.BufferedReader(new java.io.InputStreamReader(pectx.getAssets().open("images/items.meta")));
+var reader = new java.io.BufferedReader(new java.io.InputStreamReader(getImage("", "items.meta", "", true)));
 eval("meta = "+reader.readLine()+";");
 reader.close();
 var items_opaque = getImage("", "items-opaque", "");
 var width = items_opaque.getWidth();
 var height = items_opaque.getHeight();
-const FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
-
+var editxtimg = android.graphics.Bitmap.createBitmap(3, 3, android.graphics.Bitmap.Config.RGB_565);
+editxtimg.eraseColor(android.graphics.Color.rgb(0x6b, 0x61, 0x62));
+editxtimg.setPixel(1, 1, android.graphics.Color.rgb(0x3a, 0x35, 0x3a));
+editxtimg = android.graphics.Bitmap.createScaledBitmap(editxtimg, 3*FOUR, 3*FOUR, false)
 
 var GUILib = {};
 var wthnhet = [ctx.getWindowManager().getDefaultDisplay().getWidth(), ctx.getWindowManager().getDefaultDisplay().getHeight()];
@@ -52,20 +57,20 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback) {
 			var MotionEvent = android.view.MotionEvent;
 			switch(event.getAction()) {
 				case MotionEvent.ACTION_DOWN:
-					if(that.msg != "") {
+					if(that.msg !== "") {
 						shadow.setPadding(FOUR*2, FOUR*4, 0, 0);
-				 	text.setPadding(0, FOUR*2, 0, 0);
+				 		text.setPadding(0, FOUR*2, 0, 0);
 						text.setColorFilter(android.graphics.Color.parseColor("#ffff9c"), android.graphics.PorterDuff.Mode.MULTIPLY);
 					}
-				 btn.setBackgroundDrawable(ninePatch(off, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
+				 	btn.setBackgroundDrawable(ninePatch(off, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
 				break;
 				case MotionEvent.ACTION_UP:
-					if(that.msg != "") {
-					shadow.setPadding(FOUR*2, FOUR*2, 0, 0);
-					text.setPadding(0, 0, 0, 0);
-					text.setColorFilter(android.graphics.Color.parseColor("#ffffff"), android.graphics.PorterDuff.Mode.MULTIPLY);
+					if(that.msg !== "") {
+						shadow.setPadding(FOUR*2, FOUR*2, 0, 0);
+						text.setPadding(0, 0, 0, 0);
+						text.setColorFilter(android.graphics.Color.parseColor("#ffffff"), android.graphics.PorterDuff.Mode.MULTIPLY);
 					}
-				 btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
+					btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
 					if(!(event.getX()<0 || event.getY()<0 || event.getX()>width*FOUR || event.getY()>height*FOUR)) {
 						if(callback != null)
 							that.callback(that);
@@ -74,18 +79,18 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback) {
 				break;
 				case MotionEvent.ACTION_MOVE:
 				if(event.getX()<0 || event.getY()<0 || event.getX()>width*FOUR || event.getY()>height*FOUR) {
-					if(that.msg != "") {
+					if(that.msg !== "") {
 						shadow.setPadding(FOUR*2, FOUR*2, 0, 0);
 						text.setPadding(0, 0, 0, 0);
-					 text.setColorFilter(android.graphics.Color.parseColor("#ffffff"), android.graphics.PorterDuff.Mode.MULTIPLY);
+					 	text.setColorFilter(android.graphics.Color.parseColor("#ffffff"), android.graphics.PorterDuff.Mode.MULTIPLY);
 					}
 					btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
 					} else {
-						if(that.msg != "") {
+						if(that.msg !== "") {
 						 text.setPadding(0, FOUR*2, 0, 0);
-					 	shadow.setPadding(FOUR*2, FOUR*4, 0, 0);
+					 	 shadow.setPadding(FOUR*2, FOUR*4, 0, 0);
 						 text.setColorFilter(android.graphics.Color.parseColor("#ffff9c"), android.graphics.PorterDuff.Mode.MULTIPLY);
-					 }
+					 	}
 						btn.setBackgroundDrawable(ninePatch(off, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
 					}
 				break;
@@ -96,7 +101,7 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback) {
 	text.setOnTouchListener(ontouch);
 	text.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
 	text.setScaleType(android.widget.ImageView.ScaleType.CENTER);
-	if(this.msg != "")
+	if(this.msg !== "")
 		drawFont(msg, text, shadow);
 	shadow.setScaleType(android.widget.ImageView.ScaleType.CENTER);
 	shadow.setColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY);
@@ -159,7 +164,7 @@ GUILib.ImageButton = function(x, y, width, height, bm, callback) {
 	this.pw = true;
 	if(Array.isArray(bm))
 		this.image.setImageBitmap(getItemBitmap(bm));
-	else if(typeof(bm) != "string")
+	else if(typeof(bm) !== "string")
 		this.image.setImageBitmap(bm);
 	else
 		this.image.setImageBitmap(eval(bm));
@@ -170,7 +175,7 @@ GUILib.ImageButton.prototype = {};
 GUILib.ImageButton.prototype.setImage = function(bm) {
 	if(Array.isArray(bm))
 		this.image.setImageBitmap(getItemBitmap(bm));
-	else if(typeof(bm) != "string")
+	else if(typeof(bm) !== "string")
 		this.image.setImageBitmap(bm);
 	else
 		this.image.setImageBitmap(eval(bm));
@@ -205,7 +210,39 @@ GUILib.ImageButton.prototype.stop = function() {
 		}}));
 };
 
-//
+//EDITTEXT
+GUILib.EditText = function(x, y, width, height, hint) {
+	this.pw = true;
+	this.x = x*FOUR;
+	this.y = y*FOUR;
+	this.width = width*FOUR;
+	this.height = height*FOUR;
+	var layout = new android.widget.RelativeLayout(ctx);
+	var back = new android.widget.TextView(ctx);
+	back.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
+	back.setBackgroundDrawable(ninePatch(editxtimg, FOUR, FOUR, FOUR*2, FOUR*2));
+	var edtxt = new android.widget.ImageView(ctx);
+	edtxt.setScaleType(android.widget.ImageView.ScaleType.CENTER);
+	edtxt.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
+	edtxt.setPadding(FOUR*5, 0, 0, 0);
+	var shadow = new android.widget.ImageView(ctx);
+	shadow.setScaleType(android.widget.ImageView.ScaleType.CENTER);
+	shadow.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
+	shadow.setPadding(FOUR*7, FOUR*2, 0, 0);
+	shadow.setColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY);
+	layout.addView(back);
+	layout.addView(shadow);
+	layout.addView(edtxt);
+	drawFont("", edtxt, shadow, true);
+	this.mainplate = layout;
+};
+
+//EDITTEXT METHODS
+GUILib.EditText.prototype = {};
+GUILib.EditText.prototype.render = function() {
+	if(this.pw)
+		elements.push(this);
+};
 
 var _ = function(bitmap, x, y, width, height) {
 	return android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bitmap, x, y, width, height), width*FOUR, height*FOUR, false);
@@ -265,27 +302,27 @@ new java.lang.Thread(new java.lang.Runnable({run: function() {
 }})).start();
 
 //get internal image bitmap source
-function getImage(parent, file, add) {
+function getImage(parent, file, add, raw) {
 	var prefs = ctx.getSharedPreferences("mcpelauncherprefs",0);
 	var prefs2 = ctx.getSharedPreferences(ctx.getPackageName()+"_preferences",0);
-	var mcimg = android.graphics.BitmapFactory.decodeStream(pectx.getAssets().open("images/"+parent+(parent == "" ? "" : "/")+file+add+".png"));
-	if(prefs.getString("texturePack","NULL")!="NULL"&&prefs2.getBoolean("zz_texture_pack_enable", false)) {
+	var mcimg = (raw == true ? pectx.getAssets().open("images/"+parent+(parent == "" ? "" : "/")+file+add) : android.graphics.BitmapFactory.decodeStream(pectx.getAssets().open("images/"+parent+(parent == "" ? "" : "/")+file+add+".png")));
+	if(prefs.getString("texturePack","NULL") !== "NULL"&&prefs2.getBoolean("zz_texture_pack_enable", false)) {
 		var path = prefs.getString("texturePack","");
 		if(!new java.io.File(path).exists())
 			return mcimg;
 		var zf = new java.util.zip.ZipFile(new java.io.File(path));
-		var tpimg = zf.getEntry("images/"+parent+(parent == "" ? "" : "/")+file+add+".png");
+		var tpimg = zf.getEntry("images/"+parent+(parent === "" ? "" : "/")+file+add+(raw == true ? "" : ".png"));
 		if(tpimg == null) {
 			//if folder is shorter
-			if(zf.getEntry(parent+(parent == "" ? "" : "/")+file+add+".png") != null)
-				tpimg = zf.getEntry(parent+(parent == "" ? "" : "/")+file+add+".png");
+			if(zf.getEntry(parent+(parent === "" ? "" : "/")+file+add+(raw == true ? "" : ".png")) != null)
+				tpimg = zf.getEntry(parent+(parent === "" ? "" : "/")+file+add+(raw == true ? "" : ".png"));
 			//or shortest
-			else if(zf.getEntry(file+add+".png") != null)
-				tpimg = zf.getEntry(file+add+".png");
+			else if(zf.getEntry(file+add+(raw == true ? "" : ".png")) != null)
+				tpimg = zf.getEntry(file+add+(raw == true ? "" : ".png"));
 			else
 				return mcimg;
 		}
-		return android.graphics.BitmapFactory.decodeStream(zf.getInputStream(tpimg));
+		return (raw == true ? zf.getInputStream(tpimg) : android.graphics.BitmapFactory.decodeStream(zf.getInputStream(tpimg)));
 	} else
 		return mcimg;
 }
@@ -336,7 +373,7 @@ function ninePatch(bitmap, top, left, bottom, right) {
 //drawing font source
 //I want someone to upgrade this source...
 //It is very very slow
-function drawFont(string, iv, shdow) {
+function drawFont(string, iv, shdow, isEdit) {
 	new java.lang.Thread(new java.lang.Runnable({run: function() {
 		var has = hasNonAscii(string);
 		var divide = function(a) {
@@ -352,12 +389,12 @@ function drawFont(string, iv, shdow) {
 		var width = 0;
 		var p = new android.graphics.Paint();
 		string.split('').forEach(function(element) {
-			if(element != " ") {
+			if(element !== " ") {
 				var i = divide(element.charCodeAt(0)).split(":");
 				var x = (((parseInt(i[0], 10)) % 16)) * 16;
 				var y = Math.floor(parseInt(i[0], 10) / 16) * 16;
 				var num = parseInt(i[1], 10).toString(16).toUpperCase();
-				if(num == "0")
+				if(num === "0")
 					num = "00";
 				var glyph = (has ? getImage("font", "glyph_", num) : android.graphics.Bitmap.createScaledBitmap(getImage("font", "default8", ''), 256, 256, false));
 				p.setColorFilter(new android.graphics.LightingColorFilter(android.graphics.Color.parseColor("#dedfde"), 0));
@@ -388,6 +425,12 @@ function drawFont(string, iv, shdow) {
 		ctx.runOnUiThread(new java.lang.Runnable({run: function() {
 			iv.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2, cbm.getHeight()*FOUR/2, false));
 			shdow.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2, cbm.getHeight()*FOUR/2, false));
+			if(isEdit == true) {
+				if(iv.getWidth()>cbm.getWidth()*FOUR/2+FOUR*5) {
+					iv.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(cbm.getWidth()*FOUR/2+FOUR*5, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
+					shdow.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(cbm.getWidth()*FOUR/2+FOUR*5, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
+				}
+			}
 		}}));
 	}})).start();
 }
@@ -403,3 +446,6 @@ function selectLevelHook() {
 		org.mozilla.javascript.ScriptableObject.putProperty(scope, "GUILib", GUILib);
 	}
 }
+
+/*    EOF    */
+

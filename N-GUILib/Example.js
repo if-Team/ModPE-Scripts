@@ -20,3 +20,4 @@ function leaveGame() {
 	btn.stop();
 	btn2.stop();  //제거
 }
+
