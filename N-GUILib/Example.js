@@ -19,6 +19,7 @@ function newLevel() {
 	//렌더
 	btn3 = new GUILib.EditText(GUILib.deviceWidth/2 - 48, GUILib.deviceHeight/2, 96, 20);
 	btn3.setText("回レ 回レ 回レ");
+	print(btn3.getText());
 	btn3.render();
 }
 

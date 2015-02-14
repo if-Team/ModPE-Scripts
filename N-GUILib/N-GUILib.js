@@ -312,8 +312,9 @@ new java.lang.Thread(new java.lang.Runnable({run: function() {
 		if(edit_text === "")
 			ctx.runOnUiThread(new java.lang.Runnable({
 				run: function() {
-					edit_str.setImageBitmap(emptyimg);
-					edit_shdow.setImageBitmap(emptyimg);
+					drawFont("_", edit_str, edit_shdow, true, Math.max.apply(null, wthnhet)-76*FOUR-1);
+				/*	edit_str.setImageBitmap(emptyimg);
+					edit_shdow.setImageBitmap(emptyimg);*/
 				}
 			}));
 		if(elements.length>0) {
@@ -502,6 +503,8 @@ function ninePatch(bitmap, top, left, bottom, right) {
 function drawFont(string, iv, shdow, isEdit, wi) {
 	if(typeof string !== "string")
 		return;
+	if(isEdit && wi == Math.max.apply(null, wthnhet)-76*FOUR)
+		string = string + "_";
 	new java.lang.Thread(new java.lang.Runnable({run: function() {
 		var has = hasNonAscii(string);
 		var divide = function(a) {
