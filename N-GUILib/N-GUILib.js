@@ -260,7 +260,7 @@ GUILib.EditText = function(x, y, width, height, hint) {
 //EDITTEXT METHODS
 GUILib.EditText.prototype = {};
 GUILib.EditText.prototype.setText = function(text) {
-	drawFont(text, this.edit, this.shadow, true);
+	drawFont(text, this.edit, this.shadow, true, this.width);
 	this.text = text;
 };
 GUILib.EditText.prototype.getText = function() {
@@ -269,6 +269,13 @@ GUILib.EditText.prototype.getText = function() {
 GUILib.EditText.prototype.render = function() {
 	if(this.pw)
 		elements.push(this);
+};
+GUILib.EditText.prototype.stop = function() {
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+			that.pw.dismiss();
+			that.pw = null;
+		}}));
 };
 
 var _ = function(bitmap, x, y, width, height) {
@@ -361,10 +368,9 @@ function showEditPopup(text, shadow, str, that) {
 			var a = new android.widget.EditText(ctx);
 			a.setImeOptions(android.view.inputmethod.EditorInfo.IME_FLAG_NO_EXTRACT_UI);
 			a.setSingleLine(true);
-			a.setOnKeyListener(new android.view.View.OnKeyListener({
-				onKey: function(v, code) {
-					if(code == android.view.KeyEvent.KEYCODE_ENTER)
-						pw.dismiss();
+			a.setOnEditorActionListener(new android.widget.TextView.OnEditorActionListener({
+				onEditorAction: function(view, actionId, event) {
+					pw.dismiss();
 					return false;
 				}
 			}));
@@ -378,10 +384,6 @@ function showEditPopup(text, shadow, str, that) {
 					edit_text = s+"";
 					if((s+"").length>0)
 						drawFont(s + "", b, c, true, Math.max.apply(null, wthnhet)-76*FOUR);
-					if((s+"") === "") {
-						b.setImageBitmap(emptyimg);
-						c.setImageBitmap(emptyimg);
-					}
 				}
 			}));
 			var b = new android.widget.ImageView(ctx);
