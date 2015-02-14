@@ -170,7 +170,6 @@ GUILib.ImageButton = function(x, y, width, height, bm, callback) {
 	this.height = this.main.height;
 	this.image = this.main.btn;
 	this.callback = this.main.callback;
-	this.pw = true;
 	if(Array.isArray(bm))
 		this.image.setImageBitmap(getItemBitmap(bm));
 	else if(typeof(bm) !== "string")
@@ -194,7 +193,7 @@ GUILib.ImageButton.prototype.setXY = function(x, y) {
 	this.y = (y == -1 ? this.y : y*FOUR);
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
-		if(that.pw != null)
+		if(that.main.pw != null)
 			pw.update(that.x, that.y, -1, -1, true);
 	}}));
 };
@@ -203,19 +202,19 @@ GUILib.ImageButton.prototype.setWH = function(width, height) {
 	this.height = (height == -1 ? this.height : height*FOUR);
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
-		if(that.pw != null)
+		if(that.main.pw != null)
 			pw.update(that.width, that.height);
 	}}));
 };
 GUILib.ImageButton.prototype.render = function() {
-	if(this.pw)
+	if(this.main.pw)
 		elements.push(this.main);
 };
 GUILib.ImageButton.prototype.stop = function() {
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
-			that.pw.dismiss();
-			that.pw = null;
+			that.main.pw.dismiss();
+			that.main.pw = null;
 		}}));
 };
 
