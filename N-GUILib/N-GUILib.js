@@ -21,10 +21,19 @@ reader.close();
 var items_opaque = getImage("", "items-opaque", "");
 var width = items_opaque.getWidth();
 var height = items_opaque.getHeight();
+var emptyimg = android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.ARGB_8888);
 var editxtimg = android.graphics.Bitmap.createBitmap(3, 3, android.graphics.Bitmap.Config.RGB_565);
 editxtimg.eraseColor(android.graphics.Color.rgb(0x6b, 0x61, 0x62));
 editxtimg.setPixel(1, 1, android.graphics.Color.rgb(0x3a, 0x35, 0x3a));
-editxtimg = android.graphics.Bitmap.createScaledBitmap(editxtimg, 3*FOUR, 3*FOUR, false)
+editxtimg = android.graphics.Bitmap.createScaledBitmap(editxtimg, 3*FOUR, 3*FOUR, false);
+
+var popupimg = android.graphics.Bitmap.createBitmap(3, 3, android.graphics.Bitmap.Config.RGB_565);
+popupimg.eraseColor(android.graphics.Color.WHITE);
+popupimg.setPixel(1, 1, android.graphics.Color.BLACK);
+popupimg = android.graphics.Bitmap.createScaledBitmap(popupimg, 3*FOUR, 3*FOUR, false);
+
+//edittext
+var edit_str, edit_shdow, edit_text;
 
 var GUILib = {};
 var wthnhet = [ctx.getWindowManager().getDefaultDisplay().getWidth(), ctx.getWindowManager().getDefaultDisplay().getHeight()];
@@ -213,6 +222,7 @@ GUILib.ImageButton.prototype.stop = function() {
 //EDITTEXT
 GUILib.EditText = function(x, y, width, height, hint) {
 	this.pw = true;
+	this.text = "";
 	this.x = x*FOUR;
 	this.y = y*FOUR;
 	this.width = width*FOUR;
@@ -229,16 +239,33 @@ GUILib.EditText = function(x, y, width, height, hint) {
 	shadow.setScaleType(android.widget.ImageView.ScaleType.CENTER);
 	shadow.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
 	shadow.setPadding(FOUR*7, FOUR*2, 0, 0);
+	shadow.setVisibility(android.view.View.INVISIBLE);
 	shadow.setColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY);
 	layout.addView(back);
 	layout.addView(shadow);
 	layout.addView(edtxt);
-	drawFont("", edtxt, shadow, true);
 	this.mainplate = layout;
+	var that = this;
+	var onclick = new android.view.View.OnClickListener({
+		onClick: function() {
+			showEditPopup(edtxt, shadow, that.text, that);
+		}
+	});
+	edtxt.setOnClickListener(onclick);
+	back.setOnClickListener(onclick);
+	this.edit = edtxt;
+	this.shadow = shadow;
 };
 
 //EDITTEXT METHODS
 GUILib.EditText.prototype = {};
+GUILib.EditText.prototype.setText = function(text) {
+	drawFont(text, this.edit, this.shadow, true);
+	this.text = text;
+};
+GUILib.EditText.prototype.getText = function() {
+	return this.text;
+}
 GUILib.EditText.prototype.render = function() {
 	if(this.pw)
 		elements.push(this);
@@ -276,6 +303,13 @@ function getItemBitmap(data) {
 new java.lang.Thread(new java.lang.Runnable({run: function() {
 	while(1) {
 		java.lang.Thread.sleep(50);
+		if(edit_text === "")
+			ctx.runOnUiThread(new java.lang.Runnable({
+				run: function() {
+					edit_str.setImageBitmap(emptyimg);
+					edit_shdow.setImageBitmap(emptyimg);
+				}
+			}));
 		if(elements.length>0) {
 			if(currentLength<elements.length) {
 				 elements.sort(function(i) {
@@ -300,6 +334,95 @@ new java.lang.Thread(new java.lang.Runnable({run: function() {
 		}
 	}
 }})).start();
+
+//show edittext popup source
+function showEditPopup(text, shadow, str, that) {
+	ctx.runOnUiThread(new java.lang.Runnable({
+		run: function() {
+			/*
+			EditText(a)
+			--------
+			Text(b)
+			--------
+			Shadow(c)
+			*/
+			var black = new android.widget.PopupWindow(ctx);
+			black.setContentView(new android.widget.TextView(ctx));
+			black.setWidth(Math.max.apply(null, wthnhet)+10);
+			black.setHeight(Math.min.apply(null, wthnhet)+10);
+			black.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.BLACK));
+			black.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+			var done = new GUILib.GUIButton(GUILib.deviceWidth-66, 0, 66, 37, "Done", function(thiz) {
+				black.dismiss();
+				pw.dismiss();
+			});
+			done.render();
+			var textpart = new android.widget.RelativeLayout(ctx);
+			var a = new android.widget.EditText(ctx);
+			a.setImeOptions(android.view.inputmethod.EditorInfo.IME_FLAG_NO_EXTRACT_UI);
+			a.setSingleLine(true);
+			a.setOnKeyListener(new android.view.View.OnKeyListener({
+				onKey: function(v, code) {
+					if(code == android.view.KeyEvent.KEYCODE_ENTER)
+						pw.dismiss();
+					return false;
+				}
+			}));
+			a.setFocusable(true);
+			a.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+			a.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
+			a.setTextColor(android.graphics.Color.TRANSPARENT);
+			a.setCursorVisible(false);
+			a.addTextChangedListener(new android.text.TextWatcher({
+				afterTextChanged: function(s) {
+					edit_text = s+"";
+					if((s+"").length>0)
+						drawFont(s + "", b, c, true, Math.max.apply(null, wthnhet)-76*FOUR);
+					if((s+"") === "") {
+						b.setImageBitmap(emptyimg);
+						c.setImageBitmap(emptyimg);
+					}
+				}
+			}));
+			var b = new android.widget.ImageView(ctx);
+			edit_str = b;
+			b.setScaleType(android.widget.ImageView.ScaleType.CENTER);
+			var c = new android.widget.ImageView(ctx);
+			c.setVisibility(android.view.View.INVISIBLE);
+			edit_shdow = c;
+			c.setColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY);
+			c.setScaleType(android.widget.ImageView.ScaleType.CENTER);
+			textpart.addView(c);
+			textpart.addView(b);
+			textpart.addView(a);
+			if(str !== "") {
+				a.setText(str);
+				drawFont(str, b, c, true, Math.max.apply(null, wthnhet)-76*FOUR);
+			}
+			var pw = new android.widget.PopupWindow(ctx);
+			pw.setContentView(textpart);
+			pw.setWidth(Math.max.apply(null, wthnhet)-76*FOUR);
+			pw.setHeight(17*FOUR);
+			pw.setBackgroundDrawable(ninePatch(popupimg, FOUR, FOUR, FOUR*2, FOUR*2));
+			pw.setFocusable(true);
+			pw.setOnDismissListener(new android.widget.PopupWindow.OnDismissListener({
+				onDismiss: function() {
+					if(edit_text !== "")
+						drawFont(edit_text, text, shadow, true, text.getParent().getWidth());
+					else {
+						text.setImageBitmap(emptyimg);
+						shadow.setImageBitmap(emptyimg);
+					}
+					that.text = (edit_text == null ? "" : edit_text);
+					edit_text = null;
+					black.dismiss();
+					done.stop();
+				}
+			}));
+			pw.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.LEFT, 5*FOUR, 20*FOUR);
+		}
+	}));
+}
 
 //get internal image bitmap source
 function getImage(parent, file, add, raw) {
@@ -329,9 +452,11 @@ function getImage(parent, file, add, raw) {
 
 //does string have non-ascii? (source was provided by Chalk(amato17))
 function hasNonAscii(str) {
-	return str.split('').some(function(e){
-		return e >= String.fromCharCode(256);
-	});
+	if(typeof str === "string")
+		return str.split('').some(function(e){
+			return e >= String.fromCharCode(256);
+		});
+	return true;
 }
 
 //making ninepatch drawable source
@@ -373,7 +498,9 @@ function ninePatch(bitmap, top, left, bottom, right) {
 //drawing font source
 //I want someone to upgrade this source...
 //It is very very slow
-function drawFont(string, iv, shdow, isEdit) {
+function drawFont(string, iv, shdow, isEdit, wi) {
+	if(typeof string !== "string")
+		return;
 	new java.lang.Thread(new java.lang.Runnable({run: function() {
 		var has = hasNonAscii(string);
 		var divide = function(a) {
@@ -394,8 +521,8 @@ function drawFont(string, iv, shdow, isEdit) {
 				var x = (((parseInt(i[0], 10)) % 16)) * 16;
 				var y = Math.floor(parseInt(i[0], 10) / 16) * 16;
 				var num = parseInt(i[1], 10).toString(16).toUpperCase();
-				if(num === "0")
-					num = "00";
+				if((num+"").length === 1)
+					num = "0"+num;
 				var glyph = (has ? getImage("font", "glyph_", num) : android.graphics.Bitmap.createScaledBitmap(getImage("font", "default8", ''), 256, 256, false));
 				p.setColorFilter(new android.graphics.LightingColorFilter(android.graphics.Color.parseColor("#dedfde"), 0));
 				if(((element.charCodeAt(0)<123&&element.charCodeAt(0)>64) || (element.charCodeAt(0)<58&&element.charCodeAt(0)>47))&&has) {
@@ -426,9 +553,19 @@ function drawFont(string, iv, shdow, isEdit) {
 			iv.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2, cbm.getHeight()*FOUR/2, false));
 			shdow.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2, cbm.getHeight()*FOUR/2, false));
 			if(isEdit == true) {
-				if(iv.getWidth()>cbm.getWidth()*FOUR/2+FOUR*5) {
+				var w = (wi == null ? iv.getWidth() : wi);
+				if(w>cbm.getWidth()*FOUR/2) {
+					iv.setPadding(FOUR*5, 0, 0 ,0);
+					shdow.setPadding(FOUR*7, FOUR*2, 0, 0);
 					iv.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(cbm.getWidth()*FOUR/2+FOUR*5, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
 					shdow.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(cbm.getWidth()*FOUR/2+FOUR*5, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
+				} else {
+					iv.setPadding(FOUR*3, 0, 0 ,0);
+					shdow.setPadding(FOUR*5, FOUR*2, 0, 0);
+					iv.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
+					shdow.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
+					iv.setImageBitmap(android.graphics.Bitmap.createBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2, cbm.getHeight()*FOUR/2, false), 0, 0, w-FOUR*10, cbm.getHeight()*FOUR/2));
+					shdow.setImageBitmap(android.graphics.Bitmap.createBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2, cbm.getHeight()*FOUR/2, false), 0, 0, w-FOUR*10, cbm.getHeight()*FOUR/2));
 				}
 			}
 		}}));

@@ -1,5 +1,8 @@
+//include "N-GUILib.js"
+
 var btn;
-var btn2;  //변수 생성
+var btn2;
+var btn3;  //변수 생성
 
 function newLevel() {
 	var btn = new GUILib.ImageButton(GUILib.deviceWidth/2 - 48, GUILib.deviceHeight/2 - 40, 96, 20, ["sword", 0], function(thiz) {
@@ -14,9 +17,12 @@ function newLevel() {
 	//버튼
 	btn2.render();
 	//렌더
+	btn3 = new GUILib.EditText(GUILib.deviceWidth/2 - 48, GUILib.deviceHeight/2, 96, 20);
+	btn3.render();
 }
 
 function leaveGame() {
+	btn3.stop();
 	btn.stop();
 	btn2.stop();  //제거
 }
