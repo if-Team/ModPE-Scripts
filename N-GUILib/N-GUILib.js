@@ -160,6 +160,9 @@ GUILib.GUIButton.prototype.stop = function() {
 			that.pw = null;
 		}}));
 };
+GUILib.GUIButton.prototype.dismiss = function() {
+	this.stop();
+}
 
 //IMAGEBUTTON
 GUILib.ImageButton = function(x, y, width, height, bm, callback) {
@@ -217,6 +220,9 @@ GUILib.ImageButton.prototype.stop = function() {
 			that.main.pw = null;
 		}}));
 };
+GUILib.ImageButton.prototype.dismiss = function() {
+	this.stop();
+}
 
 //EDITTEXT
 GUILib.EditText = function(x, y, width, height, hint) {
@@ -276,6 +282,9 @@ GUILib.EditText.prototype.stop = function() {
 			that.pw = null;
 		}}));
 };
+GUILib.EditText.prototype.dismiss = function() {
+	this.stop();
+}
 
 var _ = function(bitmap, x, y, width, height) {
 	return android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bitmap, x, y, width, height), width*FOUR, height*FOUR, false);
