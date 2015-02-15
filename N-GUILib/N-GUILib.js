@@ -13,8 +13,6 @@ const FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMP
 
 var elements = new Array();
 var currentLength = 0;
-var shorts = "jkltIJ".split("");
-var shorts2 = ".,!i:;".split("");
 var reader = new java.io.BufferedReader(new java.io.InputStreamReader(getImage("", "items.meta", "", true)));
 eval("meta = "+reader.readLine()+";");
 reader.close();
@@ -497,6 +495,39 @@ function ninePatch(bitmap, top, left, bottom, right) {
 	return patch;
 }
 
+function checkLength(bitmap) {
+/*	var a = java.lang.reflect.Array.newInstance(java.lang.Integer.TYPE, 16*16);
+	bitmap.getPixels(a, 0, 16, 0, 0, 16, 16);*/
+	var start = -1, end = 0;
+	var arr = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+	var Color = android.graphics.Color;
+	arr.forEach(function(i) {
+		if(Color.alpha(bitmap.getPixel(i, 0))>0 ||
+		   Color.alpha(bitmap.getPixel(i, 1))>0 ||
+		   Color.alpha(bitmap.getPixel(i, 2))>0 ||
+	 	   Color.alpha(bitmap.getPixel(i, 3))>0 ||
+		   Color.alpha(bitmap.getPixel(i, 4))>0 ||
+		   Color.alpha(bitmap.getPixel(i, 5))>0 ||
+		   Color.alpha(bitmap.getPixel(i, 6))>0 ||
+		   Color.alpha(bitmap.getPixel(i, 7))>0 ||
+		   Color.alpha(bitmap.getPixel(i, 8))>0 ||
+		   Color.alpha(bitmap.getPixel(i, 9))>0 ||
+		   Color.alpha(bitmap.getPixel(i, 10))>0 ||
+		   Color.alpha(bitmap.getPixel(i, 11))>0 ||
+		   Color.alpha(bitmap.getPixel(i, 12))>0 ||
+		   Color.alpha(bitmap.getPixel(i, 13))>0 ||
+		   Color.alpha(bitmap.getPixel(i, 14))>0 ||
+		   Color.alpha(bitmap.getPixel(i, 15))>0) {
+			if(start == -1)
+				start = i;
+			if(start>=0)
+				end = i;
+		}
+	});
+//	clientMessage(start+" "+end);
+	return [start, end];
+}
+
 //drawing font source
 //I want someone to upgrade this source...
 //It is very very slow
@@ -507,6 +538,7 @@ function drawFont(string, iv, shdow, isEdit, wi) {
 		string = string + "_";
 	new java.lang.Thread(new java.lang.Runnable({run: function() {
 		var has = hasNonAscii(string);
+		try{
 		var divide = function(a) {
 			var b = 0;
 			if (a > 256)
@@ -529,26 +561,10 @@ function drawFont(string, iv, shdow, isEdit, wi) {
 					num = "0"+num;
 				var glyph = (has ? getImage("font", "glyph_", num) : android.graphics.Bitmap.createScaledBitmap(getImage("font", "default8", ''), 256, 256, false));
 				p.setColorFilter(new android.graphics.LightingColorFilter(android.graphics.Color.parseColor("#dedfde"), 0));
-				if(((element.charCodeAt(0)<123&&element.charCodeAt(0)>64) || (element.charCodeAt(0)<58&&element.charCodeAt(0)>47))&&has) {
-					canvas.drawBitmap(android.graphics.Bitmap.createBitmap(glyph, x+1, y, 6, 16), width, 0, p);
-					width-=8;
-				} else
-					canvas.drawBitmap(android.graphics.Bitmap.createBitmap(glyph, x, y, 16, 16), width, 0, p);
-				if(has)
-					width+=16;
-				else {
-					width+=12;
-					if(shorts.indexOf(element)>=0)
-						width-=4;
-					if(shorts2.indexOf(element)>=0)
-						width-=8;
-					if(element == "l" || element == "f")
-						width-=2;
-					if(element == "k")
-						width+=2;
-					if(element == "j")
-						width+=4;
-				}
+				var st = android.graphics.Bitmap.createBitmap(glyph, x, y, 16, 16);
+				var length = checkLength(st);
+				canvas.drawBitmap(android.graphics.Bitmap.createBitmap(st, length[0], 0, length[1]-length[0]+1, 16), width, 0, p);
+				width+=((element>="가"&&element<="힣") ? 16 : length[1]-length[0]+3);
 			} else
 				width+=8;
 		});
@@ -573,6 +589,9 @@ function drawFont(string, iv, shdow, isEdit, wi) {
 				}
 			}
 		}}));
+		}catch(e) {
+			clientMessage(e+e.lineNumber);
+		}
 	}})).start();
 }
 
