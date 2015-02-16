@@ -130,7 +130,7 @@ GUILib.GUIButton.prototype.setXY = function(x, y) {
 	 var that = this;
 		ctx.runOnUiThread(new java.lang.Runnable({run: function() {
 		if(that.pw != null)
-			pw.update(that.x, that.y, -1, -1, true);
+			that.pw.update(that.x, that.y, -1, -1, true);
 	}}));
 };
 GUILib.GUIButton.prototype.setWH = function(width, height) {
@@ -139,7 +139,7 @@ GUILib.GUIButton.prototype.setWH = function(width, height) {
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
 		if(that.pw != null)
-			pw.update(that.width, that.height);
+			that.pw.update(that.width, that.height);
 	}}));
 };
 GUILib.GUIButton.prototype.setMessage = function(msg) {
@@ -196,7 +196,7 @@ GUILib.ImageButton.prototype.setXY = function(x, y) {
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
 		if(that.main.pw != null)
-			pw.update(that.x, that.y, -1, -1, true);
+			that.main.pw.update(that.x, that.y, -1, -1, true);
 	}}));
 };
 GUILib.ImageButton.prototype.setWH = function(width, height) {
@@ -205,7 +205,7 @@ GUILib.ImageButton.prototype.setWH = function(width, height) {
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
 		if(that.main.pw != null)
-			pw.update(that.width, that.height);
+			that.main.pw.update(that.width, that.height);
 	}}));
 };
 GUILib.ImageButton.prototype.render = function() {
@@ -320,6 +320,50 @@ GUILib.Background.prototype.render = function() {
 		elements.unshift(this);
 };
 
+//CONTROLBAR
+GUILib.ControlBar = function(x, y, width, height, max, min) {
+	this.x = x*FOUR;
+	this.y = y*FOUR;
+	this.width = width*FOUR;
+	this.height = height*FOUR;
+	this.pw = true;
+	var layout = new android.widget.LinearLayout(ctx);
+	var seek = new android.widget.SeekBar(ctx);
+	seek.setLayoutParams(new android.widget.LinearLayout.LayoutParams(this.width, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT));
+	seek.setMax(100);
+	seek.setThumb(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(_(getImage("gui","touchgui", ''), 225, 125, 11, 17), 11*FOUR*2, 17*FOUR*2, false)));
+	setSeekBarBack(seek, max, this.width);
+	seek.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener({
+		onStopTrackingTouch: function(s) {
+			var p = s.getProgress();
+			var a = 100/(max*2);
+			for(var i = 0; i<=max*2; i++) {
+				if(i%2 == 0&&p>(i-1)*a&&p<(i+1)*a) {
+					s.setProgress(i*a);
+					break;
+				} else if(i%2 == 1&&p == i*a)
+					s.setProgress((i+1)*a);
+			}
+		}
+	}));
+	layout.addView(seek);
+	this.mainplate = layout;
+};
+
+//CONTROLBAR METHODS
+GUILib.ControlBar.prototype = {};
+GUILib.ControlBar.prototype.stop = function() {
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+			that.pw.dismiss();
+			that.pw = null;
+		}}));
+};
+GUILib.ControlBar.prototype.render = function() {
+	if(this.pw)
+		elements.push(this);
+};
+
 var _ = function(bitmap, x, y, width, height) {
 	return android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bitmap, x, y, width, height), width*FOUR, height*FOUR, false);
 };
@@ -382,6 +426,26 @@ new java.lang.Thread(new java.lang.Runnable({run: function() {
 		}
 	}
 }})).start();
+
+//set seekbar background image source
+function setSeekBarBack(seek, max, width) {
+	ctx.runOnUiThread(new java.lang.Runnable({
+		run: function() {
+			//919191 7
+			var img = android.graphics.Bitmap.createBitmap(width+4*FOUR, 7*FOUR, android.graphics.Bitmap.Config.ARGB_8888);
+			var canvas = new android.graphics.Canvas(img);
+			var p = new android.graphics.Paint();
+			p.setColor(android.graphics.Color.rgb(114, 114, 114));
+			canvas.drawRect(2*FOUR, 2*FOUR, 2*FOUR+width, 5*FOUR, p);
+			var gap = width/max;
+			p.setColor(android.graphics.Color.parseColor("#919191"));
+			for(var i = 0; i<=max; i++) {
+				canvas.drawRect(i*(width/max), 0, i*(width/max)+4*FOUR, 7*FOUR, p);
+			}
+			seek.setProgressDrawable(new android.graphics.drawable.BitmapDrawable(img));
+		}
+	}));
+}
 
 //show edittext popup source
 function showEditPopup(text, shadow, str, that) {
@@ -538,6 +602,7 @@ function ninePatch(bitmap, top, left, bottom, right) {
 	return patch;
 }
 
+//checking bitmap font length source
 function checkLength(bitmap) {
 /*	var a = java.lang.reflect.Array.newInstance(java.lang.Integer.TYPE, 16*16);
 	bitmap.getPixels(a, 0, 16, 0, 0, 16, 16);*/
