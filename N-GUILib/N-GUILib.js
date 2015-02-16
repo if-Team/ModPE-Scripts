@@ -30,6 +30,10 @@ popupimg.eraseColor(android.graphics.Color.WHITE);
 popupimg.setPixel(1, 1, android.graphics.Color.BLACK);
 popupimg = android.graphics.Bitmap.createScaledBitmap(popupimg, 3*FOUR, 3*FOUR, false);
 
+var halfimg = android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.ARGB_8888);
+halfimg.eraseColor(android.graphics.Color.parseColor("#80000000"));
+
+var dirtimg = android.graphics.Bitmap.createScaledBitmap(getImage("gui", "background", ""), 32*FOUR, 32*FOUR, false);
 //edittext
 var edit_str, edit_shdow, edit_text;
 
@@ -108,8 +112,6 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback) {
 	text.setOnTouchListener(ontouch);
 	text.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
 	text.setScaleType(android.widget.ImageView.ScaleType.CENTER);
-	if(this.msg !== "")
-		drawFont(msg, text, shadow);
 	shadow.setScaleType(android.widget.ImageView.ScaleType.CENTER);
 	shadow.setColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY);
 	shadow.setPadding(FOUR*2, FOUR*2, 0, 0);
@@ -150,6 +152,8 @@ GUILib.GUIButton.prototype.getMessage = function() {
 GUILib.GUIButton.prototype.render = function() {
 	if(this.pw)
 		elements.push(this);
+	if(this.msg !== "")
+		drawFont(this.msg, this.btn, this.shadow);
 };
 GUILib.GUIButton.prototype.stop = function() {
 	var that = this;
@@ -275,6 +279,47 @@ GUILib.EditText.prototype.stop = function() {
 		}}));
 };
 
+//BACKGROUND
+GUILib.Background = function(type) {
+	this.pw = true;
+	this.x = 0;
+	this.y = 0;
+	this.width = Math.max.apply(null, wthnhet)+100;
+	this.height = Math.min.apply(null, wthnhet);
+	var main = new android.widget.TextView(ctx);
+	var img;
+	switch(type) {
+		case "DIRT":
+			img = dirtimg;
+			break;
+		case "BLACK":
+			img = android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.RGB_565);
+			break;
+		case "HALF":
+			img = halfimg;
+			break;
+	}
+	var drawable = new android.graphics.drawable.BitmapDrawable(img);
+	drawable.setColorFilter(android.graphics.Color.rgb(70, 70, 70), android.graphics.PorterDuff.Mode.MULTIPLY);
+	drawable.setTileModeXY(android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT);
+	main.setBackgroundDrawable(drawable);
+	this.mainplate = main;
+};
+
+//BACKGROUND METHODS
+GUILib.Background.prototype = {};
+GUILib.Background.prototype.stop = function() {
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+			that.pw.dismiss();
+			that.pw = null;
+		}}));
+};
+GUILib.Background.prototype.render = function() {
+	if(this.pw)
+		elements.unshift(this);
+};
+
 var _ = function(bitmap, x, y, width, height) {
 	return android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bitmap, x, y, width, height), width*FOUR, height*FOUR, false);
 };
@@ -317,9 +362,7 @@ new java.lang.Thread(new java.lang.Runnable({run: function() {
 			}));
 		if(elements.length>0) {
 			if(currentLength<elements.length) {
-				 elements.sort(function(i) {
-				 	return (i.isBack ? -1 : 0);
-				 }).forEach(function(element) {
+				 elements.forEach(function(element) {
 					ctx.runOnUiThread(new java.lang.Runnable({run: function() {
 						if(element.pw == true) {
 							var pw = new android.widget.PopupWindow(ctx);
@@ -562,7 +605,10 @@ function drawFont(string, iv, shdow, isEdit, wi) {
 				var glyph = (has ? getImage("font", "glyph_", num) : android.graphics.Bitmap.createScaledBitmap(getImage("font", "default8", ''), 256, 256, false));
 				p.setColorFilter(new android.graphics.LightingColorFilter(android.graphics.Color.parseColor("#dedfde"), 0));
 				var st = android.graphics.Bitmap.createBitmap(glyph, x, y, 16, 16);
-				var length = checkLength(st);
+				if(element>="가"&&element<="힣")
+					var length = [0, 15];
+				else
+					var length = checkLength(st);
 				canvas.drawBitmap(android.graphics.Bitmap.createBitmap(st, length[0], 0, length[1]-length[0]+1, 16), width, 0, p);
 				width+=((element>="가"&&element<="힣") ? 16 : length[1]-length[0]+3);
 			} else
