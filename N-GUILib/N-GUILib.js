@@ -413,25 +413,59 @@ GUILib.TopBar.prototype.render = function() {
 };
 
 //DELETEBUTTON
-GUILib.DeleteButton = function(x, y, deletes) {
+GUILib.DeleteButton = function(x, y, deletes, callback) {
+	var that = this;
 	this.pw = true;
 	this.x = x*FOUR;
 	this.y = y*FOUR;
 	this.width = 18*FOUR;
 	this.height = 18*FOUR;
 	var btn = new android.widget.Button(ctx);
+	this.mainplate = btn;
 	var spritesheet = getImage("gui", "spritesheet", "");
-	var on = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 70, 0, 18, 18), this.width, this.height, false);
-	var off = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 88, 0, 18, 18), this.width, this.height, false);
+	var on = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 60, 0, 18, 18), 18*FOUR, 18*FOUR, false);
+	var off = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 78, 0, 18, 18), 18*FOUR, 18*FOUR, false);
 	btn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(on));
 	btn.setOnTouchListener(new android.view.View.OnTouchListener({
 		onTouch: function(v, event) {
 			switch(event.getAction()) {
 				case android.view.MotionEvent.ACTION_DOWN:
+					btn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(off));
+					break;
+				case android.view.MotionEvent.ACTION_MOVE:
+					if(event.getX()<0 || event.getY()<0 || event.getX()>18*FOUR || event.getY()>18*FOUR)
+						btn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(on));
+					else
+						btn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(off));
+					break;
+				case android.view.MotionEvent.ACTION_UP:
+					if(!(event.getX()<0 || event.getY()<0 || event.getX()>18*FOUR || event.getY()>18*FOUR)) {
+						deletes.forEach(function(e) {
+							e.stop();
+						});
+						that.stop();
+						if(callback != null)
+							callback();
+					}
 					break;
 			}
+			return true;
 		}
 	}));
+};
+
+//DELETEBUTTON METHODS
+GUILib.DeleteButton.prototype = {};
+GUILib.DeleteButton.prototype.stop = function() {
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+			that.pw.dismiss();
+			that.pw = null;
+		}}));
+};
+GUILib.DeleteButton.prototype.render = function() {
+	if(this.pw)
+		elements.push(this);
 };
 
 var _ = function(bitmap, x, y, width, height) {
