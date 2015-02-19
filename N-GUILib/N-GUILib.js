@@ -938,7 +938,7 @@ function showEditPopup(text, shadow, str, that) {
 //get internal image bitmap source
 function getImage(parent, file, add, raw) {
 	var stream = ModPE.openInputStreamFromTexturePack("images/"+parent+(parent == "" ? "" : "/")+file+add+(raw == true ? "" : ".png"));
-	if(!raw)
+	if(raw != true)
 		return android.graphics.BitmapFactory.decodeStream(stream);
 	else
 		return stream;
