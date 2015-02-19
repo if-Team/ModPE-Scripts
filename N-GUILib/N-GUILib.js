@@ -937,28 +937,11 @@ function showEditPopup(text, shadow, str, that) {
 
 //get internal image bitmap source
 function getImage(parent, file, add, raw) {
-	var prefs = ctx.getSharedPreferences("mcpelauncherprefs",0);
-	var prefs2 = ctx.getSharedPreferences(ctx.getPackageName()+"_preferences",0);
-	var mcimg = (raw == true ? pectx.getAssets().open("images/"+parent+(parent == "" ? "" : "/")+file+add) : android.graphics.BitmapFactory.decodeStream(pectx.getAssets().open("images/"+parent+(parent == "" ? "" : "/")+file+add+".png")));
-	if(prefs.getString("texturePack","NULL") !== "NULL"&&prefs2.getBoolean("zz_texture_pack_enable", false)) {
-		var path = prefs.getString("texturePack","");
-		if(!new java.io.File(path).exists())
-			return mcimg;
-		var zf = new java.util.zip.ZipFile(new java.io.File(path));
-		var tpimg = zf.getEntry("images/"+parent+(parent === "" ? "" : "/")+file+add+(raw == true ? "" : ".png"));
-		if(tpimg == null) {
-			//if folder is shorter
-			if(zf.getEntry(parent+(parent === "" ? "" : "/")+file+add+(raw == true ? "" : ".png")) != null)
-				tpimg = zf.getEntry(parent+(parent === "" ? "" : "/")+file+add+(raw == true ? "" : ".png"));
-			//or shortest
-			else if(zf.getEntry(file+add+(raw == true ? "" : ".png")) != null)
-				tpimg = zf.getEntry(file+add+(raw == true ? "" : ".png"));
-			else
-				return mcimg;
-		}
-		return (raw == true ? zf.getInputStream(tpimg) : android.graphics.BitmapFactory.decodeStream(zf.getInputStream(tpimg)));
-	} else
-		return mcimg;
+	var stream = ModPE.openInputStreamFromTexturePack("images/"+parent+(parent == "" ? "" : "/")+file+add+(raw == true ? "" : ".png"));
+	if(!raw)
+		return android.graphics.BitmapFactory.decodeStream(stream);
+	else
+		return stream;
 }
 
 //does string have non-ascii? (source was provided by Chalk(amato17))
