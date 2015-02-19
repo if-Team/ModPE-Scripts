@@ -34,17 +34,28 @@ var halfimg = android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap
 halfimg.eraseColor(android.graphics.Color.parseColor("#80000000"));
 
 var dirtimg = android.graphics.Bitmap.createScaledBitmap(getImage("gui", "background", ""), 32*FOUR, 32*FOUR, false);
-//edittext
+
 var edit_str, edit_shdow, edit_text;
+
+var x_text = new android.widget.ImageView(ctx);
+var x_shdow = new android.widget.ImageView(ctx);
+drawFont("Back", x_text, x_shdow); //Draw beforehand to render immediately
 
 var GUILib = {};
 var wthnhet = [ctx.getWindowManager().getDefaultDisplay().getWidth(), ctx.getWindowManager().getDefaultDisplay().getHeight()];
 GUILib.deviceWidth = Math.max.apply(null, wthnhet)/FOUR;
 GUILib.deviceHeight = Math.min.apply(null, wthnhet)/FOUR;
 
+GUILib.VERTICAL = 1;
+GUILib.HORIZONTAL = 0;
+
 //BUTTON
 GUILib.GUIButton = function(x, y, width, height, msg, callback) {
-	this.pw = true;
+	this.TYPE = "button";
+	
+	this.clicked = false;
+	this.mainplate = new android.widget.RelativeLayout(ctx);
+	this.pw = null;
 	var spritesheet = getImage("gui", "spritesheet", '');
 	var bm = android.graphics.Bitmap.createBitmap(spritesheet, 0, 32, 16, 8);
 	var off = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bm, 0, 0, 8, 8), 8*FOUR, 8*FOUR, false);
@@ -55,7 +66,6 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback) {
 	this.height = height*FOUR;
 	this.msg = msg;
 	this.callback = callback;
-	this.mainplate = new android.widget.RelativeLayout(ctx);
 	var btn = new android.widget.Button(ctx);
 	btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
 	btn.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
@@ -68,35 +78,45 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback) {
 			var MotionEvent = android.view.MotionEvent;
 			switch(event.getAction()) {
 				case MotionEvent.ACTION_DOWN:
-					if(that.msg !== "") {
-						shadow.setPadding(FOUR*2, FOUR*4, 0, 0);
-				 		text.setPadding(0, FOUR*2, 0, 0);
-						text.setColorFilter(android.graphics.Color.parseColor("#ffff9c"), android.graphics.PorterDuff.Mode.MULTIPLY);
+					if(!that.clicked) {
+						that.clicked = true;
+						if(that.msg !== "") {
+							shadow.setPadding(FOUR*2, FOUR*4, 0, 0);
+				 			text.setPadding(0, FOUR*2, 0, 0);
+							text.setColorFilter(android.graphics.Color.parseColor("#ffff9c"), android.graphics.PorterDuff.Mode.MULTIPLY);
+						}
+				 		btn.setBackgroundDrawable(ninePatch(off, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
 					}
-				 	btn.setBackgroundDrawable(ninePatch(off, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
 				break;
 				case MotionEvent.ACTION_UP:
-					if(that.msg !== "") {
-						shadow.setPadding(FOUR*2, FOUR*2, 0, 0);
-						text.setPadding(0, 0, 0, 0);
-						text.setColorFilter(android.graphics.Color.parseColor("#ffffff"), android.graphics.PorterDuff.Mode.MULTIPLY);
-					}
-					btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
-					if(!(event.getX()<0 || event.getY()<0 || event.getX()>width*FOUR || event.getY()>height*FOUR)) {
-						if(callback != null)
-							that.callback(that);
-						Level.playSound(getPlayerX(), getPlayerY(), getPlayerZ(), "random.click", 7, 7);
+					if(that.clicked) {
+						that.clicked = false;
+						if(that.msg !== "") {
+							shadow.setPadding(FOUR*2, FOUR*2, 0, 0);
+							text.setPadding(0, 0, 0, 0);
+							text.setColorFilter(android.graphics.Color.parseColor("#ffffff"), android.graphics.PorterDuff.Mode.MULTIPLY);
+						}
+						btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
+						if(!(event.getX()<0 || event.getY()<0 || event.getX()>width*FOUR || event.getY()>height*FOUR)) {
+							if(callback != null)
+								that.callback(that);
+							Level.playSound(getPlayerX(), getPlayerY(), getPlayerZ(), "random.click", 7, 7);
+						}
 					}
 				break;
 				case MotionEvent.ACTION_MOVE:
 				if(event.getX()<0 || event.getY()<0 || event.getX()>width*FOUR || event.getY()>height*FOUR) {
-					if(that.msg !== "") {
-						shadow.setPadding(FOUR*2, FOUR*2, 0, 0);
-						text.setPadding(0, 0, 0, 0);
-					 	text.setColorFilter(android.graphics.Color.parseColor("#ffffff"), android.graphics.PorterDuff.Mode.MULTIPLY);
-					}
-					btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
-					} else {
+					if(that.clicked) {
+						that.clicked = false;
+						if(that.msg !== "") {
+							shadow.setPadding(FOUR*2, FOUR*2, 0, 0);
+							text.setPadding(0, 0, 0, 0);
+					 		text.setColorFilter(android.graphics.Color.parseColor("#ffffff"), android.graphics.PorterDuff.Mode.MULTIPLY);
+						}
+						btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
+						}
+					} else if(!that.clicked) {
+						that.clicked = true;
 						if(that.msg !== "") {
 						 text.setPadding(0, FOUR*2, 0, 0);
 					 	 shadow.setPadding(FOUR*2, FOUR*4, 0, 0);
@@ -117,9 +137,12 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback) {
 	shadow.setPadding(FOUR*2, FOUR*2, 0, 0);
 	shadow.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
 	this.mainplate.addView(shadow);
+	this.image = btn;
 	this.btn = text;
 	this.shadow = shadow;
 	this.mainplate.addView(text);
+	if(this.msg !== "")
+		drawFont(this.msg, this.btn, this.shadow);
 }
 
 //BUTTON METHODS
@@ -150,10 +173,8 @@ GUILib.GUIButton.prototype.getMessage = function() {
 	return this.msg;
 };
 GUILib.GUIButton.prototype.render = function() {
-	if(this.pw)
+	if(this.pw == null)
 		elements.push(this);
-	if(this.msg !== "")
-		drawFont(this.msg, this.btn, this.shadow);
 };
 GUILib.GUIButton.prototype.stop = function() {
 	var that = this;
@@ -165,30 +186,40 @@ GUILib.GUIButton.prototype.stop = function() {
 
 //IMAGEBUTTON
 GUILib.ImageButton = function(x, y, width, height, bm, callback) {
+	this.TYPE = "image_button";
+	
+	var that = this;
 	this.main = new GUILib.GUIButton(x, y, width, height, "", callback);
+	new java.lang.Thread(new java.lang.Runnable({run: function() {
+		while(1)
+			that.clicked = that.main.clicked;
+	}})).start();
+	this.mainplate = this.main.mainplate;
 	this.x = this.main.x;
 	this.y = this.main.y;
 	this.width = this.main.width;
 	this.height = this.main.height;
-	this.image = this.main.btn;
+	this.image = this.main.image;
+	this.shadow = this.main.shadow;
+	this.btn = this.main.btn;
 	this.callback = this.main.callback;
 	if(Array.isArray(bm))
-		this.image.setImageBitmap(getItemBitmap(bm));
+		this.btn.setImageBitmap(getItemBitmap(bm));
 	else if(typeof(bm) !== "string")
-		this.image.setImageBitmap(bm);
+		this.btn.setImageBitmap(bm);
 	else
-		this.image.setImageBitmap(eval(bm));
+		this.btn.setImageBitmap(eval(bm));
 };
 
 //IMAGEBUTTON METHODS
 GUILib.ImageButton.prototype = {};
 GUILib.ImageButton.prototype.setImage = function(bm) {
 	if(Array.isArray(bm))
-		this.image.setImageBitmap(getItemBitmap(bm));
+		this.btn.setImageBitmap(getItemBitmap(bm));
 	else if(typeof(bm) !== "string")
-		this.image.setImageBitmap(bm);
+		this.btn.setImageBitmap(bm);
 	else
-		this.image.setImageBitmap(eval(bm));
+		this.btn.setImageBitmap(eval(bm));
 };
 GUILib.ImageButton.prototype.setXY = function(x, y) {
 	this.x = (x == -1 ? this.x : x*FOUR);
@@ -209,7 +240,7 @@ GUILib.ImageButton.prototype.setWH = function(width, height) {
 	}}));
 };
 GUILib.ImageButton.prototype.render = function() {
-	if(this.main.pw)
+	if(this.main.pw == null)
 		elements.push(this.main);
 };
 GUILib.ImageButton.prototype.stop = function() {
@@ -222,13 +253,16 @@ GUILib.ImageButton.prototype.stop = function() {
 
 //EDITTEXT
 GUILib.EditText = function(x, y, width, height, hint) {
-	this.pw = true;
+	this.TYPE = "edittext";
+	
+	var layout = new android.widget.RelativeLayout(ctx);
+	this.mainplate = layout;
+	this.pw = null;
 	this.text = "";
 	this.x = x*FOUR;
 	this.y = y*FOUR;
 	this.width = width*FOUR;
 	this.height = height*FOUR;
-	var layout = new android.widget.RelativeLayout(ctx);
 	var back = new android.widget.TextView(ctx);
 	back.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
 	back.setBackgroundDrawable(ninePatch(editxtimg, FOUR, FOUR, FOUR*2, FOUR*2));
@@ -245,7 +279,6 @@ GUILib.EditText = function(x, y, width, height, hint) {
 	layout.addView(back);
 	layout.addView(shadow);
 	layout.addView(edtxt);
-	this.mainplate = layout;
 	var that = this;
 	var onclick = new android.view.View.OnClickListener({
 		onClick: function() {
@@ -260,6 +293,24 @@ GUILib.EditText = function(x, y, width, height, hint) {
 
 //EDITTEXT METHODS
 GUILib.EditText.prototype = {};
+GUILib.EditText.prototype.setXY = function(x, y) {
+	this.x = (x == -1 ? this.x : x*FOUR);
+	this.y = (y == -1 ? this.y : y*FOUR);
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+		if(that.pw != null)
+			that.pw.update(that.x, that.y, -1, -1, true);
+	}}));
+};
+GUILib.EditText.prototype.setWH = function(width, height) {
+	this.width = (width == -1 ? this.width : width*FOUR);
+	this.height = (height == -1 ? this.height : height*FOUR);
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+		if(that.pw != null)
+			that.pw.update(that.width, that.height);
+	}}));
+};
 GUILib.EditText.prototype.setText = function(text) {
 	drawFont(text, this.edit, this.shadow, true, this.width);
 	this.text = text;
@@ -268,7 +319,7 @@ GUILib.EditText.prototype.getText = function() {
 	return this.text;
 }
 GUILib.EditText.prototype.render = function() {
-	if(this.pw)
+	if(this.pw == null)
 		elements.push(this);
 };
 GUILib.EditText.prototype.stop = function() {
@@ -281,7 +332,9 @@ GUILib.EditText.prototype.stop = function() {
 
 //BACKGROUND
 GUILib.Background = function(type) {
-	this.pw = true;
+	this.TYPE = "background";
+	
+	this.pw = null;
 	this.x = 0;
 	this.y = 0;
 	this.width = Math.max.apply(null, wthnhet)+100;
@@ -316,24 +369,27 @@ GUILib.Background.prototype.stop = function() {
 		}}));
 };
 GUILib.Background.prototype.render = function() {
-	if(this.pw)
+	if(this.pw == null)
 		elements.unshift(this);
 };
 
 //CONTROLBAR
 GUILib.ControlBar = function(x, y, width, height, max, min, dotEnable) {
+	this.TYPE = "control_bar";
+	
+	var layout = new android.widget.LinearLayout(ctx);
+	this.mainplate = layout;
 	this.x = x*FOUR;
 	this.y = y*FOUR;
 	this.width = width*FOUR;
 	this.height = height*FOUR;
-	this.pw = true;
+	this.pw = null;
 	this.max = max;
 	this.min = min;
-	var layout = new android.widget.LinearLayout(ctx);
 	var seek = new android.widget.SeekBar(ctx);
 	seek.setLayoutParams(new android.widget.LinearLayout.LayoutParams(this.width, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT));
 	seek.setMax(100);
-	seek.setThumb(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(_(getImage("gui","touchgui", ''), 225, 125, 11, 17), 11*FOUR*2, 17*FOUR*2, false)));
+	seek.setThumb(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(_(getImage("gui","touchgui", ''), 225, 125, 11, 17), 11*FOUR*FOUR/2, 17*FOUR*FOUR/2, false)));
 	setSeekBarBack(seek, max-min, this.width, dotEnable);
 	seek.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener({
 		onStopTrackingTouch: function(s) {
@@ -350,11 +406,28 @@ GUILib.ControlBar = function(x, y, width, height, max, min, dotEnable) {
 	}));
 	layout.addView(seek);
 	this.seek = seek;
-	this.mainplate = layout;
 };
 
 //CONTROLBAR METHODS
 GUILib.ControlBar.prototype = {};
+GUILib.ControlBar.prototype.setXY = function(x, y) {
+	this.x = (x == -1 ? this.x : x*FOUR);
+	this.y = (y == -1 ? this.y : y*FOUR);
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+		if(that.pw != null)
+			that.pw.update(that.x, that.y, -1, -1, true);
+	}}));
+};
+GUILib.ControlBar.prototype.setWH = function(width, height) {
+	this.width = (width == -1 ? this.width : width*FOUR);
+	this.height = (height == -1 ? this.height : height*FOUR);
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+		if(that.pw != null)
+			that.pw.update(that.width, that.height);
+	}}));
+};
 GUILib.ControlBar.prototype.getValue = function() {
 	var p = this.seek.getProgress();
 	var a = 100/((this.max-this.min));
@@ -368,13 +441,15 @@ GUILib.ControlBar.prototype.stop = function() {
 		}}));
 };
 GUILib.ControlBar.prototype.render = function() {
-	if(this.pw)
+	if(this.pw ==null)
 		elements.push(this);
 };
 
 //TOPBAR
 GUILib.TopBar = function(x, y, width, height, title) {
-	this.pw = true;
+	this.TYPE = "top_bar";
+	
+	this.pw = null;
 	this.x = x*FOUR;
 	this.y = y*FOUR;
 	this.width = width*FOUR;
@@ -400,6 +475,24 @@ GUILib.TopBar = function(x, y, width, height, title) {
 
 //TOPBAR METHODS
 GUILib.TopBar.prototype = {};
+GUILib.TopBar.prototype.setXY = function(x, y) {
+	this.x = (x == -1 ? this.x : x*FOUR);
+	this.y = (y == -1 ? this.y : y*FOUR);
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+		if(that.pw != null)
+			that.pw.update(that.x, that.y, -1, -1, true);
+	}}));
+};
+GUILib.TopBar.prototype.setWH = function(width, height) {
+	this.width = (width == -1 ? this.width : width*FOUR);
+	this.height = (height == -1 ? this.height : height*FOUR);
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+		if(that.pw != null)
+			that.pw.update(that.width, that.height);
+	}}));
+};
 GUILib.TopBar.prototype.stop = function() {
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
@@ -408,50 +501,97 @@ GUILib.TopBar.prototype.stop = function() {
 		}}));
 };
 GUILib.TopBar.prototype.render = function() {
-	if(this.pw)
+	if(this.pw == null)
 		elements.push(this);
 };
 
 //DELETEBUTTON
-GUILib.DeleteButton = function(x, y, deletes, callback) {
+GUILib.DeleteButton = function(x, y, deletes, callback, button) {
+	this.TYPE = "delete_button";
+	
 	var that = this;
-	this.pw = true;
+	this.clicked = false;
+	this.isButton = button;
+	var r = new android.widget.RelativeLayout(ctx);
+	this.mainplate = r;
+	this.pw = null;
 	this.x = x*FOUR;
 	this.y = y*FOUR;
-	this.width = 18*FOUR;
+	this.width = (button == true ? 38*FOUR : 18*FOUR);
 	this.height = 18*FOUR;
 	var btn = new android.widget.Button(ctx);
-	this.mainplate = btn;
+	this.image = btn;
+	btn.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(this.width, this.height));
+	r.addView(btn);
 	var spritesheet = getImage("gui", "spritesheet", "");
+	var bm = android.graphics.Bitmap.createBitmap(spritesheet, 0, 32, 16, 8);
+	var btn_off = ninePatch(android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bm, 0, 0, 8, 8), 8*FOUR, 8*FOUR, false), 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR);
+	var btn_on = ninePatch(android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bm, 8, 0, 8, 8), 8*FOUR, 8*FOUR, false), 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR);
 	var on = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 60, 0, 18, 18), 18*FOUR, 18*FOUR, false);
 	var off = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 78, 0, 18, 18), 18*FOUR, 18*FOUR, false);
-	btn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(on));
-	btn.setOnTouchListener(new android.view.View.OnTouchListener({
+	btn.setBackgroundDrawable((button == true ? btn_on : new android.graphics.drawable.BitmapDrawable(on)));
+	var ontouch = new android.view.View.OnTouchListener({
 		onTouch: function(v, event) {
 			switch(event.getAction()) {
 				case android.view.MotionEvent.ACTION_DOWN:
-					btn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(off));
+					if(!that.clicked) {
+						that.clicked = true;
+						x_text.setColorFilter(android.graphics.Color.parseColor("#ffff9c"), android.graphics.PorterDuff.Mode.MULTIPLY);
+						x_text.setPadding(0, 2*FOUR, 0, 0);
+						x_shdow.setPadding(2*FOUR, 4*FOUR, 0, 0);
+						btn.setBackgroundDrawable((button == true ? btn_off : new android.graphics.drawable.BitmapDrawable(off)));
+					}
 					break;
 				case android.view.MotionEvent.ACTION_MOVE:
-					if(event.getX()<0 || event.getY()<0 || event.getX()>18*FOUR || event.getY()>18*FOUR)
-						btn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(on));
-					else
-						btn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(off));
+					if((event.getX()<0 || event.getY()<0 || event.getX()>that.width || event.getY()>18*FOUR)) {
+						if(that.clicked) {
+							that.clicked = false;
+							x_text.setColorFilter(android.graphics.Color.WHITE, android.graphics.PorterDuff.Mode.MULTIPLY);
+							x_text.setPadding(0, 0, 0, 0);
+							x_shdow.setPadding(2*FOUR, 2*FOUR, 0, 0);
+							btn.setBackgroundDrawable((button == true ? btn_on : new android.graphics.drawable.BitmapDrawable(on)));
+						}
+					} else if(!that.clicked) {
+						that.clicked = true;
+						x_text.setColorFilter(android.graphics.Color.parseColor("#ffff9c"), android.graphics.PorterDuff.Mode.MULTIPLY);
+						x_text.setPadding(0, 2*FOUR, 0, 0);
+						x_shdow.setPadding(2*FOUR, 4*FOUR, 0, 0);
+						btn.setBackgroundDrawable((button == true ? btn_off : new android.graphics.drawable.BitmapDrawable(off)));
+					}
 					break;
 				case android.view.MotionEvent.ACTION_UP:
-					if(!(event.getX()<0 || event.getY()<0 || event.getX()>18*FOUR || event.getY()>18*FOUR)) {
-						deletes.forEach(function(e) {
-							e.stop();
-						});
-						that.stop();
-						if(callback != null)
-							callback();
+					if(that.clicked) {
+						that.clicked = false;
+						if(!(event.getX()<0 || event.getY()<0 || event.getX()>that.width || event.getY()>18*FOUR)) {
+							deletes.forEach(function(e) {
+								e.stop();
+							});
+							that.stop();
+							r.removeView(x_shdow);
+							r.removeView(x_text);
+							Level.playSound(getPlayerX(), getPlayerY(), getPlayerZ(), "random.click", 7, 7);
+							if(callback != null)
+								callback();
+						}
 					}
 					break;
 			}
 			return true;
 		}
-	}));
+	});
+	if(button != true)
+		btn.setOnTouchListener(ontouch);
+	else {
+		x_text.setOnTouchListener(ontouch);
+		r.addView(x_shdow);
+		r.addView(x_text);
+		x_shdow.setPadding(2*FOUR, 2*FOUR, 0, 0);
+		x_shdow.setColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY);
+		x_shdow.setScaleType(android.widget.ImageView.ScaleType.CENTER);
+		x_text.setScaleType(android.widget.ImageView.ScaleType.CENTER);
+		x_shdow.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(38*FOUR, 18*FOUR));
+		x_text.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(38*FOUR, 18*FOUR));
+	}
 };
 
 //DELETEBUTTON METHODS
@@ -464,8 +604,148 @@ GUILib.DeleteButton.prototype.stop = function() {
 		}}));
 };
 GUILib.DeleteButton.prototype.render = function() {
-	if(this.pw)
+	if(this.pw == null)
 		elements.push(this);
+};
+
+//GUISCROLL
+GUILib.GUIScroll = function(x, y, height, childs) {
+	var glowDrawableId = ctx.getResources().getIdentifier("overscroll_glow", "drawable", "android");
+	var edgeDrawableId = ctx.getResources().getIdentifier("overscroll_edge", "drawable", "android");
+	var androidGlow = ctx.getResources().getDrawable(glowDrawableId);
+	var androidEdge = ctx.getResources().getDrawable(edgeDrawableId);
+	androidGlow.setColorFilter(android.graphics.Color.TRANSPARENT, android.graphics.PorterDuff.Mode.MULTIPLY);
+	androidEdge.setColorFilter(android.graphics.Color.TRANSPARENT, android.graphics.PorterDuff.Mode.MULTIPLY);
+	
+	this.TYPE = "scroll";
+	
+	this.pw = null;
+	this.x = x*FOUR;
+	this.y = y*FOUR;
+	this.width = Math.max.apply(null, childs.map(function(e) { return e.width; }));
+	this.height = height*FOUR;
+	var spritesheet = getImage("gui", "spritesheet", '');
+	var bm = android.graphics.Bitmap.createBitmap(spritesheet, 0, 32, 16, 8);
+	var on = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bm, 8, 0, 8, 8), 8*FOUR, 8*FOUR, false);
+	var nineOn = ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR);
+	var scroll = new android.widget.ScrollView(ctx);
+	scroll.setVerticalScrollBarEnabled(false);
+	scroll.getViewTreeObserver().addOnScrollChangedListener(new android.view.ViewTreeObserver.OnScrollChangedListener({
+		onScrollChanged: function() {
+			var func = function(c) {
+				c.forEach(function(e) {
+					if((e.TYPE == "button" || e.TYPE == "image_button") && e.clicked == true) {
+						if(e.TYPE == "button")
+							e.clicked = false;
+						if(e.TYPE == "image_button")
+							e.main.clicked = false;
+						e.image.setBackgroundDrawable(nineOn);
+						e.btn.setColorFilter(android.graphics.Color.WHITE, android.graphics.PorterDuff.Mode.MULTIPLY);
+						e.btn.setPadding(0, FOUR, 0, 0);
+						e.shadow.setPadding(2*FOUR, 3*FOUR, 0, 0);
+					} else if(e.TYPE == "delete_button" && e.isButton == true && e.clicked == true) {
+						e.clicked = false;
+						e.image.setBackgroundDrawable(nineOn);
+						x_text.setColorFilter(android.graphics.Color.WHITE, android.graphics.PorterDuff.Mode.MULTIPLY);
+						x_text.setPadding(0, FOUR, 0, 0);
+						x_shdow.setPadding(2*FOUR, 3*FOUR, 0, 0);
+					} else if(e.TYPE == "group")
+						func(e.children);
+				});
+			};
+			func(childs);
+		}
+	}));
+	var l = new android.widget.LinearLayout(ctx);
+	l.setOrientation(android.widget.LinearLayout.VERTICAL);
+	l.setGravity(android.view.Gravity.CENTER);
+	//scroll.requestDisallowInterceptTouchEvent(true);
+	scroll.addView(l);
+	childs.forEach(function(e) {
+		e.mainplate.setLayoutParams(new android.widget.LinearLayout.LayoutParams(e.width, e.height));
+		l.addView(e.mainplate);
+	});
+	this.mainplate = scroll;
+};
+
+//GUISCROLL METHODS
+GUILib.GUIScroll.prototype = {};
+GUILib.GUIScroll.prototype.setXY = function(x, y) {
+	this.x = (x == -1 ? this.x : x*FOUR);
+	this.y = (y == -1 ? this.y : y*FOUR);
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+		if(that.pw != null)
+			that.pw.update(that.x, that.y, -1, -1, true);
+	}}));
+};
+GUILib.GUIScroll.prototype.setH = function(height) {
+	this.height = height*FOUR;
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+		if(that.pw != null)
+			that.pw.update(that.width, that.height);
+	}}));
+};
+GUILib.GUIScroll.prototype.render = function() {
+	if(this.pw == null)
+		elements.push(this);
+};
+GUILib.GUIScroll.prototype.stop = function() {
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+			that.pw.dismiss();
+			that.pw = null;
+		}}));
+};
+
+//GUIGROUP
+GUILib.GUIGroup = function(x, y, orien, children) {
+	this.TYPE = "group";
+	
+	var that = this;
+	this.children = children
+	this.pw = null;
+	this.x = x*FOUR;
+	this.y = y*FOUR;
+	if(orien == GUILib.HORIZONTAL) {
+		this.width = addAll(children.map(function(e) { return e.width; }));
+		this.height = Math.max.apply(null, children.map(function(e) { return e.height; }));
+	} else if(orien == GUILib.VERTICAL) {
+		this.width = Math.max.apply(null, children.map(function(e) { return e.width; }));
+		this.height = addAll(children.map(function(e) { return e.height; }));
+	}
+	var layout = new android.widget.LinearLayout(ctx);
+	layout.setGravity(android.view.Gravity.CENTER);
+	layout.setOrientation(orien);
+	this.mainplate = layout;
+	children.forEach(function(e) {
+		e.mainplate.setLayoutParams(new android.widget.LinearLayout.LayoutParams(e.width, e.height));
+		layout.addView(e.mainplate);
+	});
+};
+
+//GUIGROUP METHODS
+GUILib.GUIGroup.prototype = {};
+GUILib.GUIGroup.prototype.setXY = function(x, y) {
+	this.x = (x == -1 ? this.x : x*FOUR);
+	this.y = (y == -1 ? this.y : y*FOUR);
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+		if(that.pw != null)
+			that.pw.update(that.x, that.y, -1, -1, true);
+	}}));
+};
+GUILib.GUIGroup.prototype.render = function() {
+	if(this.pw == null)
+		elements.push(this);
+};
+GUILib.GUIGroup.prototype.stop = function() {
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+			that.pw.dismiss();
+			that.pw = null;
+		}}));
 };
 
 var _ = function(bitmap, x, y, width, height) {
@@ -504,15 +784,13 @@ new java.lang.Thread(new java.lang.Runnable({run: function() {
 			ctx.runOnUiThread(new java.lang.Runnable({
 				run: function() {
 					drawFont("_", edit_str, edit_shdow, true, Math.max.apply(null, wthnhet)-76*FOUR-1);
-				/*	edit_str.setImageBitmap(emptyimg);
-					edit_shdow.setImageBitmap(emptyimg);*/
 				}
 			}));
 		if(elements.length>0) {
 			if(currentLength<elements.length) {
 				 elements.forEach(function(element) {
 					ctx.runOnUiThread(new java.lang.Runnable({run: function() {
-						if(element.pw == true) {
+						if(element.pw == null) {
 							var pw = new android.widget.PopupWindow(ctx);
 							element.pw = pw;
 							pw.setContentView(element.mainplate);
@@ -531,10 +809,16 @@ new java.lang.Thread(new java.lang.Runnable({run: function() {
 	}
 }})).start();
 
+//add all of things in array
+function addAll(array) {
+	var result = 0;
+	for each(var i in array)
+		result += i;
+	return result;
+}
+
 //make top bar image
 function getTopBarImg() {
-	/*| Π |
-	  -----*/
 	var touchgui = getImage("gui", "touchgui", "");
 	var part = android.graphics.Bitmap.createBitmap(touchgui, 150, 26, 14, 29);
 	var real = android.graphics.Bitmap.createBitmap(12, 28, android.graphics.Bitmap.Config.ARGB_8888);
@@ -551,7 +835,6 @@ function getTopBarImg() {
 function setSeekBarBack(seek, max, width, dot) {
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function() {
-			//919191 7
 			var img = android.graphics.Bitmap.createBitmap(width+4*FOUR, 7*FOUR, android.graphics.Bitmap.Config.ARGB_8888);
 			var canvas = new android.graphics.Canvas(img);
 			var p = new android.graphics.Paint();
@@ -725,8 +1008,6 @@ function ninePatch(bitmap, top, left, bottom, right) {
 
 //checking bitmap font length source
 function checkLength(bitmap) {
-/*	var a = java.lang.reflect.Array.newInstance(java.lang.Integer.TYPE, 16*16);
-	bitmap.getPixels(a, 0, 16, 0, 0, 16, 16);*/
 	var start = -1, end = 0;
 	var arr = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
 	var Color = android.graphics.Color;
@@ -753,7 +1034,6 @@ function checkLength(bitmap) {
 				end = i;
 		}
 	});
-//	clientMessage(start+" "+end);
 	return [start, end];
 }
 
