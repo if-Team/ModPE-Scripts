@@ -14,7 +14,8 @@ function newLevel() {
 		});
 	var btn3 = new GUILib.EditText(0, 0, 96, 20);
 	var seek = new GUILib.ControlBar(0, 0, 150, 20, 6, 1, true);
-	var scroll = new GUILib.GUIScroll(GUILib.deviceWidth/2 - 96, GUILib.deviceHeight/2-40, 80, [group, btn2, btn3, seek]);
+	var swit = new GUILib.Switch(0, 0, null);
+	var scroll = new GUILib.GUIScroll(GUILib.deviceWidth/2 - 96, GUILib.deviceHeight/2-40, 80, [group, btn2, btn3, swit, seek]);
 	var x = new GUILib.DeleteButton(4, 4, [back, top, scroll], function() {
 			print("Deleted");
 		}, true);

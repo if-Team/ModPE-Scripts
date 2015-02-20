@@ -11,8 +11,6 @@ var pectx = ctx.createPackageContext("com.mojang.minecraftpe", android.content.C
 
 const FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
 
-var elements = new Array();
-var currentLength = 0;
 var reader = new java.io.BufferedReader(new java.io.InputStreamReader(getImage("", "items.meta", "", true)));
 eval("meta = "+reader.readLine()+";");
 reader.close();
@@ -173,8 +171,7 @@ GUILib.GUIButton.prototype.getMessage = function() {
 	return this.msg;
 };
 GUILib.GUIButton.prototype.render = function() {
-	if(this.pw == null)
-		elements.push(this);
+	render(this);
 };
 GUILib.GUIButton.prototype.stop = function() {
 	var that = this;
@@ -240,8 +237,7 @@ GUILib.ImageButton.prototype.setWH = function(width, height) {
 	}}));
 };
 GUILib.ImageButton.prototype.render = function() {
-	if(this.main.pw == null)
-		elements.push(this.main);
+	render(this.main);
 };
 GUILib.ImageButton.prototype.stop = function() {
 	var that = this;
@@ -319,8 +315,7 @@ GUILib.EditText.prototype.getText = function() {
 	return this.text;
 }
 GUILib.EditText.prototype.render = function() {
-	if(this.pw == null)
-		elements.push(this);
+	render(this);
 };
 GUILib.EditText.prototype.stop = function() {
 	var that = this;
@@ -369,8 +364,7 @@ GUILib.Background.prototype.stop = function() {
 		}}));
 };
 GUILib.Background.prototype.render = function() {
-	if(this.pw == null)
-		elements.unshift(this);
+	render(this);
 };
 
 //CONTROLBAR
@@ -441,8 +435,7 @@ GUILib.ControlBar.prototype.stop = function() {
 		}}));
 };
 GUILib.ControlBar.prototype.render = function() {
-	if(this.pw ==null)
-		elements.push(this);
+	render(this);
 };
 
 //TOPBAR
@@ -501,8 +494,7 @@ GUILib.TopBar.prototype.stop = function() {
 		}}));
 };
 GUILib.TopBar.prototype.render = function() {
-	if(this.pw == null)
-		elements.push(this);
+	render(this);
 };
 
 //DELETEBUTTON
@@ -604,8 +596,7 @@ GUILib.DeleteButton.prototype.stop = function() {
 		}}));
 };
 GUILib.DeleteButton.prototype.render = function() {
-	if(this.pw == null)
-		elements.push(this);
+	render(this);
 };
 
 //GUISCROLL
@@ -688,8 +679,7 @@ GUILib.GUIScroll.prototype.setH = function(height) {
 	}}));
 };
 GUILib.GUIScroll.prototype.render = function() {
-	if(this.pw == null)
-		elements.push(this);
+	render(this);
 };
 GUILib.GUIScroll.prototype.stop = function() {
 	var that = this;
@@ -737,10 +727,72 @@ GUILib.GUIGroup.prototype.setXY = function(x, y) {
 	}}));
 };
 GUILib.GUIGroup.prototype.render = function() {
-	if(this.pw == null)
-		elements.push(this);
+	render(this);
 };
 GUILib.GUIGroup.prototype.stop = function() {
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+			that.pw.dismiss();
+			that.pw = null;
+		}}));
+};
+
+//SWITCH
+GUILib.Switch = function(x, y, callback) {
+	this.TYPE = "switch";
+	
+	this.pw = null;
+	this.x = x*FOUR;
+	this.y = y*FOUR;
+	this.width = 38*FOUR;
+	this.height = 19*FOUR;
+	var toggle = new android.widget.ToggleButton(ctx);
+	toggle.setText("");
+	toggle.setTextOn("");
+	toggle.setTextOff("");
+	toggle.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener({
+		onCheckedChanged: function(v, checked) {
+			if(checked)
+				toggle.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(on));
+			else
+				toggle.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(off));
+		}
+	}));
+	toggle.setOnTouchListener(new android.view.View.OnTouchListener({
+		onTouch: function(v, e) {
+			if(e.getAction() == android.view.MotionEvent.ACTION_DOWN)
+				toggle.setChecked(!toggle.isChecked());
+			return true;
+		}
+	}));
+	var touchgui = getImage("gui", "touchgui", "");
+	var off = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(touchgui, 160, 206, 38, 19), 38*FOUR, 19*FOUR, false);
+	var on = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(touchgui, 198, 206, 38, 19), 38*FOUR, 19*FOUR, false);;
+	toggle.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(off));
+	this.mainplate = toggle;
+};
+
+//SWITCH METHODS
+GUILib.Switch.prototype = {};
+GUILib.Switch.prototype.isChecked = function() {
+	return this.mainplate.isChecked();
+};
+GUILib.Switch.prototype.setChecked = function(bool) {
+	this.mainplate.setChecked(bool);
+};
+GUILib.Switch.prototype.setXY = function(x, y) {
+	this.x = (x == -1 ? this.x : x*FOUR);
+	this.y = (y == -1 ? this.y : y*FOUR);
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+		if(that.pw != null)
+			that.pw.update(that.x, that.y, -1, -1, true);
+	}}));
+};
+GUILib.Switch.prototype.render = function() {
+	render(this);
+};
+GUILib.Switch.prototype.stop = function() {
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
 			that.pw.dismiss();
@@ -776,38 +828,37 @@ function getItemBitmap(data) {
 	return android.graphics.Bitmap.createScaledBitmap(result, result.getWidth()*FOUR, result.getHeight()*FOUR, false);
 }
 
-//reder checking source
-new java.lang.Thread(new java.lang.Runnable({run: function() {
-	while(1) {
-		java.lang.Thread.sleep(50);
-		if(edit_text === "")
-			ctx.runOnUiThread(new java.lang.Runnable({
-				run: function() {
-					drawFont("_", edit_str, edit_shdow, true, Math.max.apply(null, wthnhet)-76*FOUR-1);
-				}
-			}));
-		if(elements.length>0) {
-			if(currentLength<elements.length) {
-				 elements.forEach(function(element) {
-					ctx.runOnUiThread(new java.lang.Runnable({run: function() {
-						if(element.pw == null) {
-							var pw = new android.widget.PopupWindow(ctx);
-							element.pw = pw;
-							pw.setContentView(element.mainplate);
-							pw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-							pw.setWidth(element.width);
-							pw.setHeight(element.height);
-							pw.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.LEFT, element.x, element.y );
-						}
-					}}));
-				});
-				 currentLength = elements.length;
+//edtxt checking source
+new java.lang.Thread(new java.lang.Runnable({
+	run: function() {
+		while(1) {
+			java.lang.Thread.sleep(50);
+			if(edit_text === "")
+				ctx.runOnUiThread(new java.lang.Runnable({
+					run: function() {
+						drawFont("_", edit_str, edit_shdow, true, Math.max.apply(null, wthnhet)-76*FOUR-1);
+					}
+				}));
 			}
-		 if(currentLength>elements.length)
-			 currentLength = elements.length;
-		}
 	}
-}})).start();
+})).start();
+
+//render
+function render(element) {
+	ctx.runOnUiThread(new java.lang.Runnable({
+		run: function() {
+			if(element.pw == null) {
+				var pw = new android.widget.PopupWindow(ctx);
+				element.pw = pw;
+				pw.setContentView(element.mainplate);
+				pw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+				pw.setWidth(element.width);
+				pw.setHeight(element.height);
+				pw.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.LEFT, element.x, element.y );
+			}
+		}
+	}));
+}
 
 //add all of things in array
 function addAll(array) {
@@ -862,16 +913,16 @@ function showEditPopup(text, shadow, str, that) {
 			--------
 			Shadow(c)
 			*/
+			var done = new GUILib.GUIButton(GUILib.deviceWidth-66, 0, 66, 37, "Done", function(thiz) {
+				black.dismiss();
+				pw.dismiss();
+			});
 			var black = new android.widget.PopupWindow(ctx);
 			black.setContentView(new android.widget.TextView(ctx));
 			black.setWidth(Math.max.apply(null, wthnhet)+10);
 			black.setHeight(Math.min.apply(null, wthnhet)+10);
 			black.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.BLACK));
 			black.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
-			var done = new GUILib.GUIButton(GUILib.deviceWidth-66, 0, 66, 37, "Done", function(thiz) {
-				black.dismiss();
-				pw.dismiss();
-			});
 			done.render();
 			var textpart = new android.widget.RelativeLayout(ctx);
 			var a = new android.widget.EditText(ctx);
@@ -986,6 +1037,9 @@ function ninePatch(bitmap, top, left, bottom, right) {
 	};
 	var buffer = getByteBuffer(top, left, bottom, right);
 	var patch = new android.graphics.drawable.NinePatchDrawable(ctx.getResources(), bitmap, buffer.array(), new android.graphics.Rect(), "");
+	patch.getPaint().setAntiAlias(false);
+	patch.getPaint().setDither(false);
+	patch.getPaint().setFilterBitmap(false);
 	return patch;
 }
 
