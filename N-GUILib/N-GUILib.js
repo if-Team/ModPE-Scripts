@@ -1038,28 +1038,19 @@ function getItemBitmap(data) {
 	return android.graphics.Bitmap.createScaledBitmap(result, result.getWidth()*FOUR, result.getHeight()*FOUR, false);
 }
 
-new java.lang.Thread(new java.lang.Runnable({
-	run: function() {
-		while(1) {
-			java.lang.Thread.sleep(60000);
-			makeCache();
-		}
+var forMakeCache = 1200;
+function modTick() {
+	if(forMakeCache++ == 1200) {
+		makeCache();
+		forMakeCache = 0;
 	}
-})).start();
-
-new java.lang.Thread(new java.lang.Runnable({
-	run: function() {
-		while(1) {
-			java.lang.Thread.sleep(50);
-			if(edit_text === "")
-				ctx.runOnUiThread(new java.lang.Runnable({
-					run: function() {
-						drawFont("_", edit_str, edit_shdow, true, Math.max.apply(null, wthnhet)-76*FOUR-1);
-					}
-				}));
-		}
-	}
-})).start();
+	if(edit_text === "")
+		ctx.runOnUiThread(new java.lang.Runnable({
+			run: function() {
+				drawFont("_", edit_str, edit_shdow, true, Math.max.apply(null, wthnhet)-76*FOUR-1);
+			}
+		}));
+}
 
 //render
 function render(element) {
@@ -1398,7 +1389,8 @@ function makeCache() {
 		var ds = [], dss = "", ls = [], lss = "";
 		defaults.filter(function(e, i) {
 			if(e!=null) {
-				ds.push(String.fromCharCode(i));
+				ds.push(((i == 39 || i == 92) ? "\\" : "") + String.fromCharCode(i));
+				var r = "2"+toStr(e[0])+toStr(e[1]);
 				dss+=(",["+e+"]");
 				return true;
 			}
@@ -1406,7 +1398,7 @@ function makeCache() {
 		});
 		lengths.filter(function(e, i) {
 			if(e!=null) {
-				ls.push(String.fromCharCode(i));
+				ls.push(((i == 39 || i == 92) ? "\\" : "") + String.fromCharCode(i));
 				lss+=(",["+e+"]");
 				return true;
 			}
@@ -1442,6 +1434,11 @@ function getTextureName() {
 		return spl[spl.length-1].replace(".zip", "");
 	} else
 		return "default";
+}
+function toStr(i) {
+	if(i<10)
+		return "0"+i;
+	return i+"";
 }
 /*    EOF    */
 
