@@ -6,13 +6,12 @@ function useItem() {
 	var top = new GUILib.TopBar(0, 0, GUILib.deviceWidth, 28,"Top Bar");
 	var b = new GUILib.GUIButton(0, 0, 96, 96, "헉");
 	var btn = new GUILib.ImageButton(0, 0, 96, 20, ["apple", 0], function(thiz) {
-			print(seek.getValue());
-		});
+		print(seek.getValue());
+	});
 	var group = new GUILib.GUIGroup(0, 0, GUILib.HORIZONTAL, [b, btn]);
 
 	var btn2 = new GUILib.GUIButton(0, 0, 96, 20, "버튼", function(thiz) {
-			print("Button");
-		});
+	});
 	var btn3 = new GUILib.EditText(0, 0, 96, 20);
 	var seek = new GUILib.ControlBar(0, 0, 150, 20, 6, 1, true);
 	var swit = new GUILib.Switch(0, 0, null);

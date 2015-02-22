@@ -624,11 +624,11 @@ GUILib.DeleteButton = function(x, y, deletes, callback, button) {
 							r.removeView(x_shdow);
 							r.removeView(x_text);
 							Level.playSound(getPlayerX(), getPlayerY(), getPlayerZ(), "random.click", 7, 7);
-							if(callback != null)
-								callback();
 							x_text.setColorFilter(android.graphics.Color.WHITE, android.graphics.PorterDuff.Mode.MULTIPLY);
 							x_text.setPadding(0, 0, 0, 0);
 							x_shdow.setPadding(2*FOUR, 2*FOUR, 0, 0);
+							if(callback != null)
+								callback();
 						}
 					}
 					break;
@@ -811,6 +811,7 @@ GUILib.GUIGroup.prototype.stop = function() {
 GUILib.Switch = function(x, y, callback) {
 	this.TYPE = "switch";
 	
+	var that = this;
 	this.pw = null;
 	this.x = x*FOUR;
 	this.y = y*FOUR;
@@ -822,6 +823,8 @@ GUILib.Switch = function(x, y, callback) {
 	toggle.setTextOff("");
 	toggle.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener({
 		onCheckedChanged: function(v, checked) {
+			if(callback != null)
+				callback(that, checked);
 			if(checked)
 				toggle.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(on));
 			else
@@ -956,10 +959,11 @@ GUILib.VisualFont = function(x, y, text) {
 };
 
 //CHECKBOX
-GUILib.CheckBox = function(x, y, text) {
+GUILib.CheckBox = function(x, y, text, callback) {
 	var text = new GUILib.VisualFont(0,0,text);
 	this.TYPE = "checkbox";
 	
+	var that = this;
 	this.pw = null;
 	this.x = x*FOUR;
 	this.y = y*FOUR;
@@ -970,6 +974,8 @@ GUILib.CheckBox = function(x, y, text) {
 	toggle.setButtonDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
 	toggle.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener({
 		onCheckedChanged: function(v, checked) {
+			if(callback != null)
+				callback(that, checked);
 			if(checked)
 				toggle.setBackgroundDrawable(ninePatch(checkimg, 21*FOUR, 21*FOUR, 22*FOUR, 22*FOUR));
 			else
@@ -1390,7 +1396,6 @@ function makeCache() {
 		defaults.filter(function(e, i) {
 			if(e!=null) {
 				ds.push(((i == 39 || i == 92) ? "\\" : "") + String.fromCharCode(i));
-				var r = "2"+toStr(e[0])+toStr(e[1]);
 				dss+=(",["+e+"]");
 				return true;
 			}
@@ -1411,6 +1416,7 @@ function makeCache() {
 }
 
 function loadCache() {
+	new java.lang.Thread(new java.lang.Runnable({run: function() {
 	var texture = getTextureName();
 	var file = new java.io.File(android.os.Environment.getExternalStorageDirectory(), "아포카토맨/GUILib/"+texture+".cache");
 	if(file.exists()) {
@@ -1425,6 +1431,7 @@ function loadCache() {
 		});
 		reader.close();
 	}
+	}})).start();
 }
 function getTextureName() {
 	var pref = ctx.getSharedPreferences("mcpelauncherprefs", 0);
