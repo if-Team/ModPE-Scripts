@@ -9,6 +9,10 @@
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var pectx = ctx.createPackageContext("com.mojang.minecraftpe", android.content.Context.CONTEXT_IGNORE_SECURITY);
 
+var defaults = new Array(256);
+var lengths = new Array(65536);
+loadCache();
+
 const FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
 
 var reader = new java.io.BufferedReader(new java.io.InputStreamReader(getImage("", "items.meta", "", true)));
@@ -17,6 +21,62 @@ reader.close();
 var items_opaque = getImage("", "items-opaque", "");
 var width = items_opaque.getWidth();
 var height = items_opaque.getHeight();
+
+/*--------------------------------------------------*/
+var g = android.graphics.Color.parseColor("#52fc52");
+var G = android.graphics.Color.parseColor("#114011");
+var b = android.graphics.Color.parseColor("#6b6561");
+var B = android.graphics.Color.parseColor("#3a353a");
+var check = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,g,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,g,0,G,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,g,0,G,0,0,
+			 0,0,0,0,0,0,0,g,0,0,0,0,0,0,0,0,g,0,G,0,0,0,
+			 0,0,0,0,0,0,0,g,G,0,0,0,0,0,0,g,0,G,0,0,0,0,
+			 0,0,0,0,0,0,b,b,g,b,b,b,b,b,g,0,G,0,0,0,0,0,
+			 0,0,0,0,0,0,b,B,g,G,B,B,B,g,b,G,0,0,0,0,0,0,
+			 0,0,0,0,0,0,b,B,B,g,B,B,g,B,G,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,b,B,B,g,G,g,B,G,b,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,b,B,B,B,g,B,G,B,b,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,b,B,B,B,B,G,B,B,b,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,b,B,B,B,B,B,B,B,b,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,b,B,B,B,B,B,B,B,b,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,b,b,b,b,b,b,b,b,b,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+var unchk = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,b,b,b,b,b,b,b,b,b,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,b,B,B,B,B,B,B,B,b,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,b,B,B,B,B,B,B,B,b,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,b,B,B,B,B,B,B,B,b,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,b,B,B,B,B,B,B,B,b,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,b,B,B,B,B,B,B,B,b,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,b,B,B,B,B,B,B,B,b,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,b,B,B,B,B,B,B,B,b,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,b,b,b,b,b,b,b,b,b,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+var checkimg = android.graphics.Bitmap.createBitmap(22, 21, android.graphics.Bitmap.Config.ARGB_8888);
+checkimg.setPixels(check, 0, 22, 0, 0, 22, 21);
+checkimg = android.graphics.Bitmap.createScaledBitmap(checkimg, 22*FOUR, 21*FOUR, false);
+var unchkimg = android.graphics.Bitmap.createBitmap(22, 21, android.graphics.Bitmap.Config.ARGB_8888);
+unchkimg.setPixels(unchk, 0, 22, 0, 0, 22, 21);
+unchkimg = android.graphics.Bitmap.createScaledBitmap(unchkimg, 22*FOUR, 21*FOUR, false);
+/*--------------------------------------------------*/
+
 var emptyimg = android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.ARGB_8888);
 var editxtimg = android.graphics.Bitmap.createBitmap(3, 3, android.graphics.Bitmap.Config.RGB_565);
 editxtimg.eraseColor(android.graphics.Color.rgb(0x6b, 0x61, 0x62));
@@ -46,6 +106,8 @@ GUILib.deviceHeight = Math.min.apply(null, wthnhet)/FOUR;
 
 GUILib.VERTICAL = 1;
 GUILib.HORIZONTAL = 0;
+
+GUILib.Error = java.lang.Exception;
 
 //BUTTON
 GUILib.GUIButton = function(x, y, width, height, msg, callback) {
@@ -564,6 +626,9 @@ GUILib.DeleteButton = function(x, y, deletes, callback, button) {
 							Level.playSound(getPlayerX(), getPlayerY(), getPlayerZ(), "random.click", 7, 7);
 							if(callback != null)
 								callback();
+							x_text.setColorFilter(android.graphics.Color.WHITE, android.graphics.PorterDuff.Mode.MULTIPLY);
+							x_text.setPadding(0, 0, 0, 0);
+							x_shdow.setPadding(2*FOUR, 2*FOUR, 0, 0);
 						}
 					}
 					break;
@@ -625,6 +690,10 @@ GUILib.GUIScroll = function(x, y, height, childs) {
 		onScrollChanged: function() {
 			var func = function(c) {
 				c.forEach(function(e) {
+					if(e.TYPE == "scroll") {
+						throw new GUILib.Error("GUIScroll 내에는 GUIScroll을 넣을 수 없습니다. You can't add GUIScroll to GUIScroll.");
+						return;
+					}
 					if((e.TYPE == "button" || e.TYPE == "image_button") && e.clicked == true) {
 						if(e.TYPE == "button")
 							e.clicked = false;
@@ -632,8 +701,10 @@ GUILib.GUIScroll = function(x, y, height, childs) {
 							e.main.clicked = false;
 						e.image.setBackgroundDrawable(nineOn);
 						e.btn.setColorFilter(android.graphics.Color.WHITE, android.graphics.PorterDuff.Mode.MULTIPLY);
-						e.btn.setPadding(0, FOUR, 0, 0);
-						e.shadow.setPadding(2*FOUR, 3*FOUR, 0, 0);
+						if(e.TYPE == "button") {
+							e.btn.setPadding(0, FOUR, 0, 0);
+							e.shadow.setPadding(2*FOUR, 3*FOUR, 0, 0);
+						}
 					} else if(e.TYPE == "delete_button" && e.isButton == true && e.clicked == true) {
 						e.clicked = false;
 						e.image.setBackgroundDrawable(nineOn);
@@ -650,7 +721,6 @@ GUILib.GUIScroll = function(x, y, height, childs) {
 	var l = new android.widget.LinearLayout(ctx);
 	l.setOrientation(android.widget.LinearLayout.VERTICAL);
 	l.setGravity(android.view.Gravity.CENTER);
-	//scroll.requestDisallowInterceptTouchEvent(true);
 	scroll.addView(l);
 	childs.forEach(function(e) {
 		e.mainplate.setLayoutParams(new android.widget.LinearLayout.LayoutParams(e.width, e.height));
@@ -767,7 +837,7 @@ GUILib.Switch = function(x, y, callback) {
 	}));
 	var touchgui = getImage("gui", "touchgui", "");
 	var off = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(touchgui, 160, 206, 38, 19), 38*FOUR, 19*FOUR, false);
-	var on = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(touchgui, 198, 206, 38, 19), 38*FOUR, 19*FOUR, false);;
+	var on = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(touchgui, 198, 206, 38, 19), 38*FOUR, 19*FOUR, false);
 	toggle.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(off));
 	this.mainplate = toggle;
 };
@@ -800,6 +870,146 @@ GUILib.Switch.prototype.stop = function() {
 		}}));
 };
 
+//WARNING POPUP
+GUILib.WarningPopup = function(msg, dur) {
+	this.TYPE = "warning_popup";
+	
+	var that = this;
+	this.pw;
+	this.x = (GUILib.deviceWidth*FOUR-184*FOUR)/2
+	this.y = 2*FOUR;
+	this.width = 184*FOUR;
+	this.height = 28*FOUR;
+	var shdow = new android.widget.ImageView(ctx);
+	shdow.setPadding(2*FOUR, 2*FOUR, 0, 0);
+	shdow.setScaleType(android.widget.ImageView.ScaleType.CENTER);
+	shdow.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(this.width, this.height));
+	shdow.setColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY);
+	var text = new android.widget.ImageView(ctx);
+	text.setScaleType(android.widget.ImageView.ScaleType.CENTER);
+	text.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(this.width, this.height));
+	drawFont(msg, text, shdow);
+	this.msg = msg;
+	var l = new android.widget.RelativeLayout(ctx);
+	var spritesheet = getImage("gui", "spritesheet", "");
+	var back = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 34, 43, 14, 14), 14*FOUR, 14*FOUR, false);
+	l.setBackgroundDrawable(ninePatch(back, 2*FOUR, 2*FOUR, 11*FOUR, 11*FOUR));
+	var down = new android.view.animation.TranslateAnimation(0, 0, -that.height, 0);
+	down.setFillAfter(true);
+	down.setDuration(300);
+	var up = new android.view.animation.TranslateAnimation(android.view.animation.Animation.RELATIVE_TO_SELF, 0,
+															android.view.animation.Animation.RELATIVE_TO_SELF, 0,
+															android.view.animation.Animation.RELATIVE_TO_SELF, 0,
+															android.view.animation.Animation.RELATIVE_TO_SELF, -1);
+	up.setFillAfter(true);
+	up.setDuration(300);
+	l.addView(shdow);
+	l.addView(text);
+	l.setAnimation(down);
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+	new android.os.Handler().postDelayed(new java.lang.Runnable({run: function() {
+		l.startAnimation(up);
+		new android.os.Handler().postDelayed(new java.lang.Runnable({run: function() {
+				that.pw.dismiss();
+		}}), 300);
+	}}), dur+300);
+	new android.os.Handler().postDelayed(new java.lang.Runnable({run: function() {
+		text.setColorFilter(android.graphics.Color.RED, android.graphics.PorterDuff.Mode.MULTIPLY);
+		shdow.setColorFilter(android.graphics.Color.parseColor("#410000"), android.graphics.PorterDuff.Mode.MULTIPLY);
+		new android.os.Handler().postDelayed(new java.lang.Runnable({run: function() {
+			text.setColorFilter(android.graphics.Color.WHITE, android.graphics.PorterDuff.Mode.MULTIPLY);
+			shdow.setColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY);
+		}}), 100);
+	}}), dur-2000);
+	}}));
+	this.mainplate = l;
+};
+
+//WARNINGPOPUP MEHTODS
+GUILib.WarningPopup.prototype = {};
+GUILib.WarningPopup.prototype.render = function() {
+	render(this);
+};
+
+//VISUALFONT
+GUILib.VisualFont = function(x, y, text) {
+	this.TYPE = "visualfont";
+	
+	this.pw = null;
+	this.x = x*FOUR;
+	this.y = y*FOUR;
+	this.width = text.length*8*FOUR;
+	this.height = 9*FOUR;
+	var r = new android.widget.RelativeLayout(ctx);
+	var tex = new android.widget.ImageView(ctx);
+	tex.setScaleType(android.widget.ImageView.ScaleType.CENTER);
+	tex.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
+	var shadow = new android.widget.ImageView(ctx);
+	shadow.setScaleType(android.widget.ImageView.ScaleType.CENTER);
+	shadow.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
+	shadow.setPadding(2*FOUR, 2*FOUR, 0, 0);
+	shadow.setColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY);
+	drawFont(text, tex, shadow);
+	r.addView(shadow);
+	r.addView(tex);
+	this.mainplate = r;
+};
+
+//CHECKBOX
+GUILib.CheckBox = function(x, y, text) {
+	var text = new GUILib.VisualFont(0,0,text);
+	this.TYPE = "checkbox";
+	
+	this.pw = null;
+	this.x = x*FOUR;
+	this.y = y*FOUR;
+	this.width = 22*FOUR+text.width;
+	this.height = 21*FOUR;
+	var toggle = new android.widget.CheckBox(ctx);
+	this.toggle = toggle;
+	toggle.setButtonDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+	toggle.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener({
+		onCheckedChanged: function(v, checked) {
+			if(checked)
+				toggle.setBackgroundDrawable(ninePatch(checkimg, 21*FOUR, 21*FOUR, 22*FOUR, 22*FOUR));
+			else
+				toggle.setBackgroundDrawable(ninePatch(unchkimg, 21*FOUR, 21*FOUR, 22*FOUR, 22*FOUR));
+		}
+	}));
+	toggle.setOnTouchListener(new android.view.View.OnTouchListener({
+		onTouch: function(v, e) {
+			if(e.getAction() == android.view.MotionEvent.ACTION_DOWN)
+				toggle.setChecked(!toggle.isChecked());
+			return true;
+		}
+	}));
+	toggle.setBackgroundDrawable(ninePatch(unchkimg, 21*FOUR, 21*FOUR, 22*FOUR, 22*FOUR));
+	var group = new android.widget.LinearLayout(ctx);
+	group.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+	group.addView(toggle);
+	group.addView(text.mainplate);
+	this.mainplate = group;
+};
+
+//CHECKBOX METHODS
+GUILib.CheckBox.prototype = {};
+GUILib.CheckBox.prototype.setChecked = function(b) {
+	this.toggle.setChecked(b);
+};
+GUILib.CheckBox.prototype.isChecked = function() {
+	return this.toggle.isChecked();
+}
+GUILib.CheckBox.prototype.render = function() {
+	render(this);
+};
+GUILib.CheckBox.prototype.stop = function() {
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+		that.pw.dismiss();
+		that.pw = null;
+	}}));
+};
+
 var _ = function(bitmap, x, y, width, height) {
 	return android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bitmap, x, y, width, height), width*FOUR, height*FOUR, false);
 };
@@ -828,7 +1038,15 @@ function getItemBitmap(data) {
 	return android.graphics.Bitmap.createScaledBitmap(result, result.getWidth()*FOUR, result.getHeight()*FOUR, false);
 }
 
-//edtxt checking source
+new java.lang.Thread(new java.lang.Runnable({
+	run: function() {
+		while(1) {
+			java.lang.Thread.sleep(60000);
+			makeCache();
+		}
+	}
+})).start();
+
 new java.lang.Thread(new java.lang.Runnable({
 	run: function() {
 		while(1) {
@@ -839,7 +1057,7 @@ new java.lang.Thread(new java.lang.Runnable({
 						drawFont("_", edit_str, edit_shdow, true, Math.max.apply(null, wthnhet)-76*FOUR-1);
 					}
 				}));
-			}
+		}
 	}
 })).start();
 
@@ -1110,8 +1328,17 @@ function drawFont(string, iv, shdow, isEdit, wi) {
 				var st = android.graphics.Bitmap.createBitmap(glyph, x, y, 16, 16);
 				if(element>="가"&&element<="힣")
 					var length = [0, 15];
-				else
+				else if(lengths[element.charCodeAt(0)] != null && has)
+					var length = lengths[element.charCodeAt(0)];
+				else if(defaults[element.charCodeAt(0)] != null && !has)
+					var length = defaults[element.charCodeAt(0)];
+				else {
 					var length = checkLength(st);
+					if(has)
+						lengths[element.charCodeAt(0)] = length;
+					else
+						defaults[element.charCodeAt(0)] = length;
+				}
 				canvas.drawBitmap(android.graphics.Bitmap.createBitmap(st, length[0], 0, length[1]-length[0]+1, 16), width, 0, p);
 				width+=((element>="가"&&element<="힣") ? 16 : length[1]-length[0]+3);
 			} else
@@ -1146,15 +1373,75 @@ function drawFont(string, iv, shdow, isEdit, wi) {
 
 //registering object to other scripts
 function selectLevelHook() {
+	var loaded = 0;
 	var scripts = net.zhuoweizhang.mcpelauncher.ScriptManager.scripts;
 	for(var i = 0; i<scripts.size(); i++) {
 		var script = scripts.get(i);
 		var scope = script.scope;
 		if(org.mozilla.javascript.ScriptableObject.hasProperty(scope, "GUILib"))
 			continue;
+		loaded = 1;
 		org.mozilla.javascript.ScriptableObject.putProperty(scope, "GUILib", GUILib);
+	}
+	if(loaded) {
+		var warn = new GUILib.WarningPopup("GUILib이 로드되었습니다.", 3500);
+		warn.render();
 	}
 }
 
+function makeCache() {
+	new java.lang.Thread(new java.lang.Runnable({run: function() {
+		var texture = getTextureName();
+		var file = new java.io.File(android.os.Environment.getExternalStorageDirectory(), "아포카토맨/GUILib/"+texture+".cache");
+		file.getParentFile().mkdirs();
+		var writer = new java.io.BufferedWriter(new java.io.FileWriter(file));
+		var ds = [], dss = "", ls = [], lss = "";
+		defaults.filter(function(e, i) {
+			if(e!=null) {
+				ds.push(String.fromCharCode(i));
+				dss+=(",["+e+"]");
+				return true;
+			}
+			return false;
+		});
+		lengths.filter(function(e, i) {
+			if(e!=null) {
+				ls.push(String.fromCharCode(i));
+				lss+=(",["+e+"]");
+				return true;
+			}
+			return false;
+		});
+		var result = "['"+ds.join("")+"',["+dss.replace(",","")+"]];\n['"+ls.join("")+"',["+lss.replace(",","")+"]];";
+		writer.write(result);
+		writer.close();
+	}})).start();
+}
+
+function loadCache() {
+	var texture = getTextureName();
+	var file = new java.io.File(android.os.Environment.getExternalStorageDirectory(), "아포카토맨/GUILib/"+texture+".cache");
+	if(file.exists()) {
+		var reader = new java.io.BufferedReader(new java.io.FileReader(file));
+		var def = eval(reader.readLine()+"");
+		def[0].split("").forEach(function(e, i) {
+			defaults[e.charCodeAt(0)] = def[1][i];
+		});
+		var len = eval(reader.readLine()+"");
+		len[0].split("").forEach(function(e, i) {
+			lengths[e.charCodeAt(0)] = len[1][i];
+		});
+		reader.close();
+	}
+}
+function getTextureName() {
+	var pref = ctx.getSharedPreferences("mcpelauncherprefs", 0);
+	var pref2 = ctx.getSharedPreferences(ctx.getPackageName()+"_preferences", 0);
+	if(pref.getString("texturePack", "NULL") !== "NULL" && pref2.getBoolean("zz_texture_pack_enable", false)) {
+		var spl = pref.getString("texturePack", "").split("/");
+		return spl[spl.length-1].replace(".zip", "");
+	} else
+		return "default";
+}
 /*    EOF    */
 
