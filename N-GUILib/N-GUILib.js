@@ -95,10 +95,6 @@ var dirtimg = android.graphics.Bitmap.createScaledBitmap(getImage("gui", "backgr
 
 var edit_str, edit_shdow, edit_text;
 
-var x_text = new android.widget.ImageView(ctx);
-var x_shdow = new android.widget.ImageView(ctx);
-drawFont("Back", x_text, x_shdow); //Draw beforehand to render immediately
-
 var GUILib = {};
 var wthnhet = [ctx.getWindowManager().getDefaultDisplay().getWidth(), ctx.getWindowManager().getDefaultDisplay().getHeight()];
 GUILib.deviceWidth = Math.max.apply(null, wthnhet)/FOUR;
@@ -563,91 +559,84 @@ GUILib.TopBar.prototype.render = function() {
 GUILib.DeleteButton = function(x, y, deletes, callback, button) {
 	this.TYPE = "delete_button";
 	
-	var that = this;
-	this.clicked = false;
 	this.isButton = button;
-	var r = new android.widget.RelativeLayout(ctx);
-	this.mainplate = r;
 	this.pw = null;
-	this.x = x*FOUR;
-	this.y = y*FOUR;
-	this.width = (button == true ? 38*FOUR : 18*FOUR);
-	this.height = 18*FOUR;
-	var btn = new android.widget.Button(ctx);
-	this.image = btn;
-	btn.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(this.width, this.height));
-	r.addView(btn);
-	var spritesheet = getImage("gui", "spritesheet", "");
-	var bm = android.graphics.Bitmap.createBitmap(spritesheet, 0, 32, 16, 8);
-	var btn_off = ninePatch(android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bm, 0, 0, 8, 8), 8*FOUR, 8*FOUR, false), 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR);
-	var btn_on = ninePatch(android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bm, 8, 0, 8, 8), 8*FOUR, 8*FOUR, false), 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR);
-	var on = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 60, 0, 18, 18), 18*FOUR, 18*FOUR, false);
-	var off = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 78, 0, 18, 18), 18*FOUR, 18*FOUR, false);
-	btn.setBackgroundDrawable((button == true ? btn_on : new android.graphics.drawable.BitmapDrawable(on)));
-	var ontouch = new android.view.View.OnTouchListener({
-		onTouch: function(v, event) {
-			switch(event.getAction()) {
-				case android.view.MotionEvent.ACTION_DOWN:
-					if(!that.clicked) {
-						that.clicked = true;
-						x_text.setColorFilter(android.graphics.Color.parseColor("#ffff9c"), android.graphics.PorterDuff.Mode.MULTIPLY);
-						x_text.setPadding(0, 2*FOUR, 0, 0);
-						x_shdow.setPadding(2*FOUR, 4*FOUR, 0, 0);
-						btn.setBackgroundDrawable((button == true ? btn_off : new android.graphics.drawable.BitmapDrawable(off)));
-					}
-					break;
-				case android.view.MotionEvent.ACTION_MOVE:
-					if((event.getX()<0 || event.getY()<0 || event.getX()>that.width || event.getY()>18*FOUR)) {
+	
+	if(button != true) {
+		var that = this;
+		this.clicked = false;
+		this.x = x*FOUR;
+		this.y = y*FOUR;
+		this.width = 18*FOUR;
+		this.height = 18*FOUR;
+		var btn = new android.widget.Button(ctx);
+		this.mainplate = btn;
+		var spritesheet = getImage("gui", "spritesheet", "");
+		var on = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 60, 0, 18, 18), 18*FOUR, 18*FOUR, false);
+		var off = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 78, 0, 18, 18), 18*FOUR, 18*FOUR, false);
+		btn.setBackgroundDrawable( new android.graphics.drawable.BitmapDrawable(on));
+		var ontouch = new android.view.View.OnTouchListener({
+			onTouch: function(v, event) {
+				switch(event.getAction()) {
+					case android.view.MotionEvent.ACTION_DOWN:
+						if(!that.clicked) {
+							that.clicked = true;
+							btn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(off));
+						}
+						break;
+					case android.view.MotionEvent.ACTION_MOVE:
+						if((event.getX()<0 || event.getY()<0 || event.getX()>that.width || event.getY()>18*FOUR)) {
+							if(that.clicked) {
+								that.clicked = false;
+								btn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(on));
+							}
+						} else if(!that.clicked) {
+							that.clicked = true;
+							btn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(off));
+						}
+						break;
+					case android.view.MotionEvent.ACTION_UP:
 						if(that.clicked) {
 							that.clicked = false;
-							x_text.setColorFilter(android.graphics.Color.WHITE, android.graphics.PorterDuff.Mode.MULTIPLY);
-							x_text.setPadding(0, 0, 0, 0);
-							x_shdow.setPadding(2*FOUR, 2*FOUR, 0, 0);
-							btn.setBackgroundDrawable((button == true ? btn_on : new android.graphics.drawable.BitmapDrawable(on)));
+							if(!(event.getX()<0 || event.getY()<0 || event.getX()>that.width || event.getY()>18*FOUR)) {
+								deletes.forEach(function(e) {
+									e.stop();
+								});
+								that.stop();
+								Level.playSound(getPlayerX(), getPlayerY(), getPlayerZ(), "random.click", 7, 7);;
+								if(callback != null)
+									callback();
+							}
 						}
-					} else if(!that.clicked) {
-						that.clicked = true;
-						x_text.setColorFilter(android.graphics.Color.parseColor("#ffff9c"), android.graphics.PorterDuff.Mode.MULTIPLY);
-						x_text.setPadding(0, 2*FOUR, 0, 0);
-						x_shdow.setPadding(2*FOUR, 4*FOUR, 0, 0);
-						btn.setBackgroundDrawable((button == true ? btn_off : new android.graphics.drawable.BitmapDrawable(off)));
-					}
-					break;
-				case android.view.MotionEvent.ACTION_UP:
-					if(that.clicked) {
-						that.clicked = false;
-						if(!(event.getX()<0 || event.getY()<0 || event.getX()>that.width || event.getY()>18*FOUR)) {
-							deletes.forEach(function(e) {
-								e.stop();
-							});
-							that.stop();
-							r.removeView(x_shdow);
-							r.removeView(x_text);
-							Level.playSound(getPlayerX(), getPlayerY(), getPlayerZ(), "random.click", 7, 7);
-							x_text.setColorFilter(android.graphics.Color.WHITE, android.graphics.PorterDuff.Mode.MULTIPLY);
-							x_text.setPadding(0, 0, 0, 0);
-							x_shdow.setPadding(2*FOUR, 2*FOUR, 0, 0);
-							if(callback != null)
-								callback();
-						}
-					}
-					break;
+						break;
+				}
+				return true;
 			}
-			return true;
-		}
-	});
-	if(button != true)
+		});
 		btn.setOnTouchListener(ontouch);
-	else {
-		x_text.setOnTouchListener(ontouch);
-		r.addView(x_shdow);
-		r.addView(x_text);
-		x_shdow.setPadding(2*FOUR, 2*FOUR, 0, 0);
-		x_shdow.setColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY);
-		x_shdow.setScaleType(android.widget.ImageView.ScaleType.CENTER);
-		x_text.setScaleType(android.widget.ImageView.ScaleType.CENTER);
-		x_shdow.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(38*FOUR, 18*FOUR));
-		x_text.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(38*FOUR, 18*FOUR));
+	} else {
+		var that = this;
+		var main = new GUILib.GUIButton(x, y, 38, 18, "Back", function(thiz) {
+			deletes.forEach(function(e) {
+				e.stop();
+			});
+			thiz.stop();
+			if(callback != null)
+				callback();
+		});
+		this.x = x*FOUR;
+		this.y = y*FOUR;
+		this.width = 38*FOUR;
+		this.height = 18*FOUR;
+		this.mainplate = main.mainplate;
+		new java.lang.Thread(new java.lang.Runnable({run: function() {
+			while(1)
+				that.clicked = main.clicked;
+		}})).start();
+		this.image = main.image;
+		this.btn = main.btn;
+		this.shadow = main.shadow;
+		this.main = main;
 	}
 };
 
@@ -661,7 +650,7 @@ GUILib.DeleteButton.prototype.stop = function() {
 		}}));
 };
 GUILib.DeleteButton.prototype.render = function() {
-	render(this);
+	render((this.isButton == true ? this.main : this));
 };
 
 //GUISCROLL
@@ -675,6 +664,16 @@ GUILib.GUIScroll = function(x, y, height, childs) {
 	
 	this.TYPE = "scroll";
 	
+	childs.forEach(function(e) {
+		if(e.TYPE == "scroll") {
+			throw new GUILib.Error("GUIScroll 내에는 GUIScroll을 넣을 수 없습니다. You can't add GUIScroll to GUIScroll.");
+			return;
+		}
+		if(e.TYPE == "delete_button") {
+			throw new GUILib.Error("GUIScroll 내에는 DeleteButton을 넣을 수 없습니다. You can't add DeleteButton to GUIScroll.");
+			return;
+		}
+	});
 	this.pw = null;
 	this.x = x*FOUR;
 	this.y = y*FOUR;
@@ -690,10 +689,6 @@ GUILib.GUIScroll = function(x, y, height, childs) {
 		onScrollChanged: function() {
 			var func = function(c) {
 				c.forEach(function(e) {
-					if(e.TYPE == "scroll") {
-						throw new GUILib.Error("GUIScroll 내에는 GUIScroll을 넣을 수 없습니다. You can't add GUIScroll to GUIScroll.");
-						return;
-					}
 					if((e.TYPE == "button" || e.TYPE == "image_button") && e.clicked == true) {
 						if(e.TYPE == "button")
 							e.clicked = false;
@@ -705,12 +700,6 @@ GUILib.GUIScroll = function(x, y, height, childs) {
 							e.btn.setPadding(0, FOUR, 0, 0);
 							e.shadow.setPadding(2*FOUR, 3*FOUR, 0, 0);
 						}
-					} else if(e.TYPE == "delete_button" && e.isButton == true && e.clicked == true) {
-						e.clicked = false;
-						e.image.setBackgroundDrawable(nineOn);
-						x_text.setColorFilter(android.graphics.Color.WHITE, android.graphics.PorterDuff.Mode.MULTIPLY);
-						x_text.setPadding(0, FOUR, 0, 0);
-						x_shdow.setPadding(2*FOUR, 3*FOUR, 0, 0);
 					} else if(e.TYPE == "group")
 						func(e.children);
 				});
@@ -1141,6 +1130,7 @@ function showEditPopup(text, shadow, str, that) {
 			done.render();
 			var textpart = new android.widget.RelativeLayout(ctx);
 			var a = new android.widget.EditText(ctx);
+			a.requestFocus();
 			a.setImeOptions(android.view.inputmethod.EditorInfo.IME_FLAG_NO_EXTRACT_UI);
 			a.setSingleLine(true);
 			a.setOnEditorActionListener(new android.widget.TextView.OnEditorActionListener({
@@ -1381,7 +1371,7 @@ function selectLevelHook() {
 		org.mozilla.javascript.ScriptableObject.putProperty(scope, "GUILib", GUILib);
 	}
 	if(loaded) {
-		var warn = new GUILib.WarningPopup("GUILib이 로드되었습니다.", 3500);
+		var warn = new GUILib.WarningPopup("GUILib이 로드되었습니다.", 2000);
 		warn.render();
 	}
 }
@@ -1417,22 +1407,23 @@ function makeCache() {
 
 function loadCache() {
 	new java.lang.Thread(new java.lang.Runnable({run: function() {
-	var texture = getTextureName();
-	var file = new java.io.File(android.os.Environment.getExternalStorageDirectory(), "아포카토맨/GUILib/"+texture+".cache");
-	if(file.exists()) {
-		var reader = new java.io.BufferedReader(new java.io.FileReader(file));
-		var def = eval(reader.readLine()+"");
-		def[0].split("").forEach(function(e, i) {
-			defaults[e.charCodeAt(0)] = def[1][i];
-		});
-		var len = eval(reader.readLine()+"");
-		len[0].split("").forEach(function(e, i) {
-			lengths[e.charCodeAt(0)] = len[1][i];
-		});
-		reader.close();
-	}
+		var texture = getTextureName();
+		var file = new java.io.File(android.os.Environment.getExternalStorageDirectory(), "아포카토맨/GUILib/"+texture+".cache");
+		if(file.exists()) {
+			var reader = new java.io.BufferedReader(new java.io.FileReader(file));
+			var def = eval(reader.readLine()+"");
+			def[0].split("").forEach(function(e, i) {
+				defaults[e.charCodeAt(0)] = def[1][i];
+			});
+			var len = eval(reader.readLine()+"");
+			len[0].split("").forEach(function(e, i) {
+				lengths[e.charCodeAt(0)] = len[1][i];
+			});
+			reader.close();
+		}
 	}})).start();
 }
+
 function getTextureName() {
 	var pref = ctx.getSharedPreferences("mcpelauncherprefs", 0);
 	var pref2 = ctx.getSharedPreferences(ctx.getPackageName()+"_preferences", 0);
@@ -1441,11 +1432,6 @@ function getTextureName() {
 		return spl[spl.length-1].replace(".zip", "");
 	} else
 		return "default";
-}
-function toStr(i) {
-	if(i<10)
-		return "0"+i;
-	return i+"";
 }
 /*    EOF    */
 
