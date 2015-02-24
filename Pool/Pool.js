@@ -164,6 +164,10 @@ Pool.Canvas.drawLine3D = function(x0, y0, z0, x1, y1, z1, blockId, blockDamage){
     }while(true);
 }
 
+Pool.Canvas.drawCircle = function(center, radius, blockId, blockDamage){
+	//TODO: Implement method!
+};
+
 function selectLevelHook(){
 	var scripts = net.zhuoweizhang.mcpelauncher.ScriptManager.scripts;
     var ScriptableObject = org.mozilla.javascript.ScriptableObject;
