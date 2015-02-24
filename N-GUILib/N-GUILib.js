@@ -16,9 +16,8 @@ loadCache();
 /* IMAGE SIZE VALUE */
 const FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
 
-var reader = new java.io.BufferedReader(new java.io.InputStreamReader(getImage("", "items.meta", "", true)));
-eval("meta = "+reader.readLine()+";");
-reader.close();
+var str = new java.lang.String(ModPE.getBytesFromTexturePack("images/items.meta"));
+eval("meta = "+str+";");
 var items_opaque = getImage("", "items-opaque", "");
 var width = items_opaque.getWidth();
 var height = items_opaque.getHeight();
@@ -444,7 +443,7 @@ GUILib.ControlBar = function(x, y, width, height, max, min, dotEnable) {
 	this.max = max;
 	this.min = min;
 	var seek = new android.widget.SeekBar(ctx);
-	seek.setLayoutParams(new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT));
+	seek.setLayoutParams(new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 17*FOUR));
 	seek.setMax(100);
 	seek.setThumb(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(_(getImage("gui","touchgui", ''), 225, 125, 11, 17), 11*2*FOUR, 17*2*FOUR, false)));
 	setSeekBarBack(seek, max-min, this.width, this.height, dotEnable);
@@ -1116,19 +1115,20 @@ function getTopBarImg() {
 function setSeekBarBack(seek, max, width, height, dot) {
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function() {
-			var img = android.graphics.Bitmap.createBitmap(width+4*FOUR, 7*FOUR, android.graphics.Bitmap.Config.ARGB_8888);
+			var img = android.graphics.Bitmap.createBitmap(width+4*FOUR, 17*FOUR, android.graphics.Bitmap.Config.ARGB_8888);
 			var canvas = new android.graphics.Canvas(img);
 			var p = new android.graphics.Paint();
 			p.setColor(android.graphics.Color.rgb(114, 114, 114));
-			canvas.drawRect(2*FOUR, 2*FOUR, 2*FOUR+width, 5*FOUR, p);
+			canvas.drawRect(2*FOUR, 7*FOUR, 2*FOUR+width, 10*FOUR, p);
 			if(dot == true) {
 				p.setColor(android.graphics.Color.parseColor("#919191"));
 				for(var i = 0; i<=max; i++) {
-					canvas.drawRect(i*(width/max), 0, i*(width/max)+4*FOUR, 7*FOUR, p);
+					canvas.drawRect(i*(width/max), 5*FOUR, i*(width/max)+4*FOUR, 12*FOUR, p);
 				}
 			}
-			seek.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-			seek.setProgressDrawable(new android.graphics.drawable.BitmapDrawable(img));
+			seek.setThumbOffset(32);
+			seek.setProgressDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+			seek.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(img));
 		}
 	}));
 }

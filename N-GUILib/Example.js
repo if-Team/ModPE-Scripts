@@ -18,7 +18,7 @@ function useItem() {
 	var check = new GUILib.CheckBox(0, 0, "체크박스");
 	var visual = new GUILib.VisualFont(0, 0, "비주얼폰트");
 	var scroll = new GUILib.GUIScroll(0, 0, 80, [group, btn2, btn3, visual, swit, check, seek]);
-	var window = new GUILib.Window(GUILib.deviceWidth/2 - 96, GUILib.deviceHeight/2-40, 192, 80, scroll);
+	var window = new GUILib.Window(GUILib.deviceWidth/2 - 101, GUILib.deviceHeight/2-40, 192, 80, scroll);
 	var x = new GUILib.DeleteButton(4, 4, [back, top, window], function() {
 		print("Deleted");
 	}, true);
