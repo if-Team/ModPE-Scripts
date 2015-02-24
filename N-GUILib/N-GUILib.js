@@ -13,6 +13,7 @@ var defaults = new Array(256);
 var lengths = new Array(65536);
 loadCache();
 
+/* IMAGE SIZE VALUE */
 const FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
 
 var reader = new java.io.BufferedReader(new java.io.InputStreamReader(getImage("", "items.meta", "", true)));
@@ -245,10 +246,13 @@ GUILib.ImageButton = function(x, y, width, height, bm, callback) {
 	
 	var that = this;
 	this.main = new GUILib.GUIButton(x, y, width, height, "", callback);
-	new java.lang.Thread(new java.lang.Runnable({run: function() {
-		while(1)
+	this.thread = new java.lang.Thread(new java.lang.Runnable({run: function() {
+		while(1) {
+			java.lang.Thread.sleep(50);
 			that.clicked = that.main.clicked;
-	}})).start();
+		}
+	}}));
+	this.thread.start();
 	this.mainplate = this.main.mainplate;
 	this.x = this.main.x;
 	this.y = this.main.y;
@@ -299,6 +303,7 @@ GUILib.ImageButton.prototype.render = function() {
 };
 GUILib.ImageButton.prototype.stop = function() {
 	var that = this;
+	this.thread.interrupt();
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
 			that.main.pw.dismiss();
 			that.main.pw = null;
@@ -439,10 +444,10 @@ GUILib.ControlBar = function(x, y, width, height, max, min, dotEnable) {
 	this.max = max;
 	this.min = min;
 	var seek = new android.widget.SeekBar(ctx);
-	seek.setLayoutParams(new android.widget.LinearLayout.LayoutParams(this.width, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT));
+	seek.setLayoutParams(new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT));
 	seek.setMax(100);
-	seek.setThumb(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(_(getImage("gui","touchgui", ''), 225, 125, 11, 17), 11*FOUR*FOUR/2, 17*FOUR*FOUR/2, false)));
-	setSeekBarBack(seek, max-min, this.width, dotEnable);
+	seek.setThumb(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(_(getImage("gui","touchgui", ''), 225, 125, 11, 17), 11*2*FOUR, 17*2*FOUR, false)));
+	setSeekBarBack(seek, max-min, this.width, this.height, dotEnable);
 	seek.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener({
 		onStopTrackingTouch: function(s) {
 			var p = s.getProgress();
@@ -572,48 +577,12 @@ GUILib.DeleteButton = function(x, y, deletes, callback, button) {
 		var btn = new android.widget.Button(ctx);
 		this.mainplate = btn;
 		var spritesheet = getImage("gui", "spritesheet", "");
-		var on = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 60, 0, 18, 18), 18*FOUR, 18*FOUR, false);
-		var off = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 78, 0, 18, 18), 18*FOUR, 18*FOUR, false);
-		btn.setBackgroundDrawable( new android.graphics.drawable.BitmapDrawable(on));
-		var ontouch = new android.view.View.OnTouchListener({
-			onTouch: function(v, event) {
-				switch(event.getAction()) {
-					case android.view.MotionEvent.ACTION_DOWN:
-						if(!that.clicked) {
-							that.clicked = true;
-							btn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(off));
-						}
-						break;
-					case android.view.MotionEvent.ACTION_MOVE:
-						if((event.getX()<0 || event.getY()<0 || event.getX()>that.width || event.getY()>18*FOUR)) {
-							if(that.clicked) {
-								that.clicked = false;
-								btn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(on));
-							}
-						} else if(!that.clicked) {
-							that.clicked = true;
-							btn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(off));
-						}
-						break;
-					case android.view.MotionEvent.ACTION_UP:
-						if(that.clicked) {
-							that.clicked = false;
-							if(!(event.getX()<0 || event.getY()<0 || event.getX()>that.width || event.getY()>18*FOUR)) {
-								deletes.forEach(function(e) {
-									e.stop();
-								});
-								that.stop();
-								Level.playSound(getPlayerX(), getPlayerY(), getPlayerZ(), "random.click", 7, 7);;
-								if(callback != null)
-									callback();
-							}
-						}
-						break;
-				}
-				return true;
-			}
-		});
-		btn.setOnTouchListener(ontouch);
+		var on = new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 60, 0, 18, 18), 18*FOUR, 18*FOUR, false));
+		var off = new android.graphics.drawable.BitmalDrawable(android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 78, 0, 18, 18), 18*FOUR, 18*FOUR, false));
+		var list = new android.graphics.drawable.StateListDrawable();
+		list.addState([android.R.attr.state_pressed], off);
+		
+		btn.setOnClickListener(ontouch);
 	} else {
 		var that = this;
 		var main = new GUILib.GUIButton(x, y, 38, 18, "Back", function(thiz) {
@@ -630,8 +599,10 @@ GUILib.DeleteButton = function(x, y, deletes, callback, button) {
 		this.height = 18*FOUR;
 		this.mainplate = main.mainplate;
 		new java.lang.Thread(new java.lang.Runnable({run: function() {
-			while(1)
+			while(1) {
+				java.lang.Thread(50);
 				that.clicked = main.clicked;
+			}
 		}})).start();
 		this.image = main.image;
 		this.btn = main.btn;
@@ -1005,6 +976,61 @@ GUILib.CheckBox.prototype.stop = function() {
 	}}));
 };
 
+//WINDOW
+GUILib.Window = function(x, y, width, height, view) {
+	this.TYPE = "window";
+	
+	this.x = x*FOUR;
+	this.y = y*FOUR;
+	this.width = width*FOUR+10*FOUR;
+	this.height = height*FOUR;
+	var window = new android.widget.PopupWindow(ctx);
+	window.setWidth(this.width);
+	window.setHeight(this.height);
+	var spritesheet = getImage("gui", "spritesheet", "");
+	var layout = new android.widget.LinearLayout(ctx);
+	layout.setGravity(android.view.Gravity.CENTER);
+	layout.addView(view.mainplate);
+	layout.setPadding(3*FOUR, 3*FOUR, 3*FOUR, 3*FOUR);
+	window.setContentView(layout);
+	var back = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 34, 43, 14, 14), 14*FOUR, 14*FOUR, false);
+	window.setBackgroundDrawable(ninePatch(back, 2*FOUR, 2*FOUR, 11*FOUR, 11*FOUR));
+	this.mainplate = window;
+};
+
+//WINDOW METHODS
+GUILib.Window.prototype = {};
+GUILib.Window.prototype.setXY = function(x, y) {
+	this.x = (x == -1 ? this.x : x*FOUR);
+	this.y = (y == -1 ? this.y : y*FOUR);
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+		if(this.mainplate.isShowing())
+			this.mainplate.update(that.x, that.y, -1, -1, false);
+	}}));
+};
+GUILib.Window.prototype.setWH = function(w, h) {
+	this.width = (w == -1 ? this.width : w*FOUR);
+	this.height = (h == -1 ? this.height : h*FOUR);
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+		if(this.mainplate.isShowing())
+			this.mainplate.update(that.width, that.height);
+	}}));
+};
+GUILib.Window.prototype.render = function() {
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+		that.mainplate.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.LEFT, that.x, that.y );
+	}}));
+};
+GUILib.Window.prototype.stop = function() {
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+		that.mainplate.dismiss();
+	}}));
+};
+
 var _ = function(bitmap, x, y, width, height) {
 	return android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bitmap, x, y, width, height), width*FOUR, height*FOUR, false);
 };
@@ -1087,7 +1113,7 @@ function getTopBarImg() {
 }
 
 //set seekbar background image source
-function setSeekBarBack(seek, max, width, dot) {
+function setSeekBarBack(seek, max, width, height, dot) {
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function() {
 			var img = android.graphics.Bitmap.createBitmap(width+4*FOUR, 7*FOUR, android.graphics.Bitmap.Config.ARGB_8888);
@@ -1101,6 +1127,7 @@ function setSeekBarBack(seek, max, width, dot) {
 					canvas.drawRect(i*(width/max), 0, i*(width/max)+4*FOUR, 7*FOUR, p);
 				}
 			}
+			seek.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
 			seek.setProgressDrawable(new android.graphics.drawable.BitmapDrawable(img));
 		}
 	}));
@@ -1432,6 +1459,12 @@ function getTextureName() {
 		return spl[spl.length-1].replace(".zip", "");
 	} else
 		return "default";
+}
+
+function getGrandParent(v) {
+	if(v.getParent() == null)
+		return v;
+	return getGrandParent(v.getParent());
 }
 /*    EOF    */
 

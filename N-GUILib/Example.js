@@ -17,15 +17,16 @@ function useItem() {
 	var swit = new GUILib.Switch(0, 0, null);
 	var check = new GUILib.CheckBox(0, 0, "체크박스");
 	var visual = new GUILib.VisualFont(0, 0, "비주얼폰트");
-	var scroll = new GUILib.GUIScroll(GUILib.deviceWidth/2 - 96, GUILib.deviceHeight/2-40, 80, [group, btn2, btn3, visual, swit, check, seek]);
-	var x = new GUILib.DeleteButton(4, 4, [back, top, scroll], function() {
+	var scroll = new GUILib.GUIScroll(0, 0, 80, [group, btn2, btn3, visual, swit, check, seek]);
+	var window = new GUILib.Window(GUILib.deviceWidth/2 - 96, GUILib.deviceHeight/2-40, 192, 80, scroll);
+	var x = new GUILib.DeleteButton(4, 4, [back, top, window], function() {
 		print("Deleted");
 	}, true);
 	//Declare first for rendering speed!
 	
 	back.render(); //It must be rendered first because it's background
 	top.render();
-	scroll.render();
+	window.render();
 	x.render();
 	
 	var warn = new GUILib.WarningPopup("GUILib has been loaded.", 3500);
