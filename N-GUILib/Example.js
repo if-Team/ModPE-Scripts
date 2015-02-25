@@ -1,5 +1,7 @@
 //include "N-GUILib.js"
 
+var progress;
+
 function useItem() {
 	new java.lang.Thread(new java.lang.Runnable({run: function(){
 	var back = new GUILib.Background("DIRT"); //Recommend DIRT type(It is more minecraftical!)
@@ -17,11 +19,13 @@ function useItem() {
 	var swit = new GUILib.Switch(0, 0, null);
 	var check = new GUILib.CheckBox(0, 0, "체크박스");
 	var visual = new GUILib.VisualFont(0, 0, "비주얼폰트");
-	var scroll = new GUILib.GUIScroll(0, 0, 80, [group, btn2, btn3, visual, swit, check, seek]);
+	progress = new GUILib.ProgressBar(0, 0, 100);
+	var scroll = new GUILib.GUIScroll(0, 0, 80, [group, btn2, btn3, visual, swit, check, progress, seek]);
 	var window = new GUILib.Window(GUILib.deviceWidth/2 - 101, GUILib.deviceHeight/2-40, 192, 80, scroll);
 	var x = new GUILib.DeleteButton(4, 4, [back, top, window], function() {
 		print("Deleted");
-	}, true);
+		progress = null;
+	}, false);
 	//Declare first for rendering speed!
 	
 	back.render(); //It must be rendered first because it's background
@@ -29,7 +33,15 @@ function useItem() {
 	window.render();
 	x.render();
 	
-	var warn = new GUILib.WarningPopup("GUILib has been loaded.", 3500);
+	var warn = new GUILib.WarningPopup("GUILib test window.", 3500);
 	warn.render();
 	}})).start();
+}
+
+var value = 0;
+function modTick() {
+	if(value == 100)
+		value = 0;
+	if(progress != null)
+		progress.setValue(value++);
 }

@@ -13,7 +13,12 @@ var defaults = new Array(256);
 var lengths = new Array(65536);
 loadCache();
 
-/* IMAGE SIZE VALUE */
+/* MAGIC VALUE */
+//const FOUR = 1; //80 dpi
+//const FOUR = 2; //160 dpi
+//const FOUR = 3; //240 dpi
+//const FOUR = 4; //320 dpi
+//const FOUR = 6; //480 dpi
 const FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
 
 var str = new java.lang.String(ModPE.getBytesFromTexturePack("images/items.meta"));
@@ -568,7 +573,6 @@ GUILib.DeleteButton = function(x, y, deletes, callback, button) {
 	
 	if(button != true) {
 		var that = this;
-		this.clicked = false;
 		this.x = x*FOUR;
 		this.y = y*FOUR;
 		this.width = 18*FOUR;
@@ -577,11 +581,23 @@ GUILib.DeleteButton = function(x, y, deletes, callback, button) {
 		this.mainplate = btn;
 		var spritesheet = getImage("gui", "spritesheet", "");
 		var on = new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 60, 0, 18, 18), 18*FOUR, 18*FOUR, false));
-		var off = new android.graphics.drawable.BitmalDrawable(android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 78, 0, 18, 18), 18*FOUR, 18*FOUR, false));
+		var off = new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 78, 0, 18, 18), 18*FOUR, 18*FOUR, false));
 		var list = new android.graphics.drawable.StateListDrawable();
 		list.addState([android.R.attr.state_pressed], off);
-		
-		btn.setOnClickListener(ontouch);
+		list.addState([], on);
+		btn.setBackgroundDrawable(list);
+		var onclick = new android.view.View.OnClickListener({
+			onClick: function() {
+				deletes.forEach(function(e) {
+					e.stop();
+				});
+				that.stop();
+				Level.playSound(getPlayerX(), getPlayerY(), getPlayerZ(), "random.click", 7, 7);
+				if(callback != null)
+					callback();
+			}
+		});
+		btn.setOnClickListener(onclick);
 	} else {
 		var that = this;
 		var main = new GUILib.GUIButton(x, y, 38, 18, "Back", function(thiz) {
@@ -917,6 +933,8 @@ GUILib.VisualFont = function(x, y, text) {
 	this.mainplate = r;
 };
 
+//VISUALFONT METHODS
+
 //CHECKBOX
 GUILib.CheckBox = function(x, y, text, callback) {
 	var text = new GUILib.VisualFont(0,0,text);
@@ -1028,6 +1046,49 @@ GUILib.Window.prototype.stop = function() {
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
 		that.mainplate.dismiss();
 	}}));
+};
+
+//PROGRESSBAR
+GUILib.ProgressBar = function(x, y, max, value) {
+	this.TYPE = "progress_bar";
+	
+	this.pw = null;
+	this.x = x*FOUR;
+	this.y = y*FOUR;
+	this.width = 100*FOUR;
+	this.height = 2*FOUR;
+	this.max = max;
+	var main = new android.widget.ProgressBar(ctx, null, android.R.attr.progressBarStyleHorizontal);
+	main.setMax(max);
+	var progressDrawable = main.getProgressDrawable();
+	var cd = new android.graphics.drawable.ClipDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor("#82fc82")), android.view.Gravity.LEFT, android.graphics.drawable.ClipDrawable.HORIZONTAL);
+	progressDrawable.setDrawableByLayerId(android.R.id.progress, cd);
+	progressDrawable.setDrawableByLayerId(android.R.id.background, new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor("#818081")));
+	this.mainplate = main;
+	if(value != null)
+		main.setProgress(value);
+};
+
+//PROGRESSBAR METHODS
+GUILib.ProgressBar.prototype = {};
+GUILib.ProgressBar.prototype.render = function() {
+	render(this);
+};
+GUILib.ProgressBar.prototype.stop = function() {
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+			that.pw.dismiss();
+			that.pw = null;
+		}}));
+};
+GUILib.ProgressBar.prototype.incrementProgressBy = function(i) {
+	this.mainplate.incrementProgressBy(i);
+};
+GUILib.ProgressBar.prototype.setValue = function(v) {
+	this.mainplate.setProgress(v);
+};
+GUILib.ProgressBar.prototype.getValue = function() {
+	return this.mainplate.getProgress();
 };
 
 var _ = function(bitmap, x, y, width, height) {
@@ -1269,9 +1330,6 @@ function ninePatch(bitmap, top, left, bottom, right) {
 	};
 	var buffer = getByteBuffer(top, left, bottom, right);
 	var patch = new android.graphics.drawable.NinePatchDrawable(ctx.getResources(), bitmap, buffer.array(), new android.graphics.Rect(), "");
-	patch.getPaint().setAntiAlias(false);
-	patch.getPaint().setDither(false);
-	patch.getPaint().setFilterBitmap(false);
 	return patch;
 }
 
@@ -1437,16 +1495,20 @@ function loadCache() {
 		var texture = getTextureName();
 		var file = new java.io.File(android.os.Environment.getExternalStorageDirectory(), "아포카토맨/GUILib/"+texture+".cache");
 		if(file.exists()) {
-			var reader = new java.io.BufferedReader(new java.io.FileReader(file));
-			var def = eval(reader.readLine()+"");
-			def[0].split("").forEach(function(e, i) {
-				defaults[e.charCodeAt(0)] = def[1][i];
-			});
-			var len = eval(reader.readLine()+"");
-			len[0].split("").forEach(function(e, i) {
-				lengths[e.charCodeAt(0)] = len[1][i];
-			});
-			reader.close();
+			try {
+				var reader = new java.io.BufferedReader(new java.io.FileReader(file));
+				var def = eval(reader.readLine()+"");
+				def[0].split("").forEach(function(e, i) {
+					defaults[e.charCodeAt(0)] = def[1][i];
+				});
+				var len = eval(reader.readLine()+"");
+				len[0].split("").forEach(function(e, i) {
+					lengths[e.charCodeAt(0)] = len[1][i];
+				});
+				reader.close();
+			} catch(e) {
+				file.delete();
+			}
 		}
 	}})).start();
 }
