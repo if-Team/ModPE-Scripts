@@ -918,7 +918,7 @@ GUILib.VisualFont = function(x, y, text) {
 	this.pw = null;
 	this.x = x*FOUR;
 	this.y = y*FOUR;
-	this.width = text.length*8*FOUR;
+	this.width = getTextWidth(text)*FOUR/2;
 	this.height = 9*FOUR;
 	var r = new android.widget.RelativeLayout(ctx);
 	var tex = new android.widget.ImageView(ctx);
@@ -936,6 +936,17 @@ GUILib.VisualFont = function(x, y, text) {
 };
 
 //VISUALFONT METHODS
+GUILib.VisualFont.prototype = {};
+GUILib.VisualFont.prototype.render = function() {
+	render(this);
+};
+GUILib.VisualFont.prototype.stop = function() {
+	var that = this;
+	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
+			that.pw.dismiss();
+			that.pw = null;
+		}}));
+};
 
 //CHECKBOX
 GUILib.CheckBox = function(x, y, text, callback) {
@@ -1121,7 +1132,49 @@ function getItemBitmap(data) {
 	return android.graphics.Bitmap.createScaledBitmap(result, result.getWidth()*FOUR, result.getHeight()*FOUR, false);
 }
 
-var forMakeCache = 1200;
+//get text width source
+function getTextWidth(string) {
+	var has = hasNonAscii(string);
+	var divide = function(a) {
+		var b = 0;
+		if (a > 256)
+			b = a % 256;
+		else
+			b = a;
+		return b + ":" + Math.floor(a / 256);
+	};
+	var width = 0;
+	string.split('').forEach(function(element) {
+		if(element !== " ") {
+			var i = divide(element.charCodeAt(0)).split(":");
+			var x = (((parseInt(i[0], 10)) % 16)) * 16;
+			var y = Math.floor(parseInt(i[0], 10) / 16) * 16;
+			var num = parseInt(i[1], 10).toString(16).toUpperCase();
+			if((num+"").length === 1)
+				num = "0"+num;
+			var glyph = (has ? getImage("font", "glyph_", num) : android.graphics.Bitmap.createScaledBitmap(getImage("font", "default8", ''), 256, 256, false));
+			var st = android.graphics.Bitmap.createBitmap(glyph, x, y, 16, 16);
+			if(element>="가"&&element<="힣")
+				var length = [0, 15];
+			else if(lengths[element.charCodeAt(0)] != null && has)
+				var length = lengths[element.charCodeAt(0)];
+			else if(defaults[element.charCodeAt(0)] != null && !has)
+				var length = defaults[element.charCodeAt(0)];
+			else {
+				var length = checkLength(st);
+				if(has)
+					lengths[element.charCodeAt(0)] = length;
+				else
+					defaults[element.charCodeAt(0)] = length;
+			}
+				width+=((element>="가"&&element<="힣") ? 16 : length[1]-length[0]+3);
+		} else
+			width+=8;
+	});
+	return width;
+}
+
+var forMakeCache = 0;
 function modTick() {
 	if(forMakeCache++ == 1200) {
 		makeCache();
@@ -1523,12 +1576,6 @@ function getTextureName() {
 		return spl[spl.length-1].replace(".zip", "");
 	} else
 		return "default";
-}
-
-function getGrandParent(v) {
-	if(v.getParent() == null)
-		return v;
-	return getGrandParent(v.getParent());
 }
 
 /*    EOF    */
