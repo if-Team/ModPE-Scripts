@@ -5,7 +5,8 @@
 //@@///@@//@@////@@//@@//@@//////@@//@@///@@@//       * rights
 //@@@@@@@//@@@@@@@@//@@//@@@@@@//@@//@@@@@@@///       * reserved.
 ///////////////////////////////////////////////       */
-const VERSION = "0.1";
+print("test");
+const VERSION = "0.1 Beta";
 
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var pectx = ctx.createPackageContext("com.mojang.minecraftpe", android.content.Context.CONTEXT_IGNORE_SECURITY);
@@ -1502,6 +1503,7 @@ function drawFont(string, iv, shdow, isEdit, wi) {
 
 Object.freeze(GUILib);
 
+var myScript = "";
 //registering object to other scripts
 function selectLevelHook() {
 	var loaded = 0;
@@ -1509,8 +1511,10 @@ function selectLevelHook() {
 	for(var i = 0; i<scripts.size(); i++) {
 		var script = scripts.get(i);
 		var scope = script.scope;
-		if(org.mozilla.javascript.ScriptableObject.hasProperty(scope, "GUILib"))
+		if(org.mozilla.javascript.ScriptableObject.hasProperty(scope, "GUILib")) {
+			myScript = script.name;
 			continue;
+		}
 		loaded = 1;
 		org.mozilla.javascript.ScriptableObject.putProperty(scope, "GUILib", GUILib);
 	}
@@ -1588,12 +1592,13 @@ function getTextureName() {
 			try{
 				var url = new java.net.URL("https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/N-GUILib/version").openStream();
 				var reader = new java.io.BufferedReader(new java.io.InputStreamReader(url));
-				if(reader.readLine() !== VERSION) {
+				if(reader.readLine()+"" !== VERSION) {
 					var text1 = new GUILib.VisualFont(0,0,"GUILib의 최신 버전이 발견되었습니다.");
 					var text2 = new GUILib.VisualFont(0,0,"지금 업데이트 하시겠습니까?");
 					var empty = new GUILib.VisualFont(0,0," ");
 					var ok = new GUILib.GUIButton(0,0,80,20,"확인",function() {
 						window.stop();
+						downloadAndApply();
 					}, true);
 					var empty2 = new GUILib.VisualFont(0,0," ");
 					var cancel = new GUILib.GUIButton(0,0,80,20,"취소",function() {
@@ -1611,5 +1616,33 @@ function getTextureName() {
 		}
 	})).start();
 })();
+
+function downloadAndApply() {
+	new java.lang.Thread(new java.lang.Runnable({
+		run: function() {
+			if(myScript == "") {
+				var scripts = net.zhuoweizhang.mcpelauncher.ScriptManager.scripts;
+				for(var i = 0; i<scripts.size(); i++) {
+					var script = scripts.get(i);
+					var scope = script.scope;
+					if(org.mozilla.javascript.ScriptableObject.hasProperty(scope, "GUILib")) {
+						myScript = script.name;
+						break;
+					}
+				}
+			}
+			var file = new java.io.File("/data/data/"+ctx.getPackageName()+"/app_modscripts/"+myScript);
+			var bw = new java.io.BufferedWriter(new java.io.FileWriter(file));
+			var br = new java.io.BufferedReader(new java.io.InputStreamReader(new java.net.URL("https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/N-GUILib/N-GUILib.js").openStream()));
+			var read;
+			while((read = br.readLine()) != null) {
+				bw.write(read+"\n");
+			}
+			bw.close();
+			br.close();
+			print("다운로드&적용이 완료되었습니다. 블럭런처를 재시작 해주세요.");
+		}
+	})).start();
+}
 
 /*    EOF    */
