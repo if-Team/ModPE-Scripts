@@ -1600,15 +1600,16 @@ function getTextureName() {
 			try{
 				var url = new java.net.URL("https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/N-GUILib/version").openStream();
 				var reader = new java.io.BufferedReader(new java.io.InputStreamReader(url));
-				if(reader.readLine()+"" !== VERSION) {
-					var text1 = new GUILib.VisualFont(0,0,"GUILib의 최신 버전이 발견되었습니다.");
-					var text2 = new GUILib.VisualFont(0,0,"지금 업데이트 하시겠습니까?");
-					var empty = new GUILib.VisualFont(0,0," ");
+				var vers = reader.readLine();
+				if(!vers.equals(new java.lang.String(VERSION))) {
+					var text1 = new GUILib.VisualFont(0,0,"GUILib의 최신 버전이 발견되었습니다.", 16);
+					var text2 = new GUILib.VisualFont(0,0,"지금 업데이트 하시겠습니까?", 16);
+					var empty = new GUILib.VisualFont(0,0," ", 16);
 					var ok = new GUILib.GUIButton(0,0,80,20,"확인",function() {
 						window.stop();
 						downloadAndApply();
 					}, true);
-					var empty2 = new GUILib.VisualFont(0,0," ");
+					var empty2 = new GUILib.VisualFont(0,0," ", 16);
 					var cancel = new GUILib.GUIButton(0,0,80,20,"취소",function() {
 						window.stop();
 					}, true);
