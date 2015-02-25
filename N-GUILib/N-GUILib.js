@@ -1210,8 +1210,9 @@ function render(element) {
 //add all of things in array
 function addAll(array) {
 	var result = 0;
-	for each(var i in array)
-		result += i;
+	for(var i = 0; i < array.length; i++){
+		result += array[i];
+	}
 	return result;
 }
 
@@ -1514,7 +1515,7 @@ Object.freeze(GUILib);
 var myScript = "";
 //registering object to other scripts
 function selectLevelHook() {
-	var loaded = 0;
+	var loaded = false;
 	var scripts = net.zhuoweizhang.mcpelauncher.ScriptManager.scripts;
 	for(var i = 0; i<scripts.size(); i++) {
 		var script = scripts.get(i);
@@ -1523,7 +1524,7 @@ function selectLevelHook() {
 			myScript = script.name;
 			continue;
 		}
-		loaded = 1;
+		loaded = true;
 		org.mozilla.javascript.ScriptableObject.putProperty(scope, "GUILib", GUILib);
 	}
 	if(loaded) {
