@@ -1,5 +1,3 @@
-//include "N-GUILib.js"
-
 var progress;
 
 function useItem() {

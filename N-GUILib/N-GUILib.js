@@ -5,6 +5,7 @@
 //@@///@@//@@////@@//@@//@@//////@@//@@///@@@//       * rights
 //@@@@@@@//@@@@@@@@//@@//@@@@@@//@@//@@@@@@@///       * reserved.
 ///////////////////////////////////////////////       */
+const VERSION = "0.1";
 
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var pectx = ctx.createPackageContext("com.mojang.minecraftpe", android.content.Context.CONTEXT_IGNORE_SECURITY);
@@ -113,7 +114,7 @@ GUILib.HORIZONTAL = 0;
 GUILib.Error = java.lang.Exception;
 
 //BUTTON
-GUILib.GUIButton = function(x, y, width, height, msg, callback) {
+GUILib.GUIButton = function(x, y, width, height, msg, callback, isUpdate) {
 	this.TYPE = "button";
 	
 	this.clicked = false;
@@ -163,7 +164,8 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback) {
 						if(!(event.getX()<0 || event.getY()<0 || event.getX()>width*FOUR || event.getY()>height*FOUR)) {
 							if(callback != null)
 								that.callback(that);
-							Level.playSound(getPlayerX(), getPlayerY(), getPlayerZ(), "random.click", 7, 7);
+							if(isUpdate != true)
+								Level.playSound(getPlayerX(), getPlayerY(), getPlayerZ(), "random.click", 7, 7);
 						}
 					}
 				break;
@@ -882,7 +884,7 @@ GUILib.WarningPopup = function(msg, dur) {
 															android.view.animation.Animation.RELATIVE_TO_SELF, 0,
 															android.view.animation.Animation.RELATIVE_TO_SELF, -1);
 	up.setFillAfter(true);
-	up.setDuration(300);
+	up.setDuration(200);
 	l.addView(shdow);
 	l.addView(text);
 	l.setAnimation(down);
@@ -891,7 +893,7 @@ GUILib.WarningPopup = function(msg, dur) {
 		l.startAnimation(up);
 		new android.os.Handler().postDelayed(new java.lang.Runnable({run: function() {
 				that.pw.dismiss();
-		}}), 300);
+		}}), 200);
 	}}), dur+300);
 	new android.os.Handler().postDelayed(new java.lang.Runnable({run: function() {
 		text.setColorFilter(android.graphics.Color.RED, android.graphics.PorterDuff.Mode.MULTIPLY);
@@ -1498,6 +1500,8 @@ function drawFont(string, iv, shdow, isEdit, wi) {
 	}})).start();
 }
 
+Object.freeze(GUILib);
+
 //registering object to other scripts
 function selectLevelHook() {
 	var loaded = 0;
@@ -1577,5 +1581,35 @@ function getTextureName() {
 	} else
 		return "default";
 }
+
+(function() {
+	new java.lang.Thread(new java.lang.Runnable({
+		run: function() {
+			try{
+				var url = new java.net.URL("https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/N-GUILib/version").openStream();
+				var reader = new java.io.BufferedReader(new java.io.InputStreamReader(url));
+				if(reader.readLine() !== VERSION) {
+					var text1 = new GUILib.VisualFont(0,0,"GUILib의 최신 버전이 발견되었습니다.");
+					var text2 = new GUILib.VisualFont(0,0,"지금 업데이트 하시겠습니까?");
+					var empty = new GUILib.VisualFont(0,0," ");
+					var ok = new GUILib.GUIButton(0,0,80,20,"확인",function() {
+						window.stop();
+					}, true);
+					var empty2 = new GUILib.VisualFont(0,0," ");
+					var cancel = new GUILib.GUIButton(0,0,80,20,"취소",function() {
+						window.stop();
+					}, true);
+					var group = new GUILib.GUIGroup(0,0,GUILib.HORIZONTAL,[ok, empty2, cancel]);
+					var l = new GUILib.GUIGroup(0,0,GUILib.VERTICAL, [text1, text2, empty, group]);
+					var window = new GUILib.Window(GUILib.deviceWidth/2-105, GUILib.deviceHeight/2-40, 200, 80, l);
+					window.render();
+				}
+				reader.close();
+			} catch(e) {
+				
+			}
+		}
+	})).start();
+})();
 
 /*    EOF    */
