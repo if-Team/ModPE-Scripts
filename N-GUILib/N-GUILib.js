@@ -5,7 +5,6 @@
 //@@///@@//@@////@@//@@//@@//////@@//@@///@@@//       * rights
 //@@@@@@@//@@@@@@@@//@@//@@@@@@//@@//@@@@@@@///       * reserved.
 ///////////////////////////////////////////////       */
-print("test");
 const VERSION = "0.1 Beta";
 
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
@@ -325,6 +324,7 @@ GUILib.EditText = function(x, y, width, height, hint) {
 	
 	var layout = new android.widget.RelativeLayout(ctx);
 	this.mainplate = layout;
+	this.hint = hint;
 	this.pw = null;
 	this.text = "";
 	this.x = x*FOUR;
@@ -1267,6 +1267,8 @@ function showEditPopup(text, shadow, str, that) {
 				black.dismiss();
 				pw.dismiss();
 			});
+			if(that.hint != "" && that.hint != null)
+				var hint = new GUILib.VisualFont(5, 5, that.hint)
 			var black = new android.widget.PopupWindow(ctx);
 			black.setContentView(new android.widget.TextView(ctx));
 			black.setWidth(Math.max.apply(null, wthnhet)+10);
@@ -1274,6 +1276,7 @@ function showEditPopup(text, shadow, str, that) {
 			black.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.BLACK));
 			black.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
 			done.render();
+			hint.render();
 			var textpart = new android.widget.RelativeLayout(ctx);
 			var a = new android.widget.EditText(ctx);
 			a.requestFocus();
@@ -1330,6 +1333,7 @@ function showEditPopup(text, shadow, str, that) {
 					edit_text = null;
 					black.dismiss();
 					done.stop();
+					hint.stop();
 				}
 			}));
 			pw.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.LEFT, 5*FOUR, 20*FOUR);
@@ -1640,7 +1644,7 @@ function downloadAndApply() {
 			}
 			bw.close();
 			br.close();
-			print("다운로드&적용이 완료되었습니다. 블럭런처를 재시작 해주세요.");
+			print("다운로드 & 적용이 완료되었습니다. 블럭런처를 재시작 해주세요.");
 		}
 	})).start();
 }

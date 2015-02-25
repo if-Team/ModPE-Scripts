@@ -12,7 +12,7 @@ function useItem() {
 
 	var btn2 = new GUILib.GUIButton(0, 0, 96, 20, "버튼", function(thiz) {
 	});
-	var btn3 = new GUILib.EditText(0, 0, 96, 20);
+	var btn3 = new GUILib.EditText(0, 0, 96, 20, "Hint Text");
 	var seek = new GUILib.ControlBar(0, 0, 150, 20, 6, 1, true);
 	var swit = new GUILib.Switch(0, 0, null);
 	var check = new GUILib.CheckBox(0, 0, "체크박스");
