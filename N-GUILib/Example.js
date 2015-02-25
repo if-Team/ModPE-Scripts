@@ -5,7 +5,7 @@ function useItem() {
 	var back = new GUILib.Background("DIRT"); //Recommend DIRT type(It is more minecraftical!)
 	var top = new GUILib.TopBar(0, 0, GUILib.deviceWidth, 28,"Top Bar");
 	var b = new GUILib.GUIButton(0, 0, 96, 96, "헉");
-	var btn = new GUILib.ImageButton(0, 0, 96, 20, ["apple", 0], function(thiz) {
+	var btn = new GUILib.ImageButton(0, 0, 96, 20, "images.option2", function(thiz) {
 		print(seek.getValue());
 	});
 	var group = new GUILib.GUIGroup(0, 0, GUILib.HORIZONTAL, [b, btn]);
@@ -16,14 +16,14 @@ function useItem() {
 	var seek = new GUILib.ControlBar(0, 0, 150, 20, 6, 1, true);
 	var swit = new GUILib.Switch(0, 0, null);
 	var check = new GUILib.CheckBox(0, 0, "체크박스");
-	var visual = new GUILib.VisualFont(0, 0, "GUILib");
+	var visual = new GUILib.VisualFont(0, 0, "GUILib", 13);
 	progress = new GUILib.ProgressBar(0, 0, 100);
 	var scroll = new GUILib.GUIScroll(0, 0, 80, [group, btn2, btn3, visual, swit, check, progress, seek]);
 	var window = new GUILib.Window(GUILib.deviceWidth/2 - 101, GUILib.deviceHeight/2-40, 192, 80, scroll);
 	var x = new GUILib.DeleteButton(4, 4, [back, top, window], function() {
 		print("Deleted");
 		progress = null;
-	}, false);
+	}, true);
 	//Declare first for rendering speed!
 	
 	back.render(); //It must be rendered first because it's background

@@ -853,7 +853,7 @@ GUILib.Switch.prototype.stop = function() {
 		}}));
 };
 
-//WARNING POPUP
+//WARNINGPOPUP
 GUILib.WarningPopup = function(msg, dur) {
 	this.TYPE = "warning_popup";
 	
@@ -915,14 +915,15 @@ GUILib.WarningPopup.prototype.render = function() {
 };
 
 //VISUALFONT
-GUILib.VisualFont = function(x, y, text) {
+GUILib.VisualFont = function(x, y, text, size) {
 	this.TYPE = "visualfont";
 	
+	var s = size/16;
 	this.pw = null;
 	this.x = x*FOUR;
 	this.y = y*FOUR;
-	this.width = getTextWidth(text)*FOUR/2;
-	this.height = 9*FOUR;
+	this.width = getTextWidth(text)*FOUR/2*s;
+	this.height = 9*FOUR*s;
 	var r = new android.widget.RelativeLayout(ctx);
 	var tex = new android.widget.ImageView(ctx);
 	tex.setScaleType(android.widget.ImageView.ScaleType.CENTER);
@@ -930,9 +931,9 @@ GUILib.VisualFont = function(x, y, text) {
 	var shadow = new android.widget.ImageView(ctx);
 	shadow.setScaleType(android.widget.ImageView.ScaleType.CENTER);
 	shadow.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
-	shadow.setPadding(2*FOUR, 2*FOUR, 0, 0);
+	shadow.setPadding(2*FOUR*s, 2*FOUR*s, 0, 0);
 	shadow.setColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY);
-	drawFont(text, tex, shadow);
+	drawFont(text, tex, shadow, size);
 	r.addView(shadow);
 	r.addView(tex);
 	this.mainplate = r;
@@ -953,7 +954,7 @@ GUILib.VisualFont.prototype.stop = function() {
 
 //CHECKBOX
 GUILib.CheckBox = function(x, y, text, callback) {
-	var text = new GUILib.VisualFont(0,0,text);
+	var text = new GUILib.VisualFont(0,0,text,16);
 	this.TYPE = "checkbox";
 	
 	var that = this;
@@ -1113,12 +1114,10 @@ var _ = function(bitmap, x, y, width, height) {
 //mcpe internal images
 var images = {};
 images.setting = _(getImage("gui","touchgui", ''), 219, 0, 20, 20);
-/*images.option1
-images.option2
-images.option3
-images.option4
-images.chatting
-images.mapdelete*/
+images.option1 = _(getImage("gui","touchgui2", ''), 138, 5, 21, 18);
+images.option2 = _(getImage("gui","touchgui2", ''), 109, 3, 22, 19);
+images.option3 = _(getImage("gui","touchgui2", ''), 109, 30, 22, 23);
+images.option4 = _(getImage("gui","touchgui2", ''), 134, 35, 24, 20);
 
 //get item image from meta source
 function getItemBitmap(data) {
@@ -1480,8 +1479,13 @@ function drawFont(string, iv, shdow, isEdit, wi) {
 		});
 		var cbm = android.graphics.Bitmap.createBitmap(bm, 0, 0, width, bm.getHeight());
 		ctx.runOnUiThread(new java.lang.Runnable({run: function() {
-			iv.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2, cbm.getHeight()*FOUR/2, false));
-			shdow.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2, cbm.getHeight()*FOUR/2, false));
+			if(typeof isEdit === "number") {
+				iv.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2*(isEdit/16), cbm.getHeight()*FOUR/2*(isEdit/16), false));
+				shdow.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2*(isEdit/16), cbm.getHeight()*FOUR/2*(isEdit/16), false));
+			} else {
+				iv.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2, cbm.getHeight()*FOUR/2, false));
+				shdow.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(cbm, cbm.getWidth()*FOUR/2, cbm.getHeight()*FOUR/2, false));
+			}
 			if(isEdit == true) {
 				var w = (wi == null ? iv.getWidth() : wi);
 				if(w>cbm.getWidth()*FOUR/2) {
