@@ -915,10 +915,10 @@ GUILib.WarningPopup.prototype.render = function() {
 };
 
 //VISUALFONT
-GUILib.VisualFont = function(x, y, text, size) {
+GUILib.VisualFont = function(x, y, text, size, color) {
 	this.TYPE = "visualfont";
 	
-	var s = size/16;
+	var s = (typeof size === "number" ? size/16 : 1);
 	this.pw = null;
 	this.x = x*FOUR;
 	this.y = y*FOUR;
@@ -926,14 +926,26 @@ GUILib.VisualFont = function(x, y, text, size) {
 	this.height = 9*FOUR*s;
 	var r = new android.widget.RelativeLayout(ctx);
 	var tex = new android.widget.ImageView(ctx);
+	if(typeof color === "string")
+		tex.setColorFilter(android.graphics.Color.parseColor(color), android.graphics.PorterDuff.Mode.MULTIPLY);
 	tex.setScaleType(android.widget.ImageView.ScaleType.CENTER);
 	tex.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
 	var shadow = new android.widget.ImageView(ctx);
 	shadow.setScaleType(android.widget.ImageView.ScaleType.CENTER);
 	shadow.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
 	shadow.setPadding(2*FOUR*s, 2*FOUR*s, 0, 0);
-	shadow.setColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY);
-	drawFont(text, tex, shadow, size);
+	if(typeof color === "string") {
+		var dr = android.graphics.Color.red(android.graphics.Color.DKGRAY);
+		var dg = android.graphics.Color.green(android.graphics.Color.DKGRAY);
+		var db = android.graphics.Color.blue(android.graphics.Color.DKGRAY);
+		var cr = android.graphics.Color.red(android.graphics.Color.parseColor(color));
+		var cg = android.graphics.Color.green(android.graphics.Color.parseColor(color));
+		var cb = android.graphics.Color.blue(android.graphics.Color.parseColor(color));
+		var mixed = mixColor({a:255,r:cr,g:cg,b:cb}, {a:255,r:dr,g:dg,b:db});
+		shadow.setColorFilter(android.graphics.Color.rgb(mixed.r, mixed.g, mixed.b), android.graphics.PorterDuff.Mode.MULTIPLY);
+	} else
+		shadow.setColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY);
+	drawFont(text, tex, shadow, s*16);
 	r.addView(shadow);
 	r.addView(tex);
 	this.mainplate = r;
@@ -1205,6 +1217,18 @@ function render(element) {
 			}
 		}
 	}));
+}
+
+//color mixing source
+/* from http://stackoverflow.com/a/11531317*/
+function mixColor(c1, c2){
+	var a = c1.a + c2.a*(1-c1.a);
+	return {
+		r: (c1.r * c1.a  + c2.r * c2.a * (1 - c1.a)) / a,
+		g: (c1.g * c1.a  + c2.g * c2.a * (1 - c1.a)) / a,
+		b: (c1.b * c1.a  + c2.b * c2.a * (1 - c1.a)) / a,
+		a: a
+	};
 }
 
 //add all of things in array
