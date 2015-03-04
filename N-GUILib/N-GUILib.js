@@ -1268,7 +1268,7 @@ function showEditPopup(text, shadow, str, that) {
 				pw.dismiss();
 			});
 			if(that.hint != "" && that.hint != null)
-				var hint = new GUILib.VisualFont(5, 5, that.hint)
+				var hint = new GUILib.VisualFont(5, 5, that.hint, 16);
 			var black = new android.widget.PopupWindow(ctx);
 			black.setContentView(new android.widget.TextView(ctx));
 			black.setWidth(Math.max.apply(null, wthnhet)+10);
@@ -1579,7 +1579,7 @@ function loadCache() {
 				});
 				reader.close();
 			} catch(e) {
-				file.delete();
+				file["delete"]();
 			}
 		}
 	}})).start();
