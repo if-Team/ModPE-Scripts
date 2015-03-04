@@ -1,11 +1,11 @@
 var progress;
 
-function useItem() {
+function useItem(x, y, z) {
 	new java.lang.Thread(new java.lang.Runnable({run: function(){
 	var back = new GUILib.Background("DIRT"); //Recommend DIRT type(It is more minecraftical!)
 	var top = new GUILib.TopBar(0, 0, GUILib.deviceWidth, 28,"Top Bar");
 	var b = new GUILib.GUIButton(0, 0, 96, 96, "헉");
-	var btn = new GUILib.ImageButton(0, 0, 96, 20, "images.option2", function(thiz) {
+	var btn = new GUILib.ImageButton(0, 0, 96, 20, ["apple",0], function(thiz) {
 		print(seek.getValue());
 	});
 	var group = new GUILib.GUIGroup(0, 0, GUILib.HORIZONTAL, [b, btn]);

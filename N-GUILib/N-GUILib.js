@@ -131,7 +131,7 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback, isUpdate) {
 	this.msg = msg;
 	this.callback = callback;
 	var btn = new android.widget.Button(ctx);
-	btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
+	btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR, this.width, this.height));
 	btn.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
 	this.mainplate.addView(btn);
 	var text = new android.widget.ImageView(ctx);
@@ -149,7 +149,7 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback, isUpdate) {
 				 			text.setPadding(0, FOUR*2, 0, 0);
 							text.setColorFilter(android.graphics.Color.parseColor("#ffff9c"), android.graphics.PorterDuff.Mode.MULTIPLY);
 						}
-				 		btn.setBackgroundDrawable(ninePatch(off, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
+				 		btn.setBackgroundDrawable(ninePatch(off, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR, that.width, that.height));
 					}
 				break;
 				case MotionEvent.ACTION_UP:
@@ -160,7 +160,7 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback, isUpdate) {
 							text.setPadding(0, 0, 0, 0);
 							text.setColorFilter(android.graphics.Color.parseColor("#ffffff"), android.graphics.PorterDuff.Mode.MULTIPLY);
 						}
-						btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
+						btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR, that.width, that.height));
 						if(!(event.getX()<0 || event.getY()<0 || event.getX()>width*FOUR || event.getY()>height*FOUR)) {
 							if(callback != null)
 								that.callback(that);
@@ -178,7 +178,7 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback, isUpdate) {
 							text.setPadding(0, 0, 0, 0);
 					 		text.setColorFilter(android.graphics.Color.parseColor("#ffffff"), android.graphics.PorterDuff.Mode.MULTIPLY);
 						}
-						btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
+						btn.setBackgroundDrawable(ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR, that.width, that.height));
 						}
 					} else if(!that.clicked) {
 						that.clicked = true;
@@ -187,7 +187,7 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback, isUpdate) {
 					 	 shadow.setPadding(FOUR*2, FOUR*4, 0, 0);
 						 text.setColorFilter(android.graphics.Color.parseColor("#ffff9c"), android.graphics.PorterDuff.Mode.MULTIPLY);
 					 	}
-						btn.setBackgroundDrawable(ninePatch(off, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR));
+						btn.setBackgroundDrawable(ninePatch(off, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR, that.width, that.height));
 					}
 				break;
 			}
@@ -333,7 +333,7 @@ GUILib.EditText = function(x, y, width, height, hint) {
 	this.height = height*FOUR;
 	var back = new android.widget.TextView(ctx);
 	back.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
-	back.setBackgroundDrawable(ninePatch(editxtimg, FOUR, FOUR, FOUR*2, FOUR*2));
+	back.setBackgroundDrawable(ninePatch(editxtimg, FOUR, FOUR, FOUR*2, FOUR*2, this.width, this.height));
 	var edtxt = new android.widget.ImageView(ctx);
 	edtxt.setScaleType(android.widget.ImageView.ScaleType.CENTER);
 	edtxt.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
@@ -530,7 +530,7 @@ GUILib.TopBar = function(x, y, width, height, title) {
 	var r = new android.widget.RelativeLayout(ctx);
 	var image = new android.widget.TextView(ctx);
 	image.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
-	image.setBackgroundDrawable(ninePatch(android.graphics.Bitmap.createScaledBitmap(getTopBarImg(), 12*FOUR, 28*FOUR, false), 2*FOUR, 2*FOUR, 22*FOUR, 10*FOUR));
+	image.setBackgroundDrawable(ninePatch(android.graphics.Bitmap.createScaledBitmap(getTopBarImg(), 12*FOUR, 28*FOUR, false), 2*FOUR, 2*FOUR, 22*FOUR, 10*FOUR, this.width, this.height));
 	r.addView(image);
 	r.addView(shadow);
 	r.addView(text);
@@ -673,7 +673,7 @@ GUILib.GUIScroll = function(x, y, height, childs) {
 	var spritesheet = getImage("gui", "spritesheet", '');
 	var bm = android.graphics.Bitmap.createBitmap(spritesheet, 0, 32, 16, 8);
 	var on = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bm, 8, 0, 8, 8), 8*FOUR, 8*FOUR, false);
-	var nineOn = ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR);
+	var nineOn = ninePatch(on, 3*FOUR, 3*FOUR, 5*FOUR, 4*FOUR, this.width, this.height);
 	var scroll = new android.widget.ScrollView(ctx);
 	scroll.setVerticalScrollBarEnabled(false);
 	scroll.getViewTreeObserver().addOnScrollChangedListener(new android.view.ViewTreeObserver.OnScrollChangedListener({
@@ -876,7 +876,7 @@ GUILib.WarningPopup = function(msg, dur) {
 	var l = new android.widget.RelativeLayout(ctx);
 	var spritesheet = getImage("gui", "spritesheet", "");
 	var back = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 34, 43, 14, 14), 14*FOUR, 14*FOUR, false);
-	l.setBackgroundDrawable(ninePatch(back, 2*FOUR, 2*FOUR, 11*FOUR, 11*FOUR));
+	l.setBackgroundDrawable(ninePatch(back, 2*FOUR, 2*FOUR, 11*FOUR, 11*FOUR, this.width, this.height));
 	var down = new android.view.animation.TranslateAnimation(0, 0, -that.height, 0);
 	down.setFillAfter(true);
 	down.setDuration(300);
@@ -983,9 +983,9 @@ GUILib.CheckBox = function(x, y, text, callback) {
 			if(callback != null)
 				callback(that, checked);
 			if(checked)
-				toggle.setBackgroundDrawable(ninePatch(checkimg, 21*FOUR, 21*FOUR, 22*FOUR, 22*FOUR));
+				toggle.setBackgroundDrawable(ninePatch(checkimg, 21*FOUR, 21*FOUR, 22*FOUR, 22*FOUR, that.width, that.height));
 			else
-				toggle.setBackgroundDrawable(ninePatch(unchkimg, 21*FOUR, 21*FOUR, 22*FOUR, 22*FOUR));
+				toggle.setBackgroundDrawable(ninePatch(unchkimg, 21*FOUR, 21*FOUR, 22*FOUR, 22*FOUR, that.width, that.height));
 		}
 	}));
 	toggle.setOnTouchListener(new android.view.View.OnTouchListener({
@@ -995,7 +995,7 @@ GUILib.CheckBox = function(x, y, text, callback) {
 			return true;
 		}
 	}));
-	toggle.setBackgroundDrawable(ninePatch(unchkimg, 21*FOUR, 21*FOUR, 22*FOUR, 22*FOUR));
+	toggle.setBackgroundDrawable(ninePatch(unchkimg, 21*FOUR, 21*FOUR, 22*FOUR, 22*FOUR, that.width, that.height));
 	var group = new android.widget.LinearLayout(ctx);
 	group.setOrientation(android.widget.LinearLayout.HORIZONTAL);
 	group.addView(toggle);
@@ -1040,7 +1040,7 @@ GUILib.Window = function(x, y, width, height, view) {
 	layout.setPadding(3*FOUR, 3*FOUR, 3*FOUR, 3*FOUR);
 	window.setContentView(layout);
 	var back = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(spritesheet, 34, 43, 14, 14), 14*FOUR, 14*FOUR, false);
-	window.setBackgroundDrawable(ninePatch(back, 2*FOUR, 2*FOUR, 11*FOUR, 11*FOUR));
+	window.setBackgroundDrawable(ninePatch(back, 2*FOUR, 2*FOUR, 11*FOUR, 11*FOUR, this.width, this.height));
 	this.mainplate = window;
 };
 
@@ -1176,9 +1176,12 @@ function getTextWidth(string) {
 				var length = defaults[element.charCodeAt(0)];
 			else {
 				var length = checkLength(st);
-				if(has)
-					lengths[element.charCodeAt(0)] = length;
-				else
+				if(has) {
+					if(length[0] < 0 && length[1] === 0)
+						lengths[element.charCodeAt(0)] = [0, 13];
+					else
+						lengths[element.charCodeAt(0)] = length;
+				} else
 					defaults[element.charCodeAt(0)] = length;
 			}
 				width+=((element>="가"&&element<="힣") ? 16 : length[1]-length[0]+3);
@@ -1343,7 +1346,7 @@ function showEditPopup(text, shadow, str, that) {
 			pw.setContentView(textpart);
 			pw.setWidth(Math.max.apply(null, wthnhet)-76*FOUR);
 			pw.setHeight(17*FOUR);
-			pw.setBackgroundDrawable(ninePatch(popupimg, FOUR, FOUR, FOUR*2, FOUR*2));
+			pw.setBackgroundDrawable(ninePatch(popupimg, FOUR, FOUR, FOUR*2, FOUR*2, Math.max.apply(null, wthnhet)-76*FOUR, 17*FOUR));
 			pw.setFocusable(true);
 			pw.setOnDismissListener(new android.widget.PopupWindow.OnDismissListener({
 				onDismiss: function() {
@@ -1384,7 +1387,7 @@ function hasNonAscii(str) {
 }
 
 //making ninepatch drawable source
-function ninePatch(bitmap, top, left, bottom, right) {
+function ninePatch(bitmap, top, left, bottom, right, width, height) {
 	var getByteBuffer = function(top, left, bottom, right) {
 		var NO_COLOR = 0x00000001;
 		var buffer = java.nio.ByteBuffer.allocate(84).order(java.nio.ByteOrder.nativeOrder());
@@ -1416,6 +1419,7 @@ function ninePatch(bitmap, top, left, bottom, right) {
 	};
 	var buffer = getByteBuffer(top, left, bottom, right);
 	var patch = new android.graphics.drawable.NinePatchDrawable(ctx.getResources(), bitmap, buffer.array(), new android.graphics.Rect(), "");
+	var bm = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
 	return patch;
 }
 
@@ -1492,9 +1496,12 @@ function drawFont(string, iv, shdow, isEdit, wi) {
 					var length = defaults[element.charCodeAt(0)];
 				else {
 					var length = checkLength(st);
-					if(has)
-						lengths[element.charCodeAt(0)] = length;
-					else
+					if(has) {
+						if(length[0] < 0 && length[1] === 0)
+							lengths[element.charCodeAt(0)] = [0, 13];
+						else
+							lengths[element.charCodeAt(0)] = length;
+					} else
 						defaults[element.charCodeAt(0)] = length;
 				}
 				canvas.drawBitmap(android.graphics.Bitmap.createBitmap(st, length[0], 0, length[1]-length[0]+1, 16), width, 0, p);
