@@ -16,7 +16,7 @@ function useItem(x, y, z) {
 	var seek = new GUILib.ControlBar(0, 0, 150, 20, 6, 1, true);
 	var swit = new GUILib.Switch(0, 0, null);
 	var check = new GUILib.CheckBox(0, 0, "체크박스");
-	var visual = new GUILib.VisualFont(0, 0, "GUILib", 32, "#ffff9c");
+	var visual = new GUILib.VisualFont(0, 0, "GUILib for ModPE 0.1 beta", 16);
 	progress = new GUILib.ProgressBar(0, 0, 100);
 	var scroll = new GUILib.GUIScroll(0, 0, 80, [group, btn2, btn3, visual, swit, check, progress, seek]);
 	var window = new GUILib.Window(GUILib.deviceWidth/2 - 101, GUILib.deviceHeight/2-40, 192, 80, scroll);

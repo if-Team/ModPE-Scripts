@@ -104,7 +104,7 @@ var dirtimg = android.graphics.Bitmap.createScaledBitmap(getImage("gui", "backgr
 var edit_str, edit_shdow, edit_text;
 
 var GUILib = {};
-var wthnhet = [ctx.getWindowManager().getDefaultDisplay().getWidth(), ctx.getWindowManager().getDefaultDisplay().getHeight()];
+wthnhet = [ctx.getScreenWidth(), ctx.getScreenHeight()];
 GUILib.deviceWidth = Math.max.apply(null, wthnhet)/FOUR;
 GUILib.deviceHeight = Math.min.apply(null, wthnhet)/FOUR;
 
@@ -934,17 +934,7 @@ GUILib.VisualFont = function(x, y, text, size, color) {
 	shadow.setScaleType(android.widget.ImageView.ScaleType.CENTER);
 	shadow.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
 	shadow.setPadding(2*FOUR*s, 2*FOUR*s, 0, 0);
-	if(typeof color === "string") {
-		var dr = android.graphics.Color.red(android.graphics.Color.DKGRAY);
-		var dg = android.graphics.Color.green(android.graphics.Color.DKGRAY);
-		var db = android.graphics.Color.blue(android.graphics.Color.DKGRAY);
-		var cr = android.graphics.Color.red(android.graphics.Color.parseColor(color));
-		var cg = android.graphics.Color.green(android.graphics.Color.parseColor(color));
-		var cb = android.graphics.Color.blue(android.graphics.Color.parseColor(color));
-		var mixed = mixColor({a:255,r:cr,g:cg,b:cb}, {a:255,r:dr,g:dg,b:db});
-		shadow.setColorFilter(android.graphics.Color.rgb(mixed.r, mixed.g, mixed.b), android.graphics.PorterDuff.Mode.MULTIPLY);
-	} else
-		shadow.setColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY);
+	shadow.setColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY);
 	drawFont(text, tex, shadow, s*16);
 	r.addView(shadow);
 	r.addView(tex);
@@ -995,6 +985,7 @@ GUILib.CheckBox = function(x, y, text, callback) {
 			return true;
 		}
 	}));
+	toggle.setLayoutParams(new android.widget.LinearLayout.LayoutParams(22*FOUR, 21*FOUR));
 	toggle.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(unchkimg));
 	var group = new android.widget.LinearLayout(ctx);
 	group.setOrientation(android.widget.LinearLayout.HORIZONTAL);
@@ -1220,18 +1211,6 @@ function render(element) {
 			}
 		}
 	}));
-}
-
-//color mixing source
-/* from http://stackoverflow.com/a/11531317*/
-function mixColor(c1, c2){
-	var a = c1.a + c2.a*(1-c1.a);
-	return {
-		r: (c1.r * c1.a  + c2.r * c2.a * (1 - c1.a)) / a,
-		g: (c1.g * c1.a  + c2.g * c2.a * (1 - c1.a)) / a,
-		b: (c1.b * c1.a  + c2.b * c2.a * (1 - c1.a)) / a,
-		a: a
-	};
 }
 
 //add all of things in array
@@ -1544,7 +1523,6 @@ Object.freeze(GUILib);
 var myScript = "";
 //registering object to other scripts
 function selectLevelHook() {
-	var loaded = false;
 	var scripts = net.zhuoweizhang.mcpelauncher.ScriptManager.scripts;
 	for(var i = 0; i<scripts.size(); i++) {
 		var script = scripts.get(i);
@@ -1553,12 +1531,7 @@ function selectLevelHook() {
 			myScript = script.name;
 			continue;
 		}
-		loaded = true;
 		org.mozilla.javascript.ScriptableObject.putProperty(scope, "GUILib", GUILib);
-	}
-	if(loaded) {
-		var warn = new GUILib.WarningPopup("GUILib이 로드되었습니다.", 2000);
-		warn.render();
 	}
 }
 
