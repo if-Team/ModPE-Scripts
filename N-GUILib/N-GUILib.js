@@ -1,10 +1,3 @@
-///////////////////////////////////////////////      /* Copyright
-//@@@@@@@//@@////@@//@@//@@//////@@//@@////////       * 2015.
-//@@///////@@////@@//@@//@@//////////@@////////       * Affogatoman
-//@@//@@@//@@////@@//@@//@@//////@@//@@@@@@@///       * all
-//@@///@@//@@////@@//@@//@@//////@@//@@///@@@//       * rights
-//@@@@@@@//@@@@@@@@//@@//@@@@@@//@@//@@@@@@@///       * reserved.
-///////////////////////////////////////////////       */
 const VERSION = "0.1 Beta";
 
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
@@ -14,12 +7,7 @@ var defaults = new Array(256);
 var lengths = new Array(65536);
 loadCache();
 
-/* MAGIC VALUE */
-//const FOUR = 1; //80 dpi
-//const FOUR = 2; //160 dpi
-//const FOUR = 3; //240 dpi
-//const FOUR = 4; //320 dpi
-//const FOUR = 6; //480 dpi
+//MAGIC VALUE 
 const FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
 
 var str = new java.lang.String(ModPE.getBytesFromTexturePack("images/items.meta"));
@@ -85,35 +73,29 @@ unchkimg.setPixels(unchk, 0, 22, 0, 0, 22, 21);
 unchkimg = android.graphics.Bitmap.createScaledBitmap(unchkimg, 22*FOUR, 21*FOUR, false);
 /*--------------------------------------------------*/
 
-var emptyimg = android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.ARGB_8888);
-var editxtimg = android.graphics.Bitmap.createBitmap(3, 3, android.graphics.Bitmap.Config.RGB_565);
-editxtimg.eraseColor(android.graphics.Color.rgb(0x6b, 0x61, 0x62));
-editxtimg.setPixel(1, 1, android.graphics.Color.rgb(0x3a, 0x35, 0x3a));
-editxtimg = android.graphics.Bitmap.createScaledBitmap(editxtimg, 3*FOUR, 3*FOUR, false);
-
-var popupimg = android.graphics.Bitmap.createBitmap(3, 3, android.graphics.Bitmap.Config.RGB_565);
-popupimg.eraseColor(android.graphics.Color.WHITE);
-popupimg.setPixel(1, 1, android.graphics.Color.BLACK);
-popupimg = android.graphics.Bitmap.createScaledBitmap(popupimg, 3*FOUR, 3*FOUR, false);
-
-var halfimg = android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.ARGB_8888);
-halfimg.eraseColor(android.graphics.Color.parseColor("#80000000"));
-
-var dirtimg = android.graphics.Bitmap.createScaledBitmap(getImage("gui", "background", ""), 32*FOUR, 32*FOUR, false);
-
 var edit_str, edit_shdow, edit_text;
 
 var GUILib = {};
-wthnhet = [ctx.getScreenWidth(), ctx.getScreenHeight()];
-GUILib.deviceWidth = Math.max.apply(null, wthnhet)/FOUR;
-GUILib.deviceHeight = Math.min.apply(null, wthnhet)/FOUR;
-
+GUILib.DEVICEWIDTH = ctx.getScreenWidth()/FOUR;
+GUILib.DEVICEHEIGHT = ctx.getScreenHeight()/FOUR;
 GUILib.VERTICAL = 1;
 GUILib.HORIZONTAL = 0;
 
 GUILib.Error = java.lang.Exception;
 
-//BUTTON
+/**
+ * 버튼을 생성합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} x - 버튼의 x좌표
+ * @param {Number} y - 버튼의 y좌표
+ * @param {Number} width - 버튼의 가로 길이
+ * @param {Number} height - 버튼의 세로 길이
+ * @param {String} msg - 버튼의 텍스트
+ * @param {Function} callback - 버튼 클릭시 호출되는 함수
+ * @param {Boolean} isUpdate
+ */
 GUILib.GUIButton = function(x, y, width, height, msg, callback, isUpdate) {
 	this.TYPE = "button";
 	
@@ -208,10 +190,18 @@ GUILib.GUIButton = function(x, y, width, height, msg, callback, isUpdate) {
 	this.mainplate.addView(text);
 	if(this.msg !== "")
 		drawFont(this.msg, this.btn, this.shadow);
-}
+};
 
-//BUTTON METHODS
 GUILib.GUIButton.prototype = {};
+
+/**
+ * 버튼의 위치를 설정합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} x - 버튼의 x좌표
+ * @param {Number} y - 버튼의 y좌표
+ */
 GUILib.GUIButton.prototype.setXY = function(x, y) {
 	this.x = (x == -1 ? this.x : x*FOUR);
 	this.y = (y == -1 ? this.y : y*FOUR);
@@ -221,6 +211,15 @@ GUILib.GUIButton.prototype.setXY = function(x, y) {
 			that.pw.update(that.x, that.y, -1, -1, true);
 	}}));
 };
+
+/**
+ * 버튼의 크기를 설정합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} width - 버튼의 가로 길이
+ * @param {Number} height - 버튼의 세로 길이
+ */
 GUILib.GUIButton.prototype.setWH = function(width, height) {
 	this.width = (width == -1 ? this.width : width*FOUR);
 	this.height = (height == -1 ? this.height : height*FOUR);
@@ -230,16 +229,46 @@ GUILib.GUIButton.prototype.setWH = function(width, height) {
 			that.pw.update(that.width, that.height);
 	}}));
 };
+
+/**
+ * 버튼의 텍스트를 설정합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {String} msg - 버튼의 텍스트
+ */
 GUILib.GUIButton.prototype.setMessage = function(msg) {
 	this.msg = msg;
 	drawFont(this.msg, this.btn, this.shadow);
 };
+
+/**
+ * 버튼의 텍스트를 얻습니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @return {String} - 버튼의 텍스트
+ */
 GUILib.GUIButton.prototype.getMessage = function() {
 	return this.msg;
 };
+
+/**
+ * 버튼을 화면에 띄웁니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
 GUILib.GUIButton.prototype.render = function() {
 	render(this);
 };
+
+/**
+ * 버튼을 제거합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
 GUILib.GUIButton.prototype.stop = function() {
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
@@ -248,7 +277,22 @@ GUILib.GUIButton.prototype.stop = function() {
 		}}));
 };
 
-//IMAGEBUTTON
+
+
+
+
+/**
+ * 이미지버튼을 생성합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} x - 버튼의 x좌표
+ * @param {Number} y - 버튼의 y좌표
+ * @param {Number} width - 버튼의 가로 길이
+ * @param {Number} height - 버튼의 세로 길이
+ * @param {Bitmap|String} bm - 버튼 이미지의 비트맵 객체 혹은 GUILib 내장 이미지
+ * @param {Function} callback - 이미지버튼 클릭시 호출되는 함수
+ */
 GUILib.ImageButton = function(x, y, width, height, bm, callback) {
 	this.TYPE = "image_button";
 	
@@ -278,8 +322,15 @@ GUILib.ImageButton = function(x, y, width, height, bm, callback) {
 		this.btn.setImageBitmap(eval(bm));
 };
 
-//IMAGEBUTTON METHODS
 GUILib.ImageButton.prototype = {};
+
+/**
+ * 이미지버튼의 이미지를 설정합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Bitmap|Strinf }bm - 버튼 이미지의 비트맵 객체 혹은 GUILib 내장 이미지
+ */
 GUILib.ImageButton.prototype.setImage = function(bm) {
 	if(Array.isArray(bm))
 		this.btn.setImageBitmap(getItemBitmap(bm));
@@ -288,6 +339,15 @@ GUILib.ImageButton.prototype.setImage = function(bm) {
 	else
 		this.btn.setImageBitmap(eval(bm));
 };
+
+/**
+ * 이미지버튼을 설정합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} x - 이미지버튼의 x좌표
+ * @param {Number} y - 이미지버튼의 y좌표
+ */
 GUILib.ImageButton.prototype.setXY = function(x, y) {
 	this.x = (x == -1 ? this.x : x*FOUR);
 	this.y = (y == -1 ? this.y : y*FOUR);
@@ -297,6 +357,15 @@ GUILib.ImageButton.prototype.setXY = function(x, y) {
 			that.main.pw.update(that.x, that.y, -1, -1, true);
 	}}));
 };
+
+/**
+ * 이미지버튼의 크기를 설정합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} width - 이미지버튼의 가로 길이
+ * @param {Number} height - 이미지버튼의 세로 길이
+ */
 GUILib.ImageButton.prototype.setWH = function(width, height) {
 	this.width = (width == -1 ? this.width : width*FOUR);
 	this.height = (height == -1 ? this.height : height*FOUR);
@@ -306,9 +375,23 @@ GUILib.ImageButton.prototype.setWH = function(width, height) {
 			that.main.pw.update(that.width, that.height);
 	}}));
 };
+
+/**
+ * 이미지버튼을 화면에 띄웁니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
 GUILib.ImageButton.prototype.render = function() {
 	render(this.main);
 };
+
+/**
+ * 이미지버튼을 제거합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
 GUILib.ImageButton.prototype.stop = function() {
 	var that = this;
 	this.thread.interrupt();
@@ -318,7 +401,21 @@ GUILib.ImageButton.prototype.stop = function() {
 		}}));
 };
 
-//EDITTEXT
+
+
+
+
+/**
+ * 에딧텍스트를 생성합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} x - 에딧텍스트의 x좌표
+ * @param {Number} y - 에딧텍스트의 y좌표
+ * @param {Number} width - 에딧텍스트의 가로 길이
+ * @param {Number} height - 에딧텍스트의 세로 길이
+ * @param {Number} hint - 에딧텍스트의 힌트 텍스트
+ */
 GUILib.EditText = function(x, y, width, height, hint) {
 	this.TYPE = "edittext";
 	
@@ -333,6 +430,12 @@ GUILib.EditText = function(x, y, width, height, hint) {
 	this.height = height*FOUR;
 	var back = new android.widget.TextView(ctx);
 	back.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
+	
+	var editxtimg = android.graphics.Bitmap.createBitmap(3, 3, android.graphics.Bitmap.Config.RGB_565);
+	editxtimg.eraseColor(android.graphics.Color.rgb(0x6b, 0x61, 0x62));
+	editxtimg.setPixel(1, 1, android.graphics.Color.rgb(0x3a, 0x35, 0x3a));
+	editxtimg = android.graphics.Bitmap.createScaledBitmap(editxtimg, 3*FOUR, 3*FOUR, false);
+
 	back.setBackgroundDrawable(ninePatch(editxtimg, FOUR, FOUR, FOUR, FOUR, this.width, this.height));
 	var edtxt = new android.widget.ImageView(ctx);
 	edtxt.setScaleType(android.widget.ImageView.ScaleType.CENTER);
@@ -359,8 +462,16 @@ GUILib.EditText = function(x, y, width, height, hint) {
 	this.shadow = shadow;
 };
 
-//EDITTEXT METHODS
 GUILib.EditText.prototype = {};
+
+/**
+ * 에딧텍스트의 좌표를 설정합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} x - 에딧텍스트의 x좌표
+ * @param {Number} y - 에딧텍스트의 y좌표
+ */
 GUILib.EditText.prototype.setXY = function(x, y) {
 	this.x = (x == -1 ? this.x : x*FOUR);
 	this.y = (y == -1 ? this.y : y*FOUR);
@@ -370,6 +481,15 @@ GUILib.EditText.prototype.setXY = function(x, y) {
 			that.pw.update(that.x, that.y, -1, -1, true);
 	}}));
 };
+
+/**
+ * 에딧텍스트의 크기를 설정합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} width - 에딧텍스트의 가로 길이
+ * @param {Number} height - 에딧텍스트의 세로 길이
+ */
 GUILib.EditText.prototype.setWH = function(width, height) {
 	this.width = (width == -1 ? this.width : width*FOUR);
 	this.height = (height == -1 ? this.height : height*FOUR);
@@ -379,16 +499,46 @@ GUILib.EditText.prototype.setWH = function(width, height) {
 			that.pw.update(that.width, that.height);
 	}}));
 };
+
+/**
+ * 에딧텍스트의 텍스트를 설정합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {String} x - 에딧텍스트의 텍스트
+ */
 GUILib.EditText.prototype.setText = function(text) {
 	drawFont(text, this.edit, this.shadow, true, this.width);
 	this.text = text;
 };
+
+/**
+ * 에딧텍스트의 텍스트를 얻습니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @return {String} - 에딧텍스트의 텍스트
+ */
 GUILib.EditText.prototype.getText = function() {
 	return this.text;
 }
+
+/**
+ * 에딧텍스트를 화면에 띄웁니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
 GUILib.EditText.prototype.render = function() {
 	render(this);
 };
+
+/**
+ * 에딧텍스트를 제거합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
 GUILib.EditText.prototype.stop = function() {
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
@@ -397,26 +547,37 @@ GUILib.EditText.prototype.stop = function() {
 		}}));
 };
 
-//BACKGROUND
+
+
+
+
+/**
+ * 백그라운드를 생성합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {String} type - 백그라운드의 타입
+ */
 GUILib.Background = function(type) {
 	this.TYPE = "background";
 	
 	this.pw = null;
 	this.x = 0;
 	this.y = 0;
-	this.width = Math.max.apply(null, wthnhet)+100;
-	this.height = Math.min.apply(null, wthnhet);
+	this.width = ctx.getScreenWidth();
+	this.height = ctx.getScreenHeight();
 	var main = new android.widget.TextView(ctx);
 	var img;
 	switch(type) {
 		case "DIRT":
-			img = dirtimg;
+			img = android.graphics.Bitmap.createScaledBitmap(getImage("gui", "background", ""), 32*FOUR, 32*FOUR, false);
 			break;
 		case "BLACK":
 			img = android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.RGB_565);
 			break;
 		case "HALF":
-			img = halfimg;
+			img = android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.ARGB_8888);
+			img.eraseColor(android.graphics.Color.parseColor("#80000000"));
 			break;
 	}
 	var drawable = new android.graphics.drawable.BitmapDrawable(img);
@@ -426,8 +587,14 @@ GUILib.Background = function(type) {
 	this.mainplate = main;
 };
 
-//BACKGROUND METHODS
 GUILib.Background.prototype = {};
+
+/**
+ * 백그라운드를 제거합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
 GUILib.Background.prototype.stop = function() {
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
@@ -435,11 +602,34 @@ GUILib.Background.prototype.stop = function() {
 			that.pw = null;
 		}}));
 };
+
+/**
+ * 백그라운드를 화면에 띄웁니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
 GUILib.Background.prototype.render = function() {
 	render(this);
 };
 
-//CONTROLBAR
+
+
+
+
+/**
+ * 컨트롤바를 생성합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} x - 컨트롤바의 x좌표
+ * @param {Number} y - 컨트롤바의 y좌표
+ * @param {Number} width - 컨트롤바의 가로 길이
+ * @param {Number} height - 컨트롤바의 세로 길이
+ * @param {Number} max - 컨트롤바의 최댓값
+ * @param {Number} min - 컨트롤바의 최솟값
+ * @param {Boolean} dotEnable - 컨트롤바 이미지의 구간 나눔 점 존재 여부
+ */
 GUILib.ControlBar = function(x, y, width, height, max, min, dotEnable) {
 	this.TYPE = "control_bar";
 	
@@ -474,8 +664,16 @@ GUILib.ControlBar = function(x, y, width, height, max, min, dotEnable) {
 	this.seek = seek;
 };
 
-//CONTROLBAR METHODS
 GUILib.ControlBar.prototype = {};
+
+/**
+ * 컨트롤바의 좌표를 설정합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} x - 컨트롤바의 x좌표
+ * @param {Number} y - 컨트롤바의 y좌표
+ */
 GUILib.ControlBar.prototype.setXY = function(x, y) {
 	this.x = (x == -1 ? this.x : x*FOUR);
 	this.y = (y == -1 ? this.y : y*FOUR);
@@ -485,6 +683,15 @@ GUILib.ControlBar.prototype.setXY = function(x, y) {
 			that.pw.update(that.x, that.y, -1, -1, true);
 	}}));
 };
+
+/**
+ * 컨트롤바의 크기를 설정합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} width - 컨트롤바의 가로 길이
+ * @param {Number} height - 컨트롤바의 세로 길이
+ */
 GUILib.ControlBar.prototype.setWH = function(width, height) {
 	this.width = (width == -1 ? this.width : width*FOUR);
 	this.height = (height == -1 ? this.height : height*FOUR);
@@ -494,11 +701,26 @@ GUILib.ControlBar.prototype.setWH = function(width, height) {
 			that.pw.update(that.width, that.height);
 	}}));
 };
+
+/**
+ * 컨트롤바의 현재 값을 얻습니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @return {Number} - 컨트롤바의 현재 값
+ */
 GUILib.ControlBar.prototype.getValue = function() {
 	var p = this.seek.getProgress();
 	var a = 100/((this.max-this.min));
 	return Math.round(p/a)+this.min;
 };
+
+/**
+ * 컨트롤바를 제거합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
 GUILib.ControlBar.prototype.stop = function() {
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
@@ -506,11 +728,27 @@ GUILib.ControlBar.prototype.stop = function() {
 			that.pw = null;
 		}}));
 };
+
+/**
+ * 컨트롤바를 화면에 띄웁니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
 GUILib.ControlBar.prototype.render = function() {
 	render(this);
 };
 
-//TOPBAR
+
+
+
+
+/**
+ * 탑바를 생성합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
 GUILib.TopBar = function(x, y, width, height, title) {
 	this.TYPE = "top_bar";
 	
@@ -859,7 +1097,7 @@ GUILib.WarningPopup = function(msg, dur) {
 	
 	var that = this;
 	this.pw;
-	this.x = (GUILib.deviceWidth*FOUR-184*FOUR)/2
+	this.x = (GUILib.DEVICEWIDTH*FOUR-184*FOUR)/2
 	this.y = 2*FOUR;
 	this.width = 184*FOUR;
 	this.height = 28*FOUR;
@@ -1191,7 +1429,7 @@ function modTick() {
 	if(edit_text === "")
 		ctx.runOnUiThread(new java.lang.Runnable({
 			run: function() {
-				drawFont("_", edit_str, edit_shdow, true, Math.max.apply(null, wthnhet)-76*FOUR-1);
+				drawFont("_", edit_str, edit_shdow, true, ctx.getScreenWidth()-76*FOUR-1);
 			}
 		}));
 }
@@ -1269,7 +1507,7 @@ function showEditPopup(text, shadow, str, that) {
 			--------
 			Shadow(c)
 			*/
-			var done = new GUILib.GUIButton(GUILib.deviceWidth-66, 0, 66, 37, "Done", function(thiz) {
+			var done = new GUILib.GUIButton(GUILib.DEVICEWIDTH-66, 0, 66, 37, "Done", function(thiz) {
 				black.dismiss();
 				pw.dismiss();
 			});
@@ -1277,8 +1515,8 @@ function showEditPopup(text, shadow, str, that) {
 				var hint = new GUILib.VisualFont(5, 5, that.hint)
 			var black = new android.widget.PopupWindow(ctx);
 			black.setContentView(new android.widget.TextView(ctx));
-			black.setWidth(Math.max.apply(null, wthnhet)+10);
-			black.setHeight(Math.min.apply(null, wthnhet)+10);
+			black.setWidth(ctx.getScreenWidth()+10);
+			black.setHeight(ctx.getScreenHeight()+10);
 			black.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.BLACK));
 			black.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
 			done.render();
@@ -1303,7 +1541,7 @@ function showEditPopup(text, shadow, str, that) {
 				afterTextChanged: function(s) {
 					edit_text = s+"";
 					if((s+"").length>0)
-						drawFont(s + "", b, c, true, Math.max.apply(null, wthnhet)-76*FOUR);
+						drawFont(s + "", b, c, true, ctx.getScreenWidth()-76*FOUR);
 				}
 			}));
 			var b = new android.widget.ImageView(ctx);
@@ -1319,19 +1557,26 @@ function showEditPopup(text, shadow, str, that) {
 			textpart.addView(a);
 			if(str !== "") {
 				a.setText(str);
-				drawFont(str, b, c, true, Math.max.apply(null, wthnhet)-76*FOUR);
+				drawFont(str, b, c, true, ctx.getScreenWidth()-76*FOUR);
 			}
+			
+			var popupimg = android.graphics.Bitmap.createBitmap(3, 3, android.graphics.Bitmap.Config.RGB_565);
+			popupimg.eraseColor(android.graphics.Color.WHITE);
+			popupimg.setPixel(1, 1, android.graphics.Color.BLACK);
+			popupimg = android.graphics.Bitmap.createScaledBitmap(popupimg, 3*FOUR, 3*FOUR, false);
+
 			var pw = new android.widget.PopupWindow(ctx);
 			pw.setContentView(textpart);
-			pw.setWidth(Math.max.apply(null, wthnhet)-76*FOUR);
+			pw.setWidth(ctx.getScreenWidth()-76*FOUR);
 			pw.setHeight(17*FOUR);
-			pw.setBackgroundDrawable(ninePatch(popupimg, FOUR, FOUR, FOUR, FOUR, Math.max.apply(null, wthnhet)-76*FOUR, 17*FOUR));
+			pw.setBackgroundDrawable(ninePatch(popupimg, FOUR, FOUR, FOUR, FOUR, ctx.getScreenWidth()-76*FOUR, 17*FOUR));
 			pw.setFocusable(true);
 			pw.setOnDismissListener(new android.widget.PopupWindow.OnDismissListener({
 				onDismiss: function() {
 					if(edit_text !== "")
 						drawFont(edit_text, text, shadow, true, text.getParent().getWidth());
 					else {
+						var emptyimg = android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.ARGB_8888);
 						text.setImageBitmap(emptyimg);
 						shadow.setImageBitmap(emptyimg);
 					}
@@ -1437,7 +1682,7 @@ function checkLength(bitmap) {
 function drawFont(string, iv, shdow, isEdit, wi) {
 	if(typeof string !== "string")
 		return;
-	if(isEdit && wi == Math.max.apply(null, wthnhet)-76*FOUR)
+	if(isEdit && wi == ctx.getScreenWidth()-76*FOUR)
 		string = string + "_";
 	new java.lang.Thread(new java.lang.Runnable({run: function() {
 		var has = hasNonAscii(string);
@@ -1618,7 +1863,7 @@ function getTextureName() {
 					}, true);
 					var group = new GUILib.GUIGroup(0,0,GUILib.HORIZONTAL,[ok, empty2, cancel]);
 					var l = new GUILib.GUIGroup(0,0,GUILib.VERTICAL, [text1, text2, empty, group]);
-					var window = new GUILib.Window(GUILib.deviceWidth/2-105, GUILib.deviceHeight/2-40, 200, 80, l);
+					var window = new GUILib.Window(GUILib.DEVICEWIDTH/2-105, GUILib.DEVICEHEIGHT/2-40, 200, 80, l);
 					window.render();
 				}
 				reader.close();

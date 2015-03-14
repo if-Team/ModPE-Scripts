@@ -3,7 +3,7 @@ var progress;
 function useItem(x, y, z) {
 	new java.lang.Thread(new java.lang.Runnable({run: function(){
 	var back = new GUILib.Background("DIRT"); //Recommend DIRT type(It is more minecraftical!)
-	var top = new GUILib.TopBar(0, 0, GUILib.deviceWidth, 28,"Top Bar");
+	var top = new GUILib.TopBar(0, 0, GUILib.DEVICEWIDTH, 28,"Top Bar");
 	var b = new GUILib.GUIButton(0, 0, 96, 96, "헉");
 	var btn = new GUILib.ImageButton(0, 0, 96, 20, ["apple",0], function(thiz) {
 		print(seek.getValue());
@@ -19,7 +19,7 @@ function useItem(x, y, z) {
 	var visual = new GUILib.VisualFont(0, 0, "GUILib for ModPE 0.1 beta", 16);
 	progress = new GUILib.ProgressBar(0, 0, 100);
 	var scroll = new GUILib.GUIScroll(0, 0, 80, [group, btn2, btn3, visual, swit, check, progress, seek]);
-	var window = new GUILib.Window(GUILib.deviceWidth/2 - 101, GUILib.deviceHeight/2-40, 192, 80, scroll);
+	var window = new GUILib.Window(GUILib.DEVICEWIDTH/2 - 101, GUILib.DEVICEHEIGHT/2-40, 192, 80, scroll);
 	var x = new GUILib.DeleteButton(4, 4, [back, top, window], function() {
 		print("Deleted");
 		progress = null;
