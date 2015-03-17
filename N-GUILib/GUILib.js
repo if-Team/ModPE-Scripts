@@ -45,6 +45,60 @@ GUILib.getContext = function() {
 
 
 /**
+ * GUILib 버튼클래스
+ *
+ * @since API 1
+ * @author 아포카토맨
+ * @param {Number} x
+ * @param {Number} y
+ * @param {Number} width
+ * @param {Number} height
+ * @param {String} text
+ * @param {Function} callback
+ * @class
+ */
+GUILib.Button = function(x, y, width, height, text, callback) {
+	try {
+		if((typeof x === "number" && !isNaN(x)) || (typeof y === "number" && !isNaN(y)) || (typeof width === "number" && !isNaN(width)) || (typeof height === "number" && !isNaN(height))) {
+			this.x = x * Utils.FOUR;
+			this.y = y * Utils.FOUR;
+			this.width = width * Utils.FOUR;
+			this.height = height * Utils.FOUR;
+			var spritesheet = Utils.getImage("images/gui/spritesheet.png");
+			var off = Utils.stretchImage(Utils.trimImage(spritesheet, 0, 32, 8, 8), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 4*Utils.FOUR, width*Utils.FOUR, height*Utils.FOUR);
+			var on = Utils.stretchImage(Utils.trimImage(spritesheet, 8, 32, 8, 8), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 4*Utils.FOUR, width*Utils.FOUR, height*Utils.FOUR);
+			this.mainplate = new android.widget.Button(GUILib.getContext());
+			this.mainplate.setText(Utils.getStringBuilder(text));
+			this.mainplate.setGravity(android.view.Gravity.CENTER);
+			var list = new android.graphics.drawable.StateListDrawable();
+			list.addState([android.R.attr.state_pressed], off);
+			list.addState([], on);
+			this.mainplate.setBackgroundDrawable(list);
+		} else {
+			throw new Error("Illegal argument error");
+		}
+	} catch(e) {
+		GUILib.parseError(e);
+	}
+};
+
+GUILib.Button.prototype = {};
+
+/**
+ * 버튼을 화면에 띄웁니다
+ *
+ * @since API 1
+ * @author 아포카토맨
+ */
+GUILib.Button.prototype.render = function() {
+	Utils.render(this);
+};
+
+
+
+
+
+/**
  * 부가 함수 총괄 객체
  *
  * @since API 1
@@ -52,6 +106,68 @@ GUILib.getContext = function() {
  * @namespace
  */
 var Utils = {};
+
+/**
+ * UI스레드내에서 함수를 실행합니다
+ *
+ * @since API 1
+ * @author 아포카토맨
+ * @param {Function} func
+ */
+Utils.createUiThread = function(func) {
+	GUILib.getContext().runOnUiThread(new java.lang.Runnable({
+		run: function() {
+			func();
+		}
+	}));
+};
+
+/**
+ * 전달받은 객체를 화면에 띄워줍니다
+ *
+ * @since API 1
+ * @author 아포카토맨
+ * @param {Object} clazz
+ */
+Utils.render = function(clazz) {
+	Utils.createUiThread(function() {
+		try {
+			var pw = new android.widget.PopupWindow(GUILib.getContext());
+			pw.setContentView(clazz.mainplate);
+			pw.setWidth(clazz.width);
+			pw.setHeight(clazz.height);
+			pw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+			pw.showAtLocation(GUILib.getContext().getWindow().getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.TOP, clazz.x, clazz.y);
+		} catch(e) {
+			GUILib.parseError(e);
+		}
+	});
+};
+
+/**
+ * 2DP를 구합니다
+ * 
+ * @since API 1
+ * @author 아포카토맨
+ * @constant
+ */
+Utils.FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, GUILib.getContext().getResources().getDisplayMetrics());
+
+/**
+ * 이미지를 잘라줍니다
+ *
+ * @since API 1
+ * @author 아포카토맨
+ * @param {Bitmap} bm
+ * @param {Number} x
+ * @param {Number} y
+ * @param {Number} width
+ * @param {Number} height
+ * @return {Bitmap}
+ */
+Utils.trimImage = function(bm, x, y, width, height) {
+	return android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(bm, x, y, width, height), width*Utils.FOUR, height*Utils.FOUR, false);
+};
 
 /**
  * 이미지를 늘린 비트맵 드로어블 객체를 얻습니다
@@ -118,7 +234,7 @@ Utils.hasNonAscii = function(str) {
  * @return {Bitmap} - 이미지의 비트맵 객체
  */
 Utils.getImage = function(path) {
-	return android.graphics.BitmapFactory.decodeStream(ModPE.openInputStream(path));
+	return android.graphics.BitmapFactory.decodeStream(ModPE.openInputStreamFromTexturePack(path));
 };
 
 /**
@@ -177,7 +293,25 @@ Utils.getStringBuilder = function(text) {
 		var y = Math.floor(parseInt(d[0], 10) / 16) * 16;
 		var num = parseInt(d[1], 10).toString(16).toUpperCase();
 		var bitmap = android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(Utils.getImage("images/font/glyph_"+num+".png"), x, y, 16, 16), 32, 32, false);
-		builder.setSpan(new android.text.style.ImageSpan(ctx, bitmap), i, i+1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		builder.setSpan(new android.text.style.ImageSpan(GUILib.getContext(), bitmap), i, i+1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 	}
 	return builder;
 };
+
+
+
+
+
+/**
+ * GUILib 객체를 다른 스크립트에 등록합니다
+ */
+function selectLevelHook() {
+	var scripts = net.zhuoweizhang.mcpelauncher.ScriptManager.scripts;
+	for(var i = 0; i < scripts.size(); i++) {
+		var script = scripts.get(i);
+		var scope = script.scope;
+		if(org.mozilla.javascript.ScriptableObject.hasProperty(scope, "GUILib"))
+			continue;
+		org.mozilla.javascript.ScriptableObject.putProperty(scope, "GUILib", GUILib);
+	}
+}
