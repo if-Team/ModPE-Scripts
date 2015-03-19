@@ -1643,7 +1643,7 @@ function showEditPopup(text, shadow, str, that) {
 				pw.dismiss();
 			});
 			if(that.hint != "" && that.hint != null)
-				var hint = new GUILib.VisualFont(5, 5, that.hint)
+				var hint = new GUILib.VisualFont(5, 5, that.hint, 16);
 			var black = new android.widget.PopupWindow(ctx);
 			black.setContentView(new android.widget.TextView(ctx));
 			black.setWidth(ctx.getScreenWidth()+10);
