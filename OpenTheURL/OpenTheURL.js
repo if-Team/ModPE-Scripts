@@ -79,3 +79,4 @@ function dp(dips){
 }
 
 var chatHook = find;
+init();
