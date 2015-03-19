@@ -25,7 +25,7 @@ function init(){
 		run: function(){
 			var button = new android.widget.Button(ctx);
 			button.setText("OPEN");
-			button.setOnClickListener(new android.view,View.OnCLickListener({
+			button.setOnClickListener(new android.view.View.OnCLickListener({
 				onClick: function(v){
 					/*
 					var intent = new android.content.Intent(android.content.Intent.ACTION_VIEW);
