@@ -120,6 +120,15 @@ function buildMaze(maze, startX, startY, startZ, blockId, blockDamage, blockHeig
 const MESSAGE_USAGE = "Usage: /maze <width> <height> [blockId blockDamage blockHeight]";
 
 /**
+ * @callback selectLevelHook
+ * @requires ModPE
+ */
+function selectLevelHook(){
+    clientMessage("© 2015 ChalkPE. All rights reserved.");
+}
+
+/**
+ * @callback procCmd
  * @requires ModPE
  * @param {string} str - The command string
  */
