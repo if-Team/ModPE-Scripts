@@ -21,6 +21,7 @@
  * @returns {number[][]} The maze
  * @see https://github.com/dstromberg2/maze-generator
  * @license None
+ * @todo It is not a perfect maze
  */
 function createMaze(width, height){
     var totalCells = width * height;
@@ -120,10 +121,10 @@ function buildMaze(maze, startX, startY, startZ, blockId, blockDamage, blockHeig
 const MESSAGE_USAGE = "Usage: /maze <width> <height> [blockId blockDamage blockHeight]";
 
 /**
- * @callback selectLevelHook
+ * @callback newLevel
  * @requires ModPE
  */
-function selectLevelHook(){
+function newLevel(){
     clientMessage("© 2015 ChalkPE. All rights reserved.");
 }
 
@@ -135,8 +136,11 @@ function selectLevelHook(){
 function procCmd(str){
     var cmd = str.split(" ");
     if(cmd.shift() === "maze"){
-        cmd = cmd.map(parseInt);
-        if(cmd.some(isNaN)){
+        var params = cmd.map(function(param){
+            return parseInt(param, 10);
+        });
+
+        if(params.some(isNaN)){
             clientMessage("Error: parameter must be a number!");
             clientMessage(MESSAGE_USAGE);
             return;
@@ -165,15 +169,15 @@ function procCmd(str){
                 return;
 
             case 2:
-                maze = createMaze(cmd[0], cmd[1]);
+                maze = createMaze(params[0], params[1]);
                 break;
 
             case 5:
-                maze = createMaze(cmd[0], cmd[1]);
+                maze = createMaze(params[0], params[1]);
 
-                blockId = cmd[2];
-                blockDamage = cmd[3];
-                blockHeight = cmd[4];
+                blockId = params[2];
+                blockDamage = params[3];
+                blockHeight = params[4];
                 break;
         }
 
