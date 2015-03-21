@@ -212,7 +212,7 @@ function buildMaze(grid, startX, startY, startZ, blockId, blockDamage, blockHeig
                     Level.setTile(x    , y, z + 1, blockId, blockDamage);
                     Level.setTile(x + 1, y, z + 1, blockId, blockDamage);
                 }
-                if((x !== 0 || y !== 0) && (x !== grid.params.w - 1 || y !== grid.params.h - 1)){
+                if((i !== 0 || j !== 0) && (i !== grid.params.w - 1 || j !== grid.params.h - 1)){
                     if(!cell.left){
                         Level.setTile(x - 1, y, z - 1, blockId, blockDamage);
                         Level.setTile(x - 1, y, z    , blockId, blockDamage);
@@ -229,7 +229,7 @@ function buildMaze(grid, startX, startY, startZ, blockId, blockDamage, blockHeig
     }
 }
 
-const MESSAGE_USAGE = "Usage: /maze <width> <height> [blockId blockDamage blockHeight]";
+const MESSAGE_USAGE = "Usage: /maze <width> <height> [blockId blockDamage blockHeight] [TurnPercent]";
 
 /**
  * @callback newLevel
@@ -267,6 +267,8 @@ function procCmd(str){
         var blockId = 0;
         var blockDamage = 0;
         var blockHeight = 0;
+        
+        var turn = 0.5;
 
         switch(cmd.length){
             default:
@@ -294,12 +296,23 @@ function procCmd(str){
                 blockDamage = params[3];
                 blockHeight = params[4];
                 break;
+                
+            case 6:
+                width = params[0];
+                height = params[1];
+
+                blockId = params[2];
+                blockDamage = params[3];
+                blockHeight = params[4];
+                
+                turn = params[5] / 100;
+                break;
         }
 
         new java.lang.Thread({run: function(){
             buildMaze(ProcGen.maze({
                 w: width, h: height,
-                turn: 0.2,
+                turn: turn,
                 branch: 1,
                 reconnect: 0,
                 deadEnd: 0
