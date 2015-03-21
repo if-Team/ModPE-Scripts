@@ -54,8 +54,6 @@ ProcGen.maze = function(params) {
 };
 
 ProcGen._maze = function(grid, x, y, direction) {
-    var h = grid.params.h;
-    var w = grid.params.w;
     var turn = grid.params.turn;
     var branch = grid.params.branch;
     var reconnect = grid.params.reconnect;
@@ -143,7 +141,7 @@ ProcGen._maze = function(grid, x, y, direction) {
         if(Math.random() < branch) {
             dx = 0;
             dy = 0;
-            var nd = ProcGen.dir[i];
+            nd = ProcGen.dir[i];
 
             if(nd == 'up') {
                 dy = -1;
@@ -214,17 +212,18 @@ function buildMaze(grid, startX, startY, startZ, blockId, blockDamage, blockHeig
                     Level.setTile(x    , y, z + 1, blockId, blockDamage);
                     Level.setTile(x + 1, y, z + 1, blockId, blockDamage);
                 }
-                if(!cell.left){
-                    Level.setTile(x - 1, y, z - 1, blockId, blockDamage);
-                    Level.setTile(x - 1, y, z    , blockId, blockDamage);
-                    Level.setTile(x - 1, y, z + 1, blockId, blockDamage);
+                if((x !== 0 || y !== 0) && (x !== grid.params.w - 1 || y !== grid.params.h - 1)){
+                    if(!cell.left){
+                        Level.setTile(x - 1, y, z - 1, blockId, blockDamage);
+                        Level.setTile(x - 1, y, z    , blockId, blockDamage);
+                        Level.setTile(x - 1, y, z + 1, blockId, blockDamage);
+                    }
+                    if(!cell.right){
+                        Level.setTile(x + 1, y, z - 1, blockId, blockDamage);
+                        Level.setTile(x + 1, y, z    , blockId, blockDamage);
+                        Level.setTile(x + 1, y, z + 1, blockId, blockDamage);
+                    }
                 }
-                if(!cell.right){
-                    Level.setTile(x + 1, y, z - 1, blockId, blockDamage);
-                    Level.setTile(x + 1, y, z    , blockId, blockDamage);
-                    Level.setTile(x + 1, y, z + 1, blockId, blockDamage);
-                }
-
             }
         }
     }
