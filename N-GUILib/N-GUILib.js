@@ -5,7 +5,7 @@ var pectx = ctx.createPackageContext("com.mojang.minecraftpe", android.content.C
 
 var defaults = new Array(256);
 var lengths = new Array(65536);
-loadCache();
+GUILib.Cache.loadCache();
 
 //MAGIC VALUE 
 const FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
@@ -75,12 +75,30 @@ unchkimg = android.graphics.Bitmap.createScaledBitmap(unchkimg, 22*FOUR, 21*FOUR
 
 var edit_str, edit_shdow, edit_text;
 
+/**
+ * GUILib 객체입니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @namespace
+ */
 var GUILib = {};
+
+/**
+ * 오류 내용을 보여줍니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Error} e - 에러 객체
+ */
+GUILib.parseError = function(e) {
+	
+};
+
 GUILib.DEVICEWIDTH = ctx.getScreenWidth()/FOUR;
 GUILib.DEVICEHEIGHT = ctx.getScreenHeight()/FOUR;
 GUILib.VERTICAL = 1;
 GUILib.HORIZONTAL = 0;
-
 GUILib.Error = java.lang.Exception;
 
 /**
@@ -776,8 +794,16 @@ GUILib.TopBar = function(x, y, width, height, title) {
 	this.mainplate = r;
 };
 
-//TOPBAR METHODS
 GUILib.TopBar.prototype = {};
+
+/**
+ * 탑바의 좌표를 설정합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} x - 탑바의 x좌표
+ * @param {Number} y - 탑바의 y좌표
+ */
 GUILib.TopBar.prototype.setXY = function(x, y) {
 	this.x = (x == -1 ? this.x : x*FOUR);
 	this.y = (y == -1 ? this.y : y*FOUR);
@@ -787,6 +813,15 @@ GUILib.TopBar.prototype.setXY = function(x, y) {
 			that.pw.update(that.x, that.y, -1, -1, true);
 	}}));
 };
+
+/**
+ * 탑바의 크기를 설정합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} width - 탑바의 가로 길이
+ * @param {Number} height - 탑바의 세로 길이
+ */
 GUILib.TopBar.prototype.setWH = function(width, height) {
 	this.width = (width == -1 ? this.width : width*FOUR);
 	this.height = (height == -1 ? this.height : height*FOUR);
@@ -796,6 +831,13 @@ GUILib.TopBar.prototype.setWH = function(width, height) {
 			that.pw.update(that.width, that.height);
 	}}));
 };
+
+/**
+ * 탑바를 제거합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
 GUILib.TopBar.prototype.stop = function() {
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
@@ -803,11 +845,32 @@ GUILib.TopBar.prototype.stop = function() {
 			that.pw = null;
 		}}));
 };
+
+/**
+ * 탑바를 화면에 띄웁니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
 GUILib.TopBar.prototype.render = function() {
 	render(this);
 };
 
-//DELETEBUTTON
+
+
+
+
+/**
+ * 딜리트버튼을 생성합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} x - 딜리트버튼의 x좌표
+ * @param {Number} y - 딜리트버튼의 y좌표
+ * @param {Array} deletes - 딜리트버튼 클릭 시 제거되는 뷰들
+ * @param {Function} callback - 딜리트버튼 클릭 시 호출되는 함수
+ * @param {Boolean} button - 딜리트버튼의 버튼 모양 여부
+ */
 GUILib.DeleteButton = function(x, y, deletes, callback, button) {
 	this.TYPE = "delete_button";
 	
@@ -869,8 +932,14 @@ GUILib.DeleteButton = function(x, y, deletes, callback, button) {
 	}
 };
 
-//DELETEBUTTON METHODS
 GUILib.DeleteButton.prototype = {};
+
+/**
+ * 딜리트버튼을 제거합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
 GUILib.DeleteButton.prototype.stop = function() {
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
@@ -878,11 +947,31 @@ GUILib.DeleteButton.prototype.stop = function() {
 			that.pw = null;
 		}}));
 };
+
+/**
+ * 딜리트버튼을 화면에 띄웁니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
 GUILib.DeleteButton.prototype.render = function() {
 	render((this.isButton == true ? this.main : this));
 };
 
-//GUISCROLL
+
+
+
+
+/**
+ * 스크롤을 생성합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} x - 스크롤의 x좌표
+ * @param {Number} y - 스크롤의 y좌표
+ * @param {Number} height - 스크롤의 세로 길이
+ * @param {Number} childs - 스크롤 내부의 뷰
+ */
 GUILib.GUIScroll = function(x, y, height, childs) {
 	var glowDrawableId = ctx.getResources().getIdentifier("overscroll_glow", "drawable", "android");
 	var edgeDrawableId = ctx.getResources().getIdentifier("overscroll_edge", "drawable", "android");
@@ -947,8 +1036,16 @@ GUILib.GUIScroll = function(x, y, height, childs) {
 	this.mainplate = scroll;
 };
 
-//GUISCROLL METHODS
 GUILib.GUIScroll.prototype = {};
+
+/**
+ * 스크롤의 좌표를 설정합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} x - 스크롤의 x좌표
+ * @param {Number} y - 스크롤의 y좌표
+ */
 GUILib.GUIScroll.prototype.setXY = function(x, y) {
 	this.x = (x == -1 ? this.x : x*FOUR);
 	this.y = (y == -1 ? this.y : y*FOUR);
@@ -958,6 +1055,14 @@ GUILib.GUIScroll.prototype.setXY = function(x, y) {
 			that.pw.update(that.x, that.y, -1, -1, true);
 	}}));
 };
+
+/**
+ * 스크롤의 세로 길이를 설정합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} height - 스크롤의 세로 길이
+ */
 GUILib.GUIScroll.prototype.setH = function(height) {
 	this.height = height*FOUR;
 	var that = this;
@@ -966,9 +1071,23 @@ GUILib.GUIScroll.prototype.setH = function(height) {
 			that.pw.update(that.width, that.height);
 	}}));
 };
+
+/**
+ * 스크롤을 화면에 띄웁니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
 GUILib.GUIScroll.prototype.render = function() {
 	render(this);
 };
+
+/**
+ * 스크롤을 제거합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
 GUILib.GUIScroll.prototype.stop = function() {
 	var that = this;
 	ctx.runOnUiThread(new java.lang.Runnable({run: function() {
@@ -977,7 +1096,19 @@ GUILib.GUIScroll.prototype.stop = function() {
 		}}));
 };
 
-//GUIGROUP
+
+
+
+
+/**
+ * 그룹을 생성합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @param {Number} x - 그룹의 x좌표
+ * @param {Number} y - 그룹의 y좌표
+ * @param {Number} orien - 그룹의 
+ */
 GUILib.GUIGroup = function(x, y, orien, children) {
 	this.TYPE = "group";
 	
@@ -1423,7 +1554,7 @@ function getTextWidth(string) {
 var forMakeCache = 0;
 function modTick() {
 	if(forMakeCache++ == 1200) {
-		makeCache();
+		GUILib.Cache.makeCache();
 		forMakeCache = 0;
 	}
 	if(edit_text === "")
@@ -1512,7 +1643,7 @@ function showEditPopup(text, shadow, str, that) {
 				pw.dismiss();
 			});
 			if(that.hint != "" && that.hint != null)
-				var hint = new GUILib.VisualFont(5, 5, that.hint)
+				var hint = new GUILib.VisualFont(5, 5, that.hint, 16);
 			var black = new android.widget.PopupWindow(ctx);
 			black.setContentView(new android.widget.TextView(ctx));
 			black.setWidth(ctx.getScreenWidth()+10);
@@ -1780,7 +1911,26 @@ function selectLevelHook() {
 	}
 }
 
-function makeCache() {
+
+
+
+
+/**
+ * 캐시파일 관련 객체입니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @namespace
+ */
+GUILib.Cache = {};
+
+/**
+ * 캐시파일을 생성합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
+GUILib.Cache.makeCache = function() {
 	new java.lang.Thread(new java.lang.Runnable({run: function() {
 		var texture = getTextureName();
 		var file = new java.io.File(android.os.Environment.getExternalStorageDirectory(), "아포카토맨/GUILib/"+texture+".cache");
@@ -1807,9 +1957,15 @@ function makeCache() {
 		writer.write(result);
 		writer.close();
 	}})).start();
-}
+};
 
-function loadCache() {
+/**
+ * 캐시파일을 로드합니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
+GUILib.Cache.loadCache = function() {
 	new java.lang.Thread(new java.lang.Runnable({run: function() {
 		var texture = getTextureName();
 		var file = new java.io.File(android.os.Environment.getExternalStorageDirectory(), "아포카토맨/GUILib/"+texture+".cache");
@@ -1830,9 +1986,15 @@ function loadCache() {
 			}
 		}
 	}})).start();
-}
+};
 
-function getTextureName() {
+/**
+ * 캐시파일명을 위한 텍스트쳐팩명을 얻습니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
+GUILib.Cache.getTextureName = function() {
 	var pref = ctx.getSharedPreferences("mcpelauncherprefs", 0);
 	var pref2 = ctx.getSharedPreferences(ctx.getPackageName()+"_preferences", 0);
 	if(pref.getString("texturePack", "NULL") !== "NULL" && pref2.getBoolean("zz_texture_pack_enable", false)) {
@@ -1840,9 +2002,28 @@ function getTextureName() {
 		return spl[spl.length-1].replace(".zip", "");
 	} else
 		return "default";
-}
+};
 
-(function() {
+
+
+
+
+/**
+ * 업데이트 관련 객체입니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ * @namespace
+ */
+GUILib.Updater = {};
+
+/**
+ * 업데이트 체크 함수입니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
+GUILib.Updater.checkUpdate = function() {
 	new java.lang.Thread(new java.lang.Runnable({
 		run: function() {
 			try{
@@ -1855,7 +2036,7 @@ function getTextureName() {
 					var empty = new GUILib.VisualFont(0,0," ", 16);
 					var ok = new GUILib.GUIButton(0,0,80,20,"확인",function() {
 						window.stop();
-						downloadAndApply();
+						GUILib.Updater.downloadAndApply();
 					}, true);
 					var empty2 = new GUILib.VisualFont(0,0," ", 16);
 					var cancel = new GUILib.GUIButton(0,0,80,20,"취소",function() {
@@ -1868,13 +2049,19 @@ function getTextureName() {
 				}
 				reader.close();
 			} catch(e) {
-				
+				//Internet Failed
 			}
 		}
 	})).start();
-})();
+};
 
-function downloadAndApply() {
+/**
+ * 업데이트 소스입니다
+ *
+ * @since API 1
+ * @author affogatoman(colombia2)
+ */
+GUILib.Updater.downloadAndApply = function() {
 	new java.lang.Thread(new java.lang.Runnable({
 		run: function() {
 			if(myScript == "") {
@@ -1900,6 +2087,4 @@ function downloadAndApply() {
 			print("다운로드 & 적용이 완료되었습니다. 블럭런처를 재시작 해주세요.");
 		}
 	})).start();
-}
-
-/*    EOF    */
+};
