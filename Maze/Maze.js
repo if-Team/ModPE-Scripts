@@ -174,7 +174,6 @@ ProcGen._maze_in_bounds = function(grid, x, y) {
 
 };
 
-
 /**
  * Build a maze in the minecraft world!
  * @param {object} grid - The maze
@@ -229,14 +228,108 @@ function buildMaze(grid, startX, startY, startZ, blockId, blockDamage, blockHeig
     }
 }
 
-const MESSAGE_USAGE = "Usage: /maze <width> <height> [blockId=42 blockDamage=0 blockHeight=3] [TurnPercent=0.5 ReconnectPercent=0]";
+/**
+ * Wrapper class for resource
+ * @param {object} [values]
+ * @param {string} [defaultLocale]
+ * @constructor
+ */
+function Resource(values, defaultLocale){
+    this.values = values || {};
+    this.defaultLocale = defaultLocale || Resource.CURRENT_LAUNGUAGE;
+}
+
+Resource.CURRENT_LAUNGUAGE = java.util.Locale.getDefault().getLanguage() + "";
+Resource.DEFAULT_LANGUAGE = "en";
+
+Resource.prototype = {
+    toString: function(lang){
+        var value = this.values[lang || this.defaultLocale] || this.values[Resource.DEFAULT_LANGUAGE];
+        return value.toString();
+    }
+};
+
+var R = {
+    string: {
+        script_name: new Resource({
+            en: "Maze"
+        }),
+        copyright: new Resource({
+            en: "© 2015 ChalkPE. All rights reserved."
+        }),
+
+        message_usage: new Resource({
+            en: "Usage: /maze <width> <height> [blockId=42 blockDamage=0 blockHeight=3] [turnRate=50 reconnectionRate=0]",
+            ko: "사용법: /maze <가로> <세로> [블럭ID=42 블럭데미지=0 블럭높이=3] [회전율=50 재연결률=0]",
+            ja: "使用法: /maze <幅> <高さ> [ブロックID=42 ブロックデータ=0 ブロックの高さ=3] [回転率=50 再連結率=0]"
+        }),
+        message_created: new Resource({
+            en: "The maze has been created!",
+            ko: "미로가 생성되었습니다!",
+            ja: "迷路が作成されました！"
+        }),
+
+        error_not_a_number: new Resource({
+            en: "Error: parameter must be a integer!",
+            ko: "오류: 인자는 정수여야 합니다!",
+            ja: "エラー： パラメータは、整数である必要があります！"
+        }),
+        error_negative_number: new Resource({
+            en: "Error: parameter must be a positive integer!",
+            ko: "오류: 인자는 양의 정수여야 합니다!",
+            ja: "エラー： パラメータは、正の整数である必要があります！"
+        }),
+        error_out_of_bounds: new Resource({
+            en: "Error: One or more parameters are out of bound!",
+            ko: "오류: 한 개 이상의 인자가 범위를 벗어났습니다!",
+            ja: "エラー： 一つ以上のパラメータが範囲外です！"
+        }),
+        error_too_small: new Resource({
+            en: "The size of the maze is too small!"
+        }),
+
+        info_size: new Resource({
+            en: "the size of the maze: %s * %s",
+            ko: "미로 크기: %s * %s",
+            ja: "迷路の大き: %s * %s"
+        }),
+        info_block: new Resource({
+            en: "block: %s:%s, block height: %s",
+            ko: "블럭: %s:%s, 블럭 높이: %s",
+            ja: "ブロック: %s:%s, ブロックの高さ: %s"
+        }),
+        info_percent: new Resource({
+            en: "turn: %s%%, reconnect: %s%%",
+            ko: "회전율: %s%%, 재연결률: %s%%",
+            ja: "回転率: %s%%, 再連結率: %s%%"
+        })
+    }
+};
+
+/**
+ * Print a string
+ * @param {string} str
+ * @param {object[]} [args]
+ */
+function printLine(str, args){
+    clientMessage("[" + R.string.script_name + "] " + (Array.isArray(args) ? java.lang.String.format(new java.lang.String(str), args) + "" : str));
+}
+
+/**
+ * Returns number is negative
+ * @param {number} num
+ * @returns {boolean}
+ */
+function isNegative(num){
+    return num < 0;
+}
 
 /**
  * @callback newLevel
  * @requires ModPE
  */
 function newLevel(){
-    clientMessage("© 2015 ChalkPE. All rights reserved.");
+    clientMessage(R.string.copyright);
 }
 
 /**
@@ -251,8 +344,14 @@ function procCmd(str){
             return parseInt(param, 10);
         });
 
-        if(params.some(isNaN)){
-            clientMessage("[Maze] Error: parameter must be a number");
+        if(params.some(isNaN) || !params.every(isFinite)){
+            printLine(R.string.error_not_a_number);
+            return;
+        }
+
+        if(params.some(isNegative)){
+            printLine(R.string.error_negative_number);
+            return;
         }
 
         var width = 0;
@@ -270,25 +369,43 @@ function procCmd(str){
         var reconnect = 0;
 
         if(cmd.length >= 2){
-            width = params[0];
-            height = params[1];
+            var mapWidth = params[0];
+            var mapHeight = params[1];
 
-            clientMessage("[Maze] size: " + width + " * " + height);
+            if(mapWidth < 7 || mapHeight < 7){
+                printLine(R.string.error_too_small);
+                return;
+            }
+
+            width = Math.floor(mapWidth / 2) + (mapWidth % 2) - 1;
+            height = Math.floor(mapHeight / 2) + (mapHeight % 2) - 1;
+
+            printLine(R.string.info_size, [mapWidth, mapHeight]);
 
             if(cmd.length >= 5){
                 blockId = params[2];
                 blockDamage = params[3];
                 blockHeight = params[4];
 
-                clientMessage("[Maze] block: " + blockId + ":" + blockDamage);
-                clientMessage("[Maze] block height: " + blockHeight);
+                if(blockId >= 256 || blockHeight >= 128){
+                    printLine(R.string.error_out_of_bounds);
+                    return;
+                }
+
+                printLine(R.string.info_block, [blockId, blockDamage, blockHeight]);
 
                 if(cmd.length >= 7){
                     turn = params[5];
                     reconnect = params[6];
 
-                    clientMessage("[Maze] turn: " + turn + "%");
-                    clientMessage("[Maze] reconnect: " + reconnect + "%");
+                    if(turn > 100){
+                        turn = 100;
+                    }
+                    if(reconnect > 100){
+                        reconnect = 100;
+                    }
+
+                    printLine(R.string.info_percent, [turn, reconnect]);
                 }
             }
 
@@ -301,10 +418,10 @@ function procCmd(str){
                     deadEnd: 0
                 }), startX, startY, startZ, blockId, blockDamage, blockHeight);
 
-                clientMessage("The maze has been created!");
+                printLine(R.string.message_created);
             }}).start();
         }else{
-            clientMessage(MESSAGE_USAGE);
+            printLine(R.string.message_usage);
         }
     }
 }
