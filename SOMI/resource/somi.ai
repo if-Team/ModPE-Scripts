@@ -1,0 +1,148 @@
+var Somi = {};
+Somi.entity = null;
+Somi.entityType = 11;
+Somi.delay = 0;
+Somi.uniqueId = null;
+ModPE.setItem(472, "ender_pearl", 0, "Somi Debug", 1);
+var kill = false;
+
+function getYaw(x, y, z) {
+	var apil = Math.sqrt(Math.pow(x, 2)+Math.pow(z, 2));
+	var apisinHorizontal = x/apil;
+	var apicosHorizontal = z/apil;
+	var apitanHorizontal = x/z;
+	var apiacosHorizontal = Math.acos(z/apil)*180/Math.PI;
+	var apiatanVertical = Math.atan(y/apil);
+	var alpha = 0;
+	if(apisinHorizontal > 0 && apicosHorizontal > 0 && apitanHorizontal > 0)
+		alpha = 360 - apiacosHorizontal;
+	else if(apisinHorizontal > 0 && apicosHorizontal < 0 && apitanHorizontal < 0) 
+		alpha = 360 - apiacosHorizontal;
+	else if(apisinHorizontal < 0 && apicosHorizontal < 0 && apitanHorizontal > 0) 
+		alpha = apiacosHorizontal;
+	else if(apisinHorizontal < 0 && apicosHorizontal > 0 && apitanHorizontal < 0) 
+		alpha = apiacosHorizontal;
+	else if(apicosHorizontal == 1) alpha = 0;
+	else if(apisinHorizontal == 1) alpha = 90;
+	else if(apicosHorizontal == -1) alpha = 180;
+	else if(apisinHorizontal == -1) alpha = 270;
+	else if(apisinHorizontal == 0 && apicosHorizontal == 1 && apitanHorizontal == 0) null;
+	return alpha;
+};
+
+function getPitch(x, y, z) {
+	return -1 * Math.atan(y / Math.sqrt(Math.pow(x, 2)+Math.pow(z, 2))) * 180 / Math.PI;
+};
+
+function rangeEnt(a, b) {
+	return Math.sqrt(Math.pow(Entity.getX(a) - Entity.getX(b), 2) + Math.pow(Entity.getY(a) - Entity.getY(b), 2) + Math.pow(Entity.getZ(a) - Entity.getZ(b), 2));
+};
+
+function absRangeX(y, p) {
+	return (-1 * Math.sin(y / 180 * Math.PI) * Math.cos(p / 180 * Math.PI));
+};
+
+function absRangeY(y, p) {
+	return (Math.sin(-p / 180 * Math.PI));
+};
+
+function absRangeZ(y, p) {
+	return (Math.cos(y / 180 * Math.PI) * Math.cos(p / 180 * Math.PI));
+};
+
+function absX(x, y, z) {
+	return x / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+};
+
+function absY(x, y, z) {
+	return y / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+};
+
+function absZ(x, y, z) {
+	return z / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+};
+
+function SomiNewLevel(str) {
+	if(!_MAP_DIR().exists()) {
+		_MAP_DIR().mkdirs();
+	}
+	if(!_MAP_FILE().exists()) {
+		_MAP_FILE().createNewFile();
+	}
+	Somi.uniqueId = loadData(_MAP_FILE(), "UNIQUE_ID");
+	debug("this", Somi.uniqueId);
+}
+
+function SomiLeaveGame() {
+	Somi.entity = null;
+	debugT("EXIT", "");
+}
+
+function SomiAttackHook(e, v) {
+	if(Player.isPlayer(e)) debug(Entity.getUniqueId(v));
+	if(kill) Entity.setHealth(v, 0);
+}
+
+function SomiProcCmd(str) {
+	var cmd = str.split(" ");
+	switch(cmd) {
+		case "kill":
+			if(kill) kill = false;
+			else kill = true;
+			break;
+	}
+}
+
+function SomiModTick() {
+	if(Somi.delay >= 200) {
+		Somi.delay = 0;
+		debug("new", "SomiSpawner");
+		SomiSpawner();
+		return;
+	}
+	if(Somi.entity == null || Entity.getEntityTypeId(Somi.entity) != Somi.entityType || Entity.getHealth(Somi.entity) < 1) {
+		try{Entity.setHealth(Somi.entity, 0)}catch(e){};
+		Somi.entity = null;
+		Somi.delay++;
+	}else {
+		SomiMainActivity();
+	}
+}
+
+function SomiEntityAddedHook(ent) {
+	if(Somi.entity == null && Entity.getHealth(ent) > 720 && Entity.getEntityTypeId(ent) == Somi.entityType) {
+		Somi.entity = ent;
+		Entity.setMobSkin(ent, "mob/somi.png");
+		Entity.setRenderType(ent, codeHumanoid.renderType);
+	}
+}
+
+function SomiSpawner() {
+	debug("search", "");
+	var x = Math.floor(Player.getX() - absRangeX(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity())) * 10);
+	var y = Math.floor(Player.getY() - absRangeY(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity())) * 10);
+	var z = Math.floor(Player.getZ() - absRangeZ(Entity.getYaw(Player.getEntity()), Entity.getPitch(Player.getEntity())) * 10);
+	for(var ty = y; y - ty < 5 && (Level.getTile(x, ty, z) == 0); ty--);
+	if(Level.getTile(x, ty, z) == 0) {
+		debug("fail", x+":"+ty+":"+z);
+		return;
+	}else {
+		debug("run on", x+":"+ty+":"+z);
+		var ent = Level.spawnMob(x + 0.5, ty + 1.6, z + 0.5, Somi.entityType, "mob/somi.png");
+		Entity.setRenderType(ent, codeHumanoid.renderType);
+		Entity.setHealth(ent, 740);
+		saveData(_MAP_FILE(), "UNIQUE_ID", Entity.getUniqueId(ent));
+		Somi.entity = ent;
+	}
+}
+
+function SomiMainActivity() {
+	SomiHpManager();
+}
+
+function SomiHpManager() {
+	if(Entity.getHealth(Somi.entity) <= 720) {
+		debug("HpManager", "Death");
+		Entity.setHealth(Somi.entity, 0);
+	}
+}
