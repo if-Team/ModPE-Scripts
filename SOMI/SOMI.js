@@ -10,6 +10,8 @@ const _MAP_ROOT = new java.io.File(android.os.Environment.getExternalStorageDire
 function _MAP_DIR() {return new java.io.File(_MAP_ROOT, Level.getWorldDir() + "/mod")};
 function _MAP_FILE() {return new java.io.File(_MAP_DIR(), "somi.dat")};
 
+var isOnline = false;
+var scriptServerData = [];
 var errorCount = 0;
 
 if(!_FONT.exists()) {
@@ -17,7 +19,7 @@ if(!_FONT.exists()) {
 	downloadFile(_FONT, "https://www.dropbox.com/s/y1o46b2jkbxwl3o/minecraft.ttf?dl=1");
 }
 
-loadServerData("https://raw.githubusercontent.com/CI-CodeInside/ScriptVersion/master/Project_SOMI.info");
+loadServerData("https://github.com/if-Team/ModPE-Scripts/raw/master/SOMI/version");
 
 if(!_SKIN.exists() || !_RENDERING.exists() || !_AI.exists() || !_SOMI_DATA.exists()) newStart();
 
@@ -69,19 +71,23 @@ function newStart() {
 	_DIR.mkdirs();
 	_NO_MEDIA.createNewFile();
 	_SOMI_DATA.createNewFile();
+	if(!isOnline) {
+		toast("No internet connection\ncan't download resource file");
+		return;
+	}
 	if(checkServerData("MESSAGE_TYPE") == 3) {
 		toast("[Warning]\nServer Blocked\n\n" + enterChange(checkServerData("MESSAGE")));
 		return;
 	}
-	if(downloadFile(_SKIN, "https://www.dropbox.com/s/le8evx1uyjydfa7/somi.png?dl=1")) {
+	if(downloadFile(_SKIN, checkServerData("SKIN_DOWNLOAD_LINK"))) {
 		saveData(_SOMI_DATA, "SKIN_VERSION", checkServerData("SKIN_VERSION"));
 		saveData(_SOMI_DATA, "SKIN_VERSION_CODE", checkServerData("SKIN_VERSION_CODE"));
 	}else toasts("[Download fail]\nsomi.part\n\nNo internet connection");
-	if(downloadFile(_RENDERING, "https://raw.githubusercontent.com/CI-CodeInside/ScriptVersion/master/somi.renderer")) {
+	if(downloadFile(_RENDERING, checkServerData("MODELING_DOWNLOAD_LINK"))) {
 		saveData(_SOMI_DATA, "RENDERING_VERSION", checkServerData("RENDERING_VERSION"));
 		saveData(_SOMI_DATA, "RENDERING_VERSION_CODE", checkServerData("MODELING_VERSION_CODE"));
 	}else toasts("[Download fail]\nsomi.renderer\n\nNo internet connection");
-	if(downloadFile(_AI, "https://raw.githubusercontent.com/CI-CodeInside/ScriptVersion/master/somi.ai")) {
+	if(downloadFile(_AI, checkServerData("AI_DOWNLOAD_LINK"))) {
 		saveData(_SOMI_DATA, "AI_VERSION", checkServerData("AI_VERSION"));
 		saveData(_SOMI_DATA, "AI_VERSION_CODE", checkServerData("AI_VERSION_CODE"));
 	}else toasts("[Download fail]\nsomi.ai\n\nNo internet connection");
@@ -212,7 +218,6 @@ function copyFile(file, dir){
 	}
 };
 
-var scriptServerData = [];
 function loadServerData(scriptInfoUrl){
 	try{
 		var bufferedReader = new java.io.BufferedReader(new java.io.InputStreamReader(java.net.URL(scriptInfoUrl).openStream()));
@@ -222,8 +227,10 @@ function loadServerData(scriptInfoUrl){
 			scriptServerData.push(temp);;
 		}
 		bufferedReader.close();
+		isOnline = true;
 	}catch(e) {
 		print(e);
+		isOnline = false;
 	}
 }
 
@@ -231,8 +238,8 @@ function checkServerData(article){
 	var temp = [];
 	var temp2 = [];
 	for each(var e in scriptServerData){
-		temp.push(e.split(":")[0]);
-		temp2.push(e.split(":")[1]);
+		temp.push(e.split("\|")[0]);
+		temp2.push(e.split("\|")[1]);
 	}
 	for(var e in temp){
 		if(temp[e] == article)
