@@ -229,7 +229,7 @@ function buildMaze(grid, startX, startY, startZ, blockId, blockDamage, blockHeig
     }
 }
 
-const MESSAGE_USAGE = "Usage: /maze <width> <height> [blockId blockDamage blockHeight] [TurnPercent]";
+const MESSAGE_USAGE = "Usage: /maze <width> <height> [blockId=42 blockDamage=0 blockHeight=3] [TurnPercent=0.5 ReconnectPercent=0]";
 
 /**
  * @callback newLevel
@@ -246,15 +246,13 @@ function newLevel(){
  */
 function procCmd(str){
     var cmd = str.split(" ");
-    if(cmd.shift() === "maze"){
+    if(cmd.shift().toLowerCase() === "maze"){
         var params = cmd.map(function(param){
             return parseInt(param, 10);
         });
 
         if(params.some(isNaN)){
-            clientMessage("Error: parameter must be a number!");
-            clientMessage(MESSAGE_USAGE);
-            return;
+            clientMessage("[Maze] Error: parameter must be a number");
         }
 
         var width = 0;
@@ -267,57 +265,46 @@ function procCmd(str){
         var blockId = 0;
         var blockDamage = 0;
         var blockHeight = 0;
-        
+
         var turn = 0.5;
+        var reconnect = 0;
 
-        switch(cmd.length){
-            default:
-            case 0:
-            case 1:
-                clientMessage(MESSAGE_USAGE);
-                return;
+        if(cmd.length >= 2){
+            width = params[0];
+            height = params[1];
 
-            case 3:
-            case 4:
-                clientMessage("Error: invalid parameter!");
-                clientMessage(MESSAGE_USAGE);
-                return;
+            clientMessage("[Maze] size: " + width + " * " + height);
 
-            case 2:
-                width = params[0];
-                height = params[1];
-                break;
-
-            case 5:
-                width = params[0];
-                height = params[1];
-
+            if(cmd.length >= 5){
                 blockId = params[2];
                 blockDamage = params[3];
                 blockHeight = params[4];
-                break;
-                
-            case 6:
-                width = params[0];
-                height = params[1];
 
-                blockId = params[2];
-                blockDamage = params[3];
-                blockHeight = params[4];
-                
-                turn = params[5] / 100;
-                break;
+                clientMessage("[Maze] block: " + blockId + ":" + blockDamage);
+                clientMessage("[Maze] block height: " + blockHeight);
+
+                if(cmd.length >= 7){
+                    turn = params[5];
+                    reconnect = params[6];
+
+                    clientMessage("[Maze] turn: " + turn + "%");
+                    clientMessage("[Maze] reconnect: " + reconnect + "%");
+                }
+            }
+
+            new java.lang.Thread({run: function(){
+                buildMaze(ProcGen.maze({
+                    w: width, h: height,
+                    turn: turn / 100,
+                    reconnect: reconnect / 100,
+                    branch: 1,
+                    deadEnd: 0
+                }), startX, startY, startZ, blockId, blockDamage, blockHeight);
+
+                clientMessage("The maze has been created!");
+            }}).start();
+        }else{
+            clientMessage(MESSAGE_USAGE);
         }
-
-        new java.lang.Thread({run: function(){
-            buildMaze(ProcGen.maze({
-                w: width, h: height,
-                turn: turn,
-                branch: 1,
-                reconnect: 0,
-                deadEnd: 0
-            }), startX, startY, startZ, blockId, blockDamage, blockHeight);
-            clientMessage("The maze has been created!")
-        }}).start();
     }
 }
