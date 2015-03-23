@@ -1,0 +1,74 @@
+/*모자 챙 부분*/
+head.setTextureOffset(4, 2, false);
+for(var e = 0; e <= 18; e++) {
+	for(var f = 0; f <= 4; f++) {
+		head.addBox(-6 + e/2, -4.5 - f/6 - e/20, -6 + f/2 - e/10 - Math.sin(e / 18 * Math.PI), 1, 1, 1);
+	}
+}
+
+head.setTextureOffset(0, 2, false);
+for(var e = 0; e <= 14; e++) {
+	for(var f = 0; f <= 6; f++) {
+/*모자 앞쪽*/
+		head.addBox(-4 + e/2, -9 + f/2, -5 + (Math.sin(f / 3 * Math.PI) / 2), 1, 1, 1);
+/*모자 뒤쪽*/
+		head.addBox(-4 + e/2, -9 + f/2, 4 - (Math.sin(f / 3 * Math.PI) / 2), 1, 1, 1);
+/*모자 왼쪽*/
+		head.addBox(-5 + (Math.sin(f / 3 * Math.PI) / 2), -9 + f/2, -4 + e/2, 1, 1, 1);
+/*모자 오른쪽*/
+		head.addBox(4 - (Math.sin(f / 3 * Math.PI) / 2), -9 + f/2, -4 + e/2, 1, 1, 1);
+	}
+}
+
+/*모자 덮개*/
+for(var e = 1; e <= 8; e++) {
+	for(var f = 1; f <= 8; f++) {
+		head.addBox(-5 + e, -9.5 - (Math.sin(e/9 * Math.PI) * Math.sin(f/9 * Math.PI)), -5 + f, 1, 1, 1);
+	}
+}
+
+/*모자연결고리*/
+head.addBox(-4.5, -7, -4.5, 1, 1, 1);
+head.addBox(-4.5, -7, 3.5, 1, 1, 1);
+head.addBox(3.5, -7, -4.5, 1, 1, 1);
+head.addBox(3.5, -7, 3.5, 1, 1, 1);
+
+body.setTextureOffset(0, 0, false);
+for(var e = 1; e <= 15; e++) {
+	for(var f = 0; f <= 12; f++) {
+/*스커트 전면*/
+		body.addBox((-4 + e/2)*(f+24)/24-0.5, 8 + f/2, (-2)*(f+20)/18-((Math.cos(e/2*Math.PI)-0.5)*(-1)*(f/24)), 1, 1, 1);
+/*스커트 후면*/
+		body.addBox((-4 + e/2)*(f+24)/24-0.5, 8 + f/2, 2*(f+20)/18-1+((Math.cos(e/2*Math.PI)-0.5)*(-1)*(f/24)), 1, 1, 1);
+	}
+}
+for(var e = 1; e <= 7; e++) {
+	for(var f = 1; f <= 12; f++) {
+/*스커트 좌면*/
+		body.addBox(-4*(f+30)/28+0.2-((Math.cos(e/2*Math.PI)-0.5)*(-1)*(f/24)), 8 + f/2, (-2 + e*3/7) * (f+28)/24, 1, 1, 1);
+/*스커트 우면*/
+		body.addBox(4*(f+30)/28-1.2+((Math.cos(e/2*Math.PI)-0.5)*(-1)*(f/24)), 8 + f/2, (-2 + e*3/7) * (f+28)/24, 1, 1, 1);
+	}
+}
+
+/*스카프(모델링 크리에이터)*/
+var X = 2.5;
+var Y = 0;
+var Z = 0;
+body.setTextureOffset(0, 4, false);
+body.addBox(-1 + X, 4 + Y, -4 + Z, 1, 1, 1, 0);
+body.addBox(-5 + X, 4 + Y, -4 + Z, 1, 1, 1, 0);
+body.addBox(-1 + X, 3 + Y, -4 + Z, 1, 1, 1, 0);
+body.addBox(-2 + X, 3 + Y, -4 + Z, 1, 1, 1, 0);
+body.addBox(-4 + X, 3 + Y, -4 + Z, 1, 1, 1, 0);
+body.addBox(-5 + X, 3 + Y, -4 + Z, 1, 1, 1, 0);
+body.addBox(-2 + X, 2 + Y, -4 + Z, 1, 1, 1, 0);
+body.addBox(-4 + X, 2 + Y, -4 + Z, 1, 1, 1, 0);
+body.addBox(-1 + X, 2 + Y, -3 + Z, 1, 1, 1, 0);
+body.addBox(-5 + X, 2 + Y, -3 + Z, 1, 1, 1, 0);
+body.addBox(-3 + X, 1 + Y, -4 + Z, 1, 1, 1, 0);
+body.addBox(-2 + X, 1 + Y, -3 + Z, 1, 1, 1, 0);
+body.addBox(-3 + X, 1 + Y, -3 + Z, 1, 1, 1, 0);
+body.addBox(-4 + X, 1 + Y, -3 + Z, 1, 1, 1, 0);
+body.addBox(-2 + X, 0 + Y, -3 + Z, 1, 1, 1, 0);
+body.addBox(-3 + X, 0 + Y, -3 + Z, 1, 1, 1, 0);
