@@ -3,8 +3,28 @@ Somi.entity = null;
 Somi.entityType = 11;
 Somi.delay = 0;
 Somi.uniqueId = null;
+Somi.emotion = "IDLE";
+Somi.jumpDelay = 0;
+
+Somi.hpManager = function() {
+	if(Entity.getHealth(Somi.entity) <= 720) {
+		debug("HpManager", "Death");
+		Entity.setHealth(Somi.entity, 0);
+	}
+}
+
+Somi.jump = function(x, y, z, px, py, pz) {
+	if(Somi.jumpDelay > 0) {
+		Somi.jumpDelay--;
+	}else if(noJumpBlock.indexOf(Level.getTile(x + (absX(px - x, 0, pz - z) / 2), y, z + (absZ(px - x, 0, pz - z) / 2))) == -1) {
+		Somi.jumpDelay = 16;
+		Entity.setVelY(Somi.entity, 0.4);
+	}
+}
+
 ModPE.setItem(472, "ender_pearl", 0, "Somi Debug", 1);
-var kill = false;
+
+var noJumpBlock = [0,6,26,27,30,31,32,37,38,39,40,50,51,59,63,64,65,66,68,71,78,83,92,95,96,104,105,106,111,126,127,141,142,175,244];
 
 function getYaw(x, y, z) {
 	var apil = Math.sqrt(Math.pow(x, 2)+Math.pow(z, 2));
@@ -75,21 +95,16 @@ function SomiNewLevel(str) {
 
 function SomiLeaveGame() {
 	Somi.entity = null;
-	debugT("EXIT", "");
+	debugT("EXIT", "map");
 }
 
 function SomiAttackHook(e, v) {
 	if(Player.isPlayer(e)) debug(Entity.getUniqueId(v));
-	if(kill) Entity.setHealth(v, 0);
 }
 
 function SomiProcCmd(str) {
 	var cmd = str.split(" ");
 	switch(cmd) {
-		case "kill":
-			if(kill) kill = false;
-			else kill = true;
-			break;
 	}
 }
 
@@ -137,12 +152,37 @@ function SomiSpawner() {
 }
 
 function SomiMainActivity() {
-	SomiHpManager();
-}
-
-function SomiHpManager() {
-	if(Entity.getHealth(Somi.entity) <= 720) {
-		debug("HpManager", "Death");
-		Entity.setHealth(Somi.entity, 0);
+	Somi.hpManager();
+	var x = Entity.getX(Somi.entity);
+	var y = Entity.getY(Somi.entity);
+	var z = Entity.getZ(Somi.entity);
+	var px = Player.getX();
+	var py = Player.getY();
+	var pz = Player.getZ();
+	switch(Somi.emotion) {
+		case "FOLLOW_SURVIVAL":
+		case "FOLLOW_CREATIVE":
+			Somi.jump(x, y, z, px, py, pz);
+			Entity.setVelX(Somi.entity, absX(px-x, py-y, pz-z)/6);
+			Entity.setVelZ(Somi.entity, absZ(px-x, py-y, pz-z)/6);
+			if(rangeEnt(Somi.entity, Player.getEntity()) < 4) {
+				debug("a.i", "idle");
+				Somi.emotion = "IDLE";
+			}
+			break;
+//		case 2:
+			//Follow : fly
+//			break;
+		case "IDLE":
+			if(rangeEnt(Somi.entity, Player.getEntity()) > 8) {
+				if(Level.getGameMode() == 1) {
+					Somi.emotion = "FOLLOW_CREATIVE";
+					debug("a.i", "followCreative");
+				}else {
+					Somi.emotion = "FOLLOW_SURVIVAL";
+					debug("a.i", "followSurvival");
+				}
+			}
+			break;
 	}
 }

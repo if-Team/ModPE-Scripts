@@ -21,12 +21,10 @@ if(!_FONT.exists()) {
 
 loadServerData("https://github.com/if-Team/ModPE-Scripts/raw/master/SOMI/version");
 
-toast(checkServerData("VERSION"));
-
 if(!_SKIN.exists() || !_RENDERING.exists() || !_AI.exists() || !_SOMI_DATA.exists()) newStart();
 
 try {
-	var br = new java.io.BufferedReader(new java.io.FileReader(_AI));
+/var br = new java.io.BufferedReader(new java.io.FileReader(_AI));
 	var len, content = "";
 	while((len = br.readLine()) != null) {
 		content += len;
