@@ -1,14 +1,14 @@
-VERSION|SingleWave v1
-AI_VERSION|0.1
-SKIN_VERSION|0.1
-MODELING_VERSION|0.1
-VERSION_CODE|100
-AI_VERSION_CODE|100
-SKIN_VERSION_CODE|100
-MODELING_VERSION_CODE|100
-AI_DOWNLOAD_LINK|https://github.com/if-Team/ModPE-Scripts/raw/master/SOMI/resource/somi.ai
-SKIN_DOWNLOAD_LINK|https://github.com/if-Team/ModPE-Scripts/raw/master/SOMI/resource/somi.part
-MODELING_DOWNLOAD_LINK|https://github.com/if-Team/ModPE-Scripts/raw/master/SOMI/resource/somi.renderer
-MESSAGE_TYPE|1
+VERSION;SingleWave v1
+AI_VERSION;0.1
+SKIN_VERSION;0.1
+MODELING_VERSION;0.1
+VERSION_CODE;100
+AI_VERSION_CODE;100
+SKIN_VERSION_CODE;100
+MODELING_VERSION_CODE;100
+AI_DOWNLOAD_LINK;https://github.com/if-Team/ModPE-Scripts/raw/master/SOMI/resource/somi.ai
+SKIN_DOWNLOAD_LINK;https://github.com/if-Team/ModPE-Scripts/raw/master/SOMI/resource/somi.part
+MODELING_DOWNLOAD_LINK;https://github.com/if-Team/ModPE-Scripts/raw/master/SOMI/resource/somi.renderer
+MESSAGE_TYPE;1
 //0:메시지 없음, 1:처음 접속시 한번만 방송, 2:켤때미다 방송, 3:리소스 다운로드 금지 강제로 방송
-MESSAGE|§7Model, A.I Copyright 2015 CodeInside¶§7[Info]Somi A.I now release!¶§7[Info]Version - SingleWave v1
+MESSAGE;§7Model, A.I Copyright 2015 CodeInside¶§7[Info]Somi A.I now release!¶§7[Info]Version - SingleWave v1

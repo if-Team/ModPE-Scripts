@@ -21,6 +21,8 @@ if(!_FONT.exists()) {
 
 loadServerData("https://github.com/if-Team/ModPE-Scripts/raw/master/SOMI/version");
 
+toast(checkServerData("VERSION"));
+
 if(!_SKIN.exists() || !_RENDERING.exists() || !_AI.exists() || !_SOMI_DATA.exists()) newStart();
 
 try {
@@ -238,8 +240,8 @@ function checkServerData(article){
 	var temp = [];
 	var temp2 = [];
 	for each(var e in scriptServerData){
-		temp.push(e.split("\|")[0]);
-		temp2.push(e.split("\|")[1]);
+		temp.push(e.split(";")[0]);
+		temp2.push(e.split(";")[1]);
 	}
 	for(var e in temp){
 		if(temp[e] == article)
