@@ -107,9 +107,9 @@ ProcGen._maze = function(grid, x, y, direction) {
         }
 
         if(Math.random() < 0.5) {
-            td = ds[0];
+            var temp = ds[0];
             ds[0] = ds[1];
-            ds[1] = td;
+            ds[1] = temp;
         }
 
         for(i = 0; i < 2; i++) {
@@ -425,3 +425,5 @@ function procCmd(str){
         }
     }
 }
+
+void(newLevel); void(procCmd);
