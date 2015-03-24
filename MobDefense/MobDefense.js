@@ -1,5 +1,5 @@
 var ScriptName = "Code: Mob Defense";
-var Version = "Beta 0.5";
+var Version = "Beta 0.5v";
 /*
 —————Change Log—————
 Beta 0.1(20150209)
