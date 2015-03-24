@@ -1284,6 +1284,7 @@ function defenseMobSpawner(ary){new java.lang.Thread(new java.lang.Runnable({run
 						spiderJockeyAI(ent, ent2);
 						debug("Info", "Spawn" + tempArray[l], ent);
 						entList.push(ent);
+						entList.push(ent2);
 						tempArray3[l]--;
 						break;
 					default:
@@ -1314,23 +1315,22 @@ function defenseMobSpawner(ary){new java.lang.Thread(new java.lang.Runnable({run
 	clientMessage(err);
 	gaming = false;
 }}})).start();};
-/*
+
 function spiderJockeyAI(rider, mount){new java.lang.Thread(new java.lang.Runnable({run: function(){try{
 	Entity.rideAnimal(rider, mount);
-	while(temp = Entity.getHealth(rider) > 0 && temp2 = Entity.getHealth(mount) > 0){
-		if(temp > temp2){
-			Entity.setHealth(rider, temp2);
+	while(Entity.getHealth(rider) > 0 && Entity.getHealth(mount) > 0){
+		if(temp != temp2){
+			Entity.setHealth(rider, Math.floor((Entity.getHealth(rider) + Entity.getHealth(mount)) / 2));
+			Entity.setHealth(mount, Math.floor((Entity.getHealth(rider) + Entity.getHealth(mount)) / 2));
 		}
-		if(temp < temp2){
-			Entity.setHealth(mount, temp);
-		}
+		java.lang.Thread.sleep(200);
 	}
 	Entity.setHealth(rider, 0);
 	Entity.setHealth(mount, 0);
 }catch(err){
 	clientMessage("[Error]<Spider Jockey> " + err);
 }}})).start()};
-*/
+
 /*
 ==============================
 ==============================
