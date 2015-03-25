@@ -24,7 +24,7 @@ loadServerData("https://github.com/if-Team/ModPE-Scripts/raw/master/SOMI/version
 if(!_SKIN.exists() || !_RENDERING.exists() || !_AI.exists() || !_SOMI_DATA.exists()) newStart();
 
 try {
-/var br = new java.io.BufferedReader(new java.io.FileReader(_AI));
+	var br = new java.io.BufferedReader(new java.io.FileReader(_AI));
 	var len, content = "";
 	while((len = br.readLine()) != null) {
 		content += len;
@@ -97,7 +97,7 @@ function newLevel(str) {
 	var type = parseInt(checkServerData("MESSAGE_TYPE"));
 	if(type > 0) {
 		var msg = checkServerData("MESSAGE") 
-		if(msg !== loadData(_SOMI_DATA, "LAST_MESSAGE") || type !== 1) {
+		if(msg != loadData(_SOMI_DATA, "LAST_MESSAGE") || type != 1) {
 			clientMessage(enterChange(msg));
 			saveData(_SOMI_DATA, "LAST_MESSAGE", msg);
 		}
@@ -105,6 +105,7 @@ function newLevel(str) {
 	try{
 		SomiNewLevel(str);
 	}catch(e) {
+		debug("errorLine: " + e.lineNumber, e);
 	}
 }
 
@@ -112,6 +113,7 @@ function leaveGame() {
 	try{
 		SomiLeaveGame();
 	}catch(e) {
+		debugT("errorLine: " + e.lineNumber, e);
 	}
 }
 
@@ -119,6 +121,7 @@ function modTick() {
 	try{
 		SomiModTick();
 	}catch(e) {
+		debug("errorLine: " + e.lineNumber, e);
 	}
 }
 
@@ -126,6 +129,7 @@ function entityAddedHook(ent) {
 	try{
 		SomiEntityAddedHook(ent);
 	}catch(e) {
+		debug("errorLine: " + e.lineNumber, e);
 	}
 }
 
@@ -133,6 +137,7 @@ function entityRemovedHook(ent) {
 	try{
 		SomiEntityRemovedHook(ent);
 	}catch(e) {
+		debug("errorLine: " + e.lineNumber, e);
 	}
 }
 
@@ -140,6 +145,7 @@ function useItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage) {
 	try{
 		SomiUseItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage);
 	}catch(e) {
+		debug("errorLine: " + e.lineNumber, e);
 	}
 }
 
@@ -147,6 +153,7 @@ function destroyBlock(x, y, z, side) {
 	try{
 		SomiDestroyBlock(x, y, z, side);
 	}catch(e) {
+		debug("errorLine: " + e.lineNumber, e);
 	}
 }
 
@@ -154,6 +161,7 @@ function startDestroyBlock(x, y, z, side) {
 	try{
 		SomiStartDestroyBlock(x, y, z, side);
 	}catch(e) {
+		debug("errorLine: " + e.lineNumber, e);
 	}
 }
 
@@ -161,6 +169,7 @@ function procCmd(str) {
 	try{
 		SomiProcCmd(str);
 	}catch(e) {
+		debug("errorLine: " + e.lineNumber, e);
 	}
 }
 
@@ -168,6 +177,7 @@ function attackHook(attacker, victim) {
 	try{
 		SomiAttackHook(attacker, victim);
 	}catch(e) {
+		debug("errorLine: " + e.lineNumber, e);
 	}
 }
 
@@ -175,6 +185,7 @@ function deathHook(attacker, victim) {
 	try{
 		SomiDeathHook(attacker, victim);
 	}catch(e) {
+		debug("errorLine: " + e.lineNumber, e);
 	}
 }
 
@@ -182,6 +193,7 @@ function blockEventHook(x, y, z, type, data) {
 	try{
 		SomiBlockEventHook(x, y, z, type, data);
 	}catch(e) {
+		debug("errorLine: " + e.lineNumber, e);
 	}
 	clientMessage("BE-"+type+" "+data);
 }
@@ -190,6 +202,7 @@ function levelEventHook(player, eventType, x, y, z, data) {
 	try{
 		SomiLevelEventHook(player, eventType, x, y, z, data);
 	}catch(e) {
+		debug("errorLine: " + e.lineNumber, e);
 	}
 	clientMessage("LE-"+player+" "+eventType+" "+data);
 }
@@ -198,6 +211,7 @@ function chatReceiveHook(str, sender) {
 	try{
 		SomiChatReceiveHook(str, sender);
 	}catch(e) {
+		debug("errorLine: " + e.lineNumber, e);
 	}
 }
 
@@ -371,6 +385,10 @@ function toasts(str) {
 var debuging = true;
 function debug(a, b) {
 	if(debuging) clientMessage(ChatColor.GRAY + "[Debug] " + a + " - " + b);
+};
+
+function debugM(a, b) {
+	if(debuging) ModPE.showTipMessage(a + " - " + b);
 };
 
 function debugT(a, b) {

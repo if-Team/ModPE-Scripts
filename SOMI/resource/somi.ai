@@ -1,25 +1,45 @@
 var Somi = {};
-Somi.entity = null;
+Somi.entity = [];
 Somi.entityType = 11;
 Somi.delay = 0;
-Somi.uniqueId = null;
-Somi.emotion = "IDLE";
-Somi.jumpDelay = 0;
+//Somi.uniqueId = [];
+Somi.emotion = [];
+Somi.jumpDelay = [];
+Somi.isFly = 0;
+Somi.fly = 0;
+Somi.debugSpawn = false;
+Somi.rotLock = [];
 
-Somi.hpManager = function() {
-	if(Entity.getHealth(Somi.entity) <= 720) {
-		debug("HpManager", "Death");
-		Entity.setHealth(Somi.entity, 0);
+Somi.hpManager = function(e) {
+	if(Entity.getHealth(Somi.entity[e]) <= 720) {
+		debug("HpManager", Somi.entity[e] + "Death");
+		Entity.setHealth(Somi.entity[e], 0);
+		Somi.entity.splice(e, 1);
+		//Somi.uniqueId.splice(e, 1);
+		Somi.emotion.splice(e, 1);
+		Somi.jumpDelay.splice(e, 1);
+		Somi.rotLock.splice(e, 1);
 	}
 }
 
-Somi.jump = function(x, y, z, px, py, pz) {
-	if(Somi.jumpDelay > 0) {
-		Somi.jumpDelay--;
-	}else if(noJumpBlock.indexOf(Level.getTile(x + (absX(px - x, 0, pz - z) / 2), y, z + (absZ(px - x, 0, pz - z) / 2))) == -1) {
-		Somi.jumpDelay = 16;
-		Entity.setVelY(Somi.entity, 0.4);
+Somi.jump = function(e, x, y, z, px, py, pz) {
+	if(Somi.jumpDelay[e] > 0) {
+		Somi.jumpDelay[e]--;
+	}else if(noJumpBlock.indexOf(Level.getTile(x + (absX(px - x, 0, pz - z)), y, z + (absZ(px - x, 0, pz - z)))) == -1) {
+		Somi.jumpDelay[e] = 16;
+		Entity.setVelY(Somi.entity[e], 0.4);
 	}
+}
+
+Somi.see = function(e, tg) {
+	var rot = new java.lang.Thread(new java.lang.Runnable({ run: function() {
+		while(Somi.rotLock[e]) {
+			Entity.setRot(Somi.entity[e], getYaw(Entity.getX(tg) - Entity.getX(Somi.entity[e]), Entity.getY(tg) - Entity.getY(Somi.entity[e]), Entity.getZ(tg) - Entity.getZ(Somi.entity[e])), getPitch( Entity.getX(tg) - Entity.getX(Somi.entity[e]), Entity.getY(tg) - Entity.getY(Somi.entity[e]), Entity.getZ(tg) - Entity.getZ(Somi.entity[e])));
+			debugM("e", "Watch...");
+			java.lang.Thread.sleep(1);
+		}
+	}}));
+	rot.start();
 }
 
 ModPE.setItem(472, "ender_pearl", 0, "Somi Debug", 1);
@@ -99,12 +119,30 @@ function SomiLeaveGame() {
 }
 
 function SomiAttackHook(e, v) {
-	if(Player.isPlayer(e)) debug(Entity.getUniqueId(v));
+	if(Player.isPlayer(e)) debugM(Somi.entity.indexOf(v), Somi.emotion[Somi.entity.indexOf(v)]);
 }
 
 function SomiProcCmd(str) {
 	var cmd = str.split(" ");
-	switch(cmd) {
+	switch(cmd[0]) {
+		case "somidebug":
+			if(!Somi.debugSpawn) {
+				Somi.debugSpawn = true;
+				debug("TouchSpawn", "ON");
+			}else if(Somi.debugSpawn){
+				Somi.debugSpawn = false;
+				debug("TouchSpawn", "OFF");
+			}
+		break;
+	}
+}
+
+function SomiUseItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage) {
+	if(Somi.debugSpawn || itemid ===  472) {
+		debug("run on", x+":"+y+":"+z);
+		var ent = Level.spawnMob(x + 0.5, y + 1.6, z + 0.5, Somi.entityType, "mob/somi.png");
+		Entity.setHealth(ent, 740);
+		SomiEntityAddedHook(ent);
 	}
 }
 
@@ -115,9 +153,7 @@ function SomiModTick() {
 		SomiSpawner();
 		return;
 	}
-	if(Somi.entity == null || Entity.getEntityTypeId(Somi.entity) != Somi.entityType || Entity.getHealth(Somi.entity) < 1) {
-		try{Entity.setHealth(Somi.entity, 0)}catch(e){};
-		Somi.entity = null;
+	if(Somi.entity.length < 1) {
 		Somi.delay++;
 	}else {
 		SomiMainActivity();
@@ -125,12 +161,24 @@ function SomiModTick() {
 }
 
 function SomiEntityAddedHook(ent) {
-	if(Somi.entity == null && Entity.getHealth(ent) > 720 && Entity.getEntityTypeId(ent) == Somi.entityType) {
-		Somi.entity = ent;
+	if(Entity.getHealth(ent) <= 740 && Entity.getHealth(ent) > 720 && Entity.getEntityTypeId(ent) == Somi.entityType) {
+		Somi.entity.push(ent);
+		Somi.jumpDelay.push(0);
+		Somi.emotion.push("IDLE");
+		Somi.rotLock.push(false);
+		//Somi.uniqueId.push(Entity.getUniqueId(ent));
 		Entity.setMobSkin(ent, "mob/somi.png");
 		Entity.setRenderType(ent, codeHumanoid.renderType);
+		debug("length", Somi.entity.length);
 	}
-}
+};
+
+function SomiDestroyBlock() {};
+function SomiStartDeatroyBlock() {};
+function SomiEntityRemovedHook() {};
+function SomiDeathHook() {};
+function SomiBlockEventHook() {};
+function SomiLevelEventHook() {};
 
 function SomiSpawner() {
 	debug("search", "");
@@ -144,45 +192,80 @@ function SomiSpawner() {
 	}else {
 		debug("run on", x+":"+ty+":"+z);
 		var ent = Level.spawnMob(x + 0.5, ty + 1.6, z + 0.5, Somi.entityType, "mob/somi.png");
-		Entity.setRenderType(ent, codeHumanoid.renderType);
+		//Entity.setRenderType(ent, codeHumanoid.renderType);
 		Entity.setHealth(ent, 740);
-		saveData(_MAP_FILE(), "UNIQUE_ID", Entity.getUniqueId(ent));
-		Somi.entity = ent;
+		SomiEntityAddedHook(ent);
+		//saveData(_MAP_FILE(), "UNIQUE_ID", Entity.getUniqueId(ent));
 	}
 }
 
-function SomiMainActivity() {
-	Somi.hpManager();
-	var x = Entity.getX(Somi.entity);
-	var y = Entity.getY(Somi.entity);
-	var z = Entity.getZ(Somi.entity);
+function SomiMainActivity() {for(var e in Somi.entity) {
+	Somi.hpManager(e);
+	var x = Entity.getX(Somi.entity[e]);
+	var y = Entity.getY(Somi.entity[e]);
+	var z = Entity.getZ(Somi.entity[e]);
 	var px = Player.getX();
 	var py = Player.getY();
 	var pz = Player.getZ();
-	switch(Somi.emotion) {
-		case "FOLLOW_SURVIVAL":
-		case "FOLLOW_CREATIVE":
-			Somi.jump(x, y, z, px, py, pz);
-			Entity.setVelX(Somi.entity, absX(px-x, py-y, pz-z)/6);
-			Entity.setVelZ(Somi.entity, absZ(px-x, py-y, pz-z)/6);
-			if(rangeEnt(Somi.entity, Player.getEntity()) < 4) {
-				debug("a.i", "idle");
-				Somi.emotion = "IDLE";
-			}
-			break;
-//		case 2:
-			//Follow : fly
-//			break;
-		case "IDLE":
-			if(rangeEnt(Somi.entity, Player.getEntity()) > 8) {
-				if(Level.getGameMode() == 1) {
-					Somi.emotion = "FOLLOW_CREATIVE";
-					debug("a.i", "followCreative");
-				}else {
-					Somi.emotion = "FOLLOW_SURVIVAL";
-					debug("a.i", "followSurvival");
+	if(Level.getTile(px,py-2,pz) != 0) {
+		if(Somi.isFly > 0) {
+			Somi.isFly--;
+		}else if(Somi.fly) {
+			Somi.fly = false;
+		}
+	}else {
+		if(Somi.isFly < 32) {
+			Somi.isFly++;
+		}else if(!Somi.fly) {
+			Somi.fly = true;
+		}
+	}
+	switch(Somi.emotion[e]) {
+		case "FOLLOW":
+			if(Somi.fly) {
+				Entity.setVelX(Somi.entity[e], absX(px-x, py-y-1.6, pz-z)/2);
+				Entity.setVelY(Somi.entity[e], absY(px-x, py-y-1.6, pz-z)/2);
+				Entity.setVelZ(Somi.entity[e], absZ(px-x, py-y-1.6, pz-z)/2);
+				if(rangeEnt(Somi.entity[e], Player.getEntity()) < 4) {
+					debug("a.i", Somi.entity[e] + "flyIdle");
+					Somi.rotLock[e] = false;
+					Somi.emotion[e] = "FLY_IDLE";
+				}
+			}else {
+				Somi.jump(e, x, y, z, px, py, pz);
+				Entity.setVelX(Somi.entity[e], absX(px-x, py-y-1, pz-z)/6);
+				Entity.setVelZ(Somi.entity[e], absZ(px-x, py-y-1, pz-z)/6);
+				if(rangeEnt(Somi.entity[e], Player.getEntity()) < 4) {
+					debug("a.i", Somi.entity[e] + "idle");
+					Somi.rotLock[e] = false;
+					Somi.emotion[e] = "IDLE";
 				}
 			}
 			break;
+		case "IDLE":
+			Entity.setVelX(Somi.entity[e], 0);
+			Entity.setVelZ(Somi.entity[e], 0);
+			if(rangeEnt(Somi.entity[e], Player.getEntity()) > 8) {
+				Somi.emotion[e] = "FOLLOW";
+				Somi.rotLock[e] = true;
+				Somi.see(e, Player.getEntity());
+				debug("a.i", Somi.entity[e] + "follow");
+			}
+			break;
+		case "FLY_IDLE":
+			Entity.setVelX(Somi.entity[e], 0);
+			Entity.setVelY(Somi.entity[e], 0);
+			Entity.setVelZ(Somi.entity[e], 0);
+			if(!Somi.fly) {
+				Somi.emotion[e] = "IDLE";
+				debug("a.i", Somi.entity[e] + "idle");
+			}
+			if(rangeEnt(Somi.entity[e], Player.getEntity()) > 8) {
+				Somi.rotLock[e] = true;
+				Somi.see(e, Player.getEntity());
+				Somi.emotion[e] = "FOLLOW";
+				debug("a.i", Somi.entity[e] + "follow");
+			}
+			break;
 	}
-}
+}}
