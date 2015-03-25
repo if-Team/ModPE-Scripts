@@ -44,7 +44,7 @@ Somi.jumpDelay = [];
 Somi.isFly = 0;
 Somi.fly = 0;
 Somi.debugSpawn = false;
-Somi.rotLock = false;
+Somi.rotLock = [];
 
 Somi.hpManager = function(e) {
 	if(Entity.getHealth(Somi.entity[e]) <= 720) {
@@ -54,13 +54,14 @@ Somi.hpManager = function(e) {
 		//Somi.uniqueId.splice(e, 1);
 		Somi.emotion.splice(e, 1);
 		Somi.jumpDelay.splice(e, 1);
+		Somi.rotLock.splice(e, 1);
 	}
 }
 
 Somi.jump = function(e, x, y, z, px, py, pz) {
 	if(Somi.jumpDelay[e] > 0) {
 		Somi.jumpDelay[e]--;
-	}else if(noJumpBlock.indexOf(Level.getTile(x + (absX(px - x, 0, pz - z) / 2), y, z + (absZ(px - x, 0, pz - z) / 2))) == -1) {
+	}else if(noJumpBlock.indexOf(Level.getTile(x + (absX(px - x, 0, pz - z)), y, z + (absZ(px - x, 0, pz - z)))) == -1) {
 		Somi.jumpDelay[e] = 16;
 		Entity.setVelY(Somi.entity[e], 0.4);
 	}
@@ -68,8 +69,9 @@ Somi.jump = function(e, x, y, z, px, py, pz) {
 
 Somi.see = function(e, tg) {
 	var rot = new java.lang.Thread(new java.lang.Runnable({ run: function() {
-		while(Somi.rotLock) {
-			Entity.setRot(e, getYaw(Entity.getX(tg), Entity.getY(tg), Entity.getZ(tg)), getPitch(Entity.getX(tg), Entity.getY(tg), Entity.getZ(tg)));
+		while(Somi.rotLock[e]) {
+			Entity.setRot(Somi.entity[e], getYaw(Entity.getX(tg) - Entity.getX(Somi.entity[e]), Entity.getY(tg) - Entity.getY(Somi.entity[e]), Entity.getZ(tg) - Entity.getZ(Somi.entity[e])), getPitch( Entity.getX(tg) - Entity.getX(Somi.entity[e]), Entity.getY(tg) - Entity.getY(Somi.entity[e]), Entity.getZ(tg) - Entity.getZ(Somi.entity[e])));
+			debugM("e", "Watch...");
 			java.lang.Thread.sleep(1);
 		}
 	}}));
@@ -162,17 +164,17 @@ function SomiProcCmd(str) {
 		case "somidebug":
 			if(!Somi.debugSpawn) {
 				Somi.debugSpawn = true;
-				debugT("TouchSpawn", "ON");
+				debug("TouchSpawn", "ON");
 			}else if(Somi.debugSpawn){
 				Somi.debugSpawn = false;
-				debugT("TouchSpawn", "OFF");
+				debug("TouchSpawn", "OFF");
 			}
 		break;
 	}
 }
 
 function SomiUseItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage) {
-	if(Somi.debugSpawn) {
+	if(Somi.debugSpawn || itemId ===  472) {
 		debug("run on", x+":"+y+":"+z);
 		var ent = Level.spawnMob(x + 0.5, y + 1.6, z + 0.5, Somi.entityType, "mob/somi.png");
 		Entity.setHealth(ent, 740);
@@ -199,6 +201,7 @@ function SomiEntityAddedHook(ent) {
 		Somi.entity.push(ent);
 		Somi.jumpDelay.push(0);
 		Somi.emotion.push("IDLE");
+		Somi.rotLock.push(false);
 		//Somi.uniqueId.push(Entity.getUniqueId(ent));
 		Entity.setMobSkin(ent, "mob/somi.png");
 		Entity.setRenderType(ent, codeHumanoid.renderType);
@@ -254,7 +257,7 @@ function SomiMainActivity() {for(var e in Somi.entity) {
 				Entity.setVelZ(Somi.entity[e], absZ(px-x, py-y-1.6, pz-z)/2);
 				if(rangeEnt(Somi.entity[e], Player.getEntity()) < 4) {
 					debug("a.i", Somi.entity[e] + "flyIdle");
-					Somi.rotLock = false;
+					Somi.rotLock[e] = false;
 					Somi.emotion[e] = "FLY_IDLE";
 				}
 			}else {
@@ -263,7 +266,7 @@ function SomiMainActivity() {for(var e in Somi.entity) {
 				Entity.setVelZ(Somi.entity[e], absZ(px-x, py-y-1, pz-z)/6);
 				if(rangeEnt(Somi.entity[e], Player.getEntity()) < 4) {
 					debug("a.i", Somi.entity[e] + "idle");
-					Somi.rotLock = false;
+					Somi.rotLock[e] = false;
 					Somi.emotion[e] = "IDLE";
 				}
 			}
@@ -271,8 +274,8 @@ function SomiMainActivity() {for(var e in Somi.entity) {
 		case "IDLE":
 			if(rangeEnt(Somi.entity[e], Player.getEntity()) > 8) {
 				Somi.emotion[e] = "FOLLOW";
-				Somi.rotLock = true;
-				Somi.see(Somi.entity[e], Player.getEntity());
+				Somi.rotLock[e] = true;
+				Somi.see(e, Player.getEntity());
 				debug("a.i", Somi.entity[e] + "follow");
 			}
 			break;
@@ -285,8 +288,8 @@ function SomiMainActivity() {for(var e in Somi.entity) {
 				debug("a.i", Somi.entity[e] + "idle");
 			}
 			if(rangeEnt(Somi.entity[e], Player.getEntity()) > 8) {
-				Somi.rotLock = true;
-				Somi.see(Somi.entity[e], Player.getEntity());
+				Somi.rotLock[e] = true;
+				Somi.see(e, Player.getEntity());
 				Somi.emotion[e] = "FOLLOW";
 				debug("a.i", Somi.entity[e] + "follow");
 			}
@@ -356,7 +359,7 @@ function newLevel(str) {
 	var type = parseInt(checkServerData("MESSAGE_TYPE"));
 	if(type > 0) {
 		var msg = checkServerData("MESSAGE") 
-		if(msg !== loadData(_SOMI_DATA, "LAST_MESSAGE") || type !== 1) {
+		if(msg != loadData(_SOMI_DATA, "LAST_MESSAGE") || type != 1) {
 			clientMessage(enterChange(msg));
 			saveData(_SOMI_DATA, "LAST_MESSAGE", msg);
 		}
