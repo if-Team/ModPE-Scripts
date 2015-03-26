@@ -70,6 +70,8 @@ var breaking = false;
 var debuging = false;
 var temp,temp2,temp3,temp4,temp5,tempArray,tempArray2,tempArray3,tempArray4,processing,mobSpawnLocX,mobSpawnLocZ,mob,skin,ent,ent2,entList,spawnLimit,pause;
 var zombieHighlight, skeletonHighlight, spiderHighlight, zombiePigHighlight, silverfishHighlight, endermanHighlight;
+var tick20 = 0;
+var crashCount = 0;
 
 function newLevel(lvl){
 	if(new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/CodeMobDefense").exists()){/**해당맵이 디팬스맵일경우*/
@@ -77,6 +79,8 @@ function newLevel(lvl){
 			run: function(){
 				try{
 					clientMessage(ChatColor.GRAY + "[Info] Booting...");/**저사양 기기를 위한 대기시간*/
+					mainTextBufferActivity();/**전광판 기능 활성화*/
+					mainBackgroundActivity();/**상시 돌아가는 프로세스 시적*/
 					delay(3000);
 					clientMessage(ChatColor.GRAY + "Mob Defense Map - CodeInside");
 					messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 1]);
@@ -84,8 +88,6 @@ function newLevel(lvl){
 					clientMessage("Mob Defense Help : /defense");
 					running = true;
 					players = new Array();
-					mainTextBufferActivity();/**전광판 기능 활성화*/
-					mainBootActivity();/**상시 돌아가는 프로세스 시적*/
 				}catch(err){
 					running = false;
 					broadcast(ChatColor.DARK_RED + "[newLevel Error" + err.lineNumber + "] " + err);
@@ -280,83 +282,104 @@ function delay(int){
 	java.lang.Thread.sleep(int);
 };
 
-function mainBootActivity(){
-	while(running){
-		delay(1000);
-		var temp = Entity.getAll();
-		for each(var e in temp){
-			if(Player.isPlayer(e)){
-				if(players.indexOf(e) == "-1"){
-					players.push(e);
-					debug("push", e);
-					teleport("LOBY",e);
-					messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
-					messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Welcome", 100]);
-					messageBuffer.push([2642, 89, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
-					break;
-				}
-			}else{
-				if(!gaming){
-					Entity.remove(e);
-				}
-			}
+function mainBackgroundActivity() {new java.lang.Thread(new java.lang.Runnable( {run: function() {try {
+	while(running) {
+		delay(50);
+		if(++tick20 >= 20) {
+			tick20 = 0;
+			playerManager();
 		}
-		for(var e in players){
-			if(!Player.isPlayer(players[e])) {
-				players.splice(e, 1);
-				debug("splice", players[e]);
-				return;
-			}
-		}
-		for each(var e in players){
-			switch(Level.getTile(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e))){
-				case 173:
-					if(!gaming){
-						if(defenders.indexOf(e) == -1){
-							defenders.push(e);
-							teleport("READY", e);
-							broadcast(ChatColor.YELLOW + "[" + defenders.length + "/" + players.length + "] " + Player.getName(e) + ChatColor.AQUA + " join Party");
-							//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
-							//messageBuffer.push([2642, 97, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
-							//messageBuffer.push([2642, 89, 56, "X-", 80, 35, 3, 42, 0, "Join Party ", 100]);
-							//messageBuffer.push([2642, 81, 56, "X-", 80, 35, 15, 42, 0, "[" + defenders.length + "/" + players.length + "]", 100]);
-							breaking = true;
-						}else{
-							defenders.splice(defenders.indexOf(e),1);
-							teleport("LOBY", e);
-						}
-					}
-					break;
-				case 35:
-					if(Level.getData(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e)) == 15){
-						teleport("LOBY", e);
-					}
-					if(gaming && Level.getData(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e)) == 1){
-						teleport("VIEW", e);
-					}
-					break;
-				case 159:
-					if(!gaming && Level.getData(Entity.getX(e) ,Entity.getY(e) - 2,Entity.getZ(e)) == 10){
-						if(defenders.indexOf(e) == -1){
-							defenders.push(e);
-							teleport("READY", e);
-						}else{
-							defenders.splice(defenders.indexOf(e),1);
-							teleport("LOBY", e);
-							broadcast(ChatColor.YELLOW + "[" + defenders.length + "/" + players.length + "] " + Player.getName(e) + ChatColor.RED + " leave Party");
-							messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
-							messageBuffer.push([2642, 97, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
-							messageBuffer.push([2642, 89, 56, "X-", 80, 35, 14, 42, 0, "Leave Party", 100]);
-							messageBuffer.push([2642, 81, 56, "X-", 80, 35, 15, 42, 0, "[" + defenders.length + "/" + players.length + "]", 100]);
-							breaking = true;
-						}
-					}
-					break;
-			}
-			if(breaking){
-				breaking = false;
+	}
+}catch(e) {
+	broadcast(ChatColor.DARK_RED + "[MainBackgroundActivity Error" + e.lineNumber + "] " + e);
+	delay(1000);
+	if(++crashCount <= 3) {
+		broadcast(ChatColor.RED + "ERROR IGNORE - AUTO REBOOT...");
+	}else {
+		broadcast(ChatColor.DARK_RED + "CAN'T HOLD ON. SERVER CRASH");
+		broadcast(ChatColor.GOLD + "please report Error Message to");
+		broadcast(ChatColor.GOLD + "CodeInside(scgtdy7151@gmail.com)");
+		delay(3000);
+		broadcast(ChatColor.DARK_RED + "SERVER AUTO CLOSE please wait...");
+		delay(5000);
+		net.zhuoweizhang.mcpelauncher.ui.NerdyStuffActivity.forceRestart(com.mojang.minecraftpe.MainActivity.currentMainActivity.get());
+	}
+}}})).start()};
+
+function playerManager(){
+	var temp = Entity.getAll();
+	for each(var e in temp){
+		if(Player.isPlayer(e)){
+			if(players.indexOf(e) == "-1"){
+				players.push(e);
+				debug("push", e);
+				teleport("LOBY",e);
+				messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
+				messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Welcome", 100]);
+				messageBuffer.push([2642, 89, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
 				break;
 			}
+		}else{
+			if(!gaming){
+				Entity.remove(e);
+			}
+		}
+	}
+	for(var e in players){
+		if(!Player.isPlayer(players[e])) {
+			players.splice(e, 1);
+			debug("splice", players[e]);
+			return;
+		}
+	}
+	for each(var e in players){
+		switch(Level.getTile(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e))){
+			case 173:
+				if(!gaming){
+					if(defenders.indexOf(e) == -1){
+						defenders.push(e);
+						teleport("READY", e);
+						broadcast(ChatColor.YELLOW + "[" + defenders.length + "/" + players.length + "] " + Player.getName(e) + ChatColor.AQUA + " join Party");
+						//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
+						//messageBuffer.push([2642, 97, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
+						//messageBuffer.push([2642, 89, 56, "X-", 80, 35, 3, 42, 0, "Join Party ", 100]);
+						//messageBuffer.push([2642, 81, 56, "X-", 80, 35, 15, 42, 0, "[" + defenders.length + "/" + players.length + "]", 100]);
+						breaking = true;
+					}else{
+						defenders.splice(defenders.indexOf(e),1);
+						teleport("LOBY", e);
+					}
+				}
+				break;
+			case 35:
+				if(Level.getData(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e)) == 15){
+					teleport("LOBY", e);
+				}
+				if(gaming && Level.getData(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e)) == 1){
+					teleport("VIEW", e);
+				}
+				break;
+			case 159:
+				if(!gaming && Level.getData(Entity.getX(e) ,Entity.getY(e) - 2,Entity.getZ(e)) == 10){
+					if(defenders.indexOf(e) == -1){
+						defenders.push(e);
+						teleport("READY", e);
+					}else{
+						defenders.splice(defenders.indexOf(e),1);
+						teleport("LOBY", e);
+						broadcast(ChatColor.YELLOW + "[" + defenders.length + "/" + players.length + "] " + Player.getName(e) + ChatColor.RED + " leave Party");
+						//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
+						//messageBuffer.push([2642, 97, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
+						//messageBuffer.push([2642, 89, 56, "X-", 80, 35, 14, 42, 0, "Leave Party", 100]);
+						//messageBuffer.push([2642, 81, 56, "X-", 80, 35, 15, 42, 0, "[" + defenders.length + "/" + players.length + "]", 100]);
+						breaking = true;
+					}
+				}
+				break;
+		}
+		if(breaking){
+			breaking = false;
+			break;
 		}
 	}
 };
@@ -1346,8 +1369,23 @@ function spiderJockeyAI(rider, mount){new java.lang.Thread(new java.lang.Runnabl
 	Entity.setHealth(rider, 0);
 	Entity.setHealth(mount, 0);
 }catch(err){
-	clientMessage("[Error]<Spider Jockey> " + err);
+	broadcast(ChatColor.DARK_RED + "[SpiderJockey Error" + err.lineNumber + "] " + err);
 }}})).start()};
+
+function defenderBuff(effect, power, duration) {try {
+	switch(effect) {
+		case "HEAL":
+			break;
+		case "SHILD":
+			break;
+		case "KNOCKBACK":
+			break;
+		default:
+			broadcast("[defenderBuff Error] Unkown effect type: " + effect);
+	}
+}catch(e) {
+	broadcast(ChatColor.DARK_RED + "[DefenderBuff Error" + e.lineNumber + "] " + e);
+}};
 
 /*
 ==============================
