@@ -896,7 +896,7 @@ function mobDefenseMainActivity(){
 	highlight("ZOMBIE_PIG", "ON");
 	highlight("ENDER_MAN", "ON");
 	highlight("SILVER_FISH", "ON");
-	giveDefenders(["310:0:1", "276:-1000:1", "354:0:1", "400:0:32", "303:14:10"]);
+	giveDefenders(["310:0:1", "276:-1000:1", "354:0:1", "400:0:32", "383:14:10"]);
 	broadcast(ChatColor.YELLOW + "[Info] break time!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
 	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "break!", 300]);
@@ -940,6 +940,10 @@ function playerHPManager(){
 		run: function(){
 			try{
 				while(gaming){
+					if(defenders.length == 0){
+						broadcast(ChatColor.DARK_RED + "GAME OVER");
+						gaming = false;
+					}
 					java.lang.Thread.sleep(100);
 					for(var e in defenders){
 						if(Entity.getHealth(defenders[e]) < 1){
@@ -957,10 +961,6 @@ function playerHPManager(){
 						teleport("VIEW", deaths[e]);
 						deaths.splice(e, 1);
 						}
-					}
-					if(defenders.length == 0){
-						broadcast(ChatColor.DARK_RED + "GAME OVER");
-						gaming = false;
 					}
 				}
 			}catch(err){
