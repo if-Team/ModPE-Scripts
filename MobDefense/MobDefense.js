@@ -33,6 +33,12 @@ Beta 0.5(20150215)
 	-(중요)21라운드 계획 시작
 	-(중요)보스 추가 예정 계획 착안
 	-(중요)보스 A.I작업중
+	
+Beta 0.6(20150326)
+	-팀킬 방지
+	-휴식시간 추가
+	-forceclear 명령어 개선
+	-코드 정리
 */
 
 /**
@@ -63,23 +69,23 @@ var deaths = new Array();
 var breaking = false;
 var debuging = false;
 var temp,temp2,temp3,temp4,temp5,tempArray,tempArray2,tempArray3,tempArray4,processing,mobSpawnLocX,mobSpawnLocZ,mob,skin,ent,ent2,entList,spawnLimit,pause;
-var zombieHighlight, skeletonHighlight, spiderHighlight, zombiePigHighlight, silverfishHighlight, endermanHighlight,teleporting;
+var zombieHighlight, skeletonHighlight, spiderHighlight, zombiePigHighlight, silverfishHighlight, endermanHighlight;
 
 function newLevel(lvl){
-	if(new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/CodeMobDefense").exists()){
+	if(new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/CodeMobDefense").exists()){/**해당맵이 디팬스맵일경우*/
 		new java.lang.Thread(new java.lang.Runnable({
 			run: function(){
 				try{
-					clientMessage(ChatColor.GRAY + "[Info] Booting...");
+					clientMessage(ChatColor.GRAY + "[Info] Booting...");/**저사양 기기를 위한 대기시간*/
 					delay(3000);
 					clientMessage(ChatColor.GRAY + "Mob Defense Map - CodeInside");
-					//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 1]);
-					//messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Mob Defense Map - CodeInside", 50]);
+					messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 1]);
+					messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Mob Defense Map - CodeInside", 50]);/**메인 전광판에 메시지 출력*/
 					clientMessage("Mob Defense Help : /defense");
 					running = true;
 					players = new Array();
-					mainTextBufferActivity();
-					mainBootActivity();
+					mainTextBufferActivity();/**전광판 기능 활성화*/
+					mainBootActivity();/**상시 돌아가는 프로세스 시적*/
 				}catch(err){
 					running = false;
 					broadcast(err);
@@ -91,7 +97,7 @@ function newLevel(lvl){
 
 function leaveGame(){
 	gaming = false;
-	running = false;
+	running = false;/**종료*/
 };
 
 function entityRemovedHook(ent){
@@ -112,6 +118,12 @@ function entityRemovedHook(ent){
 	}
 };
 
+function attackHook(attacker, victim) {
+	if(Player.isPlayer(victim) && Player.isPlayer(attacker)) {
+		preventDefault();/**팀킬 방지*/
+	}
+}
+
 function procCmd(str){
 	var cmd = str.split(" ");
 	if(str == "start"){
@@ -123,7 +135,6 @@ function procCmd(str){
 						broadcast(ChatColor.YELLOW + "[Info] Game Start!");
 						//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
 						//messageBuffer.push([2642, 97, 56, "X-", 80, 35, 1, 42, 0, "Game Start!", 100]);
-						delay(1000);
 						mobDefenseMainActivity();
 						for each(var e in defenders)
 							teleport("LOBY", e);
@@ -162,7 +173,9 @@ function procCmd(str){
 		}
 	}else if(str == "forceclear"){
 		try{
-			entList = [];
+			for each(var e in entList) {
+				Entity.setHealth(e, 0);
+			}
 		}catch(err){
 			clientMessage(ChatColor.DARK_RED + "[Error] " + err);
 		}
@@ -275,6 +288,7 @@ function mainBootActivity(){
 			if(Player.isPlayer(e)){
 				if(players.indexOf(e) == "-1"){
 					players.push(e);
+					debug("push", e);
 					teleport("LOBY",e);
 					messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
 					messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Welcome", 100]);
@@ -290,7 +304,11 @@ function mainBootActivity(){
 		for(var e in players){
 			if(!Player.isPlayer(players[e])) {
 				players.splice(e, 1);
+				debug("splice", players[e]);
+				return;
 			}
+		}
+		for each(var e in players){
 			switch(Level.getTile(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e))){
 				case 173:
 					if(!gaming){
@@ -599,10 +617,10 @@ function mobDefenseMainActivity(){
 	highlight("SPIDER", "ON");
 	highlight("SILVER_FISH", "ON");
 	giveDefenders(["304:0:1", "274:-1000:1", "354:0:1"]);
-	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
+	broadcast(ChatColor.AQUA + "[Info] break time!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
-	stageDelay(30000);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "break!", 300]);
+	stageDelay(60000);
 	if(!gaming) return;
 	while(pause){
 		delay(1000);
@@ -879,9 +897,9 @@ function mobDefenseMainActivity(){
 	highlight("ENDER_MAN", "ON");
 	highlight("SILVER_FISH", "ON");
 	giveDefenders(["310:0:1", "276:-1000:1", "354:0:1", "400:0:32", "303:14:10"]);
-	broadcast(ChatColor.YELLOW + "[Info] Clear!");
+	broadcast(ChatColor.YELLOW + "[Info] break time!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "break!", 300]);
 	stageDelay(60000);
 	if(!gaming) return;
 	while(pause){
@@ -959,33 +977,21 @@ function teleport(place, ent){
 			var rid = Level.spawnMob(2599 + (10 * Math.random()), 67, 0 + (8 * Math.random()), 81);
 			Entity.rideAnimal(ent, rid);
 			Entity.remove(rid);
-			teleporting = true;
-			delay(3000);
-			teleporting = false;
 			break;
 		case "READY":
 			var rid = Level.spawnMob(2621 + (4 * Math.random()), 67, 17 + (4 * Math.random()), 81);
 			Entity.rideAnimal(ent, rid);
 			Entity.remove(rid);
-			teleporting = true;
-			delay(3000);
-			teleporting = false;
 			break;
 		case "BATTLE":
 			var rid = Level.spawnMob(2595 + (18 * Math.random()), 47, -38 + (18 * Math.random()), 81);
 			Entity.rideAnimal(ent, rid);
 			Entity.remove(rid);
-			teleporting = true;
-			delay(3000);
-			teleporting = false;
 			break;
 		case "VIEW":
 			var rid = Level.spawnMob(2598 + (12 * Math.random()), 63, -35 + (12 * Math.random()), 81);
 			Entity.rideAnimal(ent, rid);
 			Entity.remove(rid);
-			teleporting = true;
-			delay(3000);
-			teleporting = false;
 			break;
 	}
 };
@@ -1405,8 +1411,6 @@ function text3d(x,y,z,side,maxLength,textColor,textColorData, backgroundColor, b
 		}else{
 			for each(var Cshape in StringCore){
 				if(Cshape.t == C_InputString[CwordNum]){
-					while(teleporting)
-						delay(100);
 					debug("write", C_InputString[CwordNum], C_WordLocX + ", " + C_WordLocZ);
 					if(Cshape.y > C_WordMaxY)
 						C_WordMaxY = Cshape.y;
@@ -1460,8 +1464,6 @@ function text3d(x,y,z,side,maxLength,textColor,textColorData, backgroundColor, b
 function textClean(sx,sy,sz,ex,ey,ez,block,data,dly){new java.lang.Thread(new java.lang.Runnable({run: function(){try{
 	writting = true;
 	for(var cy = sy; cy <= ey; cy++){
-		while(teleporting)
-			delay(100);
 		for(var cz = sz; cz <= ez; cz++){
 			for(var cx = sx; cx <= ex; cx++){
 				if(Level.getTile(cx, cy, cz) != block || Level.getData(cx, cy, cz) != data){
