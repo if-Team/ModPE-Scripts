@@ -60,18 +60,34 @@ Beta 0.6(20150326)
 *
 */
 
-
-var running = false;
-var gaming = false;
-var players = new Array();
-var defenders = new Array();
-var deaths = new Array();
-var breaking = false;
+/**버그 해결용 디버깅툴*/
 var debuging = false;
+
+/**디팬스 맵인지 확인*/
+var running = false;
+/**게임중인지 확인*/
+var gaming = false;
+/**모든 플레이어의 배열*/
+var players = new Array();
+/**게임을 진행중인 플레이어의 배열*/
+var defenders = new Array();
+/**죽은 플레이어를 임시보관하는 배열*/
+var deaths = new Array();
+/**게임에 사용할 변수들*/
+var breaking = false;
 var temp,temp2,temp3,temp4,temp5,tempArray,tempArray2,tempArray3,tempArray4,processing,mobSpawnLocX,mobSpawnLocZ,mob,skin,ent,ent2,entList,spawnLimit,pause;
 var zombieHighlight, skeletonHighlight, spiderHighlight, zombiePigHighlight, silverfishHighlight, endermanHighlight;
+/**2초마다 반복 점멸하는 신호*/
+var highlightToggle = false;
+/**정해진 숫자만큼 왕복*/
 var tick20 = 0;
+var tick40 = 0;
+/**크래쉬 횟수*/
 var crashCount = 0;
+/**0.01초*/
+var mtick = 0;
+/**최근 2초간 틱의 활성도 배열*/
+var tock = new Array();
 
 function newLevel(lvl){
 	if(new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/CodeMobDefense").exists()){/**해당맵이 디팬스맵일경우*/
@@ -79,6 +95,7 @@ function newLevel(lvl){
 			run: function(){
 				try{
 					clientMessage(ChatColor.GRAY + "[Info] Booting...");/**저사양 기기를 위한 대기시간*/
+					running = true;
 					mainTextBufferActivity();/**전광판 기능 활성화*/
 					mainBackgroundActivity();/**상시 돌아가는 프로세스 시적*/
 					delay(3000);
@@ -86,8 +103,7 @@ function newLevel(lvl){
 					messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 1]);
 					messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Mob Defense Map - CodeInside", 50]);/**메인 전광판에 메시지 출력*/
 					clientMessage("Mob Defense Help : /defense");
-					running = true;
-					players = new Array();
+					players = new Array();/**플레이어 배열을 재정의*/
 				}catch(err){
 					running = false;
 					broadcast(ChatColor.DARK_RED + "[newLevel Error" + err.lineNumber + "] " + err);
@@ -102,7 +118,8 @@ function leaveGame(){
 	running = false;/**종료*/
 };
 
-function entityRemovedHook(ent){
+/**사용 안함*/
+/**function entityRemovedHook(ent){
 	if(Player.isPlayer(ent)){
 		for(var e in players){
 			if(players[e] == ent){
@@ -118,7 +135,7 @@ function entityRemovedHook(ent){
 			}
 		}
 	}
-};
+};*/
 
 function attackHook(attacker, victim) {
 	if(Player.isPlayer(victim) && Player.isPlayer(attacker)) {
@@ -128,25 +145,36 @@ function attackHook(attacker, victim) {
 
 function procCmd(str){
 	var cmd = str.split(" ");
-	if(str == "start"){
+	if(str == "defense" || str == "디펜스"){
+		clientMessage("[/start | /시작] Game start");
+		clientMessage("[/pause | /일시중지] Game pause");
+		clientMessage("[/forceclear | /강제클리어] Game force clear");
+		clientMessage("[/stop | /중지] Game Force Stop");
+		clientMessage("[/tpspawn | /텔포스폰 <NAME>] Teleport Spawn");
+		clientMessage("[/tpgame | /텔포게임 <NAME>] Teleport Defense Room");
+		clientMessage("[/tpwatch | /텔포관전 <NAME>] Teleport Defense Watch");
+		clientMessage("[/kill | /죽이기 <NAME>] Kill <NAME>");
+		clientMessage("[/give | /주기 <NAME> <ID:DAMAGE:COUNT>] Give item");
+		clientMessage("[/health | /회복 <NAME> <HP>] Health Change");
+	}else if(str == "start" || str == "시작"){/**시작 명령어 입력시*/
 		new java.lang.Thread(new java.lang.Runnable({
 			run: function(){
 				try{
-					if(running && !gaming){
+					if(running && !gaming){/**디팬스 맵이고 게임이 시작되지 않았을때*/
 						gaming = true;
 						broadcast(ChatColor.YELLOW + "[Info] Game Start!");
 						//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
 						//messageBuffer.push([2642, 97, 56, "X-", 80, 35, 1, 42, 0, "Game Start!", 100]);
-						mobDefenseMainActivity();
+						mobDefenseMainActivity();/**게임 프로세스 시작*/
 						for each(var e in defenders)
-							teleport("LOBY", e);
+							teleport("LOBY", e);/**게임 종료후 모두 로비로 텔레포트*/
 						defenders = [];
-						gaming = false;
+						gaming = false;/**게임 종료*/
 					}else{
 						clientMessage(ChatColor.RED + "[Error] Already Started.");
-						clientMessage(ChatColor.RED + "If you want stop then type: /stop");
+						clientMessage(ChatColor.RED + "If you want stop then type: /stop");/**게임이 이미 진행중일떄 명령어 입력시*/
 					}
-				}catch(err){
+				}catch(err){/**에러 발생시*/
 					gaming = false;
 					for each(var e in defenders)
 						teleport("LOBY", e);
@@ -157,7 +185,7 @@ broadcast(ChatColor.DARK_RED + "[mainThread Error" + err.lineNumber + "] " + err
 				//messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Game progress stop", 100]);
 			}
 		})).start();
-	}else if(str == "pause"){
+	}else if(str == "pause" || str == "일시정지"){
 		if(gaming){
 			if(pause){
 				pause = false;
@@ -173,7 +201,7 @@ broadcast(ChatColor.DARK_RED + "[mainThread Error" + err.lineNumber + "] " + err
 			clientMessage(ChatColor.DARK_RED + "[Error] Game is not Running");
 			pause = false;
 		}
-	}else if(str == "forceclear"){
+	}else if(str == "forceclear" || str == "강제클리어"){/**강제 스테이지 클리너*/
 		try{
 			for each(var e in entList) {
 				Entity.setHealth(e, 0);
@@ -181,7 +209,7 @@ broadcast(ChatColor.DARK_RED + "[mainThread Error" + err.lineNumber + "] " + err
 		}catch(err){
 			broadcast(ChatColor.DARK_RED + "[ForceClear Error" + err.lineNumber + "] " + err);
 		}
-	}else if(cmd[0] == "tpspawn"){
+	}else if(cmd[0] == "tpspawn" || cmd[0] == "텔포스폰"){
 		for each(var p in players){
 			if(Player.getName(p) == cmd[1]){
 				teleport("LOBY", p);
@@ -193,7 +221,7 @@ broadcast(ChatColor.DARK_RED + "[mainThread Error" + err.lineNumber + "] " + err
 			}
 		}
 		clientMessage(ChatColor.RED + "Unknow Player: " + cmd[1]);
-	}else if(cmd[0] == "tpgame"){
+	}else if(cmd[0] == "tpgame" || cmd[0] == "텔포게임"){
 		for each(var p in players){
 			if(Player.getName(p) == cmd[1]){
 				teleport("BATTLE", p);
@@ -205,7 +233,7 @@ broadcast(ChatColor.DARK_RED + "[mainThread Error" + err.lineNumber + "] " + err
 			}
 		}
 		clientMessage(ChatColor.RED + "Unknow Player: " + cmd[1]);
-	}else if(cmd[0] == "tpwatch"){
+	}else if(cmd[0] == "tpwatch" || cmd[0] == "텔포관전"){
 		for each(var p in players){
 			if(Player.getName(p) == cmd[1]){
 				teleport("VIEW", p);
@@ -217,25 +245,14 @@ broadcast(ChatColor.DARK_RED + "[mainThread Error" + err.lineNumber + "] " + err
 			}
 		}
 		clientMessage(ChatColor.RED + "Unknow Player: " + cmd[1]);
-	}else if(str == "stop"){
+	}else if(str == "stop" || str == "중지"){
 		if(gaming){
 			gaming = false;
 			broadcast(ChatColor.DARK_RED + "[Warning] Game Force Stoping. Please wait...");
 		}else{
 			clientMessage(ChatColor.DARK_RED + "[Error] Game is not Running");
 		}
-	}else if(str == "defense"){
-		clientMessage("[/start] Game start");
-		clientMessage("[/pause] Game pause");
-		clientMessage("[/forceclear] Game force clear");
-		clientMessage("[/stop] Game Force Stop");
-		clientMessage("[/tpspawn <NAME>] Teleport Spawn");
-		clientMessage("[/tpgame <NAME>] Teleport Defense Room");
-		clientMessage("[/tpwatch <NAME>] Teleport Defense Watch");
-		clientMessage("[/kill <NAME>] Kill <NAME>");
-		clientMessage("[/give <NAME> <ID:DAMAGE:COUNT>] Give item");
-		clientMessage("[/health <NAME> <HP>] Health Change");
-	}else if(cmd[0] == "kill"){
+	}else if(cmd[0] == "kill" || cmd[0] == "죽이기/"){
 		for each(var p in players){
 			if(Player.getName(p) == cmd[1]){
 				Entity.setHealth(p, 0);
@@ -244,7 +261,7 @@ broadcast(ChatColor.DARK_RED + "[mainThread Error" + err.lineNumber + "] " + err
 			}
 		}
 		clientMessage(ChatColor.RED + "Unknow Player: " + cmd[1]);
-	}else if(cmd[0] == "give"){
+	}else if(cmd[0] == "give" || cmd[0] == "주기"){
 		for each(var p in players){
 			if(Player.getName(p) == cmd[1]){
 				tempArray = cmd[2].split(":");
@@ -254,7 +271,7 @@ broadcast(ChatColor.DARK_RED + "[mainThread Error" + err.lineNumber + "] " + err
 			}
 		}
 		clientMessage(ChatColor.RED + "Unknow Player: " + cmd[1]);
-	}else if(cmd[0] == "health"){
+	}else if(cmd[0] == "health" || cmd[0] == "회복"){
 		for each(var p in players){
 			if(Player.getName(p) == cmd[1]){
 				Entity.setHealth(p, parseInt(cmd[2]));
@@ -273,6 +290,18 @@ broadcast(ChatColor.DARK_RED + "[mainThread Error" + err.lineNumber + "] " + err
 	}
 };
 
+function modTick() {
+	tock.push(mtick);
+	mtick = 0;
+	if(tock.length > 40)
+		tock.shift();
+	var tack = 0;
+	for(var e in tock) {
+		tack += tock[e];
+	}
+	ModPE.showTipMessage(tack/10);
+}
+
 function broadcast(str){
 	net.zhuoweizhang.mcpelauncher.ScriptManager.nativeSendChat(str);
 	clientMessage(str);
@@ -284,10 +313,15 @@ function delay(int){
 
 function mainBackgroundActivity() {new java.lang.Thread(new java.lang.Runnable( {run: function() {try {
 	while(running) {
-		delay(50);
-		if(++tick20 >= 20) {
+		delay(10);
+		mtick++;
+		if(++tick20 >= 100) {
 			tick20 = 0;
 			playerManager();
+		}
+		if(++tick40 >= 200) {
+			tick40 = 0;
+			highlightActivity();
 		}
 	}
 }catch(e) {
@@ -295,14 +329,18 @@ function mainBackgroundActivity() {new java.lang.Thread(new java.lang.Runnable( 
 	delay(1000);
 	if(++crashCount <= 3) {
 		broadcast(ChatColor.RED + "ERROR IGNORE - AUTO REBOOT...");
+		delay(5000);
+		mainBackgroundActivity();
 	}else {
-		broadcast(ChatColor.DARK_RED + "CAN'T HOLD ON. SERVER CRASH");
+		runing = false;
+		gaming = false;
+		broadcast(ChatColor.DARK_RED + "CAN'T HOLD ON. SCRIPT CRASH");
 		broadcast(ChatColor.GOLD + "please report Error Message to");
 		broadcast(ChatColor.GOLD + "CodeInside(scgtdy7151@gmail.com)");
-		delay(3000);
+/**		delay(5000);
 		broadcast(ChatColor.DARK_RED + "SERVER AUTO CLOSE please wait...");
-		delay(5000);
-		net.zhuoweizhang.mcpelauncher.ui.NerdyStuffActivity.forceRestart(com.mojang.minecraftpe.MainActivity.currentMainActivity.get());
+		delay(10000);
+		net.zhuoweizhang.mcpelauncher.ui.NerdyStuffActivity.forceRestart(com.mojang.minecraftpe.MainActivity.currentMainActivity.get());*/
 	}
 }}})).start()};
 
@@ -393,7 +431,6 @@ function mobDefenseMainActivity(){
 	}
 	messageBuffer.push([2579, 10, -4, 2628, 73, -4, 0, 0, 100]);
 	delay(1000);
-	highlightThread();
 	highlight("ZOMBIE", "OFF");
 	highlight("SKELETON", "OFF");
 	highlight("SPIDER", "OFF");
@@ -1066,10 +1103,9 @@ function stageDelay(maxTime){
 	}
 };
 
-function highlightThread(){new java.lang.Thread(new java.lang.Runnable({run: function(){
+function highlightActivity(){
 	try{
-		while(gaming) {
-			delay(2000);
+		if(highlightToggle) {
 			if(zombieHighlight){
 				for(var e = 0; e < 6; e++)
 					Level.setTile(2583 + e, 43, -78, 35, 15);
@@ -1094,7 +1130,7 @@ function highlightThread(){new java.lang.Thread(new java.lang.Runnable({run: fun
 				for(var e = 0; e < 6; e++)
 					Level.setTile(2618 + e, 43, -78, 35, 15);
 			}
-			delay(2000);
+		}else {
 			if(zombieHighlight){
 				for(var e = 0; e < 6; e++)
 					Level.setTile(2583 + e, 43, -78, 89, 0);
@@ -1121,9 +1157,9 @@ function highlightThread(){new java.lang.Thread(new java.lang.Runnable({run: fun
 			}
 		}
 	}catch(e) {
-		broadcast(ChatColor.DARK_RED + "[FlashThread Error" + e.lineNumber + "] " + e);
+		broadcast(ChatColor.DARK_RED + "[Highlight Error" + e.lineNumber + "] " + e);
 	}
-}})).start();};
+};
 
 function highlight(target, status){try{
 	switch(target){
