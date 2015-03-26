@@ -88,7 +88,7 @@ function newLevel(lvl){
 					mainBootActivity();/**상시 돌아가는 프로세스 시적*/
 				}catch(err){
 					running = false;
-					broadcast(err);
+					broadcast(ChatColor.DARK_RED + "[newLevel Error" + err.lineNumber + "] " + err);
 				}
 			}
 		})).start();
@@ -110,7 +110,7 @@ function entityRemovedHook(ent){
 					//messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Bye", 100]);
 					//messageBuffer.push([2642, 89, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
 				}catch(err){
-					clientMessage("[Error] " + err);
+					broadcast(ChatColor.DARK_RED + "[ExitMsg Error" + err.lineNumber + "] " + err);
 				}}})).start();
 				break;
 			}
@@ -148,7 +148,7 @@ function procCmd(str){
 					gaming = false;
 					for each(var e in defenders)
 						teleport("LOBY", e);
-					broadcast(ChatColor.DARK_RED + "[Error] " + err);
+broadcast(ChatColor.DARK_RED + "[mainThread Error" + err.lineNumber + "] " + err);
 				}
 				broadcast(ChatColor.GRAY + "[Info] game progress stop.");
 				//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
@@ -177,7 +177,7 @@ function procCmd(str){
 				Entity.setHealth(e, 0);
 			}
 		}catch(err){
-			clientMessage(ChatColor.DARK_RED + "[Error] " + err);
+			broadcast(ChatColor.DARK_RED + "[ForceClear Error" + err.lineNumber + "] " + err);
 		}
 	}else if(cmd[0] == "tpspawn"){
 		for each(var p in players){
@@ -370,6 +370,7 @@ function mobDefenseMainActivity(){
 	}
 	messageBuffer.push([2579, 10, -4, 2628, 73, -4, 0, 0, 100]);
 	delay(1000);
+	highlightThread();
 	highlight("ZOMBIE", "OFF");
 	highlight("SKELETON", "OFF");
 	highlight("SPIDER", "OFF");
@@ -964,7 +965,7 @@ function playerHPManager(){
 					}
 				}
 			}catch(err){
-				broadcast(err);
+				broadcast(ChatColor.DARK_RED + "[HpManager Error" + err.lineNumber + "] " + err);
 				gaming = false;
 			}
 		}
@@ -1042,7 +1043,66 @@ function stageDelay(maxTime){
 	}
 };
 
-function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({run: function(){try{
+function highlightThread(){new java.lang.Thread(new java.lang.Runnable({run: function(){
+	try{
+		while(gaming) {
+			delay(2000);
+			if(zombieHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2583 + e, 43, -78, 35, 15);
+			}
+			if(skeletonHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2590 + e, 43, -78, 35, 15);
+			}
+			if(spiderHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2597 + e, 43, -78, 35, 15);
+			}
+			if(zombiePigHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2604 + e, 43, -78, 35, 15);
+			}
+			if(silverfishHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2611 + e, 43, -78, 35, 15);
+			}
+			if(endermanHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2618 + e, 43, -78, 35, 15);
+			}
+			delay(2000);
+			if(zombieHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2583 + e, 43, -78, 89, 0);
+			}
+			if(skeletonHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2590 + e, 43, -78, 89, 0);
+			}
+			if(spiderHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2597 + e, 43, -78, 89, 0);
+			}
+			if(zombiePigHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2604 + e, 43, -78, 89, 0);
+			}
+			if(silverfishHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2611 + e, 43, -78, 89, 0);
+			}
+			if(endermanHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2618 + e, 43, -78, 89, 0);
+			}
+		}
+	}catch(e) {
+		broadcast(ChatColor.DARK_RED + "[FlashThread Error" + e.lineNumber + "] " + e);
+	}
+}})).start();};
+
+function highlight(target, status){try{
 	switch(target){
 		case "ZOMBIE":
 			if(status == "ON"){
@@ -1054,14 +1114,6 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2583 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				zombieHighlight = true;
-				while(zombieHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2583 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2583 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 		case "SKELETON":
@@ -1074,14 +1126,6 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2590 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				skeletonHighlight = true;
-				while(skeletonHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2590 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2590 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 		case "SPIDER":
@@ -1094,14 +1138,6 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2597 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				spiderHighlight = true;
-				while(spiderHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2597 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2597 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 		case "ZOMBIE_PIG":
@@ -1114,14 +1150,6 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2604 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				zombiePigHighlight = true;
-				while(zombiePigHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2604 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2604 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 		case "SILVER_FISH":
@@ -1134,14 +1162,6 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2611 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				silverfishHighlight = true;
-				while(silverfishHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2611 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2611 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 		case "ENDER_MAN":
@@ -1154,20 +1174,12 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2618 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				endermanHighlight = true;
-				while(endermanHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2618 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2618 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 	}
 }catch(err){
-	clientMessage("[Error] " + err);
-}}})).start()};
+	broadcast(ChatColor.DARK_RED + "[Flashing Error" + err.lineNumber + "] " + err);
+}};
 
 function defenseMobSpawner(ary){new java.lang.Thread(new java.lang.Runnable({run: function(){try{
 	debug("Run", "defense_spawner","");
