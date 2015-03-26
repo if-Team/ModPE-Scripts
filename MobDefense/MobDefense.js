@@ -33,6 +33,12 @@ Beta 0.5(20150215)
 	-(중요)21라운드 계획 시작
 	-(중요)보스 추가 예정 계획 착안
 	-(중요)보스 A.I작업중
+	
+Beta 0.6(20150326)
+	-팀킬 방지
+	-휴식시간 추가
+	-forceclear 명령어 개선
+	-코드 정리
 */
 
 /**
@@ -63,26 +69,28 @@ var deaths = new Array();
 var breaking = false;
 var debuging = false;
 var temp,temp2,temp3,temp4,temp5,tempArray,tempArray2,tempArray3,tempArray4,processing,mobSpawnLocX,mobSpawnLocZ,mob,skin,ent,ent2,entList,spawnLimit,pause;
-var zombieHighlight, skeletonHighlight, spiderHighlight, zombiePigHighlight, silverfishHighlight, endermanHighlight,teleporting;
+var zombieHighlight, skeletonHighlight, spiderHighlight, zombiePigHighlight, silverfishHighlight, endermanHighlight;
+var tick20 = 0;
+var crashCount = 0;
 
 function newLevel(lvl){
-	if(new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/CodeMobDefense").exists()){
+	if(new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/CodeMobDefense").exists()){/**해당맵이 디팬스맵일경우*/
 		new java.lang.Thread(new java.lang.Runnable({
 			run: function(){
 				try{
-					clientMessage(ChatColor.GRAY + "[Info] Booting...");
+					clientMessage(ChatColor.GRAY + "[Info] Booting...");/**저사양 기기를 위한 대기시간*/
+					mainTextBufferActivity();/**전광판 기능 활성화*/
+					mainBackgroundActivity();/**상시 돌아가는 프로세스 시적*/
 					delay(3000);
 					clientMessage(ChatColor.GRAY + "Mob Defense Map - CodeInside");
-					//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 1]);
-					//messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Mob Defense Map - CodeInside", 50]);
+					messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 1]);
+					messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Mob Defense Map - CodeInside", 50]);/**메인 전광판에 메시지 출력*/
 					clientMessage("Mob Defense Help : /defense");
 					running = true;
 					players = new Array();
-					mainTextBufferActivity();
-					mainBootActivity();
 				}catch(err){
 					running = false;
-					broadcast(err);
+					broadcast(ChatColor.DARK_RED + "[newLevel Error" + err.lineNumber + "] " + err);
 				}
 			}
 		})).start();
@@ -91,7 +99,7 @@ function newLevel(lvl){
 
 function leaveGame(){
 	gaming = false;
-	running = false;
+	running = false;/**종료*/
 };
 
 function entityRemovedHook(ent){
@@ -104,13 +112,19 @@ function entityRemovedHook(ent){
 					//messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Bye", 100]);
 					//messageBuffer.push([2642, 89, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
 				}catch(err){
-					clientMessage("[Error] " + err);
+					broadcast(ChatColor.DARK_RED + "[ExitMsg Error" + err.lineNumber + "] " + err);
 				}}})).start();
 				break;
 			}
 		}
 	}
 };
+
+function attackHook(attacker, victim) {
+	if(Player.isPlayer(victim) && Player.isPlayer(attacker)) {
+		preventDefault();/**팀킬 방지*/
+	}
+}
 
 function procCmd(str){
 	var cmd = str.split(" ");
@@ -123,7 +137,6 @@ function procCmd(str){
 						broadcast(ChatColor.YELLOW + "[Info] Game Start!");
 						//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
 						//messageBuffer.push([2642, 97, 56, "X-", 80, 35, 1, 42, 0, "Game Start!", 100]);
-						delay(1000);
 						mobDefenseMainActivity();
 						for each(var e in defenders)
 							teleport("LOBY", e);
@@ -137,7 +150,7 @@ function procCmd(str){
 					gaming = false;
 					for each(var e in defenders)
 						teleport("LOBY", e);
-					broadcast(ChatColor.DARK_RED + "[Error] " + err);
+broadcast(ChatColor.DARK_RED + "[mainThread Error" + err.lineNumber + "] " + err);
 				}
 				broadcast(ChatColor.GRAY + "[Info] game progress stop.");
 				//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
@@ -162,9 +175,11 @@ function procCmd(str){
 		}
 	}else if(str == "forceclear"){
 		try{
-			entList = [];
+			for each(var e in entList) {
+				Entity.setHealth(e, 0);
+			}
 		}catch(err){
-			clientMessage(ChatColor.DARK_RED + "[Error] " + err);
+			broadcast(ChatColor.DARK_RED + "[ForceClear Error" + err.lineNumber + "] " + err);
 		}
 	}else if(cmd[0] == "tpspawn"){
 		for each(var p in players){
@@ -267,78 +282,104 @@ function delay(int){
 	java.lang.Thread.sleep(int);
 };
 
-function mainBootActivity(){
-	while(running){
-		delay(1000);
-		var temp = Entity.getAll();
-		for each(var e in temp){
-			if(Player.isPlayer(e)){
-				if(players.indexOf(e) == "-1"){
-					players.push(e);
-					teleport("LOBY",e);
-					messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
-					messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Welcome", 100]);
-					messageBuffer.push([2642, 89, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
-					break;
-				}
-			}else{
-				if(!gaming){
-					Entity.remove(e);
-				}
-			}
+function mainBackgroundActivity() {new java.lang.Thread(new java.lang.Runnable( {run: function() {try {
+	while(running) {
+		delay(50);
+		if(++tick20 >= 20) {
+			tick20 = 0;
+			playerManager();
 		}
-		for(var e in players){
-			if(!Player.isPlayer(players[e])) {
-				players.splice(e, 1);
-			}
-			switch(Level.getTile(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e))){
-				case 173:
-					if(!gaming){
-						if(defenders.indexOf(e) == -1){
-							defenders.push(e);
-							teleport("READY", e);
-							broadcast(ChatColor.YELLOW + "[" + defenders.length + "/" + players.length + "] " + Player.getName(e) + ChatColor.AQUA + " join Party");
-							//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
-							//messageBuffer.push([2642, 97, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
-							//messageBuffer.push([2642, 89, 56, "X-", 80, 35, 3, 42, 0, "Join Party ", 100]);
-							//messageBuffer.push([2642, 81, 56, "X-", 80, 35, 15, 42, 0, "[" + defenders.length + "/" + players.length + "]", 100]);
-							breaking = true;
-						}else{
-							defenders.splice(defenders.indexOf(e),1);
-							teleport("LOBY", e);
-						}
-					}
-					break;
-				case 35:
-					if(Level.getData(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e)) == 15){
-						teleport("LOBY", e);
-					}
-					if(gaming && Level.getData(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e)) == 1){
-						teleport("VIEW", e);
-					}
-					break;
-				case 159:
-					if(!gaming && Level.getData(Entity.getX(e) ,Entity.getY(e) - 2,Entity.getZ(e)) == 10){
-						if(defenders.indexOf(e) == -1){
-							defenders.push(e);
-							teleport("READY", e);
-						}else{
-							defenders.splice(defenders.indexOf(e),1);
-							teleport("LOBY", e);
-							broadcast(ChatColor.YELLOW + "[" + defenders.length + "/" + players.length + "] " + Player.getName(e) + ChatColor.RED + " leave Party");
-							messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
-							messageBuffer.push([2642, 97, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
-							messageBuffer.push([2642, 89, 56, "X-", 80, 35, 14, 42, 0, "Leave Party", 100]);
-							messageBuffer.push([2642, 81, 56, "X-", 80, 35, 15, 42, 0, "[" + defenders.length + "/" + players.length + "]", 100]);
-							breaking = true;
-						}
-					}
-					break;
-			}
-			if(breaking){
-				breaking = false;
+	}
+}catch(e) {
+	broadcast(ChatColor.DARK_RED + "[MainBackgroundActivity Error" + e.lineNumber + "] " + e);
+	delay(1000);
+	if(++crashCount <= 3) {
+		broadcast(ChatColor.RED + "ERROR IGNORE - AUTO REBOOT...");
+	}else {
+		broadcast(ChatColor.DARK_RED + "CAN'T HOLD ON. SERVER CRASH");
+		broadcast(ChatColor.GOLD + "please report Error Message to");
+		broadcast(ChatColor.GOLD + "CodeInside(scgtdy7151@gmail.com)");
+		delay(3000);
+		broadcast(ChatColor.DARK_RED + "SERVER AUTO CLOSE please wait...");
+		delay(5000);
+		net.zhuoweizhang.mcpelauncher.ui.NerdyStuffActivity.forceRestart(com.mojang.minecraftpe.MainActivity.currentMainActivity.get());
+	}
+}}})).start()};
+
+function playerManager(){
+	var temp = Entity.getAll();
+	for each(var e in temp){
+		if(Player.isPlayer(e)){
+			if(players.indexOf(e) == "-1"){
+				players.push(e);
+				debug("push", e);
+				teleport("LOBY",e);
+				messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
+				messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Welcome", 100]);
+				messageBuffer.push([2642, 89, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
 				break;
 			}
+		}else{
+			if(!gaming){
+				Entity.remove(e);
+			}
+		}
+	}
+	for(var e in players){
+		if(!Player.isPlayer(players[e])) {
+			players.splice(e, 1);
+			debug("splice", players[e]);
+			return;
+		}
+	}
+	for each(var e in players){
+		switch(Level.getTile(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e))){
+			case 173:
+				if(!gaming){
+					if(defenders.indexOf(e) == -1){
+						defenders.push(e);
+						teleport("READY", e);
+						broadcast(ChatColor.YELLOW + "[" + defenders.length + "/" + players.length + "] " + Player.getName(e) + ChatColor.AQUA + " join Party");
+						//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
+						//messageBuffer.push([2642, 97, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
+						//messageBuffer.push([2642, 89, 56, "X-", 80, 35, 3, 42, 0, "Join Party ", 100]);
+						//messageBuffer.push([2642, 81, 56, "X-", 80, 35, 15, 42, 0, "[" + defenders.length + "/" + players.length + "]", 100]);
+						breaking = true;
+					}else{
+						defenders.splice(defenders.indexOf(e),1);
+						teleport("LOBY", e);
+					}
+				}
+				break;
+			case 35:
+				if(Level.getData(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e)) == 15){
+					teleport("LOBY", e);
+				}
+				if(gaming && Level.getData(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e)) == 1){
+					teleport("VIEW", e);
+				}
+				break;
+			case 159:
+				if(!gaming && Level.getData(Entity.getX(e) ,Entity.getY(e) - 2,Entity.getZ(e)) == 10){
+					if(defenders.indexOf(e) == -1){
+						defenders.push(e);
+						teleport("READY", e);
+					}else{
+						defenders.splice(defenders.indexOf(e),1);
+						teleport("LOBY", e);
+						broadcast(ChatColor.YELLOW + "[" + defenders.length + "/" + players.length + "] " + Player.getName(e) + ChatColor.RED + " leave Party");
+						//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
+						//messageBuffer.push([2642, 97, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
+						//messageBuffer.push([2642, 89, 56, "X-", 80, 35, 14, 42, 0, "Leave Party", 100]);
+						//messageBuffer.push([2642, 81, 56, "X-", 80, 35, 15, 42, 0, "[" + defenders.length + "/" + players.length + "]", 100]);
+						breaking = true;
+					}
+				}
+				break;
+		}
+		if(breaking){
+			breaking = false;
+			break;
 		}
 	}
 };
@@ -352,6 +393,7 @@ function mobDefenseMainActivity(){
 	}
 	messageBuffer.push([2579, 10, -4, 2628, 73, -4, 0, 0, 100]);
 	delay(1000);
+	highlightThread();
 	highlight("ZOMBIE", "OFF");
 	highlight("SKELETON", "OFF");
 	highlight("SPIDER", "OFF");
@@ -599,10 +641,10 @@ function mobDefenseMainActivity(){
 	highlight("SPIDER", "ON");
 	highlight("SILVER_FISH", "ON");
 	giveDefenders(["304:0:1", "274:-1000:1", "354:0:1"]);
-	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
+	broadcast(ChatColor.AQUA + "[Info] break time!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
-	stageDelay(30000);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "break!", 300]);
+	stageDelay(60000);
 	if(!gaming) return;
 	while(pause){
 		delay(1000);
@@ -878,10 +920,10 @@ function mobDefenseMainActivity(){
 	highlight("ZOMBIE_PIG", "ON");
 	highlight("ENDER_MAN", "ON");
 	highlight("SILVER_FISH", "ON");
-	giveDefenders(["310:0:1", "276:-1000:1", "354:0:1", "400:0:32", "303:14:10"]);
-	broadcast(ChatColor.YELLOW + "[Info] Clear!");
+	giveDefenders(["310:0:1", "276:-1000:1", "354:0:1", "400:0:32", "383:14:10"]);
+	broadcast(ChatColor.YELLOW + "[Info] break time!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "break!", 300]);
 	stageDelay(60000);
 	if(!gaming) return;
 	while(pause){
@@ -922,6 +964,10 @@ function playerHPManager(){
 		run: function(){
 			try{
 				while(gaming){
+					if(defenders.length == 0){
+						broadcast(ChatColor.DARK_RED + "GAME OVER");
+						gaming = false;
+					}
 					java.lang.Thread.sleep(100);
 					for(var e in defenders){
 						if(Entity.getHealth(defenders[e]) < 1){
@@ -940,13 +986,9 @@ function playerHPManager(){
 						deaths.splice(e, 1);
 						}
 					}
-					if(defenders.length == 0){
-						broadcast(ChatColor.DARK_RED + "GAME OVER");
-						gaming = false;
-					}
 				}
 			}catch(err){
-				broadcast(err);
+				broadcast(ChatColor.DARK_RED + "[HpManager Error" + err.lineNumber + "] " + err);
 				gaming = false;
 			}
 		}
@@ -959,33 +1001,21 @@ function teleport(place, ent){
 			var rid = Level.spawnMob(2599 + (10 * Math.random()), 67, 0 + (8 * Math.random()), 81);
 			Entity.rideAnimal(ent, rid);
 			Entity.remove(rid);
-			teleporting = true;
-			delay(3000);
-			teleporting = false;
 			break;
 		case "READY":
 			var rid = Level.spawnMob(2621 + (4 * Math.random()), 67, 17 + (4 * Math.random()), 81);
 			Entity.rideAnimal(ent, rid);
 			Entity.remove(rid);
-			teleporting = true;
-			delay(3000);
-			teleporting = false;
 			break;
 		case "BATTLE":
 			var rid = Level.spawnMob(2595 + (18 * Math.random()), 47, -38 + (18 * Math.random()), 81);
 			Entity.rideAnimal(ent, rid);
 			Entity.remove(rid);
-			teleporting = true;
-			delay(3000);
-			teleporting = false;
 			break;
 		case "VIEW":
 			var rid = Level.spawnMob(2598 + (12 * Math.random()), 63, -35 + (12 * Math.random()), 81);
 			Entity.rideAnimal(ent, rid);
 			Entity.remove(rid);
-			teleporting = true;
-			delay(3000);
-			teleporting = false;
 			break;
 	}
 };
@@ -1036,7 +1066,66 @@ function stageDelay(maxTime){
 	}
 };
 
-function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({run: function(){try{
+function highlightThread(){new java.lang.Thread(new java.lang.Runnable({run: function(){
+	try{
+		while(gaming) {
+			delay(2000);
+			if(zombieHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2583 + e, 43, -78, 35, 15);
+			}
+			if(skeletonHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2590 + e, 43, -78, 35, 15);
+			}
+			if(spiderHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2597 + e, 43, -78, 35, 15);
+			}
+			if(zombiePigHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2604 + e, 43, -78, 35, 15);
+			}
+			if(silverfishHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2611 + e, 43, -78, 35, 15);
+			}
+			if(endermanHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2618 + e, 43, -78, 35, 15);
+			}
+			delay(2000);
+			if(zombieHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2583 + e, 43, -78, 89, 0);
+			}
+			if(skeletonHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2590 + e, 43, -78, 89, 0);
+			}
+			if(spiderHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2597 + e, 43, -78, 89, 0);
+			}
+			if(zombiePigHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2604 + e, 43, -78, 89, 0);
+			}
+			if(silverfishHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2611 + e, 43, -78, 89, 0);
+			}
+			if(endermanHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2618 + e, 43, -78, 89, 0);
+			}
+		}
+	}catch(e) {
+		broadcast(ChatColor.DARK_RED + "[FlashThread Error" + e.lineNumber + "] " + e);
+	}
+}})).start();};
+
+function highlight(target, status){try{
 	switch(target){
 		case "ZOMBIE":
 			if(status == "ON"){
@@ -1048,14 +1137,6 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2583 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				zombieHighlight = true;
-				while(zombieHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2583 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2583 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 		case "SKELETON":
@@ -1068,14 +1149,6 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2590 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				skeletonHighlight = true;
-				while(skeletonHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2590 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2590 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 		case "SPIDER":
@@ -1088,14 +1161,6 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2597 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				spiderHighlight = true;
-				while(spiderHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2597 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2597 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 		case "ZOMBIE_PIG":
@@ -1108,14 +1173,6 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2604 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				zombiePigHighlight = true;
-				while(zombiePigHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2604 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2604 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 		case "SILVER_FISH":
@@ -1128,14 +1185,6 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2611 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				silverfishHighlight = true;
-				while(silverfishHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2611 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2611 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 		case "ENDER_MAN":
@@ -1148,20 +1197,12 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2618 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				endermanHighlight = true;
-				while(endermanHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2618 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2618 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 	}
 }catch(err){
-	clientMessage("[Error] " + err);
-}}})).start()};
+	broadcast(ChatColor.DARK_RED + "[Flashing Error" + err.lineNumber + "] " + err);
+}};
 
 function defenseMobSpawner(ary){new java.lang.Thread(new java.lang.Runnable({run: function(){try{
 	debug("Run", "defense_spawner","");
@@ -1328,8 +1369,23 @@ function spiderJockeyAI(rider, mount){new java.lang.Thread(new java.lang.Runnabl
 	Entity.setHealth(rider, 0);
 	Entity.setHealth(mount, 0);
 }catch(err){
-	clientMessage("[Error]<Spider Jockey> " + err);
+	broadcast(ChatColor.DARK_RED + "[SpiderJockey Error" + err.lineNumber + "] " + err);
 }}})).start()};
+
+function defenderBuff(effect, power, duration) {try {
+	switch(effect) {
+		case "HEAL":
+			break;
+		case "SHILD":
+			break;
+		case "KNOCKBACK":
+			break;
+		default:
+			broadcast("[defenderBuff Error] Unkown effect type: " + effect);
+	}
+}catch(e) {
+	broadcast(ChatColor.DARK_RED + "[DefenderBuff Error" + e.lineNumber + "] " + e);
+}};
 
 /*
 ==============================
@@ -1405,8 +1461,6 @@ function text3d(x,y,z,side,maxLength,textColor,textColorData, backgroundColor, b
 		}else{
 			for each(var Cshape in StringCore){
 				if(Cshape.t == C_InputString[CwordNum]){
-					while(teleporting)
-						delay(100);
 					debug("write", C_InputString[CwordNum], C_WordLocX + ", " + C_WordLocZ);
 					if(Cshape.y > C_WordMaxY)
 						C_WordMaxY = Cshape.y;
@@ -1460,8 +1514,6 @@ function text3d(x,y,z,side,maxLength,textColor,textColorData, backgroundColor, b
 function textClean(sx,sy,sz,ex,ey,ez,block,data,dly){new java.lang.Thread(new java.lang.Runnable({run: function(){try{
 	writting = true;
 	for(var cy = sy; cy <= ey; cy++){
-		while(teleporting)
-			delay(100);
 		for(var cz = sz; cz <= ez; cz++){
 			for(var cx = sx; cx <= ex; cx++){
 				if(Level.getTile(cx, cy, cz) != block || Level.getData(cx, cy, cz) != data){
