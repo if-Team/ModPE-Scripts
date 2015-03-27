@@ -42,6 +42,8 @@ Beta 0.6(20150326)
 	-쓰레드 최적화 시도
 	-명령어 한글화
 	-주석 일부 추가
+	-폭파 방지
+	-스파이더 조키 완성
 */
 
 /**
@@ -80,9 +82,12 @@ var deaths = new Array();
 var breaking = false;
 var temp,temp2,temp3,temp4,temp5,tempArray,tempArray2,tempArray3,tempArray4,processing,mobSpawnLocX,mobSpawnLocZ,mob,skin,ent,ent2,entList,spawnLimit,pause;
 var zombieHighlight, skeletonHighlight, spiderHighlight, zombiePigHighlight, silverfishHighlight, endermanHighlight;
+/**스파이더맨 조키의 배열*/
+var spiderJockey = new Array();
 /**2초마다 반복 점멸하는 신호*/
 var highlightToggle = false;
 /**정해진 숫자만큼 왕복*/
+var tick1 = 0;
 var tick20 = 0;
 var tick40 = 0;
 /**크래쉬 횟수*/
@@ -101,6 +106,7 @@ function newLevel(lvl){
 				try{
 					clientMessage(ChatColor.GRAY + "[Info] Booting...");/**저사양 기기를 위한 대기시간*/
 					running = true;
+					players = new Array();/**플레이어 배열을 재정의*/
 					mainTextBufferActivity();/**전광판 기능 활성화*/
 					mainBackgroundActivity();/**상시 돌아가는 프로세스 시적*/
 					delay(3000);
@@ -108,7 +114,6 @@ function newLevel(lvl){
 					messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 1]);
 					messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Mob Defense Map - CodeInside", 50]);/**메인 전광판에 메시지 출력*/
 					clientMessage("Mob Defense Help : /defense");
-					players = new Array();/**플레이어 배열을 재정의*/
 				}catch(err){
 					running = false;
 					broadcast(ChatColor.DARK_RED + "[newLevel Error" + err.lineNumber + "] " + err);
@@ -146,6 +151,10 @@ function attackHook(attacker, victim) {
 	if(Player.isPlayer(victim) && Player.isPlayer(attacker)) {
 		preventDefault();/**팀킬 방지*/
 	}
+}
+
+function explodeHook(e, x, y, z){
+	preventDefault();/**폭파 방지*/
 }
 
 function procCmd(str){
@@ -301,7 +310,7 @@ function modTick() {
 	tick = 0;
 	if(tock.length > 40)
 		tack -= tock.shift();
-	ModPE.showTipMessage(tack/10 + "(" + tack/2 + "%)");
+	ModPE.showTipMessage("(" + tack/2 + "%)");
 }
 
 function broadcast(str){
@@ -321,9 +330,16 @@ function mainBackgroundActivity() {new java.lang.Thread(new java.lang.Runnable( 
 			tick20 = 0;
 			playerManager();
 		}
-		if(++tick40 >= 200) {
-			tick40 = 0;
-			highlightActivity();
+		if(gaming) {
+			if(++tick40 >= 200) {
+				tick40 = 0;
+				highlightActivity();
+				highlightToggle = highlightToggle ? false : true;
+			}
+			if(++tick1 >= 5) {
+				tick1 = 0;
+				spiderJockeyActivity();
+			}
 		}
 	}
 }catch(e) {
@@ -389,6 +405,9 @@ function playerManager(){
 						defenders.splice(defenders.indexOf(e),1);
 						teleport("LOBY", e);
 					}
+				}else {
+					teleport("LOBY", e);
+					broadcast(ChatColor.YELLOW + Player.getName(e) + " game is Already Start. please wait");
 				}
 				break;
 			case 35:
@@ -1125,8 +1144,8 @@ function stageDelay(maxTime){
 	}
 };
 
-function highlightActivity(){
-	try{
+function highlightActivity() {try {
+	if(gaming) {
 		if(highlightToggle) {
 			if(zombieHighlight){
 				for(var e = 0; e < 6; e++)
@@ -1178,10 +1197,10 @@ function highlightActivity(){
 					Level.setTile(2618 + e, 43, -78, 89, 0);
 			}
 		}
-	}catch(e) {
-		broadcast(ChatColor.DARK_RED + "[Highlight Error" + e.lineNumber + "] " + e);
 	}
-};
+}catch(e) {
+		broadcast(ChatColor.DARK_RED + "[Highlight Error" + e.lineNumber + "] " + e);
+}};
 
 function highlight(target, status){try{
 	switch(target){
@@ -1380,7 +1399,9 @@ function defenseMobSpawner(ary){new java.lang.Thread(new java.lang.Runnable({run
 						ent2 = Level.spawnMob(mobSpawnLocX[temp4] + Math.random(), 46, mobSpawnLocZ[temp4] + Math.random(), mob, skin);
 						Entity.setHealth(ent, tempArray2[l]);
 						Entity.setHealth(ent2, tempArray2[l]);
-						spiderJockeyAI(ent, ent2);
+						Entity.rideAnimal(ent, ent2);
+						spiderJockey.push(ent + ":" + ent2);
+						
 						debug("Info", "Spawn" + tempArray[l], ent);
 						entList.push(ent);
 						entList.push(ent2);
@@ -1415,20 +1436,22 @@ function defenseMobSpawner(ary){new java.lang.Thread(new java.lang.Runnable({run
 	gaming = false;
 }}})).start();};
 
-function spiderJockeyAI(rider, mount){new java.lang.Thread(new java.lang.Runnable({run: function(){try{
-	Entity.rideAnimal(rider, mount);
-	while(Entity.getHealth(rider) > 0 && Entity.getHealth(mount) > 0){
-		if(temp != temp2){
-			Entity.setHealth(rider, Math.floor((Entity.getHealth(rider) + Entity.getHealth(mount)) / 2));
-			Entity.setHealth(mount, Math.floor((Entity.getHealth(rider) + Entity.getHealth(mount)) / 2));
+function spiderJockeyActivity(){try{
+	for(var e in spiderJockey) {
+		var temp = spiderJockey[e].split(":")[0];
+		var temp2 = spiderJockey[e].split(":")[1];
+		if(Entity.getHealth(temp) > Entity.getHealth(temp2)){
+			Entity.setHealth(temp, Entity.getHealth(temp2));
+		}else if(Entity.getHealth(temp) < Entity.getHealth(temp2)){
+			Entity.setHealth(temp2, Entity.getHealth(temp));
 		}
-		java.lang.Thread.sleep(200);
+		if(!Entity.getHealth(temp) > 0 && !Entity.getHealth(temp2) > 0) {
+			spiderJockey.splice(e, 1);
+		}
 	}
-	Entity.setHealth(rider, 0);
-	Entity.setHealth(mount, 0);
 }catch(err){
 	broadcast(ChatColor.DARK_RED + "[SpiderJockey Error" + err.lineNumber + "] " + err);
-}}})).start()};
+}};
 
 function defenderBuff(effect, power, duration) {try {
 	switch(effect) {
