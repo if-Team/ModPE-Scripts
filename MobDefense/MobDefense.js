@@ -314,10 +314,12 @@ broadcast(ChatColor.DARK_RED + "[mainThread Error" + err.lineNumber + "] " + err
 		clientMessage(ChatColor.RED + "Unknow Player: " + cmd[1]);
 	}else if(cmd[0] == "mod" || cmd[0] == "modlist" || cmd[0] == "script" || cmd[0] == "scriptlist"){
 		broadcast(ChatColor.GRAY + "Mob Defense Map & Script - CodeInside");
-	}else if(cmd[0] == "ciwrite") {
+	}else if(cmd[0] === "ciwrite") {
 			messageBuffer.push([Math.floor(Player.getX()),Math.floor(Player.getY()),Math.floor(Player.getZ()),cmd[6],160,cmd[1],cmd[2],cmd[3],cmd[4],cmd[5], 100]);
-	}else if(cmd[0] == "gamemode") {
+	}else if(cmd[0] === "gamemode") {
 		Level.setGameMode(parseInt(cmd[1]));
+	}else if(cmd[0] === "debugspawn") {
+		defenseMobSpawner([cmd[1]]);
 	}
 };
 
