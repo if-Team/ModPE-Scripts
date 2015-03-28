@@ -1,5 +1,5 @@
 var ScriptName = "Code: Mob Defense";
-var Version = "Beta 0.5v";
+var Version = "Beta v0.6";
 /*
 —————Change Log—————
 Beta 0.1(20150209)
@@ -44,6 +44,7 @@ Beta 0.6(20150326)
 	-주석 일부 추가
 	-폭파 방지
 	-스파이더 조키 완성
+	-크리퍼 투입
 */
 
 /**
@@ -148,13 +149,30 @@ function leaveGame(){
 };*/
 
 function attackHook(attacker, victim) {
-	if(Player.isPlayer(victim) && Player.isPlayer(attacker)) {
+	if(Player.isPlayer(victim) && Player.isPlayer(attacker) && running) {
 		preventDefault();/**팀킬 방지*/
 	}
 }
 
 function explodeHook(e, x, y, z){
-	preventDefault();/**폭파 방지*/
+	if(running) {
+		preventDefault();/**폭파 방지*/
+		if(Entity.getEntityTypeId(e) === 33) {
+			ARROW_EXPLODE(x, y, z, 4, 10);
+		}else {
+			broadcast(ChatColor.GOLD + "[Warning] Somebody try to use TNT");
+		}
+	}
+}
+
+function modTick() {
+	var t = tick
+	tock.push(t);
+	tack += t;
+	tick = 0;
+	if(tock.length > 40)
+		tack -= tock.shift();
+	ModPE.showTipMessage("(" + tack/2 + "%)");
 }
 
 function procCmd(str){
@@ -299,7 +317,7 @@ broadcast(ChatColor.DARK_RED + "[mainThread Error" + err.lineNumber + "] " + err
 	}else if(cmd[0] == "ciwrite") {
 			messageBuffer.push([Math.floor(Player.getX()),Math.floor(Player.getY()),Math.floor(Player.getZ()),cmd[6],160,cmd[1],cmd[2],cmd[3],cmd[4],cmd[5], 100]);
 	}else if(cmd[0] == "gamemode") {
-		Level.setGamemode(parseInt(cmd[1]));
+		Level.setGameMode(parseInt(cmd[1]));
 	}
 };
 
@@ -1344,6 +1362,15 @@ function defenseMobSpawner(ary){new java.lang.Thread(new java.lang.Runnable({run
 						entList.push(ent);
 						tempArray3[l]--;
 						break;
+					case "CREEPER":
+						mob = 33;
+						skin = "mob/creeper.png";
+						ent = Level.spawnMob(mobSpawnLocX[temp4] + Math.random(), 46, mobSpawnLocZ[temp4] + Math.random(), mob, skin);
+						Entity.setHealth(ent, tempArray2[l]);
+						debug("Info", "Spawn" + tempArray[l], ent);
+						entList.push(ent);
+						tempArray3[l]--;
+						break;
 					case "SKELETON":
 						mob = 34;
 						skin = "mob/skeleton.png";
@@ -1452,6 +1479,29 @@ function spiderJockeyActivity(){try{
 }catch(err){
 	broadcast(ChatColor.DARK_RED + "[SpiderJockey Error" + err.lineNumber + "] " + err);
 }};
+
+function ARROW_EXPLODE(x, y, z, power, howMany){
+	//power는 1이 적당 강력하게 하려면 그 이상
+	//howMany는 작을수록 많이 발싸 됨 10이 적당 많이 발싸 하려면 5정도
+	//WTF?!
+	function absRangeX(y, p) {
+		return (-1 * Math.sin(y / 180 * Math.PI) * Math.cos(p / 180 * Math.PI));
+	};
+	function absRangeY(y, p) {
+		return (Math.sin(-p / 180 * Math.PI));
+	};
+	function absRangeZ(y, p) {
+		return (Math.cos(y / 180 * Math.PI) * Math.cos(p / 180 * Math.PI));
+	};
+	for(var p=-30;p<=10;p+=howMany){
+		for(var ya=0;ya<360;ya+=2*howMany){
+			var CI = Level.spawnMob(x + (absRangeX(ya, p) / 5), y /**+ (absRangeY(ya, p) / 5)*/, z + (absRangeZ(ya, p) / 5),80);
+			setVelX(CI, absRangeX(ya, p) * power / 4 + (power * Math.random() * absRangeX(ya, p)));
+			setVelY(CI, absRangeY(ya, p) * power / 4 + (power * Math.random() * absRangeY(ya, p)));
+			setVelZ(CI, absRangeZ(ya, p) * power / 4 + (power * Math.random() * absRangeZ(ya, p)));
+		}
+	}
+}
 
 function defenderBuff(effect, power, duration) {try {
 	switch(effect) {
