@@ -285,7 +285,9 @@ var R = {
             ja: "エラー： 一つ以上のパラメータが範囲外です！"
         }),
         error_too_small: new Resource({
-            en: "The size of the maze is too small!"
+            en: "Error: The size of the maze is too small!",
+            ko: "오류: 미로 크기가 너무 작습니다!",
+            ja: "エラー： 迷路の大きが小さすぎます！"
         }),
 
         info_size: new Resource({
