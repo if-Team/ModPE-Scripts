@@ -5,11 +5,14 @@
 var java = {};
 java.io = {};
 java.io.File = function(){};
+java.io.File.delete = function(){};
 java.io.File.mkdir = function(){};
 java.lang = {};
+java.lang.Float = function(){};
 java.lang.Runnable = function(){};
 java.lang.String = function(){};
 java.lang.String.format = function(){};
+java.lang.StringBuffer = function(){};
 java.lang.System = function(){};
 java.lang.System.currentTimeMillis = function(){};
 java.lang.Thread = function(){};
