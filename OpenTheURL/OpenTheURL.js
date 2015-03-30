@@ -26,7 +26,7 @@ function init(){
 			var button = new android.widget.Button(ctx);
 			button.setText("OPEN");
 			button.setOnClickListener(new android.view.View.OnClickListener({
-				onClick: function(v){
+				onClick: function(){
 					/*
 					var intent = new android.content.Intent(android.content.Intent.ACTION_VIEW);
 					intent.setData(android.net.Uri.parse(lastURL));
@@ -41,10 +41,10 @@ function init(){
 				}
 			}));
 			
-			var window = new android.widget.PopupWindow(button);
-		    window.setWindowLayoutMode(-2, -2);
-		    window.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-		    window.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.CENTER, dp(64), dp(16));
+			var popupWindow = new android.widget.PopupWindow(button);
+            popupWindow.setWindowLayoutMode(-2, -2);
+            popupWindow.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+            popupWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.CENTER, dp(64), dp(16));
 		    
 			print("© 2015 ChalkPE. All rights reserved.");
 		}
@@ -59,7 +59,7 @@ function find(string){
 	//URL에는 띄어쓰기가 포함되지 않아요
 	string.split(" ").forEach(function(str){
 		try{
-			var url = new java.net.URL(str);
+			new java.net.URL(str);
 			lastURL = str;
 		}catch(e){
 			if(e instanceof java.net.MalformedURLException){
@@ -72,11 +72,11 @@ function find(string){
 /**
  * DPI를 픽셀로 변환합니다
  * @param {Number} dips - DPI 값
- * @returns 픽셀 값
+ * @returns {Number} 픽셀 값
  */
 function dp(dips){
 	return Math.ceil(dips * ctx.getResources().getDisplayMetrics().density);
 }
 
 var chatHook = find;
-init();
+init(chatHook);
