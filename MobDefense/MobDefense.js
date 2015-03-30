@@ -1,5 +1,5 @@
 var ScriptName = "Code: Mob Defense";
-var Version = "Beta 0.5v";
+var Version = "Beta v0.6";
 /*
 —————Change Log—————
 Beta 0.1(20150209)
@@ -33,6 +33,18 @@ Beta 0.5(20150215)
 	-(중요)21라운드 계획 시작
 	-(중요)보스 추가 예정 계획 착안
 	-(중요)보스 A.I작업중
+	
+Beta 0.6(20150326)
+	-팀킬 방지
+	-휴식시간 추가
+	-forceclear 명령어 개선
+	-코드 정리
+	-쓰레드 최적화 시도
+	-명령어 한글화
+	-주석 일부 추가
+	-폭파 방지
+	-스파이더 조키 완성
+	-크리퍼 투입
 */
 
 /**
@@ -54,35 +66,58 @@ Beta 0.5(20150215)
 *
 */
 
-
-var running = false;
-var gaming = false;
-var players = new Array();
-var defenders = new Array();
-var deaths = new Array();
-var breaking = false;
+/**버그 해결용 디버깅툴*/
 var debuging = false;
+
+/**디팬스 맵인지 확인*/
+var running = false;
+/**게임중인지 확인*/
+var gaming = false;
+/**모든 플레이어의 배열*/
+var players = new Array();
+/**게임을 진행중인 플레이어의 배열*/
+var defenders = new Array();
+/**죽은 플레이어를 임시보관하는 배열*/
+var deaths = new Array();
+/**게임에 사용할 변수들*/
+var breaking = false;
 var temp,temp2,temp3,temp4,temp5,tempArray,tempArray2,tempArray3,tempArray4,processing,mobSpawnLocX,mobSpawnLocZ,mob,skin,ent,ent2,entList,spawnLimit,pause;
-var zombieHighlight, skeletonHighlight, spiderHighlight, zombiePigHighlight, silverfishHighlight, endermanHighlight,teleporting;
+var zombieHighlight, skeletonHighlight, spiderHighlight, zombiePigHighlight, silverfishHighlight, endermanHighlight;
+/**스파이더맨 조키의 배열*/
+var spiderJockey = new Array();
+/**2초마다 반복 점멸하는 신호*/
+var highlightToggle = false;
+/**정해진 숫자만큼 왕복*/
+var tick1 = 0;
+var tick20 = 0;
+var tick40 = 0;
+/**크래쉬 횟수*/
+var crashCount = 0;
+/**0.01초*/
+var tick = 0;
+/**2초동안의 합*/
+var tack = 0;
+/**최근 2초간 틱의 활성도 배열*/
+var tock = new Array();
 
 function newLevel(lvl){
-	if(new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/CodeMobDefense").exists()){
+	if(new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/CodeMobDefense").exists()){/**해당맵이 디팬스맵일경우*/
 		new java.lang.Thread(new java.lang.Runnable({
 			run: function(){
 				try{
-					clientMessage(ChatColor.GRAY + "[Info] Booting...");
+					clientMessage(ChatColor.GRAY + "[Info] Booting...");/**저사양 기기를 위한 대기시간*/
+					running = true;
+					players = new Array();/**플레이어 배열을 재정의*/
+					mainTextBufferActivity();/**전광판 기능 활성화*/
+					mainBackgroundActivity();/**상시 돌아가는 프로세스 시적*/
 					delay(3000);
 					clientMessage(ChatColor.GRAY + "Mob Defense Map - CodeInside");
-					//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 1]);
-					//messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Mob Defense Map - CodeInside", 50]);
+					messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 1]);
+					messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Mob Defense Map - CodeInside", 50]);/**메인 전광판에 메시지 출력*/
 					clientMessage("Mob Defense Help : /defense");
-					running = true;
-					players = new Array();
-					mainTextBufferActivity();
-					mainBootActivity();
 				}catch(err){
 					running = false;
-					broadcast(err);
+					broadcast(ChatColor.DARK_RED + "[newLevel Error" + err.lineNumber + "] " + err);
 				}
 			}
 		})).start();
@@ -91,10 +126,11 @@ function newLevel(lvl){
 
 function leaveGame(){
 	gaming = false;
-	running = false;
+	running = false;/**종료*/
 };
 
-function entityRemovedHook(ent){
+/**사용 안함*/
+/**function entityRemovedHook(ent){
 	if(Player.isPlayer(ent)){
 		for(var e in players){
 			if(players[e] == ent){
@@ -104,47 +140,84 @@ function entityRemovedHook(ent){
 					//messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Bye", 100]);
 					//messageBuffer.push([2642, 89, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
 				}catch(err){
-					clientMessage("[Error] " + err);
+					broadcast(ChatColor.DARK_RED + "[ExitMsg Error" + err.lineNumber + "] " + err);
 				}}})).start();
 				break;
 			}
 		}
 	}
-};
+};*/
+
+function attackHook(attacker, victim) {
+	if(Player.isPlayer(victim) && Player.isPlayer(attacker) && running) {
+		preventDefault();/**팀킬 방지*/
+	}
+}
+
+function explodeHook(e, x, y, z){
+	if(running) {
+		preventDefault();/**폭파 방지*/
+		if(Entity.getEntityTypeId(e) === 33) {
+			ARROW_EXPLODE(x, y, z, 4, 10);
+		}else {
+			broadcast(ChatColor.GOLD + "[Warning] Somebody try to use TNT");
+		}
+	}
+}
+
+function modTick() {
+	var t = tick
+	tock.push(t);
+	tack += t;
+	tick = 0;
+	if(tock.length > 40)
+		tack -= tock.shift();
+	ModPE.showTipMessage("(" + tack/2 + "%)");
+}
 
 function procCmd(str){
 	var cmd = str.split(" ");
-	if(str == "start"){
+	if(str == "defense" || str == "디펜스"){
+		clientMessage("[/start | /시작] Game start");
+		clientMessage("[/pause | /일시중지] Game pause");
+		clientMessage("[/forceclear | /강제클리어] Game force clear");
+		clientMessage("[/stop | /중지] Game Force Stop");
+		clientMessage("[/tpspawn | /텔포스폰 <NAME>] Teleport Spawn");
+		clientMessage("[/tpgame | /텔포게임 <NAME>] Teleport Defense Room");
+		clientMessage("[/tpwatch | /텔포관전 <NAME>] Teleport Defense Watch");
+		clientMessage("[/kill | /죽이기 <NAME>] Kill <NAME>");
+		clientMessage("[/give | /주기 <NAME> <ID:DAMAGE:COUNT>] Give item");
+		clientMessage("[/health | /회복 <NAME> <HP>] Health Change");
+	}else if(str == "start" || str == "시작"){/**시작 명령어 입력시*/
 		new java.lang.Thread(new java.lang.Runnable({
 			run: function(){
 				try{
-					if(running && !gaming){
+					if(running && !gaming){/**디팬스 맵이고 게임이 시작되지 않았을때*/
 						gaming = true;
 						broadcast(ChatColor.YELLOW + "[Info] Game Start!");
 						//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
 						//messageBuffer.push([2642, 97, 56, "X-", 80, 35, 1, 42, 0, "Game Start!", 100]);
-						delay(1000);
-						mobDefenseMainActivity();
+						mobDefenseMainActivity();/**게임 프로세스 시작*/
 						for each(var e in defenders)
-							teleport("LOBY", e);
+							teleport("LOBY", e);/**게임 종료후 모두 로비로 텔레포트*/
 						defenders = [];
-						gaming = false;
+						gaming = false;/**게임 종료*/
 					}else{
 						clientMessage(ChatColor.RED + "[Error] Already Started.");
-						clientMessage(ChatColor.RED + "If you want stop then type: /stop");
+						clientMessage(ChatColor.RED + "If you want stop then type: /stop");/**게임이 이미 진행중일떄 명령어 입력시*/
 					}
-				}catch(err){
+				}catch(err){/**에러 발생시*/
 					gaming = false;
 					for each(var e in defenders)
 						teleport("LOBY", e);
-					broadcast(ChatColor.DARK_RED + "[Error] " + err);
+broadcast(ChatColor.DARK_RED + "[mainThread Error" + err.lineNumber + "] " + err);
 				}
 				broadcast(ChatColor.GRAY + "[Info] game progress stop.");
 				//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
 				//messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Game progress stop", 100]);
 			}
 		})).start();
-	}else if(str == "pause"){
+	}else if(str == "pause" || str == "일시정지"){
 		if(gaming){
 			if(pause){
 				pause = false;
@@ -160,13 +233,15 @@ function procCmd(str){
 			clientMessage(ChatColor.DARK_RED + "[Error] Game is not Running");
 			pause = false;
 		}
-	}else if(str == "forceclear"){
+	}else if(str == "forceclear" || str == "강제클리어"){/**강제 스테이지 클리너*/
 		try{
-			entList = [];
+			for each(var e in entList) {
+				Entity.setHealth(e, 0);
+			}
 		}catch(err){
-			clientMessage(ChatColor.DARK_RED + "[Error] " + err);
+			broadcast(ChatColor.DARK_RED + "[ForceClear Error" + err.lineNumber + "] " + err);
 		}
-	}else if(cmd[0] == "tpspawn"){
+	}else if(cmd[0] == "tpspawn" || cmd[0] == "텔포스폰"){
 		for each(var p in players){
 			if(Player.getName(p) == cmd[1]){
 				teleport("LOBY", p);
@@ -178,7 +253,7 @@ function procCmd(str){
 			}
 		}
 		clientMessage(ChatColor.RED + "Unknow Player: " + cmd[1]);
-	}else if(cmd[0] == "tpgame"){
+	}else if(cmd[0] == "tpgame" || cmd[0] == "텔포게임"){
 		for each(var p in players){
 			if(Player.getName(p) == cmd[1]){
 				teleport("BATTLE", p);
@@ -190,7 +265,7 @@ function procCmd(str){
 			}
 		}
 		clientMessage(ChatColor.RED + "Unknow Player: " + cmd[1]);
-	}else if(cmd[0] == "tpwatch"){
+	}else if(cmd[0] == "tpwatch" || cmd[0] == "텔포관전"){
 		for each(var p in players){
 			if(Player.getName(p) == cmd[1]){
 				teleport("VIEW", p);
@@ -202,25 +277,14 @@ function procCmd(str){
 			}
 		}
 		clientMessage(ChatColor.RED + "Unknow Player: " + cmd[1]);
-	}else if(str == "stop"){
+	}else if(str == "stop" || str == "중지"){
 		if(gaming){
 			gaming = false;
 			broadcast(ChatColor.DARK_RED + "[Warning] Game Force Stoping. Please wait...");
 		}else{
 			clientMessage(ChatColor.DARK_RED + "[Error] Game is not Running");
 		}
-	}else if(str == "defense"){
-		clientMessage("[/start] Game start");
-		clientMessage("[/pause] Game pause");
-		clientMessage("[/forceclear] Game force clear");
-		clientMessage("[/stop] Game Force Stop");
-		clientMessage("[/tpspawn <NAME>] Teleport Spawn");
-		clientMessage("[/tpgame <NAME>] Teleport Defense Room");
-		clientMessage("[/tpwatch <NAME>] Teleport Defense Watch");
-		clientMessage("[/kill <NAME>] Kill <NAME>");
-		clientMessage("[/give <NAME> <ID:DAMAGE:COUNT>] Give item");
-		clientMessage("[/health <NAME> <HP>] Health Change");
-	}else if(cmd[0] == "kill"){
+	}else if(cmd[0] == "kill" || cmd[0] == "죽이기/"){
 		for each(var p in players){
 			if(Player.getName(p) == cmd[1]){
 				Entity.setHealth(p, 0);
@@ -229,7 +293,7 @@ function procCmd(str){
 			}
 		}
 		clientMessage(ChatColor.RED + "Unknow Player: " + cmd[1]);
-	}else if(cmd[0] == "give"){
+	}else if(cmd[0] == "give" || cmd[0] == "주기"){
 		for each(var p in players){
 			if(Player.getName(p) == cmd[1]){
 				tempArray = cmd[2].split(":");
@@ -239,7 +303,7 @@ function procCmd(str){
 			}
 		}
 		clientMessage(ChatColor.RED + "Unknow Player: " + cmd[1]);
-	}else if(cmd[0] == "health"){
+	}else if(cmd[0] == "health" || cmd[0] == "회복"){
 		for each(var p in players){
 			if(Player.getName(p) == cmd[1]){
 				Entity.setHealth(p, parseInt(cmd[2]));
@@ -250,13 +314,24 @@ function procCmd(str){
 		clientMessage(ChatColor.RED + "Unknow Player: " + cmd[1]);
 	}else if(cmd[0] == "mod" || cmd[0] == "modlist" || cmd[0] == "script" || cmd[0] == "scriptlist"){
 		broadcast(ChatColor.GRAY + "Mob Defense Map & Script - CodeInside");
-	}else{
-		if(cmd[0] == "ciwrite")
+	}else if(cmd[0] === "ciwrite") {
 			messageBuffer.push([Math.floor(Player.getX()),Math.floor(Player.getY()),Math.floor(Player.getZ()),cmd[6],160,cmd[1],cmd[2],cmd[3],cmd[4],cmd[5], 100]);
-		else if(cmd[0] == "gamemode")
-			Level.setGamemode(parseInt(cmd[1]));
+	}else if(cmd[0] === "gamemode") {
+		Level.setGameMode(parseInt(cmd[1]));
+	}else if(cmd[0] === "debugspawn") {
+		defenseMobSpawner([cmd[1]]);
 	}
 };
+
+function modTick() {
+	var t = tick
+	tock.push(t);
+	tack += t;
+	tick = 0;
+	if(tock.length > 40)
+		tack -= tock.shift();
+	ModPE.showTipMessage("(" + tack/2 + "%)");
+}
 
 function broadcast(str){
 	net.zhuoweizhang.mcpelauncher.ScriptManager.nativeSendChat(str);
@@ -267,78 +342,123 @@ function delay(int){
 	java.lang.Thread.sleep(int);
 };
 
-function mainBootActivity(){
-	while(running){
-		delay(1000);
-		var temp = Entity.getAll();
-		for each(var e in temp){
-			if(Player.isPlayer(e)){
-				if(players.indexOf(e) == "-1"){
-					players.push(e);
-					teleport("LOBY",e);
-					messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
-					messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Welcome", 100]);
-					messageBuffer.push([2642, 89, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
-					break;
-				}
-			}else{
-				if(!gaming){
-					Entity.remove(e);
-				}
+function mainBackgroundActivity() {new java.lang.Thread(new java.lang.Runnable( {run: function() {try {
+	while(running) {
+		delay(10);
+		tick++;
+		if(++tick20 >= 100) {
+			tick20 = 0;
+			playerManager();
+		}
+		if(gaming) {
+			if(++tick40 >= 200) {
+				tick40 = 0;
+				highlightActivity();
+				highlightToggle = highlightToggle ? false : true;
+			}
+			if(++tick1 >= 5) {
+				tick1 = 0;
+				spiderJockeyActivity();
 			}
 		}
-		for(var e in players){
-			if(!Player.isPlayer(players[e])) {
-				players.splice(e, 1);
-			}
-			switch(Level.getTile(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e))){
-				case 173:
-					if(!gaming){
-						if(defenders.indexOf(e) == -1){
-							defenders.push(e);
-							teleport("READY", e);
-							broadcast(ChatColor.YELLOW + "[" + defenders.length + "/" + players.length + "] " + Player.getName(e) + ChatColor.AQUA + " join Party");
-							//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
-							//messageBuffer.push([2642, 97, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
-							//messageBuffer.push([2642, 89, 56, "X-", 80, 35, 3, 42, 0, "Join Party ", 100]);
-							//messageBuffer.push([2642, 81, 56, "X-", 80, 35, 15, 42, 0, "[" + defenders.length + "/" + players.length + "]", 100]);
-							breaking = true;
-						}else{
-							defenders.splice(defenders.indexOf(e),1);
-							teleport("LOBY", e);
-						}
-					}
-					break;
-				case 35:
-					if(Level.getData(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e)) == 15){
-						teleport("LOBY", e);
-					}
-					if(gaming && Level.getData(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e)) == 1){
-						teleport("VIEW", e);
-					}
-					break;
-				case 159:
-					if(!gaming && Level.getData(Entity.getX(e) ,Entity.getY(e) - 2,Entity.getZ(e)) == 10){
-						if(defenders.indexOf(e) == -1){
-							defenders.push(e);
-							teleport("READY", e);
-						}else{
-							defenders.splice(defenders.indexOf(e),1);
-							teleport("LOBY", e);
-							broadcast(ChatColor.YELLOW + "[" + defenders.length + "/" + players.length + "] " + Player.getName(e) + ChatColor.RED + " leave Party");
-							messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
-							messageBuffer.push([2642, 97, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
-							messageBuffer.push([2642, 89, 56, "X-", 80, 35, 14, 42, 0, "Leave Party", 100]);
-							messageBuffer.push([2642, 81, 56, "X-", 80, 35, 15, 42, 0, "[" + defenders.length + "/" + players.length + "]", 100]);
-							breaking = true;
-						}
-					}
-					break;
-			}
-			if(breaking){
-				breaking = false;
+	}
+}catch(e) {
+	broadcast(ChatColor.DARK_RED + "[MainBackgroundActivity Error" + e.lineNumber + "] " + e);
+	delay(1000);
+	if(++crashCount <= 3) {
+		broadcast(ChatColor.RED + "ERROR IGNORE - AUTO REBOOT...");
+		delay(5000);
+		mainBackgroundActivity();
+	}else {
+		runing = false;
+		gaming = false;
+		broadcast(ChatColor.DARK_RED + "CAN'T HOLD ON. SCRIPT CRASH");
+		broadcast(ChatColor.GOLD + "please report Error Message to");
+		broadcast(ChatColor.GOLD + "CodeInside(scgtdy7151@gmail.com)");
+/**		delay(5000);
+		broadcast(ChatColor.DARK_RED + "SERVER AUTO CLOSE please wait...");
+		delay(10000);
+		net.zhuoweizhang.mcpelauncher.ui.NerdyStuffActivity.forceRestart(com.mojang.minecraftpe.MainActivity.currentMainActivity.get());*/
+	}
+}}})).start()};
+
+function playerManager(){
+	var temp = Entity.getAll();
+	for each(var e in temp){
+		if(Player.isPlayer(e)){
+			if(players.indexOf(e) == "-1"){
+				players.push(e);
+				debug("push", e);
+				teleport("LOBY",e);
+				messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
+				messageBuffer.push([2642, 97, 56, "X-", 80, 35, 15, 42, 0, "Welcome", 100]);
+				messageBuffer.push([2642, 89, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
 				break;
 			}
+		}else{
+			if(!gaming){
+				Entity.remove(e);
+			}
+		}
+	}
+	for(var e in players){
+		if(!Player.isPlayer(players[e])) {
+			players.splice(e, 1);
+			debug("splice", players[e]);
+			return;
+		}
+	}
+	for each(var e in players){
+		switch(Level.getTile(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e))){
+			case 173:
+				if(!gaming){
+					if(defenders.indexOf(e) == -1){
+						defenders.push(e);
+						teleport("READY", e);
+						broadcast(ChatColor.YELLOW + "[" + defenders.length + "/" + players.length + "] " + Player.getName(e) + ChatColor.AQUA + " join Party");
+						//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
+						//messageBuffer.push([2642, 97, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
+						//messageBuffer.push([2642, 89, 56, "X-", 80, 35, 3, 42, 0, "Join Party ", 100]);
+						//messageBuffer.push([2642, 81, 56, "X-", 80, 35, 15, 42, 0, "[" + defenders.length + "/" + players.length + "]", 100]);
+						breaking = true;
+					}else{
+						defenders.splice(defenders.indexOf(e),1);
+						teleport("LOBY", e);
+					}
+				}else {
+					teleport("LOBY", e);
+					broadcast(ChatColor.YELLOW + Player.getName(e) + " game is Already Start. please wait");
+				}
+				break;
+			case 35:
+				if(Level.getData(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e)) == 15){
+					teleport("LOBY", e);
+				}
+				if(gaming && Level.getData(Entity.getX(e), Entity.getY(e) - 2, Entity.getZ(e)) == 1){
+					teleport("VIEW", e);
+				}
+				break;
+			case 159:
+				if(!gaming && Level.getData(Entity.getX(e) ,Entity.getY(e) - 2,Entity.getZ(e)) == 10){
+					if(defenders.indexOf(e) == -1){
+						defenders.push(e);
+						teleport("READY", e);
+					}else{
+						defenders.splice(defenders.indexOf(e),1);
+						teleport("LOBY", e);
+						broadcast(ChatColor.YELLOW + "[" + defenders.length + "/" + players.length + "] " + Player.getName(e) + ChatColor.RED + " leave Party");
+						//messageBuffer.push([2564, 58, 56, 2642, 97, 56, 42, 0, 100]);
+						//messageBuffer.push([2642, 97, 56, "X-", 80, 22, 0, 42, 0, Player.getName(e), 100]);
+						//messageBuffer.push([2642, 89, 56, "X-", 80, 35, 14, 42, 0, "Leave Party", 100]);
+						//messageBuffer.push([2642, 81, 56, "X-", 80, 35, 15, 42, 0, "[" + defenders.length + "/" + players.length + "]", 100]);
+						breaking = true;
+					}
+				}
+				break;
+		}
+		if(breaking){
+			breaking = false;
+			break;
 		}
 	}
 };
@@ -378,9 +498,9 @@ function mobDefenseMainActivity(){
 	processing = true;
 	highlight("ZOMBIE", "ON");
 	giveDefenders(["299:0:1", "269:-1000:1", "357:0:16"]);
-	broadcast(ChatColor.YELLOW + "[Info] Get Ready!");
+	broadcast(ChatColor.AQUA + "[Info] Get Ready!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Ready!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Ready!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -390,7 +510,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 1");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 1", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 1", 700]);
+	delay(3000);
 	spawnLimit = 3 + (2 * defenders.length);
 	defenseMobSpawner(["ZOMBIE:3:"+(10*defenders.length)]);
 	while(processing){
@@ -404,7 +525,7 @@ function mobDefenseMainActivity(){
 	giveDefenders(["300:0:1", "270:-1000:1", "262:0:32"]);
 	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -414,7 +535,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 2");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 2", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 2", 700]);
+	delay(3000);
 	spawnLimit = 3 + (2 * defenders.length);
 	defenseMobSpawner(["ZOMBIE:20:"+(10*defenders.length)]);
 	while(processing){
@@ -428,7 +550,7 @@ function mobDefenseMainActivity(){
 	giveDefenders(["301:0:1", "271:-1000:1", "260:0:8"]);
 	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -438,7 +560,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 3");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 3", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 3", 700]);
+	delay(3000);
 	spawnLimit = 3 + (2 * defenders.length);
 	defenseMobSpawner(["SKELETON:16:"+(10*defenders.length)]);
 	while(processing){
@@ -452,7 +575,7 @@ function mobDefenseMainActivity(){
 	giveDefenders(["298:0:1", "268:-1000:1", "320:0:8"]);
 	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -462,7 +585,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 4");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 4", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 4", 700]);
+	delay(3000);
 	spawnLimit = 3 + (2 * defenders.length);
 	defenseMobSpawner(["SPIDER:14:"+(10*defenders.length)]);
 	while(processing){
@@ -476,7 +600,7 @@ function mobDefenseMainActivity(){
 	giveDefenders(["315:0:1", "284:-1000:1", "261:0:1"]);
 	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -486,7 +610,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 5");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 5", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 5", 700]);
+	delay(3000);
 	spawnLimit = 3 + (2 * defenders.length);
 	defenseMobSpawner(["ZOMBIE_PIG:20:"+(10*defenders.length)]);
 	while(processing){
@@ -500,7 +625,7 @@ function mobDefenseMainActivity(){
 	giveDefenders(["316:0:1", "285:-1000:1", "262:0:32"]);
 	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -510,7 +635,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 6");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 6", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 6", 700]);
+	delay(3000);
 	spawnLimit = 5 + (5 * defenders.length);
 	defenseMobSpawner(["SILVER_FISH:5:"+(30*defenders.length)]);
 	while(processing){
@@ -524,7 +650,7 @@ function mobDefenseMainActivity(){
 	giveDefenders(["317:0:1", "286:-1000:1", "459:0:8"]);
 	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -534,7 +660,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 7");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 7", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 7", 700]);
+	delay(3000);
 	spawnLimit = 2 + (1 * defenders.length);
 	defenseMobSpawner(["ENDER_MAN:40:"+(5*defenders.length)]);
 	while(processing){
@@ -549,7 +676,7 @@ function mobDefenseMainActivity(){
 	giveDefenders(["314:0:1", "283:-1000:1", "360:0:8"]);
 	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -559,7 +686,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 8");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 8", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 8", 700]);
+	delay(3000);
 	spawnLimit = 5 + (3 * defenders.length);
 	defenseMobSpawner(["SKELETON:16:"+(5*defenders.length), "SPIDER:14:"+(10*defenders.length)]);
 	while(processing){
@@ -575,7 +703,7 @@ function mobDefenseMainActivity(){
 	giveDefenders(["303:0:1", "273:-1000:1", "457:0:16"]);
 	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -585,7 +713,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 9");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 9", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 9", 700]);
+	delay(3000);
 	spawnLimit = 5 + (3 * defenders.length);
 	defenseMobSpawner(["ZOMBIE:20:"+(10*defenders.length), "ZOMBIE_PIG:20:"+(10*defenders.length)]);
 	while(processing){
@@ -599,10 +728,10 @@ function mobDefenseMainActivity(){
 	highlight("SPIDER", "ON");
 	highlight("SILVER_FISH", "ON");
 	giveDefenders(["304:0:1", "274:-1000:1", "354:0:1"]);
-	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
+	broadcast(ChatColor.AQUA + "[Info] break time!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
-	stageDelay(30000);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "break!", 700]);
+	stageDelay(60000);
 	if(!gaming) return;
 	while(pause){
 		delay(1000);
@@ -611,7 +740,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 10");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 10", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 10", 700]);
+	delay(3000);
 	spawnLimit = 5 + (3 * defenders.length);
 	defenseMobSpawner(["SPIDER:14:"+(10*defenders.length), "SILVER_FISH:5:"+(30*defenders.length)]);
 	while(processing){
@@ -627,7 +757,7 @@ function mobDefenseMainActivity(){
 	giveDefenders(["305:0:1", "275:-1000:1", "297:0:8"]);
 	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -637,7 +767,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 11");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 11", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 11", 700]);
+	delay(3000);
 	spawnLimit = 3 + (2 * defenders.length);
 	defenseMobSpawner(["SPIDER:14:"+(10*defenders.length), "ENDER_MAN:40:"+(8*defenders.length)]);
 	while(processing){
@@ -651,9 +782,9 @@ function mobDefenseMainActivity(){
 	highlight("SKELETON", "ON");
 	highlight("SILVER_FISH", "ON");
 	giveDefenders(["302:0:1", "272:-1000:1", "369:0:8"]);
-	broadcast(ChatColor.YELLOW + "[Info] Clear!");
+	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -663,8 +794,9 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 12");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 12", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 12", 700]);
 	spawnLimit = 5 + (3 * defenders.length);
+	delay(3000);
 	defenseMobSpawner(["SKELETON:16:"+(15*defenders.length), "SILVER_FISH:5:"+(30*defenders.length)]);
 	while(processing){
 		delay(5000);
@@ -676,9 +808,9 @@ function mobDefenseMainActivity(){
 	processing = true;
 	highlight("ZOMBIE", "FLASHING");
 	giveDefenders(["307:0:1", "256:-1000:1", "262:0:32"]);
-	broadcast(ChatColor.YELLOW + "[Info] Clear!");
+	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -688,7 +820,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 13");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 13", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 13", 700]);
+	delay(3000);
 	spawnLimit = 1 + (1 * defenders.length);
 	defenseMobSpawner(["ZOMBIE:80:"+(5*defenders.length)]);
 	while(processing){
@@ -702,9 +835,9 @@ function mobDefenseMainActivity(){
 	highlight("SPIDER", "ON");
 	highlight("ZOMBIE_PIG", "ON");
 	giveDefenders(["308:0:1", "257:-1000:1", "391:0:16"]);
-	broadcast(ChatColor.YELLOW + "[Info] Clear!");
+	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -714,7 +847,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 14");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 14", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 14", 700]);
+	delay(3009);
 	spawnLimit = 5 + (3 * defenders.length);
 	defenseMobSpawner(["ZOMBIE:80:"+(5*defenders.length), "SPIDER:14:"+(10*defenders.length), "ZOMBIE_PIG:20:"+(10*defenders.length)]);
 	while(processing){
@@ -729,9 +863,9 @@ function mobDefenseMainActivity(){
 	highlight("ZOMBIE_PIG", "FLASHING");
 	highlight("SILVER_FISH", "ON");
 	giveDefenders(["309:0:1", "258:-1000:1", "282:0:8"]);
-	broadcast(ChatColor.YELLOW + "[Info] Clear!");
+	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -741,7 +875,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 15");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 15", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 15", 700]);
+	delay(3000);
 	spawnLimit = 5 + (3 * defenders.length);
 	defenseMobSpawner(["ZOMBIE_PIG:80:"+(10*defenders.length), "SILVER_FISH:5:"+(20*defenders.length)]);
 	while(processing){
@@ -756,9 +891,9 @@ function mobDefenseMainActivity(){
 	highlight("ENDER_MAN", "ON");
 	highlight("SILVER_FISH", "ON");
 	giveDefenders(["306:0:1", "267:-1000:1", "393:0:8"]);
-	broadcast(ChatColor.YELLOW + "[Info] Clear!");
+	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -768,7 +903,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 16");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 16", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 16", 700]);
+	delay(3000);
 	spawnLimit = 5 + (3 * defenders.length);
 	defenseMobSpawner(["SPIDER:14:"+(30*defenders.length), "ENDER_MAN:40:"+(10*defenders.length), "SILVER_FISH:5:"+(30*defenders.length)]);
 	while(processing){
@@ -788,7 +924,7 @@ function mobDefenseMainActivity(){
 	giveDefenders(["311:0:1", "277:-1000:1", "360:0:32"]);
 	broadcast(ChatColor.YELLOW + "[Info] Clear!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -798,7 +934,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 17");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 17", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 17", 700]);
+	delay(3000);
 	spawnLimit = 5 + (3 * defenders.length);
 	defenseMobSpawner(["ZOMBIE:80:"+(5*defenders.length), "SKELETON:64:"+(5*defenders.length), "SPIDER:56:"+(5*defenders.length), "ZOMBIE_PIG:80:"+(5*defenders.length), "SILVER_FISH:20:"+(5*defenders.length)]);
 	while(processing){
@@ -817,9 +954,9 @@ function mobDefenseMainActivity(){
 	highlight("ENDER_MAN", "FLASHING");
 	highlight("SILVER_FISH", "ON");
 	giveDefenders(["312:0:1", "278:-1000:1", "262:0:32"]);
-	broadcast(ChatColor.YELLOW + "[Info] Clear!");
+	broadcast(ChatColor.YELLOW + "[Info] Wave Clear!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -829,7 +966,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 18");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 18", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 18", 700]);
+	delay(3000);
 	spawnLimit = 10 + (5 * defenders.length);
 	defenseMobSpawner(["ZOMBIE:20:"+(30*defenders.length), "SKELETON:16:"+(30*defenders.length), "ENDER_MAN:160:"+(5*defenders.length),"SILVER_FISH:5:"+(40*defenders.length)]);
 	while(processing){
@@ -849,7 +987,7 @@ function mobDefenseMainActivity(){
 	giveDefenders(["313:0:1", "279:-1000:1", "392:0:16"]);
 	broadcast(ChatColor.YELLOW + "[Info] Clear!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 700]);
 	stageDelay(30000);
 	if(!gaming) return;
 	while(pause){
@@ -859,7 +997,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.GOLD + "[Warning] Wave 19");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 19", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 19", 700]);
+	delay(3000);
 	spawnLimit = 10 + (5 * defenders.length);
 	defenseMobSpawner(["ZOMBIE:80:"+(20*defenders.length), "SPIDER:56:"+(20*defenders.length), "ENDER_MAN:160:"+(10*defenders.length), "SILVER_FISH:20:"+(50*defenders.length)]);
 	while(processing){
@@ -878,10 +1017,10 @@ function mobDefenseMainActivity(){
 	highlight("ZOMBIE_PIG", "ON");
 	highlight("ENDER_MAN", "ON");
 	highlight("SILVER_FISH", "ON");
-	giveDefenders(["310:0:1", "276:-1000:1", "354:0:1", "400:0:32", "303:14:10"]);
-	broadcast(ChatColor.YELLOW + "[Info] Clear!");
+	giveDefenders(["310:0:1", "276:-1000:1", "354:0:1", "400:0:32", "383:14:10"]);
+	broadcast(ChatColor.AQUA + "[Info] break time!");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "Clear!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "break!", 700]);
 	stageDelay(60000);
 	if(!gaming) return;
 	while(pause){
@@ -891,7 +1030,8 @@ function mobDefenseMainActivity(){
 	}
 	broadcast(ChatColor.RED + "[Critical Warning] Wave 20");
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 20", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 20", 700]);
+	delay(3000);
 	spawnLimit = 20 + (10 * defenders.length);
 	defenseMobSpawner(["ZOMBIE:20:"+(50*defenders.length), "SKELETON:16:"+(50*defenders.length), "SPIDER:14:"+(50*defenders.length), "ZOMBIE_PIG:20:"+(50*defenders.length), "ENDER_MAN:40:"+(30*defenders.length), "SILVER_FISH:5:"+(100*defenders.length)]);
 	while(processing){
@@ -910,7 +1050,7 @@ function mobDefenseMainActivity(){
 			return;
 	}
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
-	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "WIN!", 300]);
+	messageBuffer.push([2585, 58, -77, "X+", 150, 89, 0, 159, 15, "WIN!", 700]);
 	broadcast(ChatColor.GOLD + "WIN!");
 	broadcast(ChatColor.GRAY + "will be teleport in 10sec...");
 	delay(10000);
@@ -922,6 +1062,10 @@ function playerHPManager(){
 		run: function(){
 			try{
 				while(gaming){
+					if(defenders.length == 0){
+						broadcast(ChatColor.DARK_RED + "GAME OVER");
+						gaming = false;
+					}
 					java.lang.Thread.sleep(100);
 					for(var e in defenders){
 						if(Entity.getHealth(defenders[e]) < 1){
@@ -940,13 +1084,9 @@ function playerHPManager(){
 						deaths.splice(e, 1);
 						}
 					}
-					if(defenders.length == 0){
-						broadcast(ChatColor.DARK_RED + "GAME OVER");
-						gaming = false;
-					}
 				}
 			}catch(err){
-				broadcast(err);
+				broadcast(ChatColor.DARK_RED + "[HpManager Error" + err.lineNumber + "] " + err);
 				gaming = false;
 			}
 		}
@@ -959,33 +1099,21 @@ function teleport(place, ent){
 			var rid = Level.spawnMob(2599 + (10 * Math.random()), 67, 0 + (8 * Math.random()), 81);
 			Entity.rideAnimal(ent, rid);
 			Entity.remove(rid);
-			teleporting = true;
-			delay(3000);
-			teleporting = false;
 			break;
 		case "READY":
 			var rid = Level.spawnMob(2621 + (4 * Math.random()), 67, 17 + (4 * Math.random()), 81);
 			Entity.rideAnimal(ent, rid);
 			Entity.remove(rid);
-			teleporting = true;
-			delay(3000);
-			teleporting = false;
 			break;
 		case "BATTLE":
 			var rid = Level.spawnMob(2595 + (18 * Math.random()), 47, -38 + (18 * Math.random()), 81);
 			Entity.rideAnimal(ent, rid);
 			Entity.remove(rid);
-			teleporting = true;
-			delay(3000);
-			teleporting = false;
 			break;
 		case "VIEW":
 			var rid = Level.spawnMob(2598 + (12 * Math.random()), 63, -35 + (12 * Math.random()), 81);
 			Entity.rideAnimal(ent, rid);
 			Entity.remove(rid);
-			teleporting = true;
-			delay(3000);
-			teleporting = false;
 			break;
 	}
 };
@@ -1036,7 +1164,65 @@ function stageDelay(maxTime){
 	}
 };
 
-function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({run: function(){try{
+function highlightActivity() {try {
+	if(gaming) {
+		if(highlightToggle) {
+			if(zombieHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2583 + e, 43, -78, 35, 15);
+			}
+			if(skeletonHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2590 + e, 43, -78, 35, 15);
+			}
+			if(spiderHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2597 + e, 43, -78, 35, 15);
+			}
+			if(zombiePigHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2604 + e, 43, -78, 35, 15);
+			}
+			if(silverfishHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2611 + e, 43, -78, 35, 15);
+			}
+			if(endermanHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2618 + e, 43, -78, 35, 15);
+			}
+		}else {
+			if(zombieHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2583 + e, 43, -78, 89, 0);
+			}
+			if(skeletonHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2590 + e, 43, -78, 89, 0);
+			}
+			if(spiderHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2597 + e, 43, -78, 89, 0);
+			}
+			if(zombiePigHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2604 + e, 43, -78, 89, 0);
+			}
+			if(silverfishHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2611 + e, 43, -78, 89, 0);
+			}
+			if(endermanHighlight){
+				for(var e = 0; e < 6; e++)
+					Level.setTile(2618 + e, 43, -78, 89, 0);
+			}
+		}
+	}
+}catch(e) {
+		broadcast(ChatColor.DARK_RED + "[Highlight Error" + e.lineNumber + "] " + e);
+}};
+
+function highlight(target, status){try{
 	switch(target){
 		case "ZOMBIE":
 			if(status == "ON"){
@@ -1048,14 +1234,6 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2583 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				zombieHighlight = true;
-				while(zombieHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2583 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2583 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 		case "SKELETON":
@@ -1068,14 +1246,6 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2590 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				skeletonHighlight = true;
-				while(skeletonHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2590 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2590 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 		case "SPIDER":
@@ -1088,14 +1258,6 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2597 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				spiderHighlight = true;
-				while(spiderHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2597 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2597 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 		case "ZOMBIE_PIG":
@@ -1108,14 +1270,6 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2604 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				zombiePigHighlight = true;
-				while(zombiePigHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2604 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2604 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 		case "SILVER_FISH":
@@ -1128,14 +1282,6 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2611 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				silverfishHighlight = true;
-				while(silverfishHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2611 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2611 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 		case "ENDER_MAN":
@@ -1148,20 +1294,12 @@ function highlight(target, status){new java.lang.Thread(new java.lang.Runnable({
 					Level.setTile(2618 + e, 43, -78, 35, 15);
 			}else if(status == "FLASHING"){
 				endermanHighlight = true;
-				while(endermanHighlight == true){
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2618 + e, 43, -78, 89, 0);
-					delay(2000);
-					for(var e = 0; e < 6; e++)
-						Level.setTile(2618 + e, 43, -78, 35, 15);
-					delay(2000);
-				}
 			}
 			break;
 	}
 }catch(err){
-	clientMessage("[Error] " + err);
-}}})).start()};
+	broadcast(ChatColor.DARK_RED + "[Flashing Error" + err.lineNumber + "] " + err);
+}};
 
 function defenseMobSpawner(ary){new java.lang.Thread(new java.lang.Runnable({run: function(){try{
 	debug("Run", "defense_spawner","");
@@ -1226,6 +1364,15 @@ function defenseMobSpawner(ary){new java.lang.Thread(new java.lang.Runnable({run
 						entList.push(ent);
 						tempArray3[l]--;
 						break;
+					case "CREEPER":
+						mob = 33;
+						skin = "mob/creeper.png";
+						ent = Level.spawnMob(mobSpawnLocX[temp4] + Math.random(), 46, mobSpawnLocZ[temp4] + Math.random(), mob, skin);
+						Entity.setHealth(ent, tempArray2[l]);
+						debug("Info", "Spawn" + tempArray[l], ent);
+						entList.push(ent);
+						tempArray3[l]--;
+						break;
 					case "SKELETON":
 						mob = 34;
 						skin = "mob/skeleton.png";
@@ -1281,7 +1428,9 @@ function defenseMobSpawner(ary){new java.lang.Thread(new java.lang.Runnable({run
 						ent2 = Level.spawnMob(mobSpawnLocX[temp4] + Math.random(), 46, mobSpawnLocZ[temp4] + Math.random(), mob, skin);
 						Entity.setHealth(ent, tempArray2[l]);
 						Entity.setHealth(ent2, tempArray2[l]);
-						spiderJockeyAI(ent, ent2);
+						Entity.rideAnimal(ent, ent2);
+						spiderJockey.push(ent + ":" + ent2);
+						
 						debug("Info", "Spawn" + tempArray[l], ent);
 						entList.push(ent);
 						entList.push(ent2);
@@ -1316,20 +1465,60 @@ function defenseMobSpawner(ary){new java.lang.Thread(new java.lang.Runnable({run
 	gaming = false;
 }}})).start();};
 
-function spiderJockeyAI(rider, mount){new java.lang.Thread(new java.lang.Runnable({run: function(){try{
-	Entity.rideAnimal(rider, mount);
-	while(Entity.getHealth(rider) > 0 && Entity.getHealth(mount) > 0){
-		if(temp != temp2){
-			Entity.setHealth(rider, Math.floor((Entity.getHealth(rider) + Entity.getHealth(mount)) / 2));
-			Entity.setHealth(mount, Math.floor((Entity.getHealth(rider) + Entity.getHealth(mount)) / 2));
+function spiderJockeyActivity(){try{
+	for(var e in spiderJockey) {
+		var temp = spiderJockey[e].split(":")[0];
+		var temp2 = spiderJockey[e].split(":")[1];
+		if(Entity.getHealth(temp) > Entity.getHealth(temp2)){
+			Entity.setHealth(temp, Entity.getHealth(temp2));
+		}else if(Entity.getHealth(temp) < Entity.getHealth(temp2)){
+			Entity.setHealth(temp2, Entity.getHealth(temp));
 		}
-		java.lang.Thread.sleep(200);
+		if(!Entity.getHealth(temp) > 0 && !Entity.getHealth(temp2) > 0) {
+			spiderJockey.splice(e, 1);
+		}
 	}
-	Entity.setHealth(rider, 0);
-	Entity.setHealth(mount, 0);
 }catch(err){
-	clientMessage("[Error]<Spider Jockey> " + err);
-}}})).start()};
+	broadcast(ChatColor.DARK_RED + "[SpiderJockey Error" + err.lineNumber + "] " + err);
+}};
+
+function ARROW_EXPLODE(x, y, z, power, howMany){
+	//power는 1이 적당 강력하게 하려면 그 이상
+	//howMany는 작을수록 많이 발싸 됨 10이 적당 많이 발싸 하려면 5정도
+	//WTF?!
+	function absRangeX(y, p) {
+		return (-1 * Math.sin(y / 180 * Math.PI) * Math.cos(p / 180 * Math.PI));
+	};
+	function absRangeY(y, p) {
+		return (Math.sin(-p / 180 * Math.PI));
+	};
+	function absRangeZ(y, p) {
+		return (Math.cos(y / 180 * Math.PI) * Math.cos(p / 180 * Math.PI));
+	};
+	for(var p=-30;p<=10;p+=howMany){
+		for(var ya=0;ya<360;ya+=2*howMany){
+			var CI = Level.spawnMob(x + (absRangeX(ya, p) / 5), y /**+ (absRangeY(ya, p) / 5)*/, z + (absRangeZ(ya, p) / 5),80);
+			setVelX(CI, absRangeX(ya, p) * power / 4 + (power * Math.random() * absRangeX(ya, p)));
+			setVelY(CI, absRangeY(ya, p) * power / 4 + (power * Math.random() * absRangeY(ya, p)));
+			setVelZ(CI, absRangeZ(ya, p) * power / 4 + (power * Math.random() * absRangeZ(ya, p)));
+		}
+	}
+}
+
+function defenderBuff(effect, power, duration) {try {
+	switch(effect) {
+		case "HEAL":
+			break;
+		case "SHILD":
+			break;
+		case "KNOCKBACK":
+			break;
+		default:
+			broadcast("[defenderBuff Error] Unkown effect type: " + effect);
+	}
+}catch(e) {
+	broadcast(ChatColor.DARK_RED + "[DefenderBuff Error" + e.lineNumber + "] " + e);
+}};
 
 /*
 ==============================
@@ -1405,8 +1594,6 @@ function text3d(x,y,z,side,maxLength,textColor,textColorData, backgroundColor, b
 		}else{
 			for each(var Cshape in StringCore){
 				if(Cshape.t == C_InputString[CwordNum]){
-					while(teleporting)
-						delay(100);
 					debug("write", C_InputString[CwordNum], C_WordLocX + ", " + C_WordLocZ);
 					if(Cshape.y > C_WordMaxY)
 						C_WordMaxY = Cshape.y;
@@ -1460,8 +1647,6 @@ function text3d(x,y,z,side,maxLength,textColor,textColorData, backgroundColor, b
 function textClean(sx,sy,sz,ex,ey,ez,block,data,dly){new java.lang.Thread(new java.lang.Runnable({run: function(){try{
 	writting = true;
 	for(var cy = sy; cy <= ey; cy++){
-		while(teleporting)
-			delay(100);
 		for(var cz = sz; cz <= ez; cz++){
 			for(var cx = sx; cx <= ex; cx++){
 				if(Level.getTile(cx, cy, cz) != block || Level.getData(cx, cy, cz) != data){
