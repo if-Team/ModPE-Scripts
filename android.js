@@ -171,7 +171,6 @@ android.widget.TextView.setSingleLine = function(){};
 android.widget.TextView.setText = function(){};
 android.widget.TextView.setTextSize = function(){};
 android.widget.TextView.setTextColor = function(){};
-android.widget.TextView.setTextColor = function(){};
 android.widget.TextView.setTypeface = function(){};
 android.widget.Toast = function(){};
 android.widget.Toast.LENGTH_LONG = NaN;
