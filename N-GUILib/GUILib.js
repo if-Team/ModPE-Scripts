@@ -60,6 +60,7 @@ GUILib.getContext = function() {
 GUILib.Button = function(x, y, width, height, text, callback) {
 	try {
 		if((typeof x === "number" && !isNaN(x)) || (typeof y === "number" && !isNaN(y)) || (typeof width === "number" && !isNaN(width)) || (typeof height === "number" && !isNaN(height))) {
+			var thiz = this;
 			this.x = x * Utils.FOUR;
 			this.y = y * Utils.FOUR;
 			this.width = width * Utils.FOUR;
@@ -70,10 +71,30 @@ GUILib.Button = function(x, y, width, height, text, callback) {
 			this.mainplate = new android.widget.Button(GUILib.getContext());
 			this.mainplate.setText(Utils.getStringBuilder(text));
 			this.mainplate.setGravity(android.view.Gravity.CENTER);
-			var list = new android.graphics.drawable.StateListDrawable();
-			list.addState([android.R.attr.state_pressed], off);
-			list.addState([], on);
-			this.mainplate.setBackgroundDrawable(list);
+			this.mainplate.setBackgroundDrawable(on);
+			this.mainplate.setOnTouchListener(new android.view.View.OnTouchListener({
+				onTouch: function(view, event) {
+					switch(event.getAction()) {
+						case 0: //DOWN
+							thiz.mainplate.setBackgroundDrawable(off);
+							break;
+						case 1: //UP
+							thiz.mainplate.setBackgroundDrawable(on);
+							 if(!(event.getX() < 0 || event.getY() < 0 || event.getX() > width * Utils.FOUR || event.getY() > height * Utils.FOUR)) {
+							 		if(typeof callback === "function")
+							 			callback();
+							 	}
+							break;
+						case 2: //MOVE
+							if(event.getX() < 0 || event.getY() < 0 || event.getX() > width * Utils.FOUR || event.getY() > height * Utils.FOUR) {
+								thiz.mainplate.setBackgroundDrawable(on);
+							} else
+								thiz.mainplate.setBackgroundDrawable(off);
+							break;
+					}
+					return true;
+				}
+			}));
 		} else {
 			throw new Error("Illegal argument error");
 		}
@@ -92,6 +113,33 @@ GUILib.Button.prototype = {};
  */
 GUILib.Button.prototype.render = function() {
 	Utils.render(this);
+};
+
+/**
+ * 버튼을 제거합니다
+ *
+ * @since API 1
+ * @author 아포카토맨
+ */
+GUILib.Button.prototype.stop = function() {
+	var thiz = this;
+	Utils.createUiThread(function() {
+		thiz.pw.dismiss();
+	});
+};
+
+/**
+ * 버튼의 텍스트를 설정합니다
+ *
+ * @since API 1
+ * @author 아포카토맨
+ * @param {String} text
+ */
+GUILib.Button.prototype.setText = function(text) {
+	var thiz = this;
+	Utils.createUiThread(function() {
+		thiz.mainplate.setText(Utils.getStringBuilder(text));
+	});
 };
 
 
@@ -138,6 +186,7 @@ Utils.render = function(clazz) {
 			pw.setHeight(clazz.height);
 			pw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
 			pw.showAtLocation(GUILib.getContext().getWindow().getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.TOP, clazz.x, clazz.y);
+			clazz.pw = pw;
 		} catch(e) {
 			GUILib.parseError(e);
 		}
@@ -275,9 +324,10 @@ Utils.getItemBitmap = function(data) {
  * @since API 1
  * @author 아포카토맨
  * @param {String} text - 바꿀 텍스트
+ * @param {String} colot - 컬러 값
  * @return {SpannableStringBuilder} - 바뀐 텍스트
  */
-Utils.getStringBuilder = function(text) {
+Utils.getStringBuilder = function(text, color) {
 	var divide = function(a) {
 		var b = 0;
 		if (a > 256)
