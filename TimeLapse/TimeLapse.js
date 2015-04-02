@@ -22,3 +22,10 @@
 var TimeLapse = {};
 TimeLapse.VERSION = 0;
 TimeLapse.VERSION_NAME = "0.0";
+
+var Utils = {};
+Utils.drawCircle = function(options, drawer){
+    for(var a = 0; a <= options.maxAngle || 360; a += options.angleIncrement || 0.5){
+        //TODO: Implement method stuff
+    }
+};
