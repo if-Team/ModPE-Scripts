@@ -29,3 +29,17 @@ Utils.drawCircle = function(options, drawer){
         //TODO: Implement method stuff
     }
 };
+
+var Vector3 = function(x, y, z){
+	this.x = x;
+	this.y = y;
+	this.z = z;
+};
+
+Vector3.prototype = {};
+Vector3.prototype.toString = function(){
+	return "[" + x + ", " + y + ", "  + z + "]";
+};
+Vector3.prototype.equals = function(another){
+	return another instanceof Vector3 && this.x === another.x && this.y === another.y && this.z === another.z;
+};
