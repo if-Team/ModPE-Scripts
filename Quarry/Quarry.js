@@ -33,22 +33,20 @@ Block.setLightOpacity(204, 1);
 Player.addItemCreativeInv(201, 5, 0);
 Player.addItemCreativeInv(204, 5, 0);
 
-function viewSide(yaw) {
-	var temp = yaw;
-	while(temp >= 360)
-		temp -= 360;
-	while(temp < 0)
-		temp += 360;
-	if((temp >= 0 && temp < 45) || (temp >= 315 && temp < 360))
-		return 200;//"북(Z+)";
-	else if(temp >= 45 && temp < 135)
-		return 203;//"동(-X)";
-	else if(temp >= 135 && temp < 225)
-		return 201;//"남(Z-)";
-	else if(temp >= 225 && temp < 315)
-		return 202;//"서(X+)";
-	else
-		return "NaY";
+function getQuarryId(yaw){
+	var angle = yaw % 360;
+
+	if((0 <= angle && angle < 45) || (315 <= angle && angle < 360)){
+        return 200; //"북(Z+)";
+    }else if(45 <= angle && angle < 135){
+        return 203; //"동(-X)";
+    }else if(135 <= angle && angle < 225){
+        return 201; //"남(Z-)";
+    }else if(225 <= angle && angle < 315){
+        return 202; //"서(X+)";
+    }else{
+        return 0;
+    }
 }
 
 function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
@@ -68,7 +66,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
         }).start();
     }else if(itemId === 201){
 		preventDefault();
-		clientMessage(viewSide(Entity.getYaw(Player.getEntity())));
+		clientMessage(getQuarryId(Entity.getYaw(Player.getEntity())));
 
 		var tx = x;
 		var ty = y;
@@ -97,7 +95,7 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
 				clientMessage("Unknown Side");
 		}
 		if(Level.getTile(tx, ty, tz) === 0) {
-			Level.setTile(tx, ty, tz, viewSide(Entity.getYaw(Player.getEntity())), 0);
+			Level.setTile(tx, ty, tz, getQuarryId(Entity.getYaw(Player.getEntity())), 0);
 		}
 	}
 }
