@@ -24,8 +24,16 @@ var popupWindow = null;
  */
 function construct(ctx){
     ctx.runOnUiThread(new java.lang.Runnable({run: function(){
-        popupWindow = new android.widget.PopupWindow();
-        //TODO: Implements this function
+        var button = new android.widget.Button(ctx);
+        button.setText("Patch");
+        button.setOnClickListener(new android.view.View.OnClickListener({onClick: function(){
+            //TODO: Add views to AlertDialog
+            new android.app.AlertDialog.Builder(ctx).show();
+        }}));
+
+        popupWindow = new android.widget.PopupWindow(button);
+        popupWindow.setWindowLayoutMode(-2, -2);
+        popupWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.RIGHT | android.view.Gravity.CENTER, Math.floor(16 * ctx.getResources().getDisplayMetrics().density), 0);
     }}));
 }
 
