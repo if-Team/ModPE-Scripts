@@ -23,10 +23,10 @@ var Tile = {
  * @author Choseul <chocoslime05@naver.com>
  */
  
-Block.defineBlock(200, "Qurry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_bottom",0],["cauldron_side",0], ["cauldron_side",0],["cauldron_side",0]], 0, true, 0);
-Block.defineBlock(201, "Qurry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_side",0],["cauldron_bottom",0], ["cauldron_side",0],["cauldron_side",0]], 0, true, 0);
-Block.defineBlock(202, "Qurry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_side",0],["cauldron_side",0], ["cauldron_bottom",0],["cauldron_side",0]], 0, true, 0);
-Block.defineBlock(203, "Qurry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_side",0],["cauldron_side",0], ["cauldron_side",0],["cauldron_bottom",0]], 0, true, 0);
+Block.defineBlock(200, "Quarry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_bottom",0],["cauldron_side",0], ["cauldron_side",0],["cauldron_side",0]], 0, true, 0);
+Block.defineBlock(201, "Quarry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_side",0],["cauldron_bottom",0], ["cauldron_side",0],["cauldron_side",0]], 0, true, 0);
+Block.defineBlock(202, "Quarry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_side",0],["cauldron_side",0], ["cauldron_bottom",0],["cauldron_side",0]], 0, true, 0);
+Block.defineBlock(203, "Quarry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_side",0],["cauldron_side",0], ["cauldron_side",0],["cauldron_bottom",0]], 0, true, 0);
 Block.defineBlock(204, "Frame", [ ["cauldron_inner",0],["cauldron_inner",0],["cauldron_inner",0],["cauldron_inner",0], ["cauldron_inner",0],["cauldron_inner",0]], 0, false, 0);
 Block.setRenderLayer(204,3);
 Block.setLightOpacity(204, 1);
@@ -53,28 +53,28 @@ function viewSide(yaw) {
 
 function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
 	if(itemId == 267){
-		
-		
-			var tile = Level.getTile(x, y, z);
-			var data = Level.getData(x, y, z);
-			var thread = new java.lang.Thread({run: function(){
-				for(; y > 0; y--) {
-						Player.addItemInventory(tile, 1, data);
-						Level.destroyBlock(x, y, z, false);
-						java.lang.Thread.sleep(2 * 1000);
-					}
-				}
-			}}).start();
-		
-	
-	
-	if(itemId === 201) {
+        new java.lang.Thread({
+            run: function(){
+                for(y = 127; y > 0; y--){
+                    var tile = Level.getTile(x, y, z);
+                    var data = Level.getData(x, y, z);
+
+                    Player.addItemInventory(tile, 1, data);
+                    Level.destroyBlock(x, y, z, false);
+                    java.lang.Thread.sleep(2 * 1000);
+
+                }
+            }
+        }).start();
+    }else if(itemId === 201){
 		preventDefault();
 		clientMessage(viewSide(Entity.getYaw(Player.getEntity())));
+
 		var tx = x;
 		var ty = y;
 		var tz = z;
-		switch(side) {
+
+        switch(side){
 			case 0:
 				ty--;
 				break;
