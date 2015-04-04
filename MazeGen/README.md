@@ -1,4 +1,6 @@
 # MazeGen
+![MainImage](http://i.imgur.com/W64V1yA.png)
+
 - 한국인이라면, [여기를 클릭하세요](https://github.com/if-Team/ModPE-Scripts/tree/master/MazeGen#한국어)
 - 日本人なら、[こちらをクリックしてください](https://github.com/if-Team/ModPE-Scripts/tree/master/MazeGen#日本語)
 
@@ -15,7 +17,7 @@ Enter the follwing command to generate a maze where the player is standing.
 | `/maze <width> <height>` | `[blockId=42 blockDamage=0 blockHeight=3]` | `[turnRate=50 reconnectionRate=0]` |
 
 ### Q. What does "turnRate" and "reconnectionRate" mean?
-TODO: Add image
+![Summary-en](http://i.imgur.com/EIZa9lv.png)
 
 ## 한국어
 ### MazeGen - 멋진 미로를 자동으로 생성합니다!
@@ -30,7 +32,7 @@ TODO: Add image
 | `/maze <가로> <세로>` | `[블럭ID=42 블럭데미지=0 블럭높이=3]` | `[회전율=50 재연결률=0]` |
 
 ### Q. "회전율"과 "재연결률"은 무엇을 의미합니까?
-TODO: Add image
+![Summary-ko](http://i.imgur.com/Wf9da9Z.png)
 
 ## 日本語
 ### MazeGen - 素敵な迷路を自動的に生成します！
@@ -45,4 +47,4 @@ TODO: Add image
 | `/maze <幅> <高さ>` | `[ブロックID=42 ブロックデータ=0 ブロックの高さ=3]` | `[回転率=50 再連結率=0]` |
 
 ### Ｑ. 「回転率」と「再連結率」は何を意味するのですか？
-TODO: Add image
+![Summary-ja](http://i.imgur.com/vV3LSG2.png)
