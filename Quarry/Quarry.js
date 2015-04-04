@@ -25,6 +25,9 @@ const _SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolut
 const _MAIN_DIR = new File(_SD_CARD, "games/com.mojang/minecraftpe/mods/Quarry");
 const _BLOCK = new File(_MAIN_DIR, "terrain-atlas.tga")
 const _BLOCK_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/Quarry/resource/terrain-atlas.tga";
+const _DRILL = new File(_MAIN_DIR, "quarry_drill.png");
+
+var rendererDrill = Renderer.createHumanoidRenderer();
 
 scriptPreLoad();
 
@@ -122,6 +125,28 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
 	}
 }
 
+function attackHook(at, victim) {
+	drillRenderType(rendererDrill, 10);
+	Entity.setMobSkin(victim, "mobs/quarry_drill.png");
+	Entity.setRenderType(victim, rendererDrill.renderType);
+}
+
+function drillRenderType(renderer, length) {
+	var model=renderer.getModel();
+	var head=model.getPart("head").clear();
+	var body=model.getPart("body").clear();
+	var rightArm=model.getPart("rightArm").clear();
+	var leftArm=model.getPart("leftArm").clear();
+	var rightLeg=model.getPart("rightLeg").clear();
+	var leftLeg=model.getPart("leftLeg").clear();
+	body.setTextureOffset(32, 0, false);
+	body.addBox(-2,0,-2,4,16,4);
+	body.setTextureOffset(0, 0, true);
+	for(var e = length; e > 0; e--) {
+		body.addBox(-4,e*(-16),-4,8,16,8);
+	}
+};
+
 function scriptPreLoad() {
 	if(!_MAIN_DIR.exists()) {
 		_MAIN_DIR.mkdirs();
@@ -134,6 +159,9 @@ function scriptPreLoad() {
 		}else {
 			print("Error, please check internet connection");
 		}
+	}
+	if(_DRILL.exists()) {
+		setTexture(_DRILL, "mobs/quarry_drill.png");
 	}
 }
 
