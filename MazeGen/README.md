@@ -17,7 +17,7 @@ Enter the follwing command to generate a maze where the player is standing.
 | `/maze <width> <height>` | `[blockId=42 blockDamage=0 blockHeight=3]` | `[turnRate=50 reconnectionRate=0]` |
 
 ### Q. What does "turnRate" and "reconnectionRate" mean?
-![Summary-en](http://i.imgur.com/EIZa9lv.png)
+![Summary-en](http://i.imgur.com/ovOwOp0.png)
 
 ## 한국어
 ### MazeGen - 멋진 미로를 자동으로 생성합니다!
@@ -32,7 +32,7 @@ Enter the follwing command to generate a maze where the player is standing.
 | `/maze <가로> <세로>` | `[블럭ID=42 블럭데미지=0 블럭높이=3]` | `[회전율=50 재연결률=0]` |
 
 ### Q. "회전율"과 "재연결률"은 무엇을 의미합니까?
-![Summary-ko](http://i.imgur.com/Wf9da9Z.png)
+![Summary-ko](http://i.imgur.com/fNKKh0F.png)
 
 ## 日本語
 ### MazeGen - 素敵な迷路を自動的に生成します！
@@ -47,4 +47,4 @@ Enter the follwing command to generate a maze where the player is standing.
 | `/maze <幅> <高さ>` | `[ブロックID=42 ブロックデータ=0 ブロックの高さ=3]` | `[回転率=50 再連結率=0]` |
 
 ### Ｑ. 「回転率」と「再連結率」は何を意味するのですか？
-![Summary-ja](http://i.imgur.com/vV3LSG2.png)
+![Summary-ja](http://i.imgur.com/qHu1g7K.png)
