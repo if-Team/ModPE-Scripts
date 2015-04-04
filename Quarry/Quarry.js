@@ -13,10 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
- 
- const _SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
- const _MAIN_DIR = new java.io.File(_SD_CARD, "games/com.mojang/minecraftpe/mods/Quarry");
+
+//import
+var File = java.io.File;
+
+const _SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
+const _MAIN_DIR = new File(_SD_CARD, "games/com.mojang/minecraftpe/mods/Quarry");
+const _BLOCK = new File(_MAIN_DIR, "terrain-atlas.tga")
+
+scriptPreLoad();
 
 var Tile = {
     AIR: 0,
@@ -111,6 +116,15 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
 		}
 	}
 }
+
+function scriptPreLoad() {
+	if(_BLOCK.exists()) {
+		setTexture(_BLOCK, "terrain-atlas.tga");
+	}else {
+		
+	}
+}
+
 function setTexture(prototypeFile, innerPath){
 	try{
 		var dir = new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/net.zhuoweizhang.mcpelauncher.pro/files/textures/images/" + innerPath);
