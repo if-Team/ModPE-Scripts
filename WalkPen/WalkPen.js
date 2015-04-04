@@ -24,6 +24,7 @@ var pw;
 var openable = true;
 var moving = false;
 var display =  context.getWindowManager().getDefaultDisplay();
+var bcBmp;
 
 function newLevel()
 {
@@ -73,10 +74,11 @@ function openBoard()
 				var bg = new TextView(context);
 				bg.setWidth(500);
 				bg.setHeight(500);
-				bg.setBackgroundColor(Color.WHITE);
+				bg.setBackgroundDrawable(new BitmapDrawable(bcBmp));
 				
 				var btnLayout = new LinearLayout(context);
 				btnLayout.setLayoutParams(new ViewGroup.LayoutParams(500,ViewGroup.LayoutParams.WRAP_CONTENT));
+				btnLayout.setBackgroundColor(Color.WHITE);
 				btnLayout.setOrientation(LinearLayout.HORIZONTAL);
 				
 				var cancelBtn = new TextView(context);
@@ -135,10 +137,11 @@ function openBoard()
 				layout.addView(bg);
 				layout.addView(btnLayout);
 				
+				
+				
 				mainPw = new PopupWindow();
 				mainPw.setContentView(layout);
 				mainPw.setWindowLayoutMode(-2,-2);
-				mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(Color.WHITE));
 				mainPw.showAtLocation(context.getWindow().getDecorView(),Gravity.CENTER,0,0);
 				
 				var editable = true;
@@ -166,25 +169,26 @@ function openBoard()
 								{
 									editable = false;
 									return false;
-								}
-								
-								var canvas = new Canvas(bitmap);
-								var point = Math.abs(x-event.getX())+Math.abs(y-event.getY());
-								for(var c = 0;c <= point;c++)
+								}else if(event.action==MotionEvent.ACTION_MOVE&&Math.sqrt(Math.pow(x-event.getX(),2)+Math.pow(x-event.getX(),2))>3)
 								{
-									var rx = (event.getX() - ((event.getX()-x)*c/point));
-									var ry = (event.getY() - ((event.getY()-y)*c/point));
-									var p = {
-										x: rx,
-										y: ry
+									var canvas = new Canvas(bitmap);
+									var point = Math.abs(x-event.getX())+Math.abs(y-event.getY());
+									for(var c = 0;c <= point;c++)
+									{
+										var rx = (event.getX() - ((event.getX()-x)*c/point));
+										var ry = (event.getY() - ((event.getY()-y)*c/point));
+										var p = {
+											x: rx,
+											y: ry
+										}
+										points.add(p);
+										canvas.drawRect(rx-scale/2,ry-scale/2,rx+scale/2,ry+scale/2,paint);
 									}
-									points.add(p);
-									canvas.drawRect(rx-scale/2,ry-scale/2,rx+scale/2,ry+scale/2,paint);
+									var drawable = new BitmapDrawable(bitmap);
+									board.setBackgroundDrawable(drawable);
+									x = event.getX();
+									y = event.getY();
 								}
-								var drawable = new BitmapDrawable(bitmap);
-								board.setBackgroundDrawable(drawable);
-								x = event.getX();
-								y = event.getY();
 							}
 							return false;
 						}catch(e)
@@ -257,6 +261,43 @@ function showButton()
 		run: function()
 		{
 			try{
+				bcBmp = new Bitmap.createBitmap(500,500,Bitmap.Config.ARGB_8888);
+				var canvas = new Canvas(bcBmp);
+				var bcP1 = new Paint();
+				bcP1.setARGB(255,255,255,255);
+				var bcP2 = new Paint();
+				bcP2.setARGB(255,180,180,180);
+				for(var x = 0;x < 500;x += 50)
+				{
+					for(var y = 0;y < 560;y += 50)
+					{
+					//	if(x%10==0&&y%10==0)
+						{
+							if(y<500)
+							{
+								if(x%100==0)
+								{
+									if(y%100==0)
+									{
+										canvas.drawRect(x,y,x+50,y+50,bcP1);
+									}else{
+										canvas.drawRect(x,y,x+50,y+50,bcP2);
+									}
+								}else{
+									if(y%100==0)
+									{
+										canvas.drawRect(x,y,x+50,y+50,bcP2);
+									}else{
+										canvas.drawRect(x,y,x+50,y+50,bcP1);
+									}
+								}
+							}else{
+								canvas.drawRect(x,y,x+50,y+50,bcP1);
+							}
+						}
+					}
+				}
+				
 				var clickDrawable = new GradientDrawable();
 				clickDrawable.setColors([
 											Color.argb(255,200,200,255),
