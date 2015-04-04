@@ -52,14 +52,17 @@ function viewSide(yaw) {
 }
 
 function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
-	for(y = 127; y >= 0; y--){
-        var tile = Level.getTile(x, y, z);
-        var data = Level.getData(x, y, z);
-		if(tile !== Tile.AIR && tile !== Tile.BEDROCK){
-			Player.addItemInventory(tile, 1, data);
-			Level.destroyBlock(x, y, z, false);
+	if(itemId == 267){
+		for(y = 127; y >= 0; y--){
+			var tile = Level.getTile(x, y, z);
+			var data = Level.getData(x, y, z);
+			if(tile !== Tile.AIR && tile !== Tile.BEDROCK){
+				Player.addItemInventory(tile, 1, data);
+				Level.destroyBlock(x, y, z, false);
+			}
 		}
 	}
+	
 	if(itemId === 201) {
 		preventDefault();
 		clientMessage(viewSide(Entity.getYaw(Player.getEntity())));
