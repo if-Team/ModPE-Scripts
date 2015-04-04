@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
+//import
+var File = java.io.File;
+
+const _SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
+const _MAIN_DIR = new File(_SD_CARD, "games/com.mojang/minecraftpe/mods/Quarry");
+const _BLOCK = new File(_MAIN_DIR, "terrain-atlas.tga")
+const _BLOCK_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/Quarry/resource/terrain-atlas.tga";
+
+scriptPreLoad();
+
 var Tile = {
     AIR: 0,
     BEDROCK: 7,
@@ -108,4 +118,60 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
 	}
 }
 
-void(useItem);
+function scriptPreLoad() {
+	if(_BLOCK.exists()) {
+		setTexture(_BLOCK, "terrain-atlas.tga");
+	}else {
+		if(downloadFile(_BLOCK, _BLOCK_URL)) {
+			setTexture(_BLOCK, "terrain-atlas.tga");
+		}else {
+			print("Error, please check internet connection");
+		}
+	}
+}
+
+function setTexture(prototypeFile, innerPath){
+	try{
+		var dir = new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/net.zhuoweizhang.mcpelauncher.pro/files/textures/images/" + innerPath);
+		dir.getParentFile().mkdirs(); 
+		bis = new java.io.BufferedInputStream(new java.io.FileInputStream(prototypeFile));
+		var bos = new java.io.BufferedOutputStream(new java.io.FileOutputStream(dir));
+		var buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
+		var count = 0;
+		while((count = bis.read(buffer)) >= 0){
+			bos.write(buffer, 0, count);
+		}
+		bis.close();
+		bos.close();
+	}catch(e){
+		print(prototypeFile.getAbsolutePath() + " 리소스파일이 없습니다");
+	}
+};
+
+function downloadFile(path, url) {
+/*	new java.lang.Thread(new java.lang.Runnable({
+		run: function(){*/
+			try{
+				var tempApiUrl = new java.net.URL(url);
+				var tempApiUrlConn = tempApiUrl.openConnection();
+				tempApiUrlConn.connect();
+				var tempLength = tempApiUrlConn.getContentLength();
+				var tempBis = new java.io.BufferedInputStream(tempApiUrl.openStream());
+				var tempFos = new java.io.FileOutputStream(path);
+				var tempData = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
+				var tempTotal = 0, tempCount;
+				while ((tempCount = tempBis.read(tempData)) != -1) {
+					tempTotal += tempCount;
+					tempFos.write(tempData, 0, tempCount);
+				}
+				tempFos.flush();
+				tempFos.close();
+				tempBis.close();
+				return true;
+			}catch(e){
+				//toast(e.lineNumber + " " + e);
+				return false;
+			}
+/*		}
+	})).start();*/
+};
