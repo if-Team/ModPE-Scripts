@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
+ 
+ const _SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
+ const _MAIN_DIR = new java.io.File(_SD_CARD, "games/com.mojang/minecraftpe/mods/Quarry");
 
 var Tile = {
     AIR: 0,
@@ -99,3 +103,21 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
 		}
 	}
 }
+
+function setTexture(prototypeFile, innerPath){
+	try{
+		var dir = new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/net.zhuoweizhang.mcpelauncher.pro/files/textures/images/" + innerPath);
+		dir.getParentFile().mkdirs(); 
+		bis = new java.io.BufferedInputStream(new java.io.FileInputStream(prototypeFile));
+		var bos = new java.io.BufferedOutputStream(new java.io.FileOutputStream(dir));
+		var buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
+		var count = 0;
+		while((count = bis.read(buffer)) >= 0){
+			bos.write(buffer, 0, count);
+		}
+		bis.close();
+		bos.close();
+	}catch(e){
+		print(prototypeFile.getAbsolutePath() + " 리소스파일이 없습니다");
+	}
+};
