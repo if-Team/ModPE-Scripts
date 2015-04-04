@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-
+var Tile = {
+    AIR: 0,
+    BEDROCK: 7
+};
+Object.freeze(Tile);
 
 /**
  * @since 2015-04-04
- * @author Choseul <chocoslime05@naver.com> 
+ * @author Choseul <chocoslime05@naver.com>
  */
+function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
+	for(y = 127; y >= 0; y--){
+        var tile = Level.getTile(x, y, z);
+        var data = Level.getData(x, y, z);
 
-function useItem(x, y, z, i, b, s, id, bd) {
-	for(var gy = 127; gy >= 0; gy--) {
-        var blockId = Level.getTile(x, gy, z);
-        var blockData = Level.getData(x, gy, z);
-
-		if(blockId !== 0 && blockId !== 7) {
-			Player.addItemInventory(blockId, 1, blockData);
-			Level.destroyBlock(x, gy, z, false);
+		if(tile !== Tile.AIR && tile !== Tile.BEDROCK){
+			Player.addItemInventory(tile, 1, data);
+			Level.destroyBlock(x, y, z, false);
 		}
 	}
 }
+void(useItem);
