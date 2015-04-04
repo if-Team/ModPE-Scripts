@@ -1,6 +1,6 @@
 # MazeGen
-- 한국인이라면, [여기를 클릭하세요](MazeGen/README.md/#한국어)
-- 日本人なら、[こちらをクリックしてください](MazeGen/README.md/#日本語)
+- 한국인이라면, [여기를 클릭하세요](https://github.com/if-Team/ModPE-Scripts/tree/master/MazeGen#한국어)
+- 日本人なら、[こちらをクリックしてください](https://github.com/if-Team/ModPE-Scripts/tree/master/MazeGen#日本語)
 
 ## English
 ### MazeGen - Create an awesome maze automatically!
