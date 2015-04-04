@@ -53,15 +53,22 @@ function viewSide(yaw) {
 
 function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
 	if(itemId == 267){
-		for(y = 127; y >= 0; y--){
+		
+		
 			var tile = Level.getTile(x, y, z);
 			var data = Level.getData(x, y, z);
-			if(tile !== Tile.AIR && tile !== Tile.BEDROCK){
-				Player.addItemInventory(tile, 1, data);
-				Level.destroyBlock(x, y, z, false);
-			}
+			var thread = new java.lang.Thread({run: function(){
+				while(true){
+					java.lang.Thread.sleep(2 * 1000);
+					
+					for(; y > 0; y--) {
+						Player.addItemInventory(tile, 1, data);
+						Level.destroyBlock(x, y, z, false);
+					}
+				}
+			}}).start();
 		}
-	}
+	
 	
 	if(itemId === 201) {
 		preventDefault();
