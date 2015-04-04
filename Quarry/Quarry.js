@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+//catch Bug
+var debuging = true;
+
 //import
+var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var File = java.io.File;
 
 const _SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -119,6 +123,9 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
 }
 
 function scriptPreLoad() {
+	if(!_MAIN_DIR.exists()) {
+		_MAIN_DIR.mkdirs();
+	}
 	if(_BLOCK.exists()) {
 		setTexture(_BLOCK, "terrain-atlas.tga");
 	}else {
@@ -169,9 +176,21 @@ function downloadFile(path, url) {
 				tempBis.close();
 				return true;
 			}catch(e){
-				//toast(e.lineNumber + " " + e);
+				debug(e.lineNumber + " " + e);
 				return false;
 			}
 /*		}
 	})).start();*/
 };
+
+function debug(str) {
+	if(debuging) {
+		if(Level.getWorldName() === null) {
+			 ctx.runOnUiThread(new java.lang.Runnable({ run: function(){
+		android.widget.Toast.makeText(ctx, "[Debug]\n" + str, android.widget.Toast.LENGTH_LONG).show();
+			}}));
+		}else {
+			clientMessage("[debug] " + str);
+		}
+	}
+}
