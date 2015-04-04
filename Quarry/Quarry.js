@@ -18,12 +18,11 @@ var Tile = {
     AIR: 0,
     BEDROCK: 7
 };
-Object.freeze(Tile);
-
 /**
  * @since 2015-04-04
  * @author Choseul <chocoslime05@naver.com>
  */
+ 
 Block.defineBlock(200, "Qurry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_bottom",0],["cauldron_side",0], ["cauldron_side",0],["cauldron_side",0]], 0, true, 0);
 Block.defineBlock(201, "Qurry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_side",0],["cauldron_bottom",0], ["cauldron_side",0],["cauldron_side",0]], 0, true, 0);
 Block.defineBlock(202, "Qurry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_side",0],["cauldron_side",0], ["cauldron_bottom",0],["cauldron_side",0]], 0, true, 0);
