@@ -58,16 +58,14 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
 			var tile = Level.getTile(x, y, z);
 			var data = Level.getData(x, y, z);
 			var thread = new java.lang.Thread({run: function(){
-				while(true){
-					java.lang.Thread.sleep(2 * 1000);
-					
-					for(; y > 0; y--) {
+				for(; y > 0; y--) {
 						Player.addItemInventory(tile, 1, data);
 						Level.destroyBlock(x, y, z, false);
+						java.lang.Thread.sleep(2 * 1000);
 					}
 				}
 			}}).start();
-		}
+		
 	
 	
 	if(itemId === 201) {
