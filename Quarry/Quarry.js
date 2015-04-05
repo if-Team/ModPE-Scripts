@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Choseul, CodeInside, Chalk
+ * Copyright 2015 Choseul
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,13 @@ const _MAIN_DIR = new File(_SD_CARD, "games/com.mojang/minecraftpe/mods/Quarry")
 const _BLOCK = new File(_MAIN_DIR, "terrain-atlas.tga")
 const _BLOCK_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/Quarry/resource/terrain-atlas.tga";
 const _DRILL = new File(_MAIN_DIR, "quarry_drill.png");
+const _DRILL_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/Quarry/resource/quarry_drill.png";
+const _CRANE = new File(_MAIN_DIR, "quarry_crane.png");
+const _CRANE_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/Quarry/resource/quarry_crane.png";
+
 
 var rendererDrill = Renderer.createHumanoidRenderer();
+var rendererCrane = Renderer.createHumanoidRenderer();
 
 scriptPreLoad();
 
@@ -42,6 +47,9 @@ var Tile = {
 
     FRAME: 204
 };
+
+var QuarryData = [];
+//push([x, y, z, mod, startX, startY, startZ, endX, endY, endZ, DrillEnt, DrillMountEnt, CraneXEnt, CraneXMountEnt, CraneZent, CraneZMountEnt, TargetX, TargetY, TargetZ])
 
 Block.defineBlock(Tile.QUARRY_NORTH, "Quarry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_bottom",0],["cauldron_side",0], ["cauldron_side",0],["cauldron_side",0]], 0, true, 0);
 Block.defineBlock(Tile.QUARRY_SOUTH, "Quarry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_side",0],["cauldron_bottom",0], ["cauldron_side",0],["cauldron_side",0]], 0, true, 0);
@@ -69,6 +77,19 @@ function getQuarryId(yaw){
     }
 }
 
+function modTick() {
+	for(var e in QuarryData) {
+		 if(Entity.getEntityTypeId(QuarryData[e][10]) < 1 || Entity.getEntityTypeId(QuarryData[e][11]) < 1 || Entity.getEntityTypeId(QuarryData[e][12]) < 1 || Entity.getEntityTypeId(QuarryData[e][13]) < 1 || Entity.getEntityTypeId(QuarryData[e][14]) < 1 || Entity.getEntityTypeId(QuarryData[e][15]) < 1) {
+		 	QuarryData.splice(e, 1);
+		}else {
+			if(Math.hypot(QuarryData[e][16] - Entity.getX(QuarryData[e][11]), QuarryData[e][17] - Entity.getX(QuarryData[e][13]), QuarryData[e][18] - Entity.getX(QuarryData[e][15])) > 0.1 {
+				Entity.setVelX();
+				Entity.setVelY();
+				Entity.setVelZ();
+			}
+		}
+	}
+}
 
 /**
  * @since 2015-04-04
@@ -125,11 +146,31 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
 	}
 }
 
-function attackHook(at, victim) {
-	drillRenderType(rendererDrill, 10);
-	Entity.setMobSkin(victim, "mobs/quarry_drill.png");
-	Entity.setRenderType(victim, rendererDrill.renderType);
+function createNewCrain(startX, startY, startZ, endX, endY, endZ) {
+	var HX
 }
+/**test dump
+var px, py, pz, et;
+function attackHook(at, victim) {
+	craneRenderType(rendererCrane, 10);
+	Entity.setMobSkin(victim, "mobs/quarry_crane.png");
+	//Entity.setRenderType(victim, rendererCrane.renderType);
+	px = Entity.getX(victim);
+	py = Entity.getY(victim);
+	pz = Entity.getZ(victim);
+	et = victim;
+	var sc = Level.spawnMob(px, py, pz, 81, "mobs/char.png");
+	Entity.rideAnimal(et, sc);
+	new java.lang.Thread(new java.lang.Runnable({run: function() { while(Entity.getHealth(et) > 0) {
+		Entity.setVelX(sc, 0);
+		Entity.setVelY(sc, 0);
+		Entity.setVelZ(sc, 0);
+		Entity.setPosition(sc, px, py, pz);
+		//Entity.setRot(et, 0,0);
+		java.lang.Thread.sleep(1);
+	}}})).start();
+}
+*/
 
 function drillRenderType(renderer, length) {
 	var model=renderer.getModel();
@@ -144,6 +185,20 @@ function drillRenderType(renderer, length) {
 	body.setTextureOffset(0, 0, true);
 	for(var e = length; e > 0; e--) {
 		body.addBox(-4,e*(-16),-4,8,16,8);
+	}
+};
+
+function craneRenderType(renderer, length) {
+	var model=renderer.getModel();
+	var head=model.getPart("head").clear();
+	var body=model.getPart("body").clear();
+	var rightArm=model.getPart("rightArm").clear();
+	var leftArm=model.getPart("leftArm").clear();
+	var rightLeg=model.getPart("rightLeg").clear();
+	var leftLeg=model.getPart("leftLeg").clear();
+	body.setTextureOffset(0, 0, true);
+	for(var e = length; e > 0; e--) {
+		body.addBox(-e*16,-4,-4,16,8,8);
 	}
 };
 
@@ -162,6 +217,21 @@ function scriptPreLoad() {
 	}
 	if(_DRILL.exists()) {
 		setTexture(_DRILL, "mobs/quarry_drill.png");
+	}else {
+		if(downloadFile(_DRILL, _DRILL_URL)) {
+			setTexture(_DRILL, "mobs/quarry_drill.png");
+		}else {
+			print("Error, please check internet connection");
+		}
+	}
+	if(_CRANE.exists()) {
+		setTexture(_CRANE, "mobs/quarry_crane.png");
+	}else {
+		if(downloadFile(_CRANE, _CRANE_URL)) {
+			setTexture(_CRANE, "mobs/quarry_crane.png");
+		}else {
+			print("Error, please check internet connection");
+		}
 	}
 }
 
