@@ -51,7 +51,7 @@ var Tile = {
 
 var Quarry = {};
 var QuarryData = [];
-//push([[x, y, z], [mod, DataArray], [startX, startY, startZ], [endX, endY, endZ], [DrillEnt, DrillMountEnt, CraneXEnt, CraneXMountEnt, CraneZent, CraneZMountEnt], [TargetX, TargetY, TargetZ]])
+//push([[x, y, z], [mod, DataArray], [startX, startY, startZ], [endX, endY, endZ], [DrillEnt, DrillMountEnt, ConnectEnt, ConnectMountEnt, CraneXEnt, CraneXMountEnt, CraneZent, CraneZMountEnt], [TargetX, TargetY, TargetZ]])
 
 Block.defineBlock(Tile.QUARRY_NORTH, "Quarry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_bottom",0],["cauldron_side",0], ["cauldron_side",0],["cauldron_side",0]], 0, true, 0);
 Block.defineBlock(Tile.QUARRY_SOUTH, "Quarry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_side",0],["cauldron_bottom",0], ["cauldron_side",0],["cauldron_side",0]], 0, true, 0);
@@ -302,14 +302,33 @@ var asynchronousModTick = new java.lang.Thread(new java.lang.Runnable({run: func
 	running = false;
 }}}));
 
-function createNewCrainEnt(q, startX, startY, startZ, endX, endY, endZ) {
-	var HXm = Level.mobSpawn(startX, endY, startZ + 1, 81, "mobs/char.png");
-	var HX = Level.mobSpawn(startX, endY, startZ + 1, 11, "mobs/quarry_crane.png");
+Quarry.createNewCrainEnt = function(q) {
+	debug("Quarry.createNewCrainEnt" + q);
+	var DRm = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2] - 1, QuarryData[q][2][3] + 1, 81, "mobs/char.png");
+	var DR = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2] - 1, QuarryData[q][2][3] + 1, 11, "mobs/quarry_drill.png");
+	craneRenderType(rendererDrill, 1);
+	Entity.setRenderType(DR, rendererCrane.renderType);
+	Entity.setRot(DR, 0, 0);
+	Entiry.rideAnimal(DR, DRm);
+	var CNm = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2], QuarryData[q][2][3] + 1, 81, "mobs/char.png");
+	var CN = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2], QuarryData[q][2][3] + 1, 11, "mobs/quarry_crane.png");
+	craneRenderType(rendererCrane, 1);
+	Entity.setRenderType(CN, rendererCrane.renderType);
+	Entity.setRot(CN, 0, 0);
+	Entiry.rideAnimal(CN, CNm);
+	var HXm = Level.mobSpawn(QuarryData[q][2][1], QuarryData[q][3][2], QuarryData[q][2][3] + 1, 81, "mobs/char.png");
+	var HX = Level.mobSpawn(QuarryData[q][2][1], QuarryData[q][3][2], QuarryData[q][2][3] + 1, 11, "mobs/quarry_crane.png");
 	craneRenderType(rendererCrane, endX - startX);
-	Entity.setRenderType(HX, rendererCrane.renderTtpe);
+	Entity.setRenderType(HX, rendererCrane.renderType);
 	Entity.setRot(HX, 0, 0);
 	Entiry.rideAnimal(HX, HXm);
-	QuarryData.push([]);
+	var HZm = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2], QuarryData[q][2][3], 81, "mobs/char.png");
+	var HZ = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2], QuarryData[q][2][3], 11, "mobs/quarry_crane.png");
+	craneRenderType(rendererCrane, endX - startX);
+	Entity.setRenderType(HZ, rendererCrane.renderType);
+	Entity.setRot(HZ, 90, 0);
+	Entiry.rideAnimal(HZ, HZm);
+	QuarryData[q][4] = [DR, DRm, CN, CNm, HX, HXm, HZ, HZm];
 }
 
 /**
