@@ -33,6 +33,7 @@ const _CRANE_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/mast
 
 var rendererDrill = Renderer.createHumanoidRenderer();
 var rendererCrane = Renderer.createHumanoidRenderer();
+var running = false;
 
 scriptPreLoad();
 
@@ -48,6 +49,7 @@ var Tile = {
     FRAME: 204
 };
 
+var Quarry = {};
 var QuarryData = [];
 //push([[x, y, z], [mod, DataArray], [startX, startY, startZ], [endX, endY, endZ], [DrillEnt, DrillMountEnt, CraneXEnt, CraneXMountEnt, CraneZent, CraneZMountEnt], [TargetX, TargetY, TargetZ]])
 
@@ -257,22 +259,57 @@ function debug(str) {
 //이 밑은 프로토타입 부분입니다.
 //====================
 
-function modTick() {
+function newLevel(str) {
+	if(!asynchronousModTick.isAlive()) {
+		running = true;
+		asynchronousModTick.start()
+	}
+}
+
+function leaveGame() {
+	if(asynchronousModTick.isAlive()) {
+		running = false;
+		//asynchronousModTick.stop()
+	}
+}
+
+/*function modTick() {
 	for(var e in QuarryData) {
 		 if(Entity.getEntityTypeId(QuarryData[e][10]) < 1 || Entity.getEntityTypeId(QuarryData[e][11]) < 1 || Entity.getEntityTypeId(QuarryData[e][12]) < 1 || Entity.getEntityTypeId(QuarryData[e][13]) < 1 || Entity.getEntityTypeId(QuarryData[e][14]) < 1 || Entity.getEntityTypeId(QuarryData[e][15]) < 1) {
 		 	QuarryData.splice(e, 1);
 		}else {
-			if(Math.hypot(QuarryData[e][16] - Entity.getX(QuarryData[e][11]), QuarryData[e][17] - Entity.getX(QuarryData[e][13]), QuarryData[e][18] - Entity.getX(QuarryData[e][15])) > 0.1 {
+			if(Math.hypot(QuarryData[e][16] - Entity.getX(QuarryData[e][11]), QuarryData[e][17] - Entity.getX(QuarryData[e][13]), QuarryData[e][18] - Entity.getX(QuarryData[e][15])) > 0.1) {
 				Entity.setVelX();
 				Entity.setVelY();
 				Entity.setVelZ();
 			}
 		}
 	}
-}
+}*/
 
-function createNewCrain(startX, startY, startZ, endX, endY, endZ) {
-	var HX
+var asynchronousModTick = new java.lang.Thread(new java.lang.Runnable({run: function() {try { while(running) {
+	for(var q = 0; q < QuarryData.length; q++) {
+		for(var e = 0; e < QuarryData[q][4].length; e++) {
+			if(Entity.getEntityTypeId(QuarryData[q][4][e]) < 1) {
+				Quarry.craneRebuild(q);
+			}
+		}
+		
+	}
+	java.lang.Thread.sleep(50);
+}}catch(e) {
+	clientMessage("[asynchronousModTick Crash" + e.lineNumber + "] " + e);
+	running = false;
+}}}));
+
+function createNewCrainEnt(q, startX, startY, startZ, endX, endY, endZ) {
+	var HXm = Level.mobSpawn(startX, endY, startZ + 1, 81, "mobs/char.png");
+	var HX = Level.mobSpawn(startX, endY, startZ + 1, 11, "mobs/quarry_crane.png");
+	craneRenderType(rendererCrane, endX - startX);
+	Entity.setRenderType(HX, rendererCrane.renderTtpe);
+	Entity.setRot(HX, 0, 0);
+	Entiry.rideAnimal(HX, HXm);
+	QuarryData.push([]);
 }
 
 /**
