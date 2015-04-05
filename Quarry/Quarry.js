@@ -49,7 +49,7 @@ var Tile = {
 };
 
 var QuarryData = [];
-//push([x, y, z, mod, startX, startY, startZ, endX, endY, endZ, DrillEnt, DrillMountEnt, CraneXEnt, CraneXMountEnt, CraneZent, CraneZMountEnt, TargetX, TargetY, TargetZ])
+//push([[x, y, z], [mod, dataArray], [startX, startY, startZ], [endX, endY, endZ], [DrillEnt, DrillMountEnt, CraneXEnt, CraneXMountEnt, CraneZent, CraneZMountEnt], [TargetX, TargetY, TargetZ]])
 
 Block.defineBlock(Tile.QUARRY_NORTH, "Quarry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_bottom",0],["cauldron_side",0], ["cauldron_side",0],["cauldron_side",0]], 0, true, 0);
 Block.defineBlock(Tile.QUARRY_SOUTH, "Quarry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_side",0],["cauldron_bottom",0], ["cauldron_side",0],["cauldron_side",0]], 0, true, 0);
@@ -75,20 +75,6 @@ function getQuarryId(yaw){
     }else{
         return 0;
     }
-}
-
-function modTick() {
-	for(var e in QuarryData) {
-		 if(Entity.getEntityTypeId(QuarryData[e][10]) < 1 || Entity.getEntityTypeId(QuarryData[e][11]) < 1 || Entity.getEntityTypeId(QuarryData[e][12]) < 1 || Entity.getEntityTypeId(QuarryData[e][13]) < 1 || Entity.getEntityTypeId(QuarryData[e][14]) < 1 || Entity.getEntityTypeId(QuarryData[e][15]) < 1) {
-		 	QuarryData.splice(e, 1);
-		}else {
-			if(Math.hypot(QuarryData[e][16] - Entity.getX(QuarryData[e][11]), QuarryData[e][17] - Entity.getX(QuarryData[e][13]), QuarryData[e][18] - Entity.getX(QuarryData[e][15])) > 0.1 {
-				Entity.setVelX();
-				Entity.setVelY();
-				Entity.setVelZ();
-			}
-		}
-	}
 }
 
 /**
@@ -145,32 +131,6 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
 		}
 	}
 }
-
-function createNewCrain(startX, startY, startZ, endX, endY, endZ) {
-	var HX
-}
-/**test dump
-var px, py, pz, et;
-function attackHook(at, victim) {
-	craneRenderType(rendererCrane, 10);
-	Entity.setMobSkin(victim, "mobs/quarry_crane.png");
-	//Entity.setRenderType(victim, rendererCrane.renderType);
-	px = Entity.getX(victim);
-	py = Entity.getY(victim);
-	pz = Entity.getZ(victim);
-	et = victim;
-	var sc = Level.spawnMob(px, py, pz, 81, "mobs/char.png");
-	Entity.rideAnimal(et, sc);
-	new java.lang.Thread(new java.lang.Runnable({run: function() { while(Entity.getHealth(et) > 0) {
-		Entity.setVelX(sc, 0);
-		Entity.setVelY(sc, 0);
-		Entity.setVelZ(sc, 0);
-		Entity.setPosition(sc, px, py, pz);
-		//Entity.setRot(et, 0,0);
-		java.lang.Thread.sleep(1);
-	}}})).start();
-}
-*/
 
 function drillRenderType(renderer, length) {
 	var model=renderer.getModel();
