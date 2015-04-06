@@ -33,6 +33,7 @@ const _CRANE_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/mast
 
 var rendererDrill = Renderer.createHumanoidRenderer();
 var rendererCrane = Renderer.createHumanoidRenderer();
+var running = false;
 
 scriptPreLoad();
 
@@ -48,8 +49,9 @@ var Tile = {
     FRAME: 204
 };
 
+var Quarry = {};
 var QuarryData = [];
-//push([[x, y, z], [mod, dataArray], [startX, startY, startZ], [endX, endY, endZ], [DrillEnt, DrillMountEnt, CraneXEnt, CraneXMountEnt, CraneZent, CraneZMountEnt], [TargetX, TargetY, TargetZ]])
+//push([[x, y, z], [mod, DataArray], [startX, startY, startZ], [endX, endY, endZ], [DrillEnt, DrillMountEnt, ConnectEnt, ConnectMountEnt, CraneXEnt, CraneXMountEnt, CraneZent, CraneZMountEnt], [TargetX, TargetY, TargetZ]])
 
 Block.defineBlock(Tile.QUARRY_NORTH, "Quarry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_bottom",0],["cauldron_side",0], ["cauldron_side",0],["cauldron_side",0]], 0, true, 0);
 Block.defineBlock(Tile.QUARRY_SOUTH, "Quarry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_side",0],["cauldron_bottom",0], ["cauldron_side",0],["cauldron_side",0]], 0, true, 0);
@@ -252,3 +254,103 @@ function debug(str) {
 		}
 	}
 }
+
+//====================
+//이 밑은 프로토타입 부분입니다.
+//====================
+
+function newLevel(str) {
+	if(!asynchronousModTick.isAlive()) {
+		running = true;
+		asynchronousModTick.start()
+	}
+}
+
+function leaveGame() {
+	if(asynchronousModTick.isAlive()) {
+		running = false;
+		//asynchronousModTick.stop()
+	}
+}
+
+/*function modTick() {
+	for(var e in QuarryData) {
+		 if(Entity.getEntityTypeId(QuarryData[e][10]) < 1 || Entity.getEntityTypeId(QuarryData[e][11]) < 1 || Entity.getEntityTypeId(QuarryData[e][12]) < 1 || Entity.getEntityTypeId(QuarryData[e][13]) < 1 || Entity.getEntityTypeId(QuarryData[e][14]) < 1 || Entity.getEntityTypeId(QuarryData[e][15]) < 1) {
+		 	QuarryData.splice(e, 1);
+		}else {
+			if(Math.hypot(QuarryData[e][16] - Entity.getX(QuarryData[e][11]), QuarryData[e][17] - Entity.getX(QuarryData[e][13]), QuarryData[e][18] - Entity.getX(QuarryData[e][15])) > 0.1) {
+				Entity.setVelX();
+				Entity.setVelY();
+				Entity.setVelZ();
+			}
+		}
+	}
+}*/
+
+var asynchronousModTick = new java.lang.Thread(new java.lang.Runnable({run: function() {try { while(running) {
+	for(var q = 0; q < QuarryData.length; q++) {
+		for(var e = 0; e < QuarryData[q][4].length; e++) {
+			if(Entity.getEntityTypeId(QuarryData[q][4][e]) < 1) {
+				Quarry.craneRebuild(q);
+			}
+		}
+		
+	}
+	java.lang.Thread.sleep(50);
+}}catch(e) {
+	clientMessage("[asynchronousModTick Crash" + e.lineNumber + "] " + e);
+	running = false;
+}}}));
+
+Quarry.createNewCrainEnt = function(q) {
+	debug("Quarry.createNewCrainEnt" + q);
+	var DRm = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2] - 1, QuarryData[q][2][3] + 1, 81, "mobs/char.png");
+	var DR = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2] - 1, QuarryData[q][2][3] + 1, 11, "mobs/quarry_drill.png");
+	craneRenderType(rendererDrill, 1);
+	Entity.setRenderType(DR, rendererCrane.renderType);
+	Entity.setRot(DR, 0, 0);
+	Entiry.rideAnimal(DR, DRm);
+	var CNm = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2], QuarryData[q][2][3] + 1, 81, "mobs/char.png");
+	var CN = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2], QuarryData[q][2][3] + 1, 11, "mobs/quarry_crane.png");
+	craneRenderType(rendererCrane, 1);
+	Entity.setRenderType(CN, rendererCrane.renderType);
+	Entity.setRot(CN, 0, 0);
+	Entiry.rideAnimal(CN, CNm);
+	var HXm = Level.mobSpawn(QuarryData[q][2][1], QuarryData[q][3][2], QuarryData[q][2][3] + 1, 81, "mobs/char.png");
+	var HX = Level.mobSpawn(QuarryData[q][2][1], QuarryData[q][3][2], QuarryData[q][2][3] + 1, 11, "mobs/quarry_crane.png");
+	craneRenderType(rendererCrane, endX - startX);
+	Entity.setRenderType(HX, rendererCrane.renderType);
+	Entity.setRot(HX, 0, 0);
+	Entiry.rideAnimal(HX, HXm);
+	var HZm = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2], QuarryData[q][2][3], 81, "mobs/char.png");
+	var HZ = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2], QuarryData[q][2][3], 11, "mobs/quarry_crane.png");
+	craneRenderType(rendererCrane, endX - startX);
+	Entity.setRenderType(HZ, rendererCrane.renderType);
+	Entity.setRot(HZ, 90, 0);
+	Entiry.rideAnimal(HZ, HZm);
+	QuarryData[q][4] = [DR, DRm, CN, CNm, HX, HXm, HZ, HZm];
+}
+
+/**
+test dump
+var px, py, pz, et;
+function attackHook(at, victim) {
+	craneRenderType(rendererCrane, 10);
+	Entity.setMobSkin(victim, "mobs/quarry_crane.png");
+	//Entity.setRenderType(victim, rendererCrane.renderType);
+	px = Entity.getX(victim);
+	py = Entity.getY(victim);
+	pz = Entity.getZ(victim);
+	et = victim;
+	var sc = Level.spawnMob(px, py, pz, 81, "mobs/char.png");
+	Entity.rideAnimal(et, sc);
+	new java.lang.Thread(new java.lang.Runnable({run: function() { while(Entity.getHealth(et) > 0) {
+		Entity.setVelX(sc, 0);
+		Entity.setVelY(sc, 0);
+		Entity.setVelZ(sc, 0);
+		Entity.setPosition(sc, px, py, pz);
+		//Entity.setRot(et, 0,0);
+		java.lang.Thread.sleep(1);
+	}}})).start();
+}
+*/
