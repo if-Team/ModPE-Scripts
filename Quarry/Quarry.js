@@ -146,6 +146,9 @@ function newLevel(str) {
 		_MAP_QUARRY_DATA().createNewFile();
 	}else {
 		QuarryData = JSON.parse(loadData(_MAP_QUARRY_DATA(), "MAIN"));
+		if(QuarryData === null) {
+			QuarryData = [];
+		}
 	}
 	if(!asynchronousModTick.isAlive()) {
 		running = true;
@@ -161,20 +164,6 @@ function leaveGame() {
 	saveData(_MAP_QUARRY_DATA(), "MAIN", JSON.stringify(QuarryData));
 	QuarryData = [];
 }
-
-/*function modTick() {
-	for(var e in QuarryData) {
-		 if(Entity.getEntityTypeId(QuarryData[e][10]) < 1 || Entity.getEntityTypeId(QuarryData[e][11]) < 1 || Entity.getEntityTypeId(QuarryData[e][12]) < 1 || Entity.getEntityTypeId(QuarryData[e][13]) < 1 || Entity.getEntityTypeId(QuarryData[e][14]) < 1 || Entity.getEntityTypeId(QuarryData[e][15]) < 1) {
-		 	QuarryData.splice(e, 1);
-		}else {
-			if(Math.hypot(QuarryData[e][16] - Entity.getX(QuarryData[e][11]), QuarryData[e][17] - Entity.getX(QuarryData[e][13]), QuarryData[e][18] - Entity.getX(QuarryData[e][15])) > 0.1) {
-				Entity.setVelX();
-				Entity.setVelY();
-				Entity.setVelZ();
-			}
-		}
-	}
-}*/
 
 function modTick() {
 	if(!asynchronous) {
@@ -196,9 +185,12 @@ var asynchronousModTick = new java.lang.Thread(new java.lang.Runnable({run: func
 //Quarry progress Manager
 //====================
 function mainQuarryActivity() {
-	for(var q = 0; q < QuarryData.length; q++) {
-		for(var e = 0; e < QuarryData[q][4].length; e++) {
+	//for(var q = 0; q < QuarryData.length; q++) {
+	for(var q in QuarryData) {
+		//for(var e = 0; e < QuarryData[q][4].length; e++) {
+		for(var e in QuarryData[q][4]) {
 			if(Entity.getEntityTypeId(QuarryData[q][4][e]) < 1) {
+				debug(e + " null ent " + Entity.getEntityTypeId(QuarryData[q][4][e]));
 				Quarry.craneRebuild(q);
 			}
 		}
@@ -214,9 +206,11 @@ function mainQuarryActivity() {
 }
 
 Quarry.craneRebuild = function(q) {try {
-	for(var e = 0; e < QuarryData[q][4]; e++) {
+	debug("Quarry.craneRebuild");
+	for(var e = 0; e < QuarryData[q][4].length; e++) {
+		debug("remove crane " + QuarryData[q][4][e]);
 		Entity.remove(QuarryData[q][4][e]);
-	}
+	}ㅕ
 	Quarry.createNewCrainEnt(q);
 }catch(e) {
 	clientMessage("[craneRebuild Crash" + e.lineNumber + "] " + e);
@@ -224,31 +218,40 @@ Quarry.craneRebuild = function(q) {try {
 
 Quarry.createNewCrainEnt = function(q) {
 	debug("Quarry.createNewCrainEnt" + q);
-	var DRm = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2] - 1, QuarryData[q][2][3] + 1, 81, "mobs/char.png");
-	var DR = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2] - 1, QuarryData[q][2][3] + 1, 11, "mobs/quarry_drill.png");
+	var DRm = Level.spawnMob(QuarryData[q][2][0] + 1, QuarryData[q][3][1] - 1, QuarryData[q][2][2] + 1, 81, "mobs/char.png");
+	var DR = Level.spawnMob(QuarryData[q][2][0] + 1, QuarryData[q][3][1] - 1, QuarryData[q][2][2] + 1, 11, "mobs/quarry_drill.png");
+	Entity.setCollisionSize(DR, 0, 0);
+	Entity.setCollisionSize(DRm, 0, 0);
 	craneRenderType(rendererDrill, 1);
 	Entity.setRenderType(DR, rendererCrane.renderType);
 	Entity.setRot(DR, 0, 0);
-	Entiry.rideAnimal(DR, DRm);
-	var CNm = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2], QuarryData[q][2][3] + 1, 81, "mobs/char.png");
-	var CN = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2], QuarryData[q][2][3] + 1, 11, "mobs/quarry_crane.png");
+	Entity.rideAnimal(DR, DRm);
+	var CNm = Level.spawnMob(QuarryData[q][2][0] + 1, QuarryData[q][3][1], QuarryData[q][2][2] + 1, 81, "mobs/char.png");
+	var CN = Level.spawnMob(QuarryData[q][2][0] + 1, QuarryData[q][3][1], QuarryData[q][2][2] + 1, 11, "mobs/quarry_crane.png");
+	Entity.setCollisionSize(CN, 0, 0);
+	Entity.setCollisionSize(CNm, 0, 0);
 	craneRenderType(rendererCrane, 1);
 	Entity.setRenderType(CN, rendererCrane.renderType);
 	Entity.setRot(CN, 0, 0);
-	Entiry.rideAnimal(CN, CNm);
-	var HXm = Level.mobSpawn(QuarryData[q][2][1], QuarryData[q][3][2], QuarryData[q][2][3] + 1, 81, "mobs/char.png");
-	var HX = Level.mobSpawn(QuarryData[q][2][1], QuarryData[q][3][2], QuarryData[q][2][3] + 1, 11, "mobs/quarry_crane.png");
-	craneRenderType(rendererCrane, endX - startX);
+	Entity.rideAnimal(CN, CNm);
+	var HXm = Level.spawnMob(QuarryData[q][2][0], QuarryData[q][3][1], QuarryData[q][2][2] + 1, 81, "mobs/char.png");
+	var HX = Level.spawnMob(QuarryData[q][2][0], QuarryData[q][3][1], QuarryData[q][2][2] + 1, 11, "mobs/quarry_crane.png");
+	Entity.setCollisionSize(HX, 0, 0);
+	Entity.setCollisionSize(HXm, 0, 0);
+	craneRenderType(rendererCrane, QuarryData[q][3][0] - QuarryData[q][2][0]);
 	Entity.setRenderType(HX, rendererCrane.renderType);
 	Entity.setRot(HX, 0, 0);
-	Entiry.rideAnimal(HX, HXm);
-	var HZm = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2], QuarryData[q][2][3], 81, "mobs/char.png");
-	var HZ = Level.mobSpawn(QuarryData[q][2][1] + 1, QuarryData[q][3][2], QuarryData[q][2][3], 11, "mobs/quarry_crane.png");
-	craneRenderType(rendererCrane, endX - startX);
+	Entity.rideAnimal(HX, HXm);
+	var HZm = Level.spawnMob(QuarryData[q][2][0] + 1, QuarryData[q][3][1], QuarryData[q][2][2], 81, "mobs/char.png");
+	var HZ = Level.spawnMob(QuarryData[q][2][0] + 1, QuarryData[q][3][1], QuarryData[q][2][2], 11, "mobs/quarry_crane.png");
+	Entity.setCollisionSize(HZ, 0, 0);
+	Entity.setCollisionSize(HZm, 0, 0);
+	craneRenderType(rendererCrane, QuarryData[q][3][2] - QuarryData[q][2][2]);
 	Entity.setRenderType(HZ, rendererCrane.renderType);
 	Entity.setRot(HZ, 90, 0);
-	Entiry.rideAnimal(HZ, HZm);
+	Entity.rideAnimal(HZ, HZm);
 	QuarryData[q][4] = [DR, DRm, CN, CNm, HX, HXm, HZ, HZm];
+	debug(QuarryData[q][4]);
 }
 
 //====================
@@ -478,3 +481,32 @@ function attackHook(at, victim) {
 	}}})).start();
 }
 */
+
+/*function modTick() {
+	for(var e in QuarryData) {
+		 if(Entity.getEntityTypeId(QuarryData[e][10]) < 1 || Entity.getEntityTypeId(QuarryData[e][11]) < 1 || Entity.getEntityTypeId(QuarryData[e][12]) < 1 || Entity.getEntityTypeId(QuarryData[e][13]) < 1 || Entity.getEntityTypeId(QuarryData[e][14]) < 1 || Entity.getEntityTypeId(QuarryData[e][15]) < 1) {
+		 	QuarryData.splice(e, 1);
+		}else {
+			if(Math.hypot(QuarryData[e][16] - Entity.getX(QuarryData[e][11]), QuarryData[e][17] - Entity.getX(QuarryData[e][13]), QuarryData[e][18] - Entity.getX(QuarryData[e][15])) > 0.1) {
+				Entity.setVelX();
+				Entity.setVelY();
+				Entity.setVelZ();
+			}
+		}
+	}
+}*/
+
+function procCmd(str) {
+	debug(str);
+	var cmd = str.split(" ");
+	if(cmd[0] === "qd") {
+		debug("add");
+		QuarryData.push([[], [], [Player.getX()-4, Player.getY()-2, Player.getZ()+1], [Player.getX()+4, Player.getY()+3, Player.getZ()+10], [-1,-1,-1,-1,-1,-1,-1,-1], []]);
+	}
+	if(cmd[0] === "qd2") {
+		Quarry.craneRebuild(0);
+	}
+	if(cmd[0] === "qd3") {
+		debug(Entity.getEntityTypeId(-1));
+	}
+}
