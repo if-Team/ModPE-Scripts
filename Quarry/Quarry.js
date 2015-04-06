@@ -29,6 +29,8 @@ const _DRILL = new File(_MAIN_DIR, "quarry_drill.png");
 const _DRILL_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/Quarry/resource/quarry_drill.png";
 const _CRANE = new File(_MAIN_DIR, "quarry_crane.png");
 const _CRANE_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/Quarry/resource/quarry_crane.png";
+function _MAP_DIR() {return new File(_SD_CARD, "games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/mods")};
+function _MAP_QUARRY_DATA() {return new File(_MAP_DIR(), "quarry.txt")};
 
 
 var rendererDrill = Renderer.createHumanoidRenderer();
@@ -261,6 +263,12 @@ function debug(str) {
 //====================
 
 function newLevel(str) {
+	if(!_MAP_DIR().exists()) {
+		_MAP_DIR().mkdir();
+	}
+	if(!_MAP_QUARRY_DATA().exists()) {
+		_MAP_QUARRY_DATA().createNewFile();
+	}
 	if(!asynchronousModTick.isAlive()) {
 		running = true;
 		asynchronousModTick.start()
