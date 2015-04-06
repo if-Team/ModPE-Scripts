@@ -138,131 +138,6 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
 	}
 }
 
-function drillRenderType(renderer, length) {
-	var model=renderer.getModel();
-	var head=model.getPart("head").clear();
-	var body=model.getPart("body").clear();
-	var rightArm=model.getPart("rightArm").clear();
-	var leftArm=model.getPart("leftArm").clear();
-	var rightLeg=model.getPart("rightLeg").clear();
-	var leftLeg=model.getPart("leftLeg").clear();
-	body.setTextureOffset(32, 0, false);
-	body.addBox(-2,0,-2,4,16,4);
-	body.setTextureOffset(0, 0, true);
-	for(var e = length; e > 0; e--) {
-		body.addBox(-4,e*(-16),-4,8,16,8);
-	}
-};
-
-function craneRenderType(renderer, length) {
-	var model=renderer.getModel();
-	var head=model.getPart("head").clear();
-	var body=model.getPart("body").clear();
-	var rightArm=model.getPart("rightArm").clear();
-	var leftArm=model.getPart("leftArm").clear();
-	var rightLeg=model.getPart("rightLeg").clear();
-	var leftLeg=model.getPart("leftLeg").clear();
-	body.setTextureOffset(0, 0, true);
-	for(var e = length; e > 0; e--) {
-		body.addBox(-e*16,-4,-4,16,8,8);
-	}
-};
-
-function scriptPreLoad() {
-	if(!_MAIN_DIR.exists()) {
-		_MAIN_DIR.mkdirs();
-	}
-	if(_BLOCK.exists()) {
-		setTexture(_BLOCK, "terrain-atlas.tga");
-	}else {
-		if(downloadFile(_BLOCK, _BLOCK_URL)) {
-			setTexture(_BLOCK, "terrain-atlas.tga");
-		}else {
-			print("Error, please check internet connection");
-		}
-	}
-	if(_DRILL.exists()) {
-		setTexture(_DRILL, "mobs/quarry_drill.png");
-	}else {
-		if(downloadFile(_DRILL, _DRILL_URL)) {
-			setTexture(_DRILL, "mobs/quarry_drill.png");
-		}else {
-			print("Error, please check internet connection");
-		}
-	}
-	if(_CRANE.exists()) {
-		setTexture(_CRANE, "mobs/quarry_crane.png");
-	}else {
-		if(downloadFile(_CRANE, _CRANE_URL)) {
-			setTexture(_CRANE, "mobs/quarry_crane.png");
-		}else {
-			print("Error, please check internet connection");
-		}
-	}
-}
-
-function setTexture(prototypeFile, innerPath){
-	try{
-		var dir = new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/net.zhuoweizhang.mcpelauncher.pro/files/textures/images/" + innerPath);
-		dir.getParentFile().mkdirs(); 
-		bis = new java.io.BufferedInputStream(new java.io.FileInputStream(prototypeFile));
-		var bos = new java.io.BufferedOutputStream(new java.io.FileOutputStream(dir));
-		var buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
-		var count = 0;
-		while((count = bis.read(buffer)) >= 0){
-			bos.write(buffer, 0, count);
-		}
-		bis.close();
-		bos.close();
-	}catch(e){
-		print(prototypeFile.getAbsolutePath() + " 리소스파일이 없습니다");
-	}
-};
-
-function downloadFile(path, url) {
-/*	new java.lang.Thread(new java.lang.Runnable({
-		run: function(){*/
-			try{
-				var tempApiUrl = new java.net.URL(url);
-				var tempApiUrlConn = tempApiUrl.openConnection();
-				tempApiUrlConn.connect();
-				var tempLength = tempApiUrlConn.getContentLength();
-				var tempBis = new java.io.BufferedInputStream(tempApiUrl.openStream());
-				var tempFos = new java.io.FileOutputStream(path);
-				var tempData = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
-				var tempTotal = 0, tempCount;
-				while ((tempCount = tempBis.read(tempData)) != -1) {
-					tempTotal += tempCount;
-					tempFos.write(tempData, 0, tempCount);
-				}
-				tempFos.flush();
-				tempFos.close();
-				tempBis.close();
-				return true;
-			}catch(e){
-				debug(e.lineNumber + " " + e);
-				return false;
-			}
-/*		}
-	})).start();*/
-};
-
-function debug(str) {
-	if(debuging) {
-		if(Level.getWorldName() === null) {
-			 ctx.runOnUiThread(new java.lang.Runnable({ run: function(){
-		android.widget.Toast.makeText(ctx, "[Debug]\n" + str, android.widget.Toast.LENGTH_LONG).show();
-			}}));
-		}else {
-			clientMessage("[debug] " + str);
-		}
-	}
-}
-
-//====================
-//이 밑은 프로토타입 부분입니다.
-//====================
-
 function newLevel(str) {
 	if(!_MAP_DIR().exists()) {
 		_MAP_DIR().mkdir();
@@ -317,6 +192,9 @@ var asynchronousModTick = new java.lang.Thread(new java.lang.Runnable({run: func
 	running = false;
 }}}));
 
+//====================
+//Quarry progress Manager
+//====================
 function mainQuarryActivity() {
 	for(var q = 0; q < QuarryData.length; q++) {
 		for(var e = 0; e < QuarryData[q][4].length; e++) {
@@ -373,30 +251,95 @@ Quarry.createNewCrainEnt = function(q) {
 	QuarryData[q][4] = [DR, DRm, CN, CNm, HX, HXm, HZ, HZm];
 }
 
-/**
-test dump
-var px, py, pz, et;
-function attackHook(at, victim) {
-	craneRenderType(rendererCrane, 10);
-	Entity.setMobSkin(victim, "mobs/quarry_crane.png");
-	//Entity.setRenderType(victim, rendererCrane.renderType);
-	px = Entity.getX(victim);
-	py = Entity.getY(victim);
-	pz = Entity.getZ(victim);
-	et = victim;
-	var sc = Level.spawnMob(px, py, pz, 81, "mobs/char.png");
-	Entity.rideAnimal(et, sc);
-	new java.lang.Thread(new java.lang.Runnable({run: function() { while(Entity.getHealth(et) > 0) {
-		Entity.setVelX(sc, 0);
-		Entity.setVelY(sc, 0);
-		Entity.setVelZ(sc, 0);
-		Entity.setPosition(sc, px, py, pz);
-		//Entity.setRot(et, 0,0);
-		java.lang.Thread.sleep(1);
-	}}})).start();
+//====================
+//Sub data management
+//====================
+function scriptPreLoad() {
+	if(!_MAIN_DIR.exists()) {
+		_MAIN_DIR.mkdirs();
+	}
+	if(_BLOCK.exists()) {
+		setTexture(_BLOCK, "terrain-atlas.tga");
+	}else {
+		if(downloadFile(_BLOCK, _BLOCK_URL)) {
+			setTexture(_BLOCK, "terrain-atlas.tga");
+		}else {
+			print("Error, please check internet connection");
+		}
+	}
+	if(_DRILL.exists()) {
+		setTexture(_DRILL, "mobs/quarry_drill.png");
+	}else {
+		if(downloadFile(_DRILL, _DRILL_URL)) {
+			setTexture(_DRILL, "mobs/quarry_drill.png");
+		}else {
+			print("Error, please check internet connection");
+		}
+	}
+	if(_CRANE.exists()) {
+		setTexture(_CRANE, "mobs/quarry_crane.png");
+	}else {
+		if(downloadFile(_CRANE, _CRANE_URL)) {
+			setTexture(_CRANE, "mobs/quarry_crane.png");
+		}else {
+			print("Error, please check internet connection");
+		}
+	}
 }
-*/
 
+function setTexture(prototypeFile, innerPath){
+	try{
+		var dir = new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/net.zhuoweizhang.mcpelauncher.pro/files/textures/images/" + innerPath);
+		dir.getParentFile().mkdirs(); 
+		bis = new java.io.BufferedInputStream(new java.io.FileInputStream(prototypeFile));
+		var bos = new java.io.BufferedOutputStream(new java.io.FileOutputStream(dir));
+		var buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
+		var count = 0;
+		while((count = bis.read(buffer)) >= 0){
+			bos.write(buffer, 0, count);
+		}
+		bis.close();
+		bos.close();
+	}catch(e){
+		print(prototypeFile.getAbsolutePath() + " 리소스파일이 없습니다");
+	}
+};
+
+function downloadFile(path, url) {
+	try{
+		var tempApiUrl = new java.net.URL(url);
+		var tempApiUrlConn = tempApiUrl.openConnection();
+		tempApiUrlConn.connect();
+		var tempLength = tempApiUrlConn.getContentLength();
+		var tempBis = new java.io.BufferedInputStream(tempApiUrl.openStream());
+		var tempFos = new java.io.FileOutputStream(path);
+		var tempData = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
+		var tempTotal = 0, tempCount;
+		while ((tempCount = tempBis.read(tempData)) != -1) {
+			tempTotal += tempCount;
+			tempFos.write(tempData, 0, tempCount);
+		}
+		tempFos.flush();
+		tempFos.close();
+		tempBis.close();
+		return true;
+	}catch(e){
+		debug(e.lineNumber + " " + e);
+		return false;
+	}
+};
+
+function debug(str) {
+	if(debuging) {
+		if(Level.getWorldName() === null) {
+			 ctx.runOnUiThread(new java.lang.Runnable({ run: function(){
+		android.widget.Toast.makeText(ctx, "[Debug]\n" + str, android.widget.Toast.LENGTH_LONG).show();
+			}}));
+		}else {
+			clientMessage("[debug] " + str);
+		}
+	}
+}
 
 function saveData(file, article, value) {
 	//읽기
@@ -476,3 +419,62 @@ function toasts(str) {
 	}
 	));
 };
+
+//====================
+//Models
+//====================
+function drillRenderType(renderer, length) {
+	var model=renderer.getModel();
+	var head=model.getPart("head").clear();
+	var body=model.getPart("body").clear();
+	var rightArm=model.getPart("rightArm").clear();
+	var leftArm=model.getPart("leftArm").clear();
+	var rightLeg=model.getPart("rightLeg").clear();
+	var leftLeg=model.getPart("leftLeg").clear();
+	body.setTextureOffset(32, 0, false);
+	body.addBox(-2,0,-2,4,16,4);
+	body.setTextureOffset(0, 0, true);
+	for(var e = length; e > 0; e--) {
+		body.addBox(-4,e*(-16),-4,8,16,8);
+	}
+};
+
+function craneRenderType(renderer, length) {
+	var model=renderer.getModel();
+	var head=model.getPart("head").clear();
+	var body=model.getPart("body").clear();
+	var rightArm=model.getPart("rightArm").clear();
+	var leftArm=model.getPart("leftArm").clear();
+	var rightLeg=model.getPart("rightLeg").clear();
+	var leftLeg=model.getPart("leftLeg").clear();
+	body.setTextureOffset(0, 0, true);
+	for(var e = length; e > 0; e--) {
+		body.addBox(-e*16,-4,-4,16,8,8);
+	}
+};
+
+//====================
+//test dump
+//====================
+/**
+var px, py, pz, et;
+function attackHook(at, victim) {
+	craneRenderType(rendererCrane, 10);
+	Entity.setMobSkin(victim, "mobs/quarry_crane.png");
+	//Entity.setRenderType(victim, rendererCrane.renderType);
+	px = Entity.getX(victim);
+	py = Entity.getY(victim);
+	pz = Entity.getZ(victim);
+	et = victim;
+	var sc = Level.spawnMob(px, py, pz, 81, "mobs/char.png");
+	Entity.rideAnimal(et, sc);
+	new java.lang.Thread(new java.lang.Runnable({run: function() { while(Entity.getHealth(et) > 0) {
+		Entity.setVelX(sc, 0);
+		Entity.setVelY(sc, 0);
+		Entity.setVelZ(sc, 0);
+		Entity.setPosition(sc, px, py, pz);
+		//Entity.setRot(et, 0,0);
+		java.lang.Thread.sleep(1);
+	}}})).start();
+}
+*/
