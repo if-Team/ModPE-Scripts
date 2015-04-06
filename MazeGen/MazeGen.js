@@ -261,12 +261,12 @@ var R = {
         message_usage: new Resource({
             en: "Usage: /maze <width> <height> [blockId=42 blockDamage=0 blockHeight=3] [turnRate=50 reconnectionRate=0]",
             ko: "사용법: /maze <가로> <세로> [블럭ID=42 블럭데미지=0 블럭높이=3] [회전율=50 재연결률=0]",
-            ja: "使用法: /maze <幅> <高さ> [ブロックID=42 ブロックデータ=0 ブロックの高さ=3] [回転率=50 再連結率=0]"
+            ja: "使用法: /maze <横> <縦> [ブロックID=42 ブロックデータ=0 ブロックの高さ=3] [回転率=50 再連結率=0]"
         }),
         message_created: new Resource({
             en: "The maze has been created!",
             ko: "미로가 생성되었습니다!",
-            ja: "迷路が作成されました！"
+            ja: "迷路を作成しました！"
         }),
 
         error_not_a_number: new Resource({
@@ -287,13 +287,13 @@ var R = {
         error_too_small: new Resource({
             en: "Error: The size of the maze is too small!",
             ko: "오류: 미로 크기가 너무 작습니다!",
-            ja: "エラー： 迷路の大きが小さすぎます！"
+            ja: "エラー： 迷路の大きさが小さすぎます！"
         }),
 
         info_size: new Resource({
             en: "the size of the maze: %s * %s",
             ko: "미로 크기: %s * %s",
-            ja: "迷路の大き: %s * %s"
+            ja: "迷路の大きさ: %s * %s"
         }),
         info_block: new Resource({
             en: "block: %s:%s, block height: %s",

@@ -10,7 +10,7 @@
 This script generates a maze to your Minecraft PE World.
 
 ### Usage
-Enter the follwing command to generate a maze where the player is standing.
+Enter the following command to generate a maze where the player is standing.
 
 | Default command | Block parameter (Optional) | Style parameter (Optional) |
 | :-----: | :------: | :----: |
@@ -44,7 +44,7 @@ Enter the follwing command to generate a maze where the player is standing.
 
 | 基本コマンド | ブロックのパラメータ (オプショナル) | スタイルのパラメータ (オプショナル) |
 | :-----: | :------: | :----: |
-| `/maze <幅> <高さ>` | `[ブロックID=42 ブロックデータ=0 ブロックの高さ=3]` | `[回転率=50 再連結率=0]` |
+| `/maze <横> <縦>` | `[ブロックID=42 ブロックデータ=0 ブロックの高さ=3]` | `[回転率=50 再連結率=0]` |
 
 ### Ｑ. 「回転率」と「再連結率」は何を意味するのですか？
 ![Summary-ja](http://i.imgur.com/qHu1g7K.png)
