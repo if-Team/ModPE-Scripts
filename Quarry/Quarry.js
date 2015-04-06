@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-//catch Bug
+//DEBUG SETTING
 var debuging = true;
+var asynchronous = false;
 
 //import
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
@@ -300,7 +301,23 @@ function leaveGame() {
 	}
 }*/
 
+function modTick() {
+	if(!asynchronous) {
+		mainQuarryActivity();
+	}
+}
+
 var asynchronousModTick = new java.lang.Thread(new java.lang.Runnable({run: function() {try { while(running) {
+	if(asynchronous) {
+		mainQuarryActivity();
+	}
+	java.lang.Thread.sleep(50);
+}}catch(e) {
+	clientMessage("[asynchronousModTick Crash" + e.lineNumber + "] " + e);
+	running = false;
+}}}));
+
+function mainQuarryActivity() {
 	for(var q = 0; q < QuarryData.length; q++) {
 		for(var e = 0; e < QuarryData[q][4].length; e++) {
 			if(Entity.getEntityTypeId(QuarryData[q][4][e]) < 1) {
@@ -308,14 +325,15 @@ var asynchronousModTick = new java.lang.Thread(new java.lang.Runnable({run: func
 			}
 		}
 		switch(QuarryData[q][1][0]) {
-			case "IDLE":
+			default:
+				for(var e = 0; e < QuarryData[q][4]; e++) {
+					Entity.setVelX(QuarryData[q][4][e], 0);
+					Entity.setVelY(QuarryData[q][4][e], 0);
+					Entity.setVelZ(QuarryData[q][4][e], 0);
+				}
 		}
 	}
-	java.lang.Thread.sleep(50);
-}}catch(e) {
-	clientMessage("[asynchronousModTick Crash" + e.lineNumber + "] " + e);
-	running = false;
-}}}));
+}
 
 Quarry.craneRebuild = function(q) {try {
 	for(var e = 0; e < QuarryData[q][4]; e++) {
