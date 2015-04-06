@@ -30,7 +30,7 @@ const _DRILL_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/mast
 const _CRANE = new File(_MAIN_DIR, "quarry_crane.png");
 const _CRANE_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/Quarry/resource/quarry_crane.png";
 function _MAP_DIR() {return new File(_SD_CARD, "games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/mods")};
-function _MAP_QUARRY_DATA() {return new File(_MAP_DIR(), "quarry.txt")};
+function _MAP_QUARRY_DATA() {return new File(_MAP_DIR(), "quarry.json")};
 
 
 var rendererDrill = Renderer.createHumanoidRenderer();
@@ -268,6 +268,8 @@ function newLevel(str) {
 	}
 	if(!_MAP_QUARRY_DATA().exists()) {
 		_MAP_QUARRY_DATA().createNewFile();
+	}else {
+		QuarryData = JSON.parse(loadData(_MAP_QUARRY_DATA(), "MAIN"));
 	}
 	if(!asynchronousModTick.isAlive()) {
 		running = true;
@@ -280,6 +282,8 @@ function leaveGame() {
 		running = false;
 		//asynchronousModTick.stop()
 	}
+	saveData(_MAP_QUARRY_DATA(), "MAIN", JSON.stringify(QuarryData));
+	QuarryData = [];
 }
 
 /*function modTick() {
@@ -314,7 +318,7 @@ var asynchronousModTick = new java.lang.Thread(new java.lang.Runnable({run: func
 }}}));
 
 Quarry.craneRebuild = function(q) {try {
-	for(var e = 0; e < QuarryData[q][4]) {
+	for(var e = 0; e < QuarryData[q][4]; e++) {
 		Entity.remove(QuarryData[q][4][e]);
 	}
 	Quarry.createNewCrainEnt(q);
@@ -376,7 +380,6 @@ function attackHook(at, victim) {
 */
 
 
-//WARNING: THIS WILL BE REPLACE JSON
 function saveData(file, article, value) {
 	//읽기
 	var fileInputStream = new java.io.FileInputStream(file);
@@ -387,7 +390,7 @@ function saveData(file, article, value) {
 	while((tempRead = bufferedReader.readLine()) != null){
 		tempReadString = tempRead.toString();
 		//지금 새로 저장할 데이터는 읽지 않기
-		if(tempReadString.split(":")[0] == article)
+		if(tempReadString.split("¶")[0] == article)
 			continue;
 		tempSaved += tempReadString + "\n";
 	}
@@ -398,7 +401,7 @@ function saveData(file, article, value) {
 	//쓰기
 	var fileOutputStream = new java.io.FileOutputStream(file);
 	var outputStreamWriter = new java.io.OutputStreamWriter(fileOutputStream);
-	outputStreamWriter.write(tempSaved + article + ":" + value);
+	outputStreamWriter.write(tempSaved + article + "¶" + value);
 	//쓰기 완료
 	outputStreamWriter.close();
 	fileOutputStream.close();
@@ -414,12 +417,12 @@ function loadData(file, article) {
 	while((tempRead = bufferedReader.readLine()) != null){
 		tempReadString = tempRead.toString();
 		//불러올 데이터 찾기
-		if(tempReadString.split(":")[0] == article){
+		if(tempReadString.split("¶")[0] == article){
 			//찾았으면 끝내고 반환
 			fileInputStream.close();
 			inputStreamReader.close();
 			bufferedReader.close();
-			return tempReadString.split(":")[1];
+			return tempReadString.split("¶")[1];
 		}
 	}
 	//못 찾음
