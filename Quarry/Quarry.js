@@ -52,6 +52,7 @@ var Tile = {
 var Quarry = {};
 var QuarryData = [];
 //push([[x, y, z], [mod, DataArray], [startX, startY, startZ], [endX, endY, endZ], [DrillEnt, DrillMountEnt, ConnectEnt, ConnectMountEnt, CraneXEnt, CraneXMountEnt, CraneZent, CraneZMountEnt], [TargetX, TargetY, TargetZ]])
+//QurryMod: IDLE, BUILDING, BUILD, MINE, FIN
 
 Block.defineBlock(Tile.QUARRY_NORTH, "Quarry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_bottom",0],["cauldron_side",0], ["cauldron_side",0],["cauldron_side",0]], 0, true, 0);
 Block.defineBlock(Tile.QUARRY_SOUTH, "Quarry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_side",0],["cauldron_bottom",0], ["cauldron_side",0],["cauldron_side",0]], 0, true, 0);
@@ -294,13 +295,24 @@ var asynchronousModTick = new java.lang.Thread(new java.lang.Runnable({run: func
 				Quarry.craneRebuild(q);
 			}
 		}
-		
+		switch(QuarryData[q][1][0]) {
+			case "IDLE":
+		}
 	}
 	java.lang.Thread.sleep(50);
 }}catch(e) {
 	clientMessage("[asynchronousModTick Crash" + e.lineNumber + "] " + e);
 	running = false;
 }}}));
+
+Quarry.craneRebuild = function(q) {try {
+	for(var e = 0; e < QuarryData[q][4]) {
+		Entity.remove(QuarryData[q][4][e]);
+	}
+	Quarry.createNewCrainEnt(q);
+}catch(e) {
+	clientMessage("[craneRebuild Crash" + e.lineNumber + "] " + e);
+}};
 
 Quarry.createNewCrainEnt = function(q) {
 	debug("Quarry.createNewCrainEnt" + q);
