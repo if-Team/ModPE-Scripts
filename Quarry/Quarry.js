@@ -366,3 +366,84 @@ function attackHook(at, victim) {
 	}}})).start();
 }
 */
+
+
+//WARNING: THIS WILL BE REPLACE JSON
+function saveData(file, article, value) {
+	//읽기
+	var fileInputStream = new java.io.FileInputStream(file);
+	var inputStreamReader = new java.io.InputStreamReader(fileInputStream);
+	var bufferedReader = new java.io.BufferedReader(inputStreamReader);
+	var tempRead, tempReadString;
+	var tempSaved = "";
+	while((tempRead = bufferedReader.readLine()) != null){
+		tempReadString = tempRead.toString();
+		//지금 새로 저장할 데이터는 읽지 않기
+		if(tempReadString.split(":")[0] == article)
+			continue;
+		tempSaved += tempReadString + "\n";
+	}
+	//읽어오기 완료
+	fileInputStream.close();
+	inputStreamReader.close();
+	bufferedReader.close();
+	//쓰기
+	var fileOutputStream = new java.io.FileOutputStream(file);
+	var outputStreamWriter = new java.io.OutputStreamWriter(fileOutputStream);
+	outputStreamWriter.write(tempSaved + article + ":" + value);
+	//쓰기 완료
+	outputStreamWriter.close();
+	fileOutputStream.close();
+}
+
+function loadData(file, article) {
+	//읽기
+	var fileInputStream = new java.io.FileInputStream(file);
+	var inputStreamReader = new java.io.InputStreamReader(fileInputStream);
+	var bufferedReader = new java.io.BufferedReader(inputStreamReader);
+	var tempRead, tempReadString;
+	var tempSaved = "";
+	while((tempRead = bufferedReader.readLine()) != null){
+		tempReadString = tempRead.toString();
+		//불러올 데이터 찾기
+		if(tempReadString.split(":")[0] == article){
+			//찾았으면 끝내고 반환
+			fileInputStream.close();
+			inputStreamReader.close();
+			bufferedReader.close();
+			return tempReadString.split(":")[1];
+		}
+	}
+	//못 찾음
+	fileInputStream.close();
+	inputStreamReader.close();
+	bufferedReader.close();
+	//없으면 반환
+	return null;
+}
+
+function toast(str) {
+	ctx.runOnUiThread(new java.lang.Runnable( {
+		run: function(){
+			try{
+				android.widget.Toast.makeText(ctx, str, android.widget.Toast.LENGTH_LONG).show();
+			}catch(e) {
+				print(e);
+			}
+		}
+	}
+	));
+};
+
+function toasts(str) {
+	ctx.runOnUiThread(new java.lang.Runnable( {
+		run: function(){
+			try{
+				android.widget.Toast.makeText(ctx, str, android.widget.Toast.LENGTH_SHORT).show();
+			}catch(e) {
+				print(e);
+			}
+		}
+	}
+	));
+};
