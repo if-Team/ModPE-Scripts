@@ -1,10 +1,10 @@
 # MazeGen
-![MainImage](http://i.imgur.com/W64V1yA.png)
-
+- If you can understand English, [Click here](https://github.com/if-Team/ModPE-Scripts/tree/master/MazeGen#English)
 - 한국인이라면, [여기를 클릭하세요](https://github.com/if-Team/ModPE-Scripts/tree/master/MazeGen#한국어)
 - 日本人なら、[こちらをクリックしてください](https://github.com/if-Team/ModPE-Scripts/tree/master/MazeGen#日本語)
 
 ## English
+![Logo-red](http://i.imgur.com/vWdttIa.png)
 ### MazeGen - Create an awesome maze automatically!
 
 This script generates a maze to your Minecraft PE World.
@@ -20,6 +20,7 @@ Enter the following command to generate a maze where the player is standing.
 ![Summary-en](http://i.imgur.com/ovOwOp0.png)
 
 ## 한국어
+![Logo-blue](http://i.imgur.com/twQtLNf.png)
 ### MazeGen - 멋진 미로를 자동으로 생성합니다!
 
 이 스크립트는 당신의 마인크래프트 PE 월드에 미로를 생성해 줍니다.
@@ -35,6 +36,7 @@ Enter the following command to generate a maze where the player is standing.
 ![Summary-ko](http://i.imgur.com/fNKKh0F.png)
 
 ## 日本語
+![Logo-gray](http://i.imgur.com/0GuHduF.png)
 ### MazeGen - 素敵な迷路を自動的に生成します！
 
 このスクリプトは、あなたのマインクラフトPEワールド迷路を生成してくれます。
