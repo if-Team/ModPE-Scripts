@@ -189,6 +189,9 @@ function buildMaze(grid, startX, startY, startZ, blockId, blockDamage, blockHeig
     blockDamage = blockDamage || 0;
     blockHeight = blockHeight || 3;
 
+    startX += 1;
+    startZ += 1;
+
     for(var i = 0; i < grid.params.w; i++){
         for(var j = 0; j < grid.params.h; j++){
             var cell = grid.data[i][j];
@@ -342,90 +345,106 @@ function newLevel(){
 function procCmd(str){
     var cmd = str.split(" ");
     if(cmd.shift().toLowerCase() === "maze"){
-        var params = cmd.map(function(param){
-            return parseInt(param, 10);
-        });
-
-        if(params.some(isNaN) || !params.every(isFinite)){
-            printLine(R.string.error_not_a_number);
+        var options = getOptionsFromCommands(cmd);
+        if(options === null){
             return;
         }
-
-        if(params.some(isNegative)){
-            printLine(R.string.error_negative_number);
-            return;
-        }
-
-        var width = 0;
-        var height = 0;
 
         var startX = Math.floor(Player.getX());
         var startY = Math.floor(Player.getY()) - 1;
         var startZ = Math.floor(Player.getZ());
 
-        var blockId = 0;
-        var blockDamage = 0;
-        var blockHeight = 0;
-
-        var turn = 0.5;
-        var reconnect = 0;
-
-        if(cmd.length >= 2){
-            var mapWidth = params[0];
-            var mapHeight = params[1];
-
-            if(mapWidth < 7 || mapHeight < 7){
-                printLine(R.string.error_too_small);
-                return;
-            }
-
-            width = Math.floor(mapWidth / 2) + (mapWidth % 2) - 1;
-            height = Math.floor(mapHeight / 2) + (mapHeight % 2) - 1;
-
-            printLine(R.string.info_size, [mapWidth, mapHeight]);
-
-            if(cmd.length >= 5){
-                blockId = params[2];
-                blockDamage = params[3];
-                blockHeight = params[4];
-
-                if(blockId >= 256 || blockHeight >= 128){
-                    printLine(R.string.error_out_of_bounds);
-                    return;
-                }
-
-                printLine(R.string.info_block, [blockId, blockDamage, blockHeight]);
-
-                if(cmd.length >= 7){
-                    turn = params[5];
-                    reconnect = params[6];
-
-                    if(turn > 100){
-                        turn = 100;
-                    }
-                    if(reconnect > 100){
-                        reconnect = 100;
-                    }
-
-                    printLine(R.string.info_percent, [turn, reconnect]);
-                }
-            }
-
-            new java.lang.Thread({run: function(){
+        new java.lang.Thread({
+            run: function(){
                 buildMaze(ProcGen.maze({
-                    w: width, h: height,
-                    turn: turn / 100,
-                    reconnect: reconnect / 100,
-                    branch: 1,
-                    deadEnd: 0
-                }), startX, startY, startZ, blockId, blockDamage, blockHeight);
+                    w: options.width, h: options.height,
+                    turn: options.turnRate / 100,
+                    reconnect: options.reconnectionRate / 100,
+                    branch: 1, deadEnd: 0
+                }), startX, startY, startZ, options.blockId, options.blockDamage, options.blockHeight);
 
                 printLine(R.string.message_created);
-            }}).start();
-        }else{
-            printLine(R.string.message_usage);
-        }
+            }
+        }).start();
     }
+}
+
+/**
+ * @param {string[]} cmd
+ * @returns {null|object}
+ */
+function getOptionsFromCommands(cmd){
+    var params = cmd.map(function(param){
+        return parseInt(param, 10);
+    });
+
+    if(params.some(isNaN) || !params.every(isFinite)){
+        printLine(R.string.error_not_a_number);
+        return null;
+    }
+
+    if(params.some(isNegative)){
+        printLine(R.string.error_negative_number);
+        return null;
+    }
+
+    if(params.length < 2){
+        printLine(R.string.message_usage);
+        return null;
+    }
+
+    var mapWidth = params.shift(); //0
+    var mapHeight = params.shift(); //1
+
+    if(mapWidth < 7 || mapHeight < 7){
+        printLine(R.string.error_too_small);
+        return;
+    }
+
+    var width = Math.floor(mapWidth / 2) + (mapWidth % 2) - 1;
+    var height = Math.floor(mapHeight / 2) + (mapHeight % 2) - 1;
+
+    printLine(R.string.info_size, [mapWidth, mapHeight]);
+
+    var blockId = 0;
+    var blockDamage = 0;
+    var blockHeight = 0;
+
+    if(params.length >= 3){
+        blockId = params.shift(); //2
+        blockDamage = params.shift(); //3
+        blockHeight = params.shift(); //4
+
+        if(blockId >= 256 || blockHeight >= 128){
+            printLine(R.string.error_out_of_bounds);
+            return;
+        }
+
+        printLine(R.string.info_block, [blockId, blockDamage, blockHeight]);
+    }
+
+    var turnRate = 0.5;
+    var reconnectionRate = 0;
+
+    if(params.length >= 2){
+        turnRate = params.shift(); //5
+        reconnectionRate = params.shift(); //6
+
+        if(turnRate > 100){
+            turnRate = 100;
+        }
+        if(reconnectionRate > 100){
+            reconnectionRate = 100;
+        }
+
+        printLine(R.string.info_percent, [turnRate, reconnectionRate]);
+    }
+
+    return {
+      width: width, height: height,
+      blockId: blockId, blockDamage: blockDamage, blockHeight: blockHeight,
+      turnRate: turnRate, reconnectionRate: reconnectionRate
+    };
 }
 
 void(newLevel); void(procCmd);
