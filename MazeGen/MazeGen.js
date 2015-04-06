@@ -398,7 +398,7 @@ function getOptionsFromCommands(cmd){
 
     if(mapWidth < 7 || mapHeight < 7){
         printLine(R.string.error_too_small);
-        return;
+        return null;
     }
 
     var width = Math.floor(mapWidth / 2) + (mapWidth % 2) - 1;
@@ -417,7 +417,7 @@ function getOptionsFromCommands(cmd){
 
         if(blockId >= 256 || blockHeight >= 128){
             printLine(R.string.error_out_of_bounds);
-            return;
+            return null;
         }
 
         printLine(R.string.info_block, [blockId, blockDamage, blockHeight]);
