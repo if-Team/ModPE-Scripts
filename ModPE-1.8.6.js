@@ -193,6 +193,19 @@ Server.getPort = function(){return;};
 Server.joinServer = function(par1String, par2int){return;};
 Server.sendChat = function(par1String){return;};
 
+var Renderer = {};
+Renderer.createHumanoidRenderer = function(){};
+Renderer.getModel = function(){};
+Renderer.renderType = NaN;
+
+var Model = {};
+Model.getPart = function(){};
+
+var ModelPart = {};
+ModelPart.addBox = function(){};
+ModelPart.clear = function(){};
+ModelPart.setTextureOffset = function(){};
+
 var ChatColor = {
 	"AQUA": "§b",
 	"BEGIN": "§",
