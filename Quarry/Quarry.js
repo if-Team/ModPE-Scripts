@@ -18,8 +18,8 @@
 var debugging = true;
 var asynchronous = false;
 
-//import
 /**
+ * Import Part
  * @type {android.content.Context}
  */
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
@@ -37,9 +37,9 @@ const _CRANE_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/mast
 function _MAP_DIR() {return new File(_SD_CARD, "games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/mods")}
 function _MAP_QUARRY_DATA() {return new File(_MAP_DIR(), "quarry.json")}
 
-
-var rendererDrill = Renderer.createHumanoidRenderer();
-var rendererCrane = Renderer.createHumanoidRenderer();
+/**
+ * Script init Part
+ */
 var running = false;
 
 scriptPreLoad();
@@ -188,9 +188,9 @@ var asynchronousModTick = new java.lang.Thread(new java.lang.Runnable({run: func
 	running = false;
 }}}));
 
-//====================
-//Quarry progress Manager
-//====================
+/**
+ * Quarry progress Manager
+ */
 function mainQuarryActivity() {
 	//for(var q = 0; q < QuarryData.length; q++) {
 	for(var q in QuarryData) {
@@ -279,9 +279,9 @@ Quarry.forceSetRot = function() {new java.lang.Thread(new java.lang.Runnable( {r
 	clientMessage(e.lineNumber + " " + e);
 }}})).start};
 
-//====================
-//Sub data management
-//====================
+/**
+ * Sub data management
+ */
 function scriptPreLoad() {
 	if(!_MAIN_DIR.exists()) {
 		_MAIN_DIR.mkdirs();
@@ -446,9 +446,12 @@ function toasts(str) {
 	));
 }
 
-//====================
-//Models
-//====================
+/**
+ * Models Part
+ */
+var rendererDrill = Renderer.createHumanoidRenderer();
+var rendererCrane = Renderer.createHumanoidRenderer();
+
 function drillRenderType(renderer, length) {
 	var model=renderer.getModel();
 	var head=model.getPart("head").clear();
@@ -463,7 +466,7 @@ function drillRenderType(renderer, length) {
 	for(var e = length; e > 0; e--) {
 		body.addBox(-4,e*(-16),-4,8,16,8);
 	}
-} void(drillRenderType);
+};
 
 function craneRenderType(renderer, length) {
 	var model=renderer.getModel();
@@ -477,63 +480,11 @@ function craneRenderType(renderer, length) {
 	for(var e = length; e > 0; e--) {
 		body.addBox(-e*16,-4,-4,16,8,8);
 	}
-}
-
-//====================
-//test dump
-//====================
-/**
-var px, py, pz, et;
-function attackHook(at, victim) {
-	craneRenderType(rendererCrane, 10);
-	Entity.setMobSkin(victim, "mobs/quarry_crane.png");
-	//Entity.setRenderType(victim, rendererCrane.renderType);
-	px = Entity.getX(victim);
-	py = Entity.getY(victim);
-	pz = Entity.getZ(victim);
-	et = victim;
-	var sc = Level.spawnMob(px, py, pz, 81, "mobs/char.png");
-	Entity.rideAnimal(et, sc);
-	new java.lang.Thread(new java.lang.Runnable({run: function() { while(Entity.getHealth(et) > 0) {
-		Entity.setVelX(sc, 0);
-		Entity.setVelY(sc, 0);
-		Entity.setVelZ(sc, 0);
-		Entity.setPosition(sc, px, py, pz);
-		//Entity.setRot(et, 0,0);
-		java.lang.Thread.sleep(1);
-	}}})).start();
-}
-*/
+};
 
 /**
-function modTick() {
-	for(var e in QuarryData) {
-		 if(Entity.getEntityTypeId(QuarryData[e][10]) < 1 || Entity.getEntityTypeId(QuarryData[e][11]) < 1 || Entity.getEntityTypeId(QuarryData[e][12]) < 1 || Entity.getEntityTypeId(QuarryData[e][13]) < 1 || Entity.getEntityTypeId(QuarryData[e][14]) < 1 || Entity.getEntityTypeId(QuarryData[e][15]) < 1) {
-		 	QuarryData.splice(e, 1);
-		}else {
-			if(Math.hypot(QuarryData[e][16] - Entity.getX(QuarryData[e][11]), QuarryData[e][17] - Entity.getX(QuarryData[e][13]), QuarryData[e][18] - Entity.getX(QuarryData[e][15])) > 0.1) {
-				Entity.setVelX();
-				Entity.setVelY();
-				Entity.setVelZ();
-			}
-		}
-	}
-}
-*/
-
-/**
-QuarryData.MainBlock = {};
-QuarryData.MainBlock.DataArray = {};
-QuarryData.Mod = {};
-QuarryData.StartPos = {};
-QuarryData.EndPos = {};
-QuarryData.Drill = {};
-QuarryData.CraneCenter = {};
-QuarryData.CraneX = {};
-QuarryData.CraneZ = {};
-QuarryData.Target = {};
-*/
-
+ * test Part
+ */
 function procCmd(str) {
 	debug(str);
 	var cmd = str.split(" ");
@@ -549,10 +500,9 @@ function procCmd(str) {
 	}
 }
 
-//====================
-//Debug function
-//====================
-
+/**
+ * Debug Window Part
+ */
 var windowText,layoutText,scrollText;
 var texts = [];
 var maxText = 16;
@@ -575,8 +525,7 @@ function createTextView() {ctx.runOnUiThread(new java.lang.Runnable({ run: funct
 	windowText.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.RIGHT, 0, 0);
 }catch(e) {
     toasts(e.lineNumber);
-}}}))}
-
+}}}))};
 
 function addText(text, color) {ctx.runOnUiThread(new java.lang.Runnable({ run: function(){ try{
 	if(texts.length >= maxText) {
@@ -594,4 +543,4 @@ function addText(text, color) {ctx.runOnUiThread(new java.lang.Runnable({ run: f
 	 layoutText.addView(texts[texts.length-1], android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, dp(13));
 }catch(e) {
     toasts(e.lineNumber);
-}}}))}
+}}}))};
