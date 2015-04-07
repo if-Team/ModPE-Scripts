@@ -74,17 +74,17 @@ var running = false;
 /**게임중인지 확인*/
 var gaming = false;
 /**모든 플레이어의 배열*/
-var players = new Array();
+var players = [];
 /**게임을 진행중인 플레이어의 배열*/
-var defenders = new Array();
+var defenders = [];
 /**죽은 플레이어를 임시보관하는 배열*/
-var deaths = new Array();
+var deaths = [];
 /**게임에 사용할 변수들*/
 var breaking = false;
 var temp,temp2,temp3,temp4,temp5,tempArray,tempArray2,tempArray3,tempArray4,processing,mobSpawnLocX,mobSpawnLocZ,mob,skin,ent,ent2,entList,spawnLimit,pause;
 var zombieHighlight, skeletonHighlight, spiderHighlight, zombiePigHighlight, silverfishHighlight, endermanHighlight;
 /**스파이더맨 조키의 배열*/
-var spiderJockey = new Array();
+var spiderJockey = [];
 /**2초마다 반복 점멸하는 신호*/
 var highlightToggle = false;
 /**정해진 숫자만큼 왕복*/
@@ -98,7 +98,7 @@ var tick = 0;
 /**2초동안의 합*/
 var tack = 0;
 /**최근 2초간 틱의 활성도 배열*/
-var tock = new Array();
+var tock = [];
 
 function newLevel(lvl){
 	if(new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/CodeMobDefense").exists()){/**해당맵이 디팬스맵일경우*/
@@ -107,7 +107,7 @@ function newLevel(lvl){
 				try{
 					clientMessage(ChatColor.GRAY + "[Info] Booting...");/**저사양 기기를 위한 대기시간*/
 					running = true;
-					players = new Array();/**플레이어 배열을 재정의*/
+					players = [];/**플레이어 배열을 재정의*/
 					mainTextBufferActivity();/**전광판 기능 활성화*/
 					mainBackgroundActivity();/**상시 돌아가는 프로세스 시적*/
 					delay(3000);
@@ -122,13 +122,11 @@ function newLevel(lvl){
 			}
 		})).start();
 	}
-};
-
+}
 function leaveGame(){
 	gaming = false;
 	running = false;/**종료*/
-};
-
+}
 /**사용 안함*/
 /**function entityRemovedHook(ent){
 	if(Player.isPlayer(ent)){
@@ -166,7 +164,7 @@ function explodeHook(e, x, y, z){
 }
 
 function modTick() {
-	var t = tick
+	var t = tick;
 	tock.push(t);
 	tack += t;
 	tick = 0;
@@ -321,8 +319,7 @@ broadcast(ChatColor.DARK_RED + "[mainThread Error" + err.lineNumber + "] " + err
 	}else if(cmd[0] === "debugspawn") {
 		defenseMobSpawner([cmd[1]]);
 	}
-};
-
+}
 function modTick() {
 	var t = tick
 	tock.push(t);
@@ -336,12 +333,10 @@ function modTick() {
 function broadcast(str){
 	net.zhuoweizhang.mcpelauncher.ScriptManager.nativeSendChat(str);
 	clientMessage(str);
-};
-
+}
 function delay(int){
 	java.lang.Thread.sleep(int);
-};
-
+}
 function mainBackgroundActivity() {new java.lang.Thread(new java.lang.Runnable( {run: function() {try {
 	while(running) {
 		delay(10);
@@ -354,7 +349,7 @@ function mainBackgroundActivity() {new java.lang.Thread(new java.lang.Runnable( 
 			if(++tick40 >= 200) {
 				tick40 = 0;
 				highlightActivity();
-				highlightToggle = highlightToggle ? false : true;
+				highlightToggle = !highlightToggle;
 			}
 			if(++tick1 >= 5) {
 				tick1 = 0;
@@ -380,8 +375,10 @@ function mainBackgroundActivity() {new java.lang.Thread(new java.lang.Runnable( 
 		delay(10000);
 		net.zhuoweizhang.mcpelauncher.ui.NerdyStuffActivity.forceRestart(com.mojang.minecraftpe.MainActivity.currentMainActivity.get());*/
 	}
-}}})).start()};
-
+}
+}
+})).start()
+}
 function playerManager(){
 	var temp = Entity.getAll();
 	for each(var e in temp){
@@ -461,8 +458,7 @@ function playerManager(){
 			break;
 		}
 	}
-};
-
+}
 function mobDefenseMainActivity(){
 	for(var cx = 2593; cx <= 2614; cx++){
 		for(var cz = -40; cz <= -19; cz++){
@@ -662,7 +658,7 @@ function mobDefenseMainActivity(){
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
 	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 7", 700]);
 	delay(3000);
-	spawnLimit = 2 + (1 * defenders.length);
+	spawnLimit = 2 + defenders.length;
 	defenseMobSpawner(["ENDER_MAN:40:"+(5*defenders.length)]);
 	while(processing){
 		delay(5000);
@@ -822,7 +818,7 @@ function mobDefenseMainActivity(){
 	messageBuffer.push([2585, 51, -77, 2623, 58, -77, 159, 15, 100]);
 	messageBuffer.push([2585, 58, -77, "X+", 150, 246, 0, 159, 15, "Wave 13", 700]);
 	delay(3000);
-	spawnLimit = 1 + (1 * defenders.length);
+	spawnLimit = 1 + defenders.length;
 	defenseMobSpawner(["ZOMBIE:80:"+(5*defenders.length)]);
 	while(processing){
 		delay(5000);
@@ -1054,8 +1050,7 @@ function mobDefenseMainActivity(){
 	broadcast(ChatColor.GOLD + "WIN!");
 	broadcast(ChatColor.GRAY + "will be teleport in 10sec...");
 	delay(10000);
-	return;
-};
+}
 
 function playerHPManager(){
 	new java.lang.Thread(new java.lang.Runnable({
@@ -1091,12 +1086,11 @@ function playerHPManager(){
 			}
 		}
 	})).start();
-};
-
+}
 function teleport(place, ent){
 	switch(place){
 		case "LOBY":
-			var rid = Level.spawnMob(2599 + (10 * Math.random()), 67, 0 + (8 * Math.random()), 81);
+			var rid = Level.spawnMob(2599 + (10 * Math.random()), 67, 8 * Math.random(), 81);
 			Entity.rideAnimal(ent, rid);
 			Entity.remove(rid);
 			break;
@@ -1116,18 +1110,16 @@ function teleport(place, ent){
 			Entity.remove(rid);
 			break;
 	}
-};
-
+}
 function giveDefenders(ary){
-	tempGive = new Array();
+	tempGive = [];
 	for each(var i in ary){
 		tempArray = i.split(":");
 		for each(var t in defenders){
 			Level.dropItem(Entity.getX(t), Entity.getY(t), Entity.getZ(t), 0, tempArray[0], tempArray[2], tempArray[1]);
 		}
 	}
-};
-
+}
 function stageDelay(maxTime){
 	if(!gaming) return;
 	while(pause){
@@ -1162,8 +1154,7 @@ function stageDelay(maxTime){
 		if(!gaming)
 			return;
 	}
-};
-
+}
 function highlightActivity() {try {
 	if(gaming) {
 		if(highlightToggle) {
@@ -1220,8 +1211,8 @@ function highlightActivity() {try {
 	}
 }catch(e) {
 		broadcast(ChatColor.DARK_RED + "[Highlight Error" + e.lineNumber + "] " + e);
-}};
-
+}
+}
 function highlight(target, status){try{
 	switch(target){
 		case "ZOMBIE":
@@ -1299,20 +1290,20 @@ function highlight(target, status){try{
 	}
 }catch(err){
 	broadcast(ChatColor.DARK_RED + "[Flashing Error" + err.lineNumber + "] " + err);
-}};
-
+}
+}
 function defenseMobSpawner(ary){new java.lang.Thread(new java.lang.Runnable({run: function(){try{
 	debug("Run", "defense_spawner","");
-	tempArray = new Array();
-	tempArray2 = new Array();
-	tempArray3 = new Array();
+	tempArray = [];
+	tempArray2 = [];
+	tempArray3 = [];
 	for each(var m in ary){
 		tempArray.push(m.split(":")[0]);
 		tempArray2.push(m.split(":")[1]);
 		tempArray3.push(m.split(":")[2]);
 	}
-	mobSpawnLocX = new Array();
-	mobSpawnLocZ = new Array();
+	mobSpawnLocX = [];
+	mobSpawnLocZ = [];
 	temp = defenders.length;
 	debug("Info", "Set Glowstone Point","");
 	for(var d = temp + 1;d > 0;d--){
@@ -1338,7 +1329,7 @@ function defenseMobSpawner(ary){new java.lang.Thread(new java.lang.Runnable({run
 		if(!gaming)
 			return;
 	}
-	entList = new Array();
+	entList = [];
 	while(tempArray.length != 0 || entList.length != 0){
 		for(var m in entList){
 			if(Entity.getHealth(entList[m]) < 1){
@@ -1463,8 +1454,10 @@ function defenseMobSpawner(ary){new java.lang.Thread(new java.lang.Runnable({run
 }catch(err){
 	clientMessage(err);
 	gaming = false;
-}}})).start();};
-
+}
+}
+})).start();
+}
 function spiderJockeyActivity(){try{
 	for(var e in spiderJockey) {
 		var temp = spiderJockey[e].split(":")[0];
@@ -1480,22 +1473,22 @@ function spiderJockeyActivity(){try{
 	}
 }catch(err){
 	broadcast(ChatColor.DARK_RED + "[SpiderJockey Error" + err.lineNumber + "] " + err);
-}};
-
+}
+}
 function ARROW_EXPLODE(x, y, z, power, howMany){
 	//power는 1이 적당 강력하게 하려면 그 이상
 	//howMany는 작을수록 많이 발싸 됨 10이 적당 많이 발싸 하려면 5정도
 	//WTF?!
 	function absRangeX(y, p) {
 		return (-1 * Math.sin(y / 180 * Math.PI) * Math.cos(p / 180 * Math.PI));
-	};
-	function absRangeY(y, p) {
+    }
+    function absRangeY(y, p) {
 		return (Math.sin(-p / 180 * Math.PI));
-	};
-	function absRangeZ(y, p) {
+    }
+    function absRangeZ(y, p) {
 		return (Math.cos(y / 180 * Math.PI) * Math.cos(p / 180 * Math.PI));
-	};
-	for(var p=-30;p<=10;p+=howMany){
+    }
+    for(var p=-30;p<=10;p+=howMany){
 		for(var ya=0;ya<360;ya+=2*howMany){
 			var CI = Level.spawnMob(x + (absRangeX(ya, p) / 5), y /**+ (absRangeY(ya, p) / 5)*/, z + (absRangeZ(ya, p) / 5),80);
 			setVelX(CI, absRangeX(ya, p) * power / 4 + (power * Math.random() * absRangeX(ya, p)));
@@ -1518,8 +1511,8 @@ function defenderBuff(effect, power, duration) {try {
 	}
 }catch(e) {
 	broadcast(ChatColor.DARK_RED + "[DefenderBuff Error" + e.lineNumber + "] " + e);
-}};
-
+}
+}
 /*
 ==============================
 ==============================
@@ -1528,8 +1521,8 @@ function defenderBuff(effect, power, duration) {try {
 ==============================
 */
 
-var C_InputString = new Array();
-var messageBuffer = new Array();
+var C_InputString = [];
+var messageBuffer = [];
 var writting = false;
 var ClDelay = false;
 var C_WordLocX,C_LineLocY,C_WordLocZ,C_PixelX,C_PixelZ,C_WriteSide,C_WriteSidePM,C_TypingDelay,C_WordMaxY,C_MaxSize,C_StartLineLoc;
@@ -1552,7 +1545,7 @@ function mainTextBufferActivity(){new java.lang.Thread(new java.lang.Runnable({r
 	}
 }catch(err){
 	clientMessage("[Write]" + err);
-}}})).start()};
+}}})).start()}
 
 function text3d(x,y,z,side,maxLength,textColor,textColorData, backgroundColor, backgroundColorData, string, textDelay){new java.lang.Thread(new java.lang.Runnable({run: function(){try{
 	writting = true;
@@ -1642,7 +1635,7 @@ function text3d(x,y,z,side,maxLength,textColor,textColorData, backgroundColor, b
 	writting = false;
 }catch(err){
 	clientMessage("[Write]" + err);
-}}})).start()};
+}}})).start()}
 
 function textClean(sx,sy,sz,ex,ey,ez,block,data,dly){new java.lang.Thread(new java.lang.Runnable({run: function(){try{
 	writting = true;
@@ -1663,7 +1656,7 @@ function textClean(sx,sy,sz,ex,ey,ez,block,data,dly){new java.lang.Thread(new ja
 	writting = false;
 }catch(err){
 	clientMessage("[Clean]" + err);
-}}})).start()};
+}}})).start()}
 
 var StringCore = [
 	{t: " ", y: 7, s: [
@@ -1673,7 +1666,7 @@ var StringCore = [
 "---",
 "---",
 "---",
-"---",
+"---"
 ]},
 	{t: "a", y: 7, s: [
 "------",
@@ -1682,7 +1675,7 @@ var StringCore = [
 "@--@--",
 "@--@--",
 "@--@--",
-"-@@-@-",
+"-@@-@-"
 ]},
 	{t: "b", y: 7, s: [
 "@----",
@@ -1691,7 +1684,7 @@ var StringCore = [
 "@@@@-",
 "@--@-",
 "@--@-",
-"@@@@-",
+"@@@@-"
 ]},
 	{t: "c", y: 7, s: [
 "-----",
@@ -1700,7 +1693,7 @@ var StringCore = [
 "@----",
 "@----",
 "@----",
-"@@@@-",
+"@@@@-"
 ]},
 	{t: "d", y: 7, s: [
 "---@-",
@@ -1709,7 +1702,7 @@ var StringCore = [
 "@@@@-",
 "@--@-",
 "@--@-",
-"@@@@-",
+"@@@@-"
 ]},
 	{t: "e", y: 7, s: [
 "------",
@@ -1718,7 +1711,7 @@ var StringCore = [
 "@---@-",
 "@@@@@-",
 "@-----",
-"-@@@--",
+"-@@@--"
 ]},
 	{t: "f", y: 7, s: [
 "-----",
@@ -1727,7 +1720,7 @@ var StringCore = [
 "@----",
 "@@@--",
 "@----",
-"@----",
+"@----"
 ]},
 	{t: "g", y: 8, s: [
 "-----",
@@ -1737,7 +1730,7 @@ var StringCore = [
 "@@@@-",
 "---@-",
 "@--@-",
-"@@@@-",
+"@@@@-"
 ]},
 	{t: "h", y: 7, s: [
 "@----",
@@ -1746,7 +1739,7 @@ var StringCore = [
 "@@@@-",
 "@--@-",
 "@--@-",
-"@--@-",
+"@--@-"
 ]},
 	{t: "i", y: 7, s: [
 "--",
@@ -1755,7 +1748,7 @@ var StringCore = [
 "--",
 "@-",
 "@-",
-"@-",
+"@-"
 ]},
 	{t: "j", y: 7, s: [
 "----",
@@ -1764,7 +1757,7 @@ var StringCore = [
 "----",
 "--@-",
 "@-@-",
-"-@--",
+"-@--"
 ]},
 	{t: "k", y: 7, s: [
 "@----",
@@ -1773,7 +1766,7 @@ var StringCore = [
 "@-@--",
 "@@---",
 "@-@--",
-"@--@-",
+"@--@-"
 
 ]},
 	{t: "l", y: 7, s: [
@@ -1783,7 +1776,7 @@ var StringCore = [
 "@-",
 "@-",
 "@-",
-"@-",
+"@-"
 ]},
 	{t: "m", y: 7, s: [
 "------",
@@ -1792,7 +1785,7 @@ var StringCore = [
 "@-@-@-",
 "@-@-@-",
 "@-@-@-",
-"@-@-@-",
+"@-@-@-"
 ]},
 	{t: "n", y: 7, s: [
 "----",
@@ -1801,7 +1794,7 @@ var StringCore = [
 "@-@-",
 "@-@-",
 "@-@-",
-"@-@-",
+"@-@-"
 ]},
 	{t: "o", y: 7, s: [
 "-----",
@@ -1810,7 +1803,7 @@ var StringCore = [
 "@--@-",
 "@--@-",
 "@--@-",
-"@@@@-",
+"@@@@-"
 ]},
 	{t: "p", y: 7, s: [
 "----",
@@ -1819,7 +1812,7 @@ var StringCore = [
 "@-@-",
 "@@@-",
 "@---",
-"@---",
+"@---"
 ]},
 	{t: "q", y: 7, s: [
 "----",
@@ -1828,7 +1821,7 @@ var StringCore = [
 "@-@-",
 "@@@-",
 "--@-",
-"--@-",
+"--@-"
 ]},
 	{t: "r", y: 7, s: [
 "---",
@@ -1837,7 +1830,7 @@ var StringCore = [
 "@--",
 "@--",
 "@--",
-"@--",
+"@--"
 ]},
 	{t: "s", y: 7, s: [
 "----",
@@ -1846,7 +1839,7 @@ var StringCore = [
 "@---",
 "@@@-",
 "--@-",
-"@@@-",
+"@@@-"
 ]},
 	{t: "t", y: 7, s: [
 "----",
@@ -1855,7 +1848,7 @@ var StringCore = [
 "@@@-",
 "-@--",
 "-@--",
-"-@--",
+"-@--"
 ]},
 	{t: "u", y: 7, s: [
 "----",
@@ -1864,7 +1857,7 @@ var StringCore = [
 "@-@-",
 "@-@-",
 "@-@-",
-"@@@-",
+"@@@-"
 ]},
 	{t: "v", y: 7, s: [
 "----",
@@ -1873,7 +1866,7 @@ var StringCore = [
 "@-@-",
 "@-@-",
 "@-@-",
-"-@--",
+"-@--"
 ]},
 	{t: "w", y: 7, s: [
 "------",
@@ -1882,7 +1875,7 @@ var StringCore = [
 "@-@-@-",
 "@-@-@-",
 "@-@-@-",
-"@@@@@-",
+"@@@@@-"
 ]},
 	{t: "x", y: 7, s: [
 "----",
@@ -1891,7 +1884,7 @@ var StringCore = [
 "@-@-",
 "-@--",
 "@-@-",
-"@-@-",
+"@-@-"
 ]},
 	{t: "y", y: 7, s: [
 "----",
@@ -1900,7 +1893,7 @@ var StringCore = [
 "@-@-",
 "-@--",
 "-@--",
-"@---",
+"@---"
 ]},
 	{t: "z", y: 7, s: [
 "------",
@@ -1909,7 +1902,7 @@ var StringCore = [
 "---@--",
 "--@---",
 "-@----",
-"@@@@@-",
+"@@@@@-"
 ]},
 	{t: "A", y: 7, s: [
 "--@---",
@@ -1918,7 +1911,7 @@ var StringCore = [
 "@@@@@-",
 "@---@-",
 "@---@-",
-"@---@-",
+"@---@-"
 ]},
 	{t: "B", y: 7, s: [
 "@@@@--",
@@ -1927,7 +1920,7 @@ var StringCore = [
 "@@@@--",
 "@---@-",
 "@---@-",
-"@@@@--",
+"@@@@--"
 ]},
 	{t: "C", y: 7, s: [
 "@@@@@-",
@@ -1936,7 +1929,7 @@ var StringCore = [
 "@-----",
 "@-----",
 "@-----",
-"@@@@@-",
+"@@@@@-"
 ]},
 	{t: "D", y: 7, s: [
 "@@@@--",
@@ -1945,7 +1938,7 @@ var StringCore = [
 "@---@-",
 "@---@-",
 "@---@-",
-"@@@@--",
+"@@@@--"
 ]},
 	{t: "E", y: 7, s: [
 "@@@@@-",
@@ -1954,7 +1947,7 @@ var StringCore = [
 "@@@@@-",
 "@-----",
 "@-----",
-"@@@@@-",
+"@@@@@-"
 ]},
 	{t: "F", y: 7, s: [
 "@@@@@-",
@@ -1963,7 +1956,7 @@ var StringCore = [
 "@@@@--",
 "@-----",
 "@-----",
-"@-----",
+"@-----"
 ]},
 	{t: "G", y: 7, s: [
 "@@@@@-",
@@ -1972,7 +1965,7 @@ var StringCore = [
 "@--@@-",
 "@---@-",
 "@---@-",
-"@@@@@-",
+"@@@@@-"
 ]},
 	{t: "H", y: 7, s: [
 "@---@-",
@@ -1981,7 +1974,7 @@ var StringCore = [
 "@@@@@-",
 "@---@-",
 "@---@-",
-"@---@-",
+"@---@-"
 ]},
 	{t: "I", y: 7, s: [
 "@@@-",
@@ -1990,7 +1983,7 @@ var StringCore = [
 "-@--",
 "-@--",
 "-@--",
-"@@@-",
+"@@@-"
 ]},
 	{t: "J", y: 7, s: [
 "@@@@-",
@@ -1999,7 +1992,7 @@ var StringCore = [
 "--@--",
 "--@--",
 "@-@--",
-"@@@--",
+"@@@--"
 ]},
 	{t: "K", y: 7, s: [
 "@---@-",
@@ -2008,7 +2001,7 @@ var StringCore = [
 "@@----",
 "@-@---",
 "@--@--",
-"@---@-",
+"@---@-"
 ]},
 	{t: "L", y: 7, s: [
 "@-----",
@@ -2017,7 +2010,7 @@ var StringCore = [
 "@-----",
 "@-----",
 "@-----",
-"@@@@@-",
+"@@@@@-"
 ]},
 	{t: "M", y: 7, s: [
 "@---@-",
@@ -2026,7 +2019,7 @@ var StringCore = [
 "@-@-@-",
 "@-@-@-",
 "@---@-",
-"@---@-",
+"@---@-"
 ]},
 	{t: "N", y: 7, s: [
 "@---@-",
@@ -2035,7 +2028,7 @@ var StringCore = [
 "@-@-@-",
 "@--@@-",
 "@--@@-",
-"@---@-",
+"@---@-"
 ]},
 	{t: "O", y: 7, s: [
 "@@@@@-",
@@ -2044,7 +2037,7 @@ var StringCore = [
 "@---@-",
 "@---@-",
 "@---@-",
-"@@@@@-",
+"@@@@@-"
 ]},
 	{t: "P", y: 7, s: [
 "@@@@@-",
@@ -2053,7 +2046,7 @@ var StringCore = [
 "@@@@@-",
 "@-----",
 "@-----",
-"@-----",
+"@-----"
 ]},
 	{t: "Q", y: 7, s: [
 "@@@@@-",
@@ -2062,7 +2055,7 @@ var StringCore = [
 "@---@-",
 "@-@-@-",
 "@--@@-",
-"@@@@@-",
+"@@@@@-"
 ]},
 	{t: "R", y: 7, s: [
 "@@@@--",
@@ -2071,7 +2064,7 @@ var StringCore = [
 "@@@@--",
 "@---@-",
 "@---@-",
-"@---@-",
+"@---@-"
 ]},
 	{t: "S", y: 7, s: [
 "@@@@@-",
@@ -2080,7 +2073,7 @@ var StringCore = [
 "@@@@@-",
 "----@-",
 "----@-",
-"@@@@@-",
+"@@@@@-"
 ]},
 	{t: "T", y: 7, s: [
 "@@@@@-",
@@ -2089,7 +2082,7 @@ var StringCore = [
 "--@---",
 "--@---",
 "--@---",
-"--@---",
+"--@---"
 ]},
 	{t: "U", y: 7, s: [
 "@---@-",
@@ -2098,7 +2091,7 @@ var StringCore = [
 "@---@-",
 "@---@-",
 "@---@-",
-"@@@@@-",
+"@@@@@-"
 ]},
 	{t: "V", y: 7, s: [
 "@---@-",
@@ -2107,7 +2100,7 @@ var StringCore = [
 "@---@-",
 "@---@-",
 "-@-@--",
-"--@---",
+"--@---"
 ]},
 	{t: "W", y: 7, s: [
 "@---@-",
@@ -2116,7 +2109,7 @@ var StringCore = [
 "@-@-@-",
 "@@-@@-",
 "@@-@@-",
-"@---@-",
+"@---@-"
 ]},
 	{t: "X", y: 7, s: [
 "@---@-",
@@ -2125,7 +2118,7 @@ var StringCore = [
 "--@---",
 "-@-@--",
 "@---@-",
-"@---@-",
+"@---@-"
 ]},
 	{t: "Y", y: 7, s: [
 "@---@-",
@@ -2134,7 +2127,7 @@ var StringCore = [
 "--@---",
 "--@---",
 "--@---",
-"--@---",
+"--@---"
 ]},
 	{t: "Z", y: 7, s: [
 "@@@@@-",
@@ -2143,7 +2136,7 @@ var StringCore = [
 "--@---",
 "-@----",
 "@-----",
-"@@@@@-",
+"@@@@@-"
 ]},
 	{t: "1", y: 7, s: [
 "-@--",
@@ -2152,7 +2145,7 @@ var StringCore = [
 "-@--",
 "-@--",
 "-@--",
-"@@@-",
+"@@@-"
 ]},
 	{t: "2", y: 7, s: [
 "-@@@--",
@@ -2161,7 +2154,7 @@ var StringCore = [
 "---@--",
 "--@---",
 "-@----",
-"@@@@@-",
+"@@@@@-"
 ]},
 	{t: "3", y: 7, s: [
 "-@@@--",
@@ -2170,7 +2163,7 @@ var StringCore = [
 "-@@@--",
 "----@-",
 "@---@-",
-"-@@@--",
+"-@@@--"
 ]},
 	{t: "4", y: 7, s: [
 "---@--",
@@ -2179,7 +2172,7 @@ var StringCore = [
 "@--@--",
 "@@@@@-",
 "---@--",
-"---@--",
+"---@--"
 ]},
 	{t: "5", y: 7, s: [
 "@@@@@-",
@@ -2188,7 +2181,7 @@ var StringCore = [
 "@@@@--",
 "----@-",
 "----@-",
-"@@@@--",
+"@@@@--"
 ]},
 	{t: "6", y: 7, s: [
 "-@@@--",
@@ -2197,7 +2190,7 @@ var StringCore = [
 "@@@@--",
 "@---@-",
 "@---@-",
-"-@@@--",
+"-@@@--"
 ]},
 	{t: "7", y: 7, s: [
 "@@@@@-",
@@ -2206,7 +2199,7 @@ var StringCore = [
 "--@---",
 "--@---",
 "--@---",
-"--@---",
+"--@---"
 ]},
 	{t: "8", y: 7, s: [
 "-@@@--",
@@ -2215,7 +2208,7 @@ var StringCore = [
 "-@@@--",
 "@---@-",
 "@---@-",
-"-@@@--",
+"-@@@--"
 ]},
 	{t: "9", y: 7, s: [
 "-@@@--",
@@ -2224,7 +2217,7 @@ var StringCore = [
 "-@@@--",
 "----@-",
 "----@-",
-"-@@@--",
+"-@@@--"
 ]},
 	{t: "0", y: 7, s: [
 "-@@@--",
@@ -2233,7 +2226,7 @@ var StringCore = [
 "@---@-",
 "@---@-",
 "@---@-",
-"-@@@--",
+"-@@@--"
 ]},
 	{t: "@", y: 7, s: [
 "-@@@@--",
@@ -2242,7 +2235,7 @@ var StringCore = [
 "@@-@-@-",
 "@-@-@@-",
 "@----@-",
-"-@@@@--",
+"-@@@@--"
 ]},
 	{t: "#", y: 7, s: [
 "-@-@--",
@@ -2251,7 +2244,7 @@ var StringCore = [
 "-@-@--",
 "-@-@--",
 "@@@@@-",
-"-@-@--",
+"-@-@--"
 ]},
 	{t: "$", y: 7, s: [
 "--@---",
@@ -2260,7 +2253,7 @@ var StringCore = [
 "@@@@@-",
 "--@-@-",
 "@@@@@-",
-"--@---",
+"--@---"
 ]},
 	{t: "%", y: 7, s: [
 "@@@---@-",
@@ -2269,7 +2262,7 @@ var StringCore = [
 "---@----",
 "--@-@@@-",
 "-@--@-@-",
-"@---@@@-",
+"@---@@@-"
 ]},
 	{t: "&", y: 7, s: [
 "-@@@--",
@@ -2278,8 +2271,8 @@ var StringCore = [
 "@-@---",
 "@--@-@",
 "@---@-",
-"-@@@-@",
-]},
+"-@@@-@"
+    ]},
 	{t: "-", y: 7, s: [
 "------",
 "------",
@@ -2287,8 +2280,8 @@ var StringCore = [
 "@@@@@-",
 "------",
 "------",
-"------",
-]},
+"------"
+    ]},
 	{t: "+", y: 7, s: [
 "------",
 "--@---",
@@ -2296,8 +2289,8 @@ var StringCore = [
 "@@@@@-",
 "--@---",
 "--@---",
-"------",
-]},
+"------"
+    ]},
 	{t: "(", y: 7, s: [
 "-@-",
 "@--",
@@ -2305,8 +2298,8 @@ var StringCore = [
 "@--",
 "@--",
 "@--",
-"-@-",
-]},
+"-@-"
+    ]},
 	{t: ")", y: 7, s: [
 "@--",
 "-@-",
@@ -2314,8 +2307,8 @@ var StringCore = [
 "-@-",
 "-@-",
 "-@-",
-"@--",
-]},
+"@--"
+    ]},
 	{t: "*", y: 7, s: [
 "------",
 "------",
@@ -2323,8 +2316,8 @@ var StringCore = [
 "@@@@@-",
 "-@-@--",
 "------",
-"------",
-]},
+"------"
+    ]},
 	{t: '"', y: 7, s: [
 "@-@-",
 "@-@-",
@@ -2332,8 +2325,8 @@ var StringCore = [
 "----",
 "----",
 "----",
-"----",
-]},
+"----"
+    ]},
 	{t: "'", y: 7, s: [
 "@-",
 "@-",
@@ -2341,8 +2334,8 @@ var StringCore = [
 "--",
 "--",
 "--",
-"--",
-]},
+"--"
+    ]},
 	{t: ":", y: 7, s: [
 "--",
 "@-",
@@ -2350,8 +2343,8 @@ var StringCore = [
 "--",
 "@-",
 "@-",
-"--",
-]},
+"--"
+    ]},
 	{t: "!", y: 7, s: [
 "@-",
 "@-",
@@ -2359,8 +2352,8 @@ var StringCore = [
 "@-",
 "@-",
 "--",
-"@-",
-]},
+"@-"
+    ]},
 	{t: "?", y: 7, s: [
 "@@@-",
 "@-@-",
@@ -2368,8 +2361,8 @@ var StringCore = [
 "-@--",
 "-@--",
 "----",
-"-@--",
-]},
+"-@--"
+    ]},
 	{t: "/", y: 7, s: [
 "--@-",
 "--@-",
@@ -2377,8 +2370,8 @@ var StringCore = [
 "-@--",
 "-@--",
 "@---",
-"@---",
-]},
+"@---"
+    ]},
 	{t: ",", y: 7, s: [
 "--",
 "--",
@@ -2386,8 +2379,8 @@ var StringCore = [
 "--",
 "--",
 "@-",
-"@-",
-]},
+"@-"
+    ]},
 	{t: ".", y: 7, s: [
 "--",
 "--",
@@ -2395,8 +2388,8 @@ var StringCore = [
 "--",
 "--",
 "--",
-"@-",
-]},
+"@-"
+    ]},
 	{t: "_", y: 7, s: [
 "------",
 "------",
@@ -2404,9 +2397,9 @@ var StringCore = [
 "------",
 "------",
 "------",
-"@@@@@-",
+"@@@@@-"
 
-]},
+    ]},
 	{t: "~", y: 7, s: [
 "------",
 "------",
@@ -2414,8 +2407,8 @@ var StringCore = [
 "@-@-@-",
 "---@--",
 "------",
-"------",
-]},
+"------"
+    ]},
 	{t: "`", y: 7, s: [
 "@-",
 "@-",
@@ -2423,8 +2416,8 @@ var StringCore = [
 "--",
 "--",
 "--",
-"--",
-]},
+"--"
+    ]},
 	{t: "|", y: 7, s: [
 "@-",
 "@-",
@@ -2432,8 +2425,8 @@ var StringCore = [
 "@-",
 "@-",
 "@-",
-"@-",
-]},
+"@-"
+    ]},
 	{t: "•", y: 7, s: [
 "---",
 "---",
@@ -2441,16 +2434,16 @@ var StringCore = [
 "@@-",
 "@@-",
 "---",
-"---",
-]},
+"---"
+    ]},
 	{t: "√", y: 7, s: [
 "--@@@-",
 "--@---",
 "--@---",
 "--@---",
 "@-@---",
-"-@----",
-]},
+"-@----"
+    ]},
 	{t: "Π", y: 7, s: [
 "@@@@@-",
 "@---@-",
@@ -2458,8 +2451,8 @@ var StringCore = [
 "@---@-",
 "@---@-",
 "@---@-",
-"@---@-",
-]},
+"@---@-"
+    ]},
 	{t: "÷", y: 7, s: [
 "------",
 "--@---",
@@ -2467,8 +2460,8 @@ var StringCore = [
 "@@@@@-",
 "------",
 "--@---",
-"------",
-]},
+"------"
+    ]},
 	{t: "×", y: 7, s: [
 "------",
 "@---@-",
@@ -2476,8 +2469,8 @@ var StringCore = [
 "--@---",
 "-@-@--",
 "@---@-",
-"------",
-]},
+"------"
+    ]},
 	{t: "¶", y: 7, s: [
 "@@@-@-",
 "@@@-@-",
@@ -2485,8 +2478,8 @@ var StringCore = [
 "--@-@-",
 "--@-@-",
 "--@-@-",
-"--@-@-",
-]},
+"--@-@-"
+    ]},
 	{t: "∆", y: 7, s: [
 "--@---",
 "--@---",
@@ -2494,8 +2487,8 @@ var StringCore = [
 "-@-@--",
 "@---@-",
 "@---@-",
-"@@@@@-",
-]},
+"@@@@@-"
+    ]},
 	{t: "£", y: 7, s: [
 "--@@--",
 "-@----",
@@ -2503,8 +2496,8 @@ var StringCore = [
 "@@@@--",
 "-@----",
 "-@----",
-"@@@@@-",
-]},
+"@@@@@-"
+    ]},
 	{t: "¢", y: 7, s: [
 "--@---",
 "@@@@@-",
@@ -2512,8 +2505,8 @@ var StringCore = [
 "@-----",
 "@-----",
 "@@@@@-",
-"--@---",
-]},
+"--@---"
+    ]},
 	{t: "€", y: 7, s: [
 "--@@@-",
 "-@----",
@@ -2521,8 +2514,8 @@ var StringCore = [
 "-@----",
 "@@@@--",
 "-@----",
-"--@@@-",
-]},
+"--@@@-"
+    ]},
 	{t: "¥", y: 7, s: [
 "@-@-",
 "@-@-",
@@ -2530,8 +2523,8 @@ var StringCore = [
 "@@@-",
 "-@--",
 "@@@-",
-"-@--",
-]},
+"-@--"
+    ]},
 	{t: "^", y: 7, s: [
 "-@--",
 "@-@-",
@@ -2539,9 +2532,9 @@ var StringCore = [
 "----",
 "----",
 "----",
-"----",
+"----"
 
-]},
+    ]},
 	{t: "°", y: 7, s: [
 "-@--",
 "@-@-",
@@ -2549,8 +2542,8 @@ var StringCore = [
 "----",
 "----",
 "----",
-"----",
-]},
+"----"
+    ]},
 	{t: "=", y: 7, s: [
 "------",
 "------",
@@ -2558,8 +2551,8 @@ var StringCore = [
 "------",
 "@@@@@-",
 "------",
-"------",
-]},
+"------"
+    ]},
 	{t: "{", y: 7, s: [
 "--@-",
 "-@--",
@@ -2567,8 +2560,8 @@ var StringCore = [
 "@---",
 "-@--",
 "-@--",
-"--@-",
-]},
+"--@-"
+    ]},
 	{t: "}", y: 7, s: [
 "@---",
 "-@--",
@@ -2576,8 +2569,8 @@ var StringCore = [
 "--@-",
 "-@--",
 "-@--",
-"@---",
-]},
+"@---"
+    ]},
 	{t: "©", y: 7, s: [
 "@@-",
 "@@-",
@@ -2585,8 +2578,8 @@ var StringCore = [
 "---",
 "---",
 "---",
-"---",
-]},
+"---"
+    ]},
 	{t: "®", y: 7, s: [
 "@@-",
 "@@-",
@@ -2594,8 +2587,8 @@ var StringCore = [
 "---",
 "---",
 "---",
-"---",
-]},
+"---"
+    ]},
 	{t: "™", y: 7, s: [
 "@@@-@@@@@-",
 "-@--@-@-@-",
@@ -2603,8 +2596,8 @@ var StringCore = [
 "----------",
 "----------",
 "----------",
-"----------",
-]},
+"----------"
+    ]},
 	{t: "℅", y: 7, s: [
 "@@----@-",
 "@----@--",
@@ -2612,8 +2605,8 @@ var StringCore = [
 "---@----",
 "--@-@@@-",
 "-@--@-@-",
-"@---@@@-",
-]},
+"@---@@@-"
+    ]},
 	{t: "[", y: 7, s: [
 "@@@-",
 "@---",
@@ -2621,8 +2614,8 @@ var StringCore = [
 "@---",
 "@---",
 "@---",
-"@@@-",
-]},
+"@@@-"
+    ]},
 	{t: "]", y: 7, s: [
 "@@@-",
 "--@-",
@@ -2630,8 +2623,8 @@ var StringCore = [
 "--@-",
 "--@-",
 "--@-",
-"@@@-",
-]},
+"@@@-"
+    ]},
 	{t: "<", y: 7, s: [
 "---@-",
 "--@--",
@@ -2639,8 +2632,8 @@ var StringCore = [
 "@----",
 "-@---",
 "--@--",
-"---@-",
-]},
+"---@-"
+    ]},
 	{t: ">", y: 7, s: [
 "@----",
 "-@---",
@@ -2648,8 +2641,8 @@ var StringCore = [
 "---@-",
 "--@--",
 "-@---",
-"@----",
-]},
+"@----"
+    ]},
 	{t: "≠", y: 7, s: [
 "------",
 "---@--",
@@ -2657,8 +2650,8 @@ var StringCore = [
 "--@---",
 "@@@@@-",
 "-@----",
-"------",
-]},
+"------"
+    ]},
 	{t: "∞", y: 7, s: [
 "------",
 "------",
@@ -2666,8 +2659,8 @@ var StringCore = [
 "@-@-@-",
 "-@-@--",
 "------",
-"------",
-]},
+"------"
+    ]},
 	{t: "≈", y: 7, s: [
 "-@----",
 "@-@-@-",
@@ -2675,8 +2668,8 @@ var StringCore = [
 "------",
 "-@----",
 "@-@-@-",
-"---@--",
-]},
+"---@--"
+    ]},
 	{t: "«", y: 7, s: [
 "---@--@-",
 "--@--@--",
@@ -2684,8 +2677,8 @@ var StringCore = [
 "@--@----",
 "-@--@---",
 "--@--@--",
-"---@--@-",
-]},
+"---@--@-"
+    ]},
 	{t: "»", y: 7, s: [
 "@--@----",
 "-@--@---",
@@ -2693,8 +2686,8 @@ var StringCore = [
 "---@--@-",
 "--@--@--",
 "-@--@---",
-"@--@----",
-]},
+"@--@----"
+    ]},
 	{t: "≤", y: 7, s: [
 "---@--",
 "--@---",
@@ -2702,8 +2695,8 @@ var StringCore = [
 "--@---",
 "---@--",
 "------",
-"@@@@@-",
-]},
+"@@@@@-"
+    ]},
 	{t: "≥", y: 7, s: [
 "-@----",
 "--@---",
@@ -2711,8 +2704,8 @@ var StringCore = [
 "--@---",
 "-@----",
 "------",
-"@@@@@-",
-]},
+"@@@@@-"
+    ]},
 	{t: "‹", y: 7, s: [
 "----",
 "--@-",
@@ -2720,8 +2713,8 @@ var StringCore = [
 "@---",
 "-@--",
 "--@-",
-"----",
-]},
+"----"
+    ]},
 	{t: "›", y: 7, s: [
 "----",
 "@---",
@@ -2729,8 +2722,8 @@ var StringCore = [
 "--@-",
 "-@--",
 "@---",
-"----",
-]},
+"----"
+    ]},
 	{t: "∅", y: 7, s: [
 "@@@@@-",
 "@--@@-",
@@ -2738,8 +2731,8 @@ var StringCore = [
 "@-@-@-",
 "@-@-@-",
 "@@--@-",
-"@@@@@-",
-]},
+"@@@@@-"
+    ]},
 	{t: "₱", y: 7, s: [
 "@@@@@-",
 "@---@-",
@@ -2747,8 +2740,8 @@ var StringCore = [
 "@---@-",
 "@@@@@-",
 "@-----",
-"@-----",
-]},
+"@-----"
+    ]},
 	{t: "₩", y: 7, s: [
 "-@---@---@--",
 "-@---@---@--",
@@ -2756,8 +2749,8 @@ var StringCore = [
 "-@---@---@--",
 "--@-@-@-@---",
 "--@-@-@-@---",
-"---@---@----",
-]},
+"---@---@----"
+    ]},
 	{t: "‰", y: 7, s: [
 "@@@---@----",
 "@-@--@-----",
@@ -2765,8 +2758,8 @@ var StringCore = [
 "---@-------",
 "--@-@@@@@@-",
 "-@--@-@@-@-",
-"@---@@@@@@-",
-]},
+"@---@@@@@@-"
+    ]},
 	{t: "—", y: 7, s: [
 "------",
 "------",
@@ -2774,8 +2767,8 @@ var StringCore = [
 "@@@@@@",
 "------",
 "------",
-"------",
-]},
+"------"
+    ]},
 	{t: "–", y: 7, s: [
 "------",
 "------",
@@ -2783,8 +2776,8 @@ var StringCore = [
 "@@@@@-",
 "------",
 "------",
-"------",
-]},
+"------"
+    ]},
 	{t: "±", y: 7, s: [
 "------",
 "--@---",
@@ -2792,8 +2785,8 @@ var StringCore = [
 "@@@@@-",
 "--@---",
 "@@@@@-",
-"------",
-]},
+"------"
+    ]},
 	{t: "†", y: 7, s: [
 "--@---",
 "--@---",
@@ -2801,8 +2794,8 @@ var StringCore = [
 "--@---",
 "--@---",
 "--@---",
-"--@---",
-]},
+"--@---"
+    ]},
 	{t: "‡", y: 7, s: [
 "--@---",
 "-@@@--",
@@ -2810,8 +2803,8 @@ var StringCore = [
 "--@---",
 "--@---",
 "-@@@--",
-"--@---",
-]},
+"--@---"
+    ]},
 	{t: "“", y: 7, s: [
 "@-@-",
 "@-@-",
@@ -2819,8 +2812,8 @@ var StringCore = [
 "----",
 "----",
 "----",
-"----",
-]},
+"----"
+    ]},
 	{t: "”", y: 7, s: [
 "@-@-",
 "@-@-",
@@ -2828,8 +2821,8 @@ var StringCore = [
 "----",
 "----",
 "----",
-"----",
-]},
+"----"
+    ]},
 	{t: "˝", y: 7, s: [
 "-@----",
 "@-@-@-",
@@ -2837,8 +2830,8 @@ var StringCore = [
 "------",
 "------",
 "------",
-"------",
-]},
+"------"
+    ]},
 	{t: "¡", y: 7, s: [
 "@-",
 "--",
@@ -2846,8 +2839,8 @@ var StringCore = [
 "@-",
 "@-",
 "@-",
-"@-",
-]},
+"@-"
+    ]},
 	{t: "¿", y: 7, s: [
 "-@--",
 "----",
@@ -2855,8 +2848,8 @@ var StringCore = [
 "-@--",
 "@---",
 "@-@-",
-"-@--",
-]},
+"-@--"
+    ]},
 	{t: "ß", y: 7, s: [
 "-@@@--",
 "@---@-",
@@ -2864,8 +2857,8 @@ var StringCore = [
 "@@-@--",
 "@---@-",
 "@---@-",
-"@@@@--",
-]},
+"@@@@--"
+    ]},
 	{t: "ç", y: 7, s: [
 "-@@@@-",
 "@-----",
@@ -2873,8 +2866,8 @@ var StringCore = [
 "@-----",
 "-@@@@-",
 "--@---",
-"-@----",
-]},
+"-@----"
+    ]},
 	{t: "§", y: 7, s: [
 "@@@@@-",
 "@-----",
@@ -2882,8 +2875,8 @@ var StringCore = [
 "@---@-",
 "@@@@@-",
 "----@-",
-"@@@@@-",
-]},
+"@@@@@-"
+    ]}
 ];
 
 var segmentCore = [
@@ -2892,75 +2885,75 @@ var segmentCore = [
 "--@-",
 "--@-",
 "--@-",
-"--@-",
-]},
+"--@-"
+    ]},
 	{t: "@2", y: 5, s: [
 "@@@-",
 "--@-",
 "@@@-",
 "@---",
-"@@@-",
-]},
+"@@@-"
+    ]},
 	{t: "@3", y: 5, s: [
 "@@@-",
 "--@-",
 "@@@-",
 "--@-",
-"@@@-",
-]},
+"@@@-"
+    ]},
 	{t: "@4", y: 5, s: [
 "@-@-",
 "@-@-",
 "@@@-",
 "--@-",
-"--@-",
-]},
+"--@-"
+    ]},
 	{t: "@5", y: 5, s: [
 "@@@-",
 "@---",
 "@@@-",
 "--@-",
-"@@@-",
-]},
+"@@@-"
+    ]},
 	{t: "@6", y: 5, s: [
 "@@@-",
 "@---",
 "@@@-",
 "@-@-",
-"@@@-",
-]},
+"@@@-"
+    ]},
 	{t: "@7", y: 5, s: [
 "@@@-",
 "@-@-",
 "@-@-",
 "--@-",
-"--@-",
-]},
+"--@-"
+    ]},
 	{t: "@8", y: 5, s: [
 "@@@-",
 "@-@-",
 "@@@-",
 "@-@-",
-"@@@-",
-]},
+"@@@-"
+    ]},
 	{t: "@9", y: 5, s: [
 "@@@-",
 "@-@-",
 "@@@-",
 "--@-",
-"@@@-",
-]},
+"@@@-"
+    ]},
 	{t: "@0", y: 5, s: [
 "@@@-",
 "@-@-",
 "@-@-",
 "@-@-",
-"@@@-",
-]},
+"@@@-"
+    ]}
 ];
 
 function debug(a,b,c){
 	if(debuging){
 		clientMessage("[Code] <"+a+">: "+b+" - "+c);
 	}
-};
+}

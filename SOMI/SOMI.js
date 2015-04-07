@@ -96,7 +96,7 @@ function newStart() {
 function newLevel(str) {
 	var type = parseInt(checkServerData("MESSAGE_TYPE"));
 	if(type > 0) {
-		var msg = checkServerData("MESSAGE") 
+		var msg = checkServerData("MESSAGE");
 		if(msg != loadData(_SOMI_DATA, "LAST_MESSAGE") || type != 1) {
 			clientMessage(enterChange(msg));
 			saveData(_SOMI_DATA, "LAST_MESSAGE", msg);
@@ -251,10 +251,10 @@ function loadServerData(scriptInfoUrl){
 function checkServerData(article){
 	var temp = [];
 	var temp2 = [];
-	for each(var e in scriptServerData){
+	scriptServerData.forEach(function(e){
 		temp.push(e.split(";")[0]);
 		temp2.push(e.split(";")[1]);
-	}
+	});
 	for(var e in temp){
 		if(temp[e] == article)
 			return temp2[e];
