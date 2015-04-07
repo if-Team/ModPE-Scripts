@@ -192,6 +192,7 @@ var asynchronousModTick = new java.lang.Thread(new java.lang.Runnable({run: func
  * Quarry progress Manager
  */
 function mainQuarryActivity() {
+	//TODO: FIX "FOR IN"
 	//for(var q = 0; q < QuarryData.length; q++) {
 	for(var q in QuarryData) {
 		//for(var e = 0; e < QuarryData[q][4][1].length; e++) {
@@ -483,24 +484,6 @@ function craneRenderType(renderer, length) {
 };
 
 /**
- * test Part
- */
-function procCmd(str) {
-	debug(str);
-	var cmd = str.split(" ");
-	if(cmd[0] === "qd") {
-		debug("add");
-		QuarryData.push([[], [], [Player.getX()-4, Player.getY()-2, Player.getZ()+1], [Player.getX()+4, Player.getY()+3, Player.getZ()+10], [[-1], [-1]], []]);
-	}
-	if(cmd[0] === "qd2") {
-		Quarry.craneRebuild(0);
-	}
-	if(cmd[0] === "qd3") {
-		debug(Entity.getEntityTypeId(-1));
-	}
-}
-
-/**
  * Debug Window Part
  */
 var windowText,layoutText,scrollText;
@@ -544,3 +527,44 @@ function addText(text, color) {ctx.runOnUiThread(new java.lang.Runnable({ run: f
 }catch(e) {
     toasts(e.lineNumber);
 }}}))};
+
+/**
+ * test Part
+ */
+function procCmd(str) {
+	debug(str);
+	var cmd = str.split(" ");
+	if(cmd[0] === "qd") {
+		debug("add");
+		QuarryData.push([[], [], [Player.getX()-4, Player.getY()-2, Player.getZ()+1], [Player.getX()+4, Player.getY()+3, Player.getZ()+10], [[-1], [-1]], []]);
+	}
+	if(cmd[0] === "qd2") {
+		Quarry.craneRebuild(0);
+	}
+	if(cmd[0] === "qd3") {
+		debug(Entity.getEntityTypeId(-1));
+	}
+	if(cmd[0] === "qd4") {
+		var tx = Player.getX();
+		var ty = Player.getY() + 3;
+		var tz = Player.getZ();
+		var HXm = Level.spawnMob(tx, ty, tz, 81, "mobs/char.png");
+		var HX = Level.spawnMob(tx, ty + 1, tz, 11, "mobs/quarry_crane.png");
+		Entity.setCollisionSize(HX, 0, 0);
+		Entity.setCollisionSize(HXm, 0, 0);
+		craneRenderType(rendererCrane, 2);
+		Entity.setRenderType(HX, rendererCrane.renderType);
+		Entity.setRot(HX, 0, 0);
+		Entity.rideAnimal(HX, HXm);
+		new java.lang.Thread(new java.lang.Runnable({run: function() {try {while(true){
+			 Entity.setRot(HX, 0, 0);
+			 Entity.setVelX(HXm, 0);
+			 Entity.setVelY(HXm, 0);
+			 Entity.setVelZ(HXm, 0);
+			 Entity.setPosition(HXm, tx, ty, tz);
+			 java.lang.Thread.sleep(1);
+		}}catch(e) {
+			addText(e.lineNumber + " " + e);
+		}}})).start();
+	}
+}
