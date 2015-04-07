@@ -3,7 +3,7 @@ var windowText,layoutText,scrollText;
 var texts = [];
 var maxText = 16;
 
-if(debuging) createTextView();
+if(debugging) createTextView();
 
 function dp(dips) {
 	return parseInt(dips * ctx.getResources().getDisplayMetrics().density + 0.5);
@@ -21,7 +21,7 @@ function createTextView() {ctx.runOnUiThread(new java.lang.Runnable({ run: funct
 	windowText.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.RIGHT, 0, 0);
 }catch(e) {
 	print(e.lineNumber)
-}}}))};
+}}}))}
 
 
 function addText(text, color) {ctx.runOnUiThread(new java.lang.Runnable({ run: function(){ try{
@@ -40,7 +40,7 @@ function addText(text, color) {ctx.runOnUiThread(new java.lang.Runnable({ run: f
 	 layoutText.addView(texts[texts.length-1], android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, dp(13));
 }catch(e) {
 	print(e.lineNumber)
-}}}))};
+}}}))}
 
 function procCmd(str) {
 	addText(str);
