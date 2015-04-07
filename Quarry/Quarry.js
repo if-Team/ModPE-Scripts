@@ -27,12 +27,8 @@ var File = java.io.File;
 
 const _SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
 const _MAIN_DIR = new File(_SD_CARD, "games/com.mojang/minecraftpe/mods/Quarry");
-<<<<<<< HEAD
 const _NO_MEDIA = new File(_MAIN_DIR, ".nomedia");
-const _BLOCK = new File(_MAIN_DIR, "terrain-atlas.tga")
-=======
 const _BLOCK = new File(_MAIN_DIR, "terrain-atlas.tga");
->>>>>>> branch 'master' of https://github.com/if-Team/ModPE-Scripts.git
 const _BLOCK_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/Quarry/resource/terrain-atlas.tga";
 const _DRILL = new File(_MAIN_DIR, "quarry_drill.png");
 const _DRILL_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/Quarry/resource/quarry_drill.png";
