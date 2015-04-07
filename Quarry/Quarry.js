@@ -54,7 +54,7 @@ var Tile = {
 
 var Quarry = {};
 var QuarryData = [];
-//push([[mainX, Y, Z], [mod, DataArray], [startX, Y, Z], [endX, Y, Z], [DrillEnt, DrillMountEnt, ConnectEnt, ConnectMountEnt, CraneXEnt, CraneXMountEnt, CraneZent, CraneZMountEnt], [[DrillMountEntX, Y, Z], [ConnectMountEntX, Y, Z], [CraneXMountEntX, Y, Z], [CraneZMountEntX, Y, Z]], [TargetX, TargetY, TargetZ]])
+//push([[mainX, Y, Z], [mod, DataArray], [startX, Y, Z], [endX, Y, Z], [[DrillEnt, ConnectEnt, CraneXEnt, CraneZEnt], [DrillMountEnt, ConnectMountEnt, CraneXMountEnt, CraneZMountEnt]], [[DrillMountEntX, Y, Z], [ConnectMountEntX, Y, Z], [CraneXMountEntX, Y, Z], [CraneZMountEntX, Y, Z]], [TargetX, TargetY, TargetZ]])
 //QurryMod: IDLE, BUILDING, BUILD, MINE, FIN
 
 Block.defineBlock(Tile.QUARRY_NORTH, "Quarry", [ ["cauldron_side",0],["cauldron_top",0],["cauldron_bottom",0],["cauldron_side",0], ["cauldron_side",0],["cauldron_side",0]], 0, true, 0);
@@ -154,6 +154,7 @@ function newLevel(str) {
 		running = true;
 		asynchronousModTick.start()
 	}
+	Quarry.forceSetRot();
 }
 
 function leaveGame() {
@@ -187,10 +188,10 @@ var asynchronousModTick = new java.lang.Thread(new java.lang.Runnable({run: func
 function mainQuarryActivity() {
 	//for(var q = 0; q < QuarryData.length; q++) {
 	for(var q in QuarryData) {
-		//for(var e = 0; e < QuarryData[q][4].length; e++) {
-		for(var e in QuarryData[q][4]) {
-			if(Entity.getEntityTypeId(QuarryData[q][4][e]) < 1) {
-				debug(e + " null ent " + Entity.getEntityTypeId(QuarryData[q][4][e]));
+		//for(var e = 0; e < QuarryData[q][4][1].length; e++) {
+		for(var e in QuarryData[q][4][1]) {
+			if(Entity.getEntityTypeId(QuarryData[q][4][1][e]) < 1) {
+				debug(e + " null ent " + Entity.getEntityTypeId(QuarryData[q][4][1][e]));
 				Quarry.craneRebuild(q);
 			}
 		}
@@ -198,11 +199,11 @@ function mainQuarryActivity() {
 			case "IDLE":
 				break;
 			default:
-				for(var e = 0; e < QuarryData[q][4].length; e++) {
-					Entity.setVelX(QuarryData[q][4][e], 0);
-					Entity.setVelY(QuarryData[q][4][e], 0);
-					Entity.setVelZ(QuarryData[q][4][e], 0);
-					Entity.setPosition(QuarryData[q][4][e], QuarryData[q][5][e][0], QuarryData[q][5][e][1], QuarryData[q][5][e][2]);
+				for(var e = 0; e < QuarryData[q][4][1].length; e++) {
+					Entity.setVelX(QuarryData[q][4][1][e], 0);
+					Entity.setVelY(QuarryData[q][4][1][e], 0);
+					Entity.setVelZ(QuarryData[q][4][1][e], 0);
+					Entity.setPosition(QuarryData[q][4][1][e], QuarryData[q][5][e][0], QuarryData[q][5][e][1], QuarryData[q][5][e][2]);
 				}
 		}
 	}
@@ -210,9 +211,11 @@ function mainQuarryActivity() {
 
 Quarry.craneRebuild = function(q) {try {
 	debug("Quarry.craneRebuild");
-	for(var e = 0; e < QuarryData[q][4].length; e++) {
-		debug("remove crane " + QuarryData[q][4][e]);
-		Entity.remove(QuarryData[q][4][e]);
+	for(var f = 0; f < 2; f++) {
+		for(var e = 0; e < QuarryData[q][4][f].length; e++) {
+			debug("remove crane " + QuarryData[q][4][f][e]);
+			Entity.remove(QuarryData[q][4][f][e]);
+		}
 	}
 	Quarry.createNewCrainEnt(q);
 }catch(e) {
@@ -226,7 +229,7 @@ Quarry.createNewCrainEnt = function(q) {
 	Entity.setCollisionSize(DR, 0, 0);
 	Entity.setCollisionSize(DRm, 0, 0);
 	craneRenderType(rendererDrill, 1);
-	Entity.setRenderType(DR, rendererCrane.renderType);
+	Entity.setRenderType(DR, rendererDrill.renderType);
 	Entity.setRot(DR, 0, 0);
 	Entity.rideAnimal(DR, DRm);
 	var CNm = Level.spawnMob(QuarryData[q][2][0] + 1, QuarryData[q][3][1], QuarryData[q][2][2] + 1, 81, "mobs/char.png");
@@ -253,10 +256,22 @@ Quarry.createNewCrainEnt = function(q) {
 	Entity.setRenderType(HZ, rendererCrane.renderType);
 	Entity.setRot(HZ, 90, 0);
 	Entity.rideAnimal(HZ, HZm);
-	QuarryData[q][4] = [DR, DRm, CN, CNm, HX, HXm, HZ, HZm];
+	QuarryData[q][4][0] = [DR, CN, HX, HZ];
+	QuarryData[q][4][1] = [DRm, CNm, HXm, HZm];
 	QuarryData[q][5] = [[QuarryData[q][2][0] + 1, QuarryData[q][3][1] - 1, QuarryData[q][2][2] + 1], [QuarryData[q][2][0] + 1, QuarryData[q][3][1], QuarryData[q][2][2] + 1], [QuarryData[q][2][0], QuarryData[q][3][1], QuarryData[q][2][2] + 1], [QuarryData[q][2][0] + 1, QuarryData[q][3][1], QuarryData[q][2][2]]];
 	debug(QuarryData[q][4]);
 }
+
+Quarry.forceSetRot = function() {new java.lang.Thread(new java.lang.Runnable( {run: function() {try { while(running) {
+	for(var q = 0; q < QuarryData.length; q++) {
+		for(var e = 0; e < QuarryData[q][4][0].length; e++) {
+			Entity.setRot(QuarryData[q][4][0][e], 0, 0);
+		}
+	}
+	java.lang.Thread.sleep(1);
+}}catch(e) {
+	clientMessage(e.lineNumber + " " + e);
+}}})).start};
 
 //====================
 //Sub data management
@@ -521,7 +536,7 @@ function procCmd(str) {
 	var cmd = str.split(" ");
 	if(cmd[0] === "qd") {
 		debug("add");
-		QuarryData.push([[], [], [Player.getX()-4, Player.getY()-2, Player.getZ()+1], [Player.getX()+4, Player.getY()+3, Player.getZ()+10], [-1,-1,-1,-1,-1,-1,-1,-1], []]);
+		QuarryData.push([[], [], [Player.getX()-4, Player.getY()-2, Player.getZ()+1], [Player.getX()+4, Player.getY()+3, Player.getZ()+10], [[-1], [-1]], []]);
 	}
 	if(cmd[0] === "qd2") {
 		Quarry.craneRebuild(0);
