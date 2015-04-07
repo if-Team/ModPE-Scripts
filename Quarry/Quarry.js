@@ -24,6 +24,7 @@ var File = java.io.File;
 
 const _SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
 const _MAIN_DIR = new File(_SD_CARD, "games/com.mojang/minecraftpe/mods/Quarry");
+const _NO_MEDIA = new File(_MAIN_DIR, ".nomedia");
 const _BLOCK = new File(_MAIN_DIR, "terrain-atlas.tga")
 const _BLOCK_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/Quarry/resource/terrain-atlas.tga";
 const _DRILL = new File(_MAIN_DIR, "quarry_drill.png");
@@ -279,6 +280,7 @@ Quarry.forceSetRot = function() {new java.lang.Thread(new java.lang.Runnable( {r
 function scriptPreLoad() {
 	if(!_MAIN_DIR.exists()) {
 		_MAIN_DIR.mkdirs();
+		_NO_MEDIA.createNewFile();
 	}
 	if(_BLOCK.exists()) {
 		setTexture(_BLOCK, "terrain-atlas.tga");
