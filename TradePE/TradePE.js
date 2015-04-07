@@ -2,6 +2,9 @@
 Trade = {};
 
 Trade.PAGE = 0;
+Trade.EME_COUNT = 0;
+Trade.META = null;
+Trade.META_MAPPED = null;
 
 Trade.Items = {
 	name: ["Apple", "Arrow", "Wooden Sword"],
@@ -11,7 +14,9 @@ Trade.Items = {
 	cost: [1,2,3]
 };
 
-Trade.showScreen = function() {
+Trade.MAINPW = null;
+
+Trade.init = function() {
 	Utils.createUiThread(function(ctx) {
 		var mainPw = new android.widget.PopupWindow(ctx);
 		var mainLayout = new android.widget.RelativeLayout(ctx);
@@ -26,16 +31,18 @@ Trade.showScreen = function() {
 		mainLayout.addView(emerald);
 		var cost = Utils.renderItem("emerald", 0, 170+18+40, 60+50+2, 1);
 		mainLayout.addView(cost);
+		var costt = Utils.justText("", 170+18+40+16, 60+50+8);
+		mainLayout.addView(costt);
 		var arrow = Utils.renderArrow(108, (Utils.getContext().getScreenHeight()/Utils.FOUR)/2);
 		mainLayout.addView(arrow);
 		var left = Utils.showButton(170, 60, 18, 50, "<", function(thiz) {
 			Utils.minusPage();
-			Utils.updateTradeList(name, itemback2, null);
+			Utils.updateTradeList(name, itemback2, costt);
 		});
 		mainLayout.addView(left);
 		var right = Utils.showButton(170+18+40+32, 60, 18, 50, ">", function(thiz) {
 			Utils.plusPage();
-			Utils.updateTradeList(name, itemback2, null);
+			Utils.updateTradeList(name, itemback2, costt);
 		});
 		mainLayout.addView(right);
 		var buy = Utils.showButton(170, 130, 64+36+8, 32, "Buy!", function(thiz) {
@@ -50,14 +57,20 @@ Trade.showScreen = function() {
 		mainLayout.addView(dismiss);
 		var name = Utils.justText("", 170, 40, 36+40+32);
 		mainLayout.addView(name);
-		Utils.updateTradeList(name, itemback2, null);
+		Utils.updateTradeList(name, itemback2, costt);
 		mainPw.setContentView(mainLayout);
 		mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
 		mainPw.setWidth(ctx.getScreenWidth());
 		mainPw.setHeight(ctx.getScreenHeight());
-		mainPw.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+		Trade.MAINPW = mainPw;
 	});
 };
+
+Trade.showScreen = function() {
+	Utils.createUiThread(function(ctx) {
+		Trade.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+	});
+}
 
 Utils = {};
 
@@ -242,10 +255,10 @@ Utils.showItemBackground = function(x, y) {
 Utils.justText = function(str, x, y, width) {
 	var text = new android.widget.TextView(Utils.getContext());
 	text.setLineSpacing(Utils.FOUR, 1);
-	if(typeof width === "number" && typeof height === "number")
-		var params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
-	else
+	if(typeof width === "number")
 		var params = new android.widget.RelativeLayout.LayoutParams(width*Utils.FOUR, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+	else
+		var params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 	params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
 	text.setLayoutParams(params);
 	text.setText(str);
@@ -286,13 +299,8 @@ Utils.renderArrow = function(x, y) {
 };
 
 Utils.getItemImage = function(text, data) {
-	var str = new java.lang.String(ModPE.getBytesFromTexturePack("images/items.meta"));
 	var items = android.graphics.BitmapFactory.decodeStream(ModPE.openInputStreamFromTexturePack("images/items-opaque.png"));
-	eval("var meta = "+str+";");
-	var arr = meta.map(function(e) {
-		return e.name;
-	});
-	var uvs = meta[arr.indexOf(text)].uvs[data];
+	var uvs = Trade.META[Trade.META_MAPPED.indexOf(text)].uvs[data];
 	var result = android.graphics.Bitmap.createBitmap(items, uvs[0]*items.getWidth(), uvs[1]*items.getHeight(), uvs[2]*items.getWidth()-uvs[0]*items.getWidth(), uvs[3]*items.getHeight()-uvs[1]*items.getHeight());
 	return result;
 };
@@ -302,12 +310,26 @@ Utils.updateTradeList = function(namev, itemv, costv) {
 	namev.setText(Trade.Items.name[page]);
 	var item = Utils.getItemImage(Trade.Items.meta[page][0], Trade.Items.meta[page][1]);
 	itemv.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*1.6, item.getHeight()*Utils.FOUR*1.6, false));
-//	costv.setText("x"+Trade.Items.cost[page]);
+	costv.setText("x "+Trade.Items.cost[page]);
+};
+
+Utils.getAllEmeralds = function() {
+	
 };
 
 
 
 
+function selectLevelHook() {
+	if(Trade.META == null)
+		eval("Trade.META = "+new java.lang.String(ModPE.getBytesFromTexturePack("images/items.meta"))+";");
+	if(Trade.META_MAPPED == null)
+		Trade.META_MAPPED = Trade.META.map(function(e) {
+			return e.name;
+		});
+	if(Trade.MAINPW == null)
+		Trade.init();
+}
 
 function useItem() {
 	Trade.showScreen();
