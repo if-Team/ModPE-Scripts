@@ -1,7 +1,7 @@
 # MazeGen
-- If you can understand English, [Click here](https://github.com/if-Team/ModPE-Scripts/tree/master/MazeGen#English)
-- 한국인이라면, [여기를 클릭하세요](https://github.com/if-Team/ModPE-Scripts/tree/master/MazeGen#한국어)
-- 日本人なら、[こちらをクリックしてください](https://github.com/if-Team/ModPE-Scripts/tree/master/MazeGen#日本語)
+- If you can understand English, [Click here!](https://github.com/if-Team/ModPE-Scripts/tree/master/MazeGen#English)
+- 한국인이라면, [여기를 클릭하세요!](https://github.com/if-Team/ModPE-Scripts/tree/master/MazeGen#한국어)
+- 日本人なら、[こちらをクリックしてください！](https://github.com/if-Team/ModPE-Scripts/tree/master/MazeGen#日本語)
 
 ## English
 ![Logo-red](http://i.imgur.com/vWdttIa.png)
