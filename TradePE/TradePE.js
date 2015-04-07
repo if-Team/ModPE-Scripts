@@ -1,29 +1,76 @@
 //TODO: make
 Trade = {};
 
-Trade.showScreen = function() {
-	var back = Utils.showBackground();
-	var header = Utils.showHeader("Trade");
-	var plus = Utils.showButton(30, 100, 50, 26, "       +1");
-	var minus = Utils.showButton(30, 128, 50, 26, "       -1");
-	var emerald = Utils.renderEmerald(38, 105, 1);
-	var emerald2 = Utils.renderEmerald(38, 133, 1);
-	var itemback = Utils.showItemBackground(35, 46);
-	var emerald3 = Utils.renderEmerald(39, 50, 2);
-	var arrow = Utils.renderArrow((Utils.getContext().getScreenWidth()/Utils.FOUR)/2-16, (Utils.getContext().getScreenHeight()/Utils.FOUR)/2);
-	Utils.showButton(4, 4, 38, 18, "Back", function(thiz) {
-		thiz.dismiss();
-		plus.dismiss();
-		minus.dismiss();
-		emerald.dismiss();
-		emerald2.dismiss();
-		emerald3.dismiss();
-		itemback.dismiss();
-		header.dismiss();
-		back.dismiss();
-		arrow.dismiss();
+Trade.PAGE = 0;
+Trade.EME_COUNT = 0;
+Trade.META = null;
+Trade.META_MAPPED = null;
+
+Trade.Items = {
+	name: ["Apple", "Arrow", "Wooden Sword"],
+	meta: [["apple",0],["arrow",0],["sword",0]],
+	id: [260, 262, 268],
+	dam: [0,0,0],
+	cost: [1,2,3]
+};
+
+Trade.MAINPW = null;
+
+Trade.init = function() {
+	Utils.createUiThread(function(ctx) {
+		var mainPw = new android.widget.PopupWindow(ctx);
+		var mainLayout = new android.widget.RelativeLayout(ctx);
+		
+		var back = Utils.showBackground();
+		mainLayout.addView(back);
+		var header = Utils.showHeader("Trade");
+		mainLayout.addView(header);
+		var itemback = Utils.showItemBackground(35, 64);
+		mainLayout.addView(itemback);
+		var emerald = Utils.renderItem("emerald", 0, 38, 67, 2);
+		mainLayout.addView(emerald);
+		var cost = Utils.renderItem("emerald", 0, 170+18+40, 60+50+2, 1);
+		mainLayout.addView(cost);
+		var costt = Utils.justText("", 170+18+40+16, 60+50+8);
+		mainLayout.addView(costt);
+		var arrow = Utils.renderArrow(108, (Utils.getContext().getScreenHeight()/Utils.FOUR)/2);
+		mainLayout.addView(arrow);
+		var left = Utils.showButton(170, 60, 18, 50, "<", function(thiz) {
+			Utils.minusPage();
+			Utils.updateTradeList(name, itemback2, costt);
+		});
+		mainLayout.addView(left);
+		var right = Utils.showButton(170+18+40+32, 60, 18, 50, ">", function(thiz) {
+			Utils.plusPage();
+			Utils.updateTradeList(name, itemback2, costt);
+		});
+		mainLayout.addView(right);
+		var buy = Utils.showButton(170, 130, 64+36+8, 32, "Buy!", function(thiz) {
+			
+		});
+		mainLayout.addView(buy);
+		var itemback2 = Utils.showItemBackground(170+18+16, 65);
+		mainLayout.addView(itemback2);
+		var dismiss = Utils.showButton(4, 4, 38, 18, "Back", function(thiz) {
+			mainPw.dismiss();
+		});
+		mainLayout.addView(dismiss);
+		var name = Utils.justText("", 170, 40, 36+40+32);
+		mainLayout.addView(name);
+		Utils.updateTradeList(name, itemback2, costt);
+		mainPw.setContentView(mainLayout);
+		mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+		mainPw.setWidth(ctx.getScreenWidth());
+		mainPw.setHeight(ctx.getScreenHeight());
+		Trade.MAINPW = mainPw;
 	});
 };
+
+Trade.showScreen = function() {
+	Utils.createUiThread(function(ctx) {
+		Trade.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+	});
+}
 
 Utils = {};
 
@@ -61,6 +108,16 @@ Utils.trimImage = function(bitmap, x, y, width, height) {
 	return android.graphics.Bitmap.createBitmap(bitmap, x, y, width, height);
 };
 
+Utils.plusPage = function() {
+	if(Trade.PAGE != Trade.Items.name.length-1)
+		Trade.PAGE++;
+};
+
+Utils.minusPage = function() {
+	if(Trade.PAGE != 0)
+		Trade.PAGE--;
+};
+
 Utils.getStretchedImage = function(bm, x, y, stretchWidth, stretchHeight, width, height) {
 	var blank = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
 	var Bitmap = android.graphics.Bitmap;
@@ -88,147 +145,129 @@ Utils.getStretchedImage = function(bm, x, y, stretchWidth, stretchHeight, width,
 };
 
 Utils.showBackground = function() {
-	var back = new android.widget.PopupWindow(Utils.getContext());
-	Utils.createUiThread(function(ctx) {
-		back.setWidth(ctx.getScreenWidth());
-		back.setHeight(ctx.getScreenHeight());
-		var spritesheet = android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 0, 0, 16, 16), 16*Utils.FOUR, 16*Utils.FOUR, false);
-		back.setBackgroundDrawable(Utils.getStretchedImage(spritesheet, 4*Utils.FOUR, 4*Utils.FOUR, 8*Utils.FOUR, 8*Utils.FOUR, ctx.getScreenWidth(), ctx.getScreenHeight()));
-//		back.setFocusable(true);
-		back.setContentView(new android.widget.TextView(ctx));
-		back.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
-	});
+	var back = new android.view.View(Utils.getContext());
+	back.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(Utils.getContext().getScreenWidth(), Utils.getContext().getScreenHeight()));
+	var spritesheet = android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 0, 0, 16, 16), 16*Utils.FOUR, 16*Utils.FOUR, false);
+	back.setBackgroundDrawable(Utils.getStretchedImage(spritesheet, 4*Utils.FOUR, 4*Utils.FOUR, 8*Utils.FOUR, 8*Utils.FOUR, Utils.getContext().getScreenWidth(), Utils.getContext().getScreenHeight()));
 	return back;
 };
 
 Utils.showHeader = function(text) {
-	var pw = new android.widget.PopupWindow(Utils.getContext());
-	Utils.createUiThread(function(ctx) {
-		var vert = new android.widget.LinearLayout(ctx);
-		vert.setOrientation(android.widget.LinearLayout.VERTICAL);
-		var horiz = new android.widget.LinearLayout(ctx);
-		horiz.setOrientation(android.widget.LinearLayout.HORIZONTAL);
-		var left = new android.view.View(ctx);
-		var header = Utils.trimImage(Utils.getTouchgui(), 150, 26, 14, 29);
-		left.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 0, 0, 2, 25), Utils.FOUR*2, Utils.FOUR*25, false)));
-		left.setLayoutParams(new android.widget.LinearLayout.LayoutParams(Utils.FOUR*2, Utils.FOUR*25));
-		horiz.addView(left);
-		var center = new android.widget.TextView(ctx);
-		center.setTypeface(Utils.getTypeface());
-		center.setGravity(android.view.Gravity.CENTER);
-		center.setTextSize(16);
-		center.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
-		center.setText(text);
-		center.setShadowLayer(0.00001, Utils.FOUR, Utils.FOUR, android.graphics.Color.DKGRAY);
-		center.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 3, 0, 8, 25), ctx.getScreenWidth()-Utils.FOUR*4, Utils.FOUR*25, false)));
-		center.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ctx.getScreenWidth()-Utils.FOUR*4, Utils.FOUR*25));
-		horiz.addView(center);
-		var right = new android.view.View(ctx);
-		right.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 12, 0, 2, 25), Utils.FOUR*2, Utils.FOUR*25, false)));
-		right.setLayoutParams(new android.widget.LinearLayout.LayoutParams(Utils.FOUR*2, Utils.FOUR*25));
-		horiz.addView(right);
-		vert.addView(horiz);
-		var down = new android.view.View(ctx);
-		down.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 3, 26, 8, 3), ctx.getScreenWidth(), Utils.FOUR*3, false)));
-		down.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ctx.getScreenWidth(), Utils.FOUR*3));
-		vert.addView(down);
-		pw.setWidth(ctx.getScreenWidth());
-		pw.setHeight(28*Utils.FOUR);
-		pw.setContentView(vert);
-//		pw.setFocusable(true);
-		pw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-		pw.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP, 0, 0);
-	});
-	return pw;
+	var ctx = Utils.getContext();
+	var vert = new android.widget.LinearLayout(ctx);
+	vert.setOrientation(android.widget.LinearLayout.VERTICAL);
+	var horiz = new android.widget.LinearLayout(ctx);
+	horiz.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+	var left = new android.view.View(ctx);
+	var header = Utils.trimImage(Utils.getTouchgui(), 150, 26, 14, 29);
+	left.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 0, 0, 2, 25), Utils.FOUR*2, Utils.FOUR*25, false)));
+	left.setLayoutParams(new android.widget.LinearLayout.LayoutParams(Utils.FOUR*2, Utils.FOUR*25));
+	horiz.addView(left);
+	var center = new android.widget.TextView(ctx);
+	center.setTypeface(Utils.getTypeface());
+	center.setGravity(android.view.Gravity.CENTER);
+	center.setTextSize(4*Utils.FOUR);
+	center.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
+	center.setText(text);
+	center.setShadowLayer(0.00001, Utils.FOUR, Utils.FOUR, android.graphics.Color.DKGRAY);
+	center.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 3, 0, 8, 25), ctx.getScreenWidth()-Utils.FOUR*4, Utils.FOUR*25, false)));
+	center.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ctx.getScreenWidth()-Utils.FOUR*4, Utils.FOUR*25));
+	horiz.addView(center);
+	var right = new android.view.View(ctx);
+	right.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 12, 0, 2, 25), Utils.FOUR*2, Utils.FOUR*25, false)));
+	right.setLayoutParams(new android.widget.LinearLayout.LayoutParams(Utils.FOUR*2, Utils.FOUR*25));
+	horiz.addView(right);
+	vert.addView(horiz);
+	var down = new android.view.View(ctx);
+	down.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 3, 26, 8, 3), ctx.getScreenWidth(), Utils.FOUR*3, false)));
+	down.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ctx.getScreenWidth(), Utils.FOUR*3));
+	vert.addView(down);
+	vert.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(Utils.getContext().getScreenWidth(), 28*Utils.FOUR));
+	return vert;
 };
 
 Utils.showButton = function(x, y, width, height, text, onclick) {
-	var pw = new android.widget.PopupWindow(Utils.getContext());
-	Utils.createUiThread(function(ctx) {
-		var button = new android.widget.Button(ctx);
-		var list = new android.graphics.drawable.StateListDrawable();
-		list.addState([android.R.attr.state_pressed], Utils.getStretchedImage(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 0, 32, 8, 8), 8*Utils.FOUR, 8*Utils.FOUR, false), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 4*Utils.FOUR, width*Utils.FOUR, height*Utils.FOUR));
-		list.addState([], Utils.getStretchedImage(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 8, 32, 8, 8), 8*Utils.FOUR, 8*Utils.FOUR, false), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 4*Utils.FOUR, width*Utils.FOUR, height*Utils.FOUR));
-		button.setBackgroundDrawable(list);
-		button.setText(text);
-		button.setTypeface(Utils.getTypeface());
-		button.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
-		button.setTextSize(16);
-		var current = false;
-		button.setOnTouchListener(new android.view.View.OnTouchListener({
-			onTouch: function(view, event) {
-				switch(event.getAction()) {
-					case android.view.MotionEvent.ACTION_DOWN:
-						view.setTextColor(android.graphics.Color.parseColor("#ffffa1"));
-					break;
-					case android.view.MotionEvent.ACTION_MOVE:
-						if(event.getX() < 0 || event.getY() <0 || event.getX() > width*Utils.FOUR || event.getY() > height*Utils.FOUR) {
-							view.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
-							current = true;
-						} else if(!current)
-							view.setTextColor(android.graphics.Color.parseColor("#ffffa1"));
-					break;
-					case android.view.MotionEvent.ACTION_UP:
+	var ctx = Utils.getContext();
+	var button = new android.widget.Button(ctx);
+	var params = new android.widget.RelativeLayout.LayoutParams(width*Utils.FOUR, height*Utils.FOUR);
+	params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
+	button.setLayoutParams(params);
+	var list = new android.graphics.drawable.StateListDrawable();
+	list.addState([android.R.attr.state_pressed], Utils.getStretchedImage(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 0, 32, 8, 8), 8*Utils.FOUR, 8*Utils.FOUR, false), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 4*Utils.FOUR, width*Utils.FOUR, height*Utils.FOUR));
+	list.addState([], Utils.getStretchedImage(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 8, 32, 8, 8), 8*Utils.FOUR, 8*Utils.FOUR, false), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 4*Utils.FOUR, width*Utils.FOUR, height*Utils.FOUR));
+	button.setBackgroundDrawable(list);
+	button.setText(text);
+	button.setTypeface(Utils.getTypeface());
+	button.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
+	button.setTextSize(4*Utils.FOUR);
+	button.setSingleLine(true);
+	var current = false;
+	button.setOnTouchListener(new android.view.View.OnTouchListener({
+		onTouch: function(view, event) {
+			switch(event.getAction()) {
+				case android.view.MotionEvent.ACTION_DOWN:
+					view.setTextColor(android.graphics.Color.parseColor("#ffffa1"));
+				break;
+				case android.view.MotionEvent.ACTION_MOVE:
+					if(event.getX() < 0 || event.getY() <0 || event.getX() > width*Utils.FOUR || event.getY() > height*Utils.FOUR) {
 						view.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
-						if(current == false && !(event.getX() < 0 || event.getY() <0 || event.getX() > width*Utils.FOUR || event.getY() > height*Utils.FOUR)) {
-							if(typeof onclick === "function")
-								onclick(pw);
-						}
-						current = false;
-					break;
-				}
-				return false;
+						current = true;
+					} else if(!current)
+						view.setTextColor(android.graphics.Color.parseColor("#ffffa1"));
+				break;
+				case android.view.MotionEvent.ACTION_UP:
+					view.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
+					if(current == false && !(event.getX() < 0 || event.getY() <0 || event.getX() > width*Utils.FOUR || event.getY() > height*Utils.FOUR)) {
+						if(typeof onclick === "function")
+							onclick();
+					}
+					current = false;
+				break;
 			}
-		}));
-		button.setShadowLayer(0.00001, Utils.FOUR, Utils.FOUR, android.graphics.Color.DKGRAY);
-		pw.setContentView(button);
-		pw.setWidth(width*Utils.FOUR);
-		pw.setHeight(height*Utils.FOUR);
-//		pw.setFocusable(true);
-		pw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-		pw.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.TOP, x*Utils.FOUR, y*Utils.FOUR);
-	});
-	return pw;
+			return false;
+		}
+	}));
+	button.setShadowLayer(0.00001, Utils.FOUR, Utils.FOUR, android.graphics.Color.DKGRAY);
+	return button;
 };
 
-Utils.renderEmerald = function(x, y, scale) {
-	var pw = new android.widget.PopupWindow(Utils.getContext());
-	Utils.createUiThread(function(ctx) {
-		var str = new java.lang.String(ModPE.getBytesFromTexturePack("images/items.meta"));
-		var items = android.graphics.BitmapFactory.decodeStream(ModPE.openInputStreamFromTexturePack("images/items-opaque.png"));
-		eval("var meta = "+str+";");
-		var arr = meta.map(function(e) {
-			return e.name;
-		});
-		var uvs = meta[arr.indexOf("emerald")].uvs[0];
-		var emerald = android.graphics.Bitmap.createBitmap(items, uvs[0]*items.getWidth(), uvs[1]*items.getHeight(), uvs[2]*items.getWidth()-uvs[0]*items.getWidth(), uvs[3]*items.getHeight()-uvs[1]*items.getHeight());
-		emerald = android.graphics.Bitmap.createScaledBitmap(emerald, emerald.getWidth()*Utils.FOUR*scale, emerald.getHeight()*Utils.FOUR*scale, false);
-		var view = new android.view.View(ctx);
-		view.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(emerald));
-		pw.setContentView(view);
-		pw.setWidth(emerald.getWidth());
-		pw.setHeight(emerald.getHeight());
-		pw.setBackgroundDrawable(null);
-		pw.setTouchable(false);
-		pw.setOutsideTouchable(true);
-		pw.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.TOP, x*Utils.FOUR, y*Utils.FOUR);
-	});
-	return pw;
+Utils.renderItem = function(name, data, x, y, scale) {
+	var emerald = Utils.getItemImage(name, data);
+	emerald = android.graphics.Bitmap.createScaledBitmap(emerald, emerald.getWidth()*Utils.FOUR*scale, emerald.getHeight()*Utils.FOUR*scale, false);
+	var view = new android.view.View(Utils.getContext());
+	view.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(emerald));
+	var params = new android.widget.RelativeLayout.LayoutParams(emerald.getWidth(), emerald.getHeight());
+	params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
+	view.setLayoutParams(params);
+	return view;
 };
 
 Utils.showItemBackground = function(x, y) {
-	var pw = new android.widget.PopupWindow(Utils.getContext());
-	Utils.createUiThread(function(ctx) {
-		var view = new android.view.View(ctx);
-		view.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getGui(), Utils.getGui().getWidth()*0.78125, Utils.getGui().getHeight()*0.1796875, Utils.getGui().getWidth()*0.0625, Utils.getGui().getWidth()*0.0625), 40*Utils.FOUR, 40*Utils.FOUR, false)));
-		pw.setContentView(view);
-		pw.setWidth(40*Utils.FOUR);
-		pw.setHeight(40*Utils.FOUR);
-//		pw.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getGui(), 200, 46, 16, 16), 32*Utils.FOUR, 32*Utils.FOUR, false)));
-		pw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-		pw.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.TOP, x*Utils.FOUR, y*Utils.FOUR);
-	});
-	return pw;
+	var view = new android.widget.ImageView(Utils.getContext());
+	view.setScaleType(android.widget.ImageView.ScaleType.CENTER);
+	var params = new android.widget.RelativeLayout.LayoutParams(40*Utils.FOUR, 40*Utils.FOUR);
+	params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
+	view.setLayoutParams(params);
+	view.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getGui(), Utils.getGui().getWidth()*0.78125, Utils.getGui().getHeight()*0.1796875, Utils.getGui().getWidth()*0.0625, Utils.getGui().getWidth()*0.0625), 40*Utils.FOUR, 40*Utils.FOUR, false)));
+	return view;
+};
+
+Utils.justText = function(str, x, y, width) {
+	var text = new android.widget.TextView(Utils.getContext());
+	text.setLineSpacing(Utils.FOUR, 1);
+	if(typeof width === "number")
+		var params = new android.widget.RelativeLayout.LayoutParams(width*Utils.FOUR, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+	else
+		var params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+	params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
+	text.setLayoutParams(params);
+	text.setText(str);
+	text.setGravity(android.view.Gravity.CENTER);
+	text.setTypeface(Utils.getTypeface());
+	text.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
+	text.setTextSize(4*Utils.FOUR);
+	text.setShadowLayer(0.00001, Utils.FOUR, Utils.FOUR, android.graphics.Color.DKGRAY);
+	return text;
 };
 
 Utils.renderArrow = function(x, y) {
@@ -251,18 +290,46 @@ Utils.renderArrow = function(x, y) {
 				  0,0,b,w,0,0,0,0,0,0,0,0,0,0,0,0,
 				  0,0,0,b,0,0,0,0,0,0,0,0,0,0,0,0];
 	var bitmap = android.graphics.Bitmap.createBitmap(pixels, 0, 16, 16, 16, android.graphics.Bitmap.Config.ARGB_8888);
-	var pw = new android.widget.PopupWindow(Utils.getContext());
-	Utils.createUiThread(function(ctx) {
-		pw.setContentView(new android.view.View(ctx));
-		pw.setWidth(16*Utils.FOUR);
-		pw.setHeight(16*Utils.FOUR);
-		pw.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(bitmap, 16*Utils.FOUR, 16*Utils.FOUR, false)));
-		pw.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.LEFT, x*Utils.FOUR, y*Utils.FOUR);
-	});
-	return pw;
+	var view = new android.view.View(Utils.getContext());
+	var params = new android.widget.RelativeLayout.LayoutParams(16*Utils.FOUR, 16*Utils.FOUR);
+	params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
+	view.setLayoutParams(params);
+	view.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(bitmap, 16*Utils.FOUR, 16*Utils.FOUR, false)));
+	return view;
+};
+
+Utils.getItemImage = function(text, data) {
+	var items = android.graphics.BitmapFactory.decodeStream(ModPE.openInputStreamFromTexturePack("images/items-opaque.png"));
+	var uvs = Trade.META[Trade.META_MAPPED.indexOf(text)].uvs[data];
+	var result = android.graphics.Bitmap.createBitmap(items, uvs[0]*items.getWidth(), uvs[1]*items.getHeight(), uvs[2]*items.getWidth()-uvs[0]*items.getWidth(), uvs[3]*items.getHeight()-uvs[1]*items.getHeight());
+	return result;
+};
+
+Utils.updateTradeList = function(namev, itemv, costv) {
+	var page = Trade.PAGE;
+	namev.setText(Trade.Items.name[page]);
+	var item = Utils.getItemImage(Trade.Items.meta[page][0], Trade.Items.meta[page][1]);
+	itemv.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*1.6, item.getHeight()*Utils.FOUR*1.6, false));
+	costv.setText("x "+Trade.Items.cost[page]);
+};
+
+Utils.getAllEmeralds = function() {
+	
 };
 
 
+
+
+function selectLevelHook() {
+	if(Trade.META == null)
+		eval("Trade.META = "+new java.lang.String(ModPE.getBytesFromTexturePack("images/items.meta"))+";");
+	if(Trade.META_MAPPED == null)
+		Trade.META_MAPPED = Trade.META.map(function(e) {
+			return e.name;
+		});
+	if(Trade.MAINPW == null)
+		Trade.init();
+}
 
 function useItem() {
 	Trade.showScreen();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Choseul
+ * Copyright 2015 Choseul, CodeInside, ChalkPE
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,31 @@
  */
 
 //DEBUG SETTING
-var debuging = true;
+var debugging = true;
 var asynchronous = false;
 
 //import
+/**
+ * @type {android.content.Context}
+ */
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var File = java.io.File;
 
 const _SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
 const _MAIN_DIR = new File(_SD_CARD, "games/com.mojang/minecraftpe/mods/Quarry");
+<<<<<<< HEAD
 const _NO_MEDIA = new File(_MAIN_DIR, ".nomedia");
 const _BLOCK = new File(_MAIN_DIR, "terrain-atlas.tga")
+=======
+const _BLOCK = new File(_MAIN_DIR, "terrain-atlas.tga");
+>>>>>>> branch 'master' of https://github.com/if-Team/ModPE-Scripts.git
 const _BLOCK_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/Quarry/resource/terrain-atlas.tga";
 const _DRILL = new File(_MAIN_DIR, "quarry_drill.png");
 const _DRILL_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/Quarry/resource/quarry_drill.png";
 const _CRANE = new File(_MAIN_DIR, "quarry_crane.png");
 const _CRANE_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/Quarry/resource/quarry_crane.png";
-function _MAP_DIR() {return new File(_SD_CARD, "games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/mods")};
-function _MAP_QUARRY_DATA() {return new File(_MAP_DIR(), "quarry.json")};
+function _MAP_DIR() {return new File(_SD_CARD, "games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/mods")}
+function _MAP_QUARRY_DATA() {return new File(_MAP_DIR(), "quarry.json")}
 
 
 var rendererDrill = Renderer.createHumanoidRenderer();
@@ -89,6 +96,8 @@ function getQuarryId(yaw){
  * @author Choseul <chocoslime05@naver.com>
  */
 function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
+    void(blockId); void(blockDamage); void(itemDamage);
+
 	if(itemId == 267){
         new java.lang.Thread({
             run: function(){
@@ -137,9 +146,9 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
 			Level.setTile(tx, ty, tz, getQuarryId(Entity.getYaw(Player.getEntity())), 0);
 		}
 	}
-}
+} void(useItem);
 
-function newLevel(str) {
+function newLevel() {
 	if(!_MAP_DIR().exists()) {
 		_MAP_DIR().mkdir();
 	}
@@ -165,13 +174,13 @@ function leaveGame() {
 	}
 	saveData(_MAP_QUARRY_DATA(), "MAIN", JSON.stringify(QuarryData));
 	QuarryData = [];
-}
+} void(leaveGame);
 
 function modTick() {
 	if(!asynchronous) {
 		mainQuarryActivity();
 	}
-}
+} void(modTick);
 
 var asynchronousModTick = new java.lang.Thread(new java.lang.Runnable({run: function() {try { while(running) {
 	if(asynchronous) {
@@ -288,7 +297,7 @@ function scriptPreLoad() {
 		if(downloadFile(_BLOCK, _BLOCK_URL)) {
 			setTexture(_BLOCK, "terrain-atlas.tga");
 		}else {
-			print("Error, please check internet connection");
+            toasts("Error, please check internet connection");
 		}
 	}
 	if(_DRILL.exists()) {
@@ -297,7 +306,7 @@ function scriptPreLoad() {
 		if(downloadFile(_DRILL, _DRILL_URL)) {
 			setTexture(_DRILL, "mobs/quarry_drill.png");
 		}else {
-			print("Error, please check internet connection");
+            toasts("Error, please check internet connection");
 		}
 	}
 	if(_CRANE.exists()) {
@@ -306,7 +315,7 @@ function scriptPreLoad() {
 		if(downloadFile(_CRANE, _CRANE_URL)) {
 			setTexture(_CRANE, "mobs/quarry_crane.png");
 		}else {
-			print("Error, please check internet connection");
+            toasts("Error, please check internet connection");
 		}
 	}
 }
@@ -315,26 +324,26 @@ function setTexture(prototypeFile, innerPath){
 	try{
 		var dir = new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/net.zhuoweizhang.mcpelauncher.pro/files/textures/images/" + innerPath);
 		dir.getParentFile().mkdirs(); 
-		bis = new java.io.BufferedInputStream(new java.io.FileInputStream(prototypeFile));
+		var bis = new java.io.BufferedInputStream(new java.io.FileInputStream(prototypeFile));
 		var bos = new java.io.BufferedOutputStream(new java.io.FileOutputStream(dir));
 		var buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
-		var count = 0;
+		var count;
 		while((count = bis.read(buffer)) >= 0){
 			bos.write(buffer, 0, count);
 		}
 		bis.close();
 		bos.close();
 	}catch(e){
-		print(prototypeFile.getAbsolutePath() + " 리소스파일이 없습니다");
+        toasts(prototypeFile.getAbsolutePath() + " 리소스파일이 없습니다");
 	}
-};
+}
 
 function downloadFile(path, url) {
 	try{
 		var tempApiUrl = new java.net.URL(url);
 		var tempApiUrlConn = tempApiUrl.openConnection();
 		tempApiUrlConn.connect();
-		var tempLength = tempApiUrlConn.getContentLength();
+
 		var tempBis = new java.io.BufferedInputStream(tempApiUrl.openStream());
 		var tempFos = new java.io.FileOutputStream(path);
 		var tempData = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
@@ -351,10 +360,10 @@ function downloadFile(path, url) {
 		debug(e.lineNumber + " " + e);
 		return false;
 	}
-};
+}
 
 function debug(str) {
-	if(debuging) {
+	if(debugging) {
 		/**if(Level.getWorldName() === null) {
 			 ctx.runOnUiThread(new java.lang.Runnable({ run: function(){
 		android.widget.Toast.makeText(ctx, "[Debug]\n" + str, android.widget.Toast.LENGTH_LONG).show();
@@ -399,7 +408,7 @@ function loadData(file, article) {
 	var inputStreamReader = new java.io.InputStreamReader(fileInputStream);
 	var bufferedReader = new java.io.BufferedReader(inputStreamReader);
 	var tempRead, tempReadString;
-	var tempSaved = "";
+
 	while((tempRead = bufferedReader.readLine()) != null){
 		tempReadString = tempRead.toString();
 		//불러올 데이터 찾기
@@ -424,26 +433,22 @@ function toast(str) {
 		run: function(){
 			try{
 				android.widget.Toast.makeText(ctx, str, android.widget.Toast.LENGTH_LONG).show();
-			}catch(e) {
-				print(e);
-			}
+			}catch(e) {}
 		}
 	}
 	));
-};
+} void(toast);
 
 function toasts(str) {
 	ctx.runOnUiThread(new java.lang.Runnable( {
 		run: function(){
 			try{
 				android.widget.Toast.makeText(ctx, str, android.widget.Toast.LENGTH_SHORT).show();
-			}catch(e) {
-				print(e);
-			}
+			}catch(e) {}
 		}
 	}
 	));
-};
+}
 
 //====================
 //Models
@@ -462,7 +467,7 @@ function drillRenderType(renderer, length) {
 	for(var e = length; e > 0; e--) {
 		body.addBox(-4,e*(-16),-4,8,16,8);
 	}
-};
+} void(drillRenderType);
 
 function craneRenderType(renderer, length) {
 	var model=renderer.getModel();
@@ -476,7 +481,7 @@ function craneRenderType(renderer, length) {
 	for(var e = length; e > 0; e--) {
 		body.addBox(-e*16,-4,-4,16,8,8);
 	}
-};
+}
 
 //====================
 //test dump
@@ -552,12 +557,11 @@ function procCmd(str) {
 //Debug function
 //====================
 
-var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var windowText,layoutText,scrollText;
 var texts = [];
 var maxText = 16;
 
-if(debuging) createTextView();
+if(debugging) createTextView();
 
 function dp(dips) {
 	return parseInt(dips * ctx.getResources().getDisplayMetrics().density + 0.5);
@@ -574,8 +578,8 @@ function createTextView() {ctx.runOnUiThread(new java.lang.Runnable({ run: funct
 	windowText.setTouchable(false);
 	windowText.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.RIGHT, 0, 0);
 }catch(e) {
-	print(e.lineNumber)
-}}}))};
+    toasts(e.lineNumber);
+}}}))}
 
 
 function addText(text, color) {ctx.runOnUiThread(new java.lang.Runnable({ run: function(){ try{
@@ -593,5 +597,5 @@ function addText(text, color) {ctx.runOnUiThread(new java.lang.Runnable({ run: f
 	}
 	 layoutText.addView(texts[texts.length-1], android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, dp(13));
 }catch(e) {
-	print(e.lineNumber)
-}}}))};
+    toasts(e.lineNumber);
+}}}))}
