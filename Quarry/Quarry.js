@@ -144,6 +144,10 @@ function useItem(x, y, z, itemId, blockId, side, itemDamage, blockDamage){
 	}
 } void(useItem);
 
+function makeQuarry() {
+    // TO DO
+}
+
 function newLevel() {
 	if(!_MAP_DIR().exists()) {
 		_MAP_DIR().mkdir();
