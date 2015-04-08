@@ -29,15 +29,33 @@ var Version = "Cell v2";
 *
 */
 
+const ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var Model = {};
-var offsetX, offsetY, offsetZ, pos1X, pos1Y, pos1Z, pos2X, pos2Y, pos2Z, model, progress, lastCode, lastData, fileName;
+var offsetX, offsetY, offsetZ, pos1X, pos1Y, pos1Z, pos2X, pos2Y, pos2Z, model, progress, lastCode, lastData, saveModelName;
 var size = 1;
 var side = "x+";
 var modelType = "body";
-var MAIN_PATH = new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/games/com.mojang/minecraftpe/mods/Code_Modeling_creator");
+var _MAIN_PATH = new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/games/com.mojang/minecraftpe/mods/Modeling_creator");
+var _SKIN = new java.io.File(_MAIN_PATH, "blockSkin.png");
+var _SKIN_URL = "https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/Modeling-Creator/resource/block_skin.png";
+var _NO_MEDIA = new java.io.File(_MAIN_PATH, ".nomedia");
+var pattern = /.\.txt/;
 
-if(!MAIN_PATH.exists())
-	MAIN_PATH.mkdirs();
+var rendererTest = Renderer.createHumanoidRenderer();
+
+if(!_MAIN_PATH.exists())
+	_MAIN_PATH.mkdirs();
+if(!_NO_MEDIA.exists())
+	_NO_MEDIA.createNewFile();
+if(_SKIN.exists()) {
+	setTexture(_SKIN, "mobs/blockSkin.png");
+}else {
+	if(downloadFile(_SKIN, _SKIN_URL)) {
+		setTexture(_SKIN, "mobs/blockSkin.png");
+	}else {
+		toasts("Error, please check internet connection");
+	}
+}
 
 Model.offset = function(x, y, z) {
 	offsetX = parseInt(x);
@@ -57,24 +75,32 @@ Model.pos2 = function(x, y, z) {
 	pos2Z = parseInt(z);
 	clientMessage(pos2X + " " + pos2Y + " " + pos2Z);
 }
+
+Model.testModelSpawn = function(file) {
+	clientMessage(" " + file.getAbsolutePath());
+	var e = Level.spawnMob(Player.getX(), Player.getY(), Player.getZ(), 11, "mobs/blockSkin.png");
+	testRenderType(rendererTest, file);
+	Entity.setRenderType(e, rendererTest.renderType);
+	Entity.setHealth(e, 1);
+}
+
 Model.create = function() {
 	new java.lang.Thread(new java.lang.Runnable( {run: function() {try {
-	if(typeof offsetX != "number" || typeof pos1X != "number" || typeof pos2X != "number") {
+	if(typeof offsetX !== "number" || typeof pos1X !== "number" || typeof pos2X !== "number") {
 		clientMessage("[Model] please set Pos first");
-	}else if(typeof modelType == "undefined") {
+	}else if(typeof modelType === "undefined") {
 		clientMessage("[Model] please set modelType");
 	}else {
-		clientMessage(typeof fileName);
-		if(typeof fileName != "string"){
+		if(typeof saveModelName !== "string"){
 			var count = 1;
-			var fileName = "unTitleModeling";
-			while(new java.io.File(MAIN_PATH, fileName + count + ".txt").exists())
+			saveModelName = "untitled";
+			while(new java.io.File(_MAIN_PATH, saveModelName + count + ".txt").exists())
 				count++;
-			var fileName = fileName + count.toString();
+			saveModelName = saveModelName + count.toString();
 		}
 		model = "";
 		clientMessage("[Model] start create Model file...");
-		var OUTPUT = new java.io.File(MAIN_PATH, fileName + ".txt");
+		var OUTPUT = new java.io.File(_MAIN_PATH, saveModelName + ".txt");
 		if(pos1X <= pos2X) {
 			var rX = pos1X;
 			var sX = (pos1X - offsetX);
@@ -205,8 +231,11 @@ clientMessage("[Model] set Size: " + size);
 			}
 			break;
 		case "create":
-			fileName = cmd[1];
+			saveModelName = cmd[1];
 			Model.create();
+			break;
+		case "test":
+			modelingTest();
 			break;
 	}
 };
@@ -235,6 +264,102 @@ function colorOffsetY(id, data) {
 	return -1;
 };
 
+function testRenderType(renderer, modelFile) {
+	var model=renderer.getModel();
+	var head=model.getPart("head").clear();
+	var body=model.getPart("body").clear();
+	var rightArm=model.getPart("rightArm").clear();
+	var leftArm=model.getPart("leftArm").clear();
+	var rightLeg=model.getPart("rightLeg").clear();
+	var leftLeg=model.getPart("leftLeg").clear();
+	var br = new java.io.BufferedReader(new java.io.FileReader(modelFile));
+	var len, content = "";
+	while((len = br.readLine()) != null) {
+		content += len;
+	}
+	br.close();
+	eval(content);
+};
+
+function setTexture(prototypeFile, innerPath){
+	try{
+		var dir = new java.io.File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/net.zhuoweizhang.mcpelauncher.pro/files/textures/images/" + innerPath);
+		dir.getParentFile().mkdirs(); 
+		var bis = new java.io.BufferedInputStream(new java.io.FileInputStream(prototypeFile));
+		var bos = new java.io.BufferedOutputStream(new java.io.FileOutputStream(dir));
+		var buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
+		var count;
+		while((count = bis.read(buffer)) >= 0){
+			bos.write(buffer, 0, count);
+		}
+		bis.close();
+		bos.close();
+	}catch(e){
+        toasts(prototypeFile.getAbsolutePath() + " 리소스파일이 없습니다");
+	}
+}
+
+function downloadFile(path, url) {
+	try{
+		var tempApiUrl = new java.net.URL(url);
+		var tempApiUrlConn = tempApiUrl.openConnection();
+		tempApiUrlConn.connect();
+
+		var tempBis = new java.io.BufferedInputStream(tempApiUrl.openStream());
+		var tempFos = new java.io.FileOutputStream(path);
+		var tempData = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
+		var tempTotal = 0, tempCount;
+		while ((tempCount = tempBis.read(tempData)) != -1) {
+			tempTotal += tempCount;
+			tempFos.write(tempData, 0, tempCount);
+		}
+		tempFos.flush();
+		tempFos.close();
+		tempBis.close();
+		return true;
+	}catch(e){
+		debug(e.lineNumber + " " + e);
+		return false;
+	}
+}
+
+function setArrayButton(layout,array,listener) {
+	var buttons = new Array();
+	for(var i in array) {
+		buttons[i] = new android.widget.Button(ctx);
+		buttons[i].setText(array[i] + "");
+		buttons[i].setOnClickListener(listener);
+		layout.addView(buttons[i]);
+	}
+}
+/**
+ *GUI
+ */
+function modelingTest() {ctx.runOnUiThread(new java.lang.Runnable({run:function(){try{
+	var dl = new android.app.AlertDialog.Builder(ctx);
+	var la = new android.widget.LinearLayout(ctx);
+	la.setOrientation(1);
+	var arr = [];
+	for each(var e in _MAIN_PATH.list()) {
+		if(pattern.test(e))
+			arr.push(e);
+	}
+	setArrayButton(la,arr,new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+		Model.testModelSpawn(new java.io.File(_MAIN_PATH.getAbsolutePath() + "/" + view.getText()));
+		dl.dismiss();
+	}catch(e) {
+		clientMessage(e.lineNumber + " " + e);
+	}}});
+	dl.setView(la);
+	dl.create();
+	dl.show();
+}catch(e) {
+	clientMessage(e.lineNumber + " " + e);
+}}}))};
+
+/**
+ *Offsets
+ */
 var modelColor = [
 {blockName: "양털들", blockCode: 35, blockData: 0, colorOffsetX: 0, colorOffsetY: 0},
 {blockName: 0, blockCode: 35, blockData: 1, colorOffsetX: 0, colorOffsetY: 2},
