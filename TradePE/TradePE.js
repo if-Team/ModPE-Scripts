@@ -331,12 +331,21 @@ Utils.buyThing = function() {
 		addItemInventroy(388, -Trade.Items.cost[Trade.PAGE], 0);
 		addItemInventory(Trade.Items.id[Trade.PAGE], 1, Trade.Items.dam[Trade.PAGE]);
 	} else
-		print("Not Enough Emeralds!");
+		Utils.warn("Not Enough Emeralds!");
 };
 
 Utils.warn(text) {
 	Utils.createUiThread(function(ctx) {
-	//	var pw = new android.widget.PopupWindow(
+		var text = new android.widget.TextView(ctx);
+		text.setText(text);
+		text.setTypeface(Utils.getTypeface());
+		text.setShadowLayer(0.00001, Utils.FOUR*2, Utils.FOUR*2, android.graphics.Color.DKGRAY);
+		text.setTextColor(android.graphics.Color.RED);
+		text.setTextSize(8*Utils.FOUR);
+		var toast = android.widget.Toast.makeText(ctx, "", android.widget.Toast.LENGTH_SHORT);
+		toast.setGravity(android.view.Gravity.CENTER, 0, 0);
+		toast.setView(text);
+		toast.show();
 	});
 }
 
