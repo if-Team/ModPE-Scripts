@@ -58,21 +58,21 @@ if(_SKIN.exists()) {
 }
 
 Model.offset = function(x, y, z) {
-	offsetX = parseInt(x);
-	offsetY = parseInt(y);
-	offsetZ = parseInt(z);
+	offsetX = parseInt(Math.floor(x));
+	offsetY = parseInt(Math.floor(y));
+	offsetZ = parseInt(Math.floor(z));
 	clientMessage(offsetX + " " + offsetY + " " + offsetZ);
 }
 Model.pos1 = function(x, y, z) {
-	pos1X = parseInt(x);
-	pos1Y = parseInt(y);
-	pos1Z = parseInt(z);
+	pos1X = parseInt(Math.floor(x));
+	pos1Y = parseInt(Math.floor(y));
+	pos1Z = parseInt(Math.floor(z));
 	clientMessage(pos1X + " " + pos1Y + " " + pos1Z);
 }
 Model.pos2 = function(x, y, z) {
-	pos2X = parseInt(x);
-	pos2Y = parseInt(y);
-	pos2Z = parseInt(z);
+	pos2X = parseInt(Math.floor(x));
+	pos2Y = parseInt(Math.floor(y));
+	pos2Z = parseInt(Math.floor(z));
 	clientMessage(pos2X + " " + pos2Y + " " + pos2Z);
 }
 
@@ -81,7 +81,7 @@ Model.testModelSpawn = function(file) {
 	var e = Level.spawnMob(Player.getX(), Player.getY(), Player.getZ(), 11, "mobs/blockSkin.png");
 	testRenderType(rendererTest, file);
 	Entity.setRenderType(e, rendererTest.renderType);
-	Entity.setHealth(e, 1);
+	Entity.setHealth(e, 10);
 }
 
 Model.create = function() {
@@ -130,7 +130,7 @@ Model.create = function() {
 		}
 		if(typeof(size) != "number" || size < 1)
 			size = 1;
-		clientMessage("[Model] Xsize:" + lX + " Ysize:" + lY + " Zsize:" + lZ);
+		clientMessage("[Model] Xsize:" + (lX + 1) + " Ysize:" + (lY + 1) + " Zsize:" + (lZ + 1));
 		if(!OUTPUT.exists())
 			OUTPUT.delete();
 		progress = 0;
@@ -145,10 +145,10 @@ Model.create = function() {
 				if(tile == lastCode && data == lastData) {
 					switch(side) {
 						case "x+":
-							bw.write(modelType + ".addBox(" + (((sZ + cZ) * (1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sX + cX) * (-1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
+							bw.write(modelType + ".addBox(" + (((sZ + cZ) * (1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sX + cX) * (1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
 							break;
 						case "x-":
-							bw.write(modelType + ".addBox(" + (((sZ + cZ) * (-1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sX + cX) * (1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
+							bw.write(modelType + ".addBox(" + (((sZ + cZ) * (-1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sX + cX) * (-1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
 							break;
 						case "z+":
 							bw.write(modelType + ".addBox(" + (((sX + cX) * (1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sZ + cZ) * (-1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
@@ -165,10 +165,10 @@ Model.create = function() {
 					bw.write(modelType + ".setTextureOffset(" + colorOffsetX(tile, data) + ", " + colorOffsetY(tile, data) + ", true);\n");
 					switch(side) {
 						case "x+":
-							bw.write(modelType + ".addBox(" + (((sZ + cZ) * (1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sX + cX) * (-1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
+							bw.write(modelType + ".addBox(" + (((sZ + cZ) * (1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sX + cX) * (1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
 							break;
 						case "x-":
-							bw.write(modelType + ".addBox(" + (((sZ + cZ) * (-1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sX + cX) * (1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
+							bw.write(modelType + ".addBox(" + (((sZ + cZ) * (-1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sX + cX) * (-1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
 							break;
 						case "z+":
 							bw.write(modelType + ".addBox(" + (((sX + cX) * (1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sZ + cZ) * (-1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
@@ -235,7 +235,7 @@ clientMessage("[Model] set Size: " + size);
 			Model.create();
 			break;
 		case "test":
-			modelingTest();
+			Gui.modelingTest();
 			break;
 	}
 };
@@ -318,25 +318,30 @@ function downloadFile(path, url) {
 		tempBis.close();
 		return true;
 	}catch(e){
-		debug(e.lineNumber + " " + e);
+		print(e.lineNumber + " " + e);
 		return false;
 	}
 }
 
-function setArrayButton(layout,array,listener) {
+function setArrayButton(layout,array,listener, longClick) {
 	var buttons = new Array();
 	for(var i in array) {
 		buttons[i] = new android.widget.Button(ctx);
 		buttons[i].setText(array[i] + "");
 		buttons[i].setOnClickListener(listener);
+		buttons[i].setOnLongClickListener(longClick);
 		layout.addView(buttons[i]);
 	}
-}
+};
+
 /**
  *GUI
  */
-function modelingTest() {ctx.runOnUiThread(new java.lang.Runnable({run:function(){try{
-	var dl = new android.app.AlertDialog.Builder(ctx);
+var Gui = {};
+Gui.modelingTest = function() {ctx.runOnUiThread(new java.lang.Runnable({run:function(){try{
+	var dl = new android.app.AlertDialog.Builder(ctx, 3);
+	var sv = new android.widget.ScrollView(ctx);
+	dl.setTitle("원하는 모델링을 선택하세요...");
 	var la = new android.widget.LinearLayout(ctx);
 	la.setOrientation(1);
 	var arr = [];
@@ -346,11 +351,33 @@ function modelingTest() {ctx.runOnUiThread(new java.lang.Runnable({run:function(
 	}
 	setArrayButton(la,arr,new android.view.View.OnClickListener() {onClick: function(view, event) {try {
 		Model.testModelSpawn(new java.io.File(_MAIN_PATH.getAbsolutePath() + "/" + view.getText()));
-		dl.dismiss();
+		//dl.dismiss();
+	}catch(e) {
+		clientMessage(e.lineNumber + " " + e);
+	}}}, new android.view.View.OnLongClickListener() {onLongClick: function(view, event) {try {
+		Gui.modelDelete(new java.io.File(_MAIN_PATH.getAbsolutePath() + "/" + view.getText()));
+		return true;
 	}catch(e) {
 		clientMessage(e.lineNumber + " " + e);
 	}}});
-	dl.setView(la);
+	sv.addView(la);
+	dl.setView(sv);
+	dl.create();
+	dl.show();
+}catch(e) {
+	clientMessage(e.lineNumber + " " + e);
+}}}))};
+
+Gui.modelDelete = function(target) {ctx.runOnUiThread(new java.lang.Runnable({run:function(){try{
+	var dl = new android.app.AlertDialog.Builder(ctx, 3);
+	dl.setTitle("해당 모델링을 삭제합니까?");
+	var tv = new android.widget.TextView(ctx);
+	tv.setText(target.getAbsolutePath());
+	dl.setView(tv);
+	dl.setNegativeButton("Back", null);
+	dl.setPositiveButton("Delete",new android.content.DialogInterface.OnClickListener({onClick:function(){
+		target.delete();
+	}}));
 	dl.create();
 	dl.show();
 }catch(e) {
