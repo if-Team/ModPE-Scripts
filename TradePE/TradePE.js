@@ -35,18 +35,18 @@ Trade.init = function() {
 		mainLayout.addView(costt);
 		var arrow = Utils.renderArrow(108, (Utils.getContext().getScreenHeight()/Utils.FOUR)/2);
 		mainLayout.addView(arrow);
-		var left = Utils.showButton(170, 60, 18, 50, "<", function(thiz) {
+		var left = Utils.showButton(170, 60, 18, 50, "<", function() {
 			Utils.minusPage();
 			Utils.updateTradeList(name, itemback2, costt);
 		});
 		mainLayout.addView(left);
-		var right = Utils.showButton(170+18+40+32, 60, 18, 50, ">", function(thiz) {
+		var right = Utils.showButton(170+18+40+32, 60, 18, 50, ">", function() {
 			Utils.plusPage();
 			Utils.updateTradeList(name, itemback2, costt);
 		});
 		mainLayout.addView(right);
 		var buy = Utils.showButton(170, 130, 64+36+8, 32, "Buy!", function(thiz) {
-			
+			Utils.buyThing();
 		});
 		mainLayout.addView(buy);
 		var itemback2 = Utils.showItemBackground(170+18+16, 65);
@@ -68,6 +68,7 @@ Trade.init = function() {
 
 Trade.showScreen = function() {
 	Utils.createUiThread(function(ctx) {
+		Trade.EME_COUNT = Utils.getAllEmeralds();
 		Trade.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
 	});
 }
@@ -314,21 +315,46 @@ Utils.updateTradeList = function(namev, itemv, costv) {
 };
 
 Utils.getAllEmeralds = function() {
-	
+	var result = 0;
+	for(var i = 9; i <= 44; i++) {
+		if(Player.getInventorySlot(i) === 388)
+			result+=Player.getInventorySlotCount(i);
+	}
+	return result;
 };
 
+Utils.buyThing = function() {
+	if(Trade.EME_COUNT > Trade.Items.cost[Trade.PAGE]) {
+		Trade.EME_COUNT-=Trade.Items.cost[Trade.PAGE];
+		//TODO: remake the addItemInventory function
+		//      make warning function
+		addItemInventroy(388, -Trade.Items.cost[Trade.PAGE], 0);
+		addItemInventory(Trade.Items.id[Trade.PAGE], 1, Trade.Items.dam[Trade.PAGE]);
+	} else
+		print("Not Enough Emeralds!");
+};
+
+Utils.warn(text) {
+	Utils.createUiThread(function(ctx) {
+	//	var pw = new android.widget.PopupWindow(
+	});
+}
 
 
 
-function selectLevelHook() {
+
+
+function modTick() {
 	if(Trade.META == null)
 		eval("Trade.META = "+new java.lang.String(ModPE.getBytesFromTexturePack("images/items.meta"))+";");
 	if(Trade.META_MAPPED == null)
 		Trade.META_MAPPED = Trade.META.map(function(e) {
 			return e.name;
 		});
-	if(Trade.MAINPW == null)
+	if(Trade.MAINPW == null) {
+		Trade.MAINPW = 0;
 		Trade.init();
+	}
 }
 
 function useItem() {
