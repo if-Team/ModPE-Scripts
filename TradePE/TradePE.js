@@ -5,13 +5,16 @@ Trade.PAGE = 0;
 Trade.EME_COUNT = 0;
 Trade.META = null;
 Trade.META_MAPPED = null;
+Trade.LANG_KEY = null;
+Trade.LANG_DATA = null;
 
 Trade.Items = {
-    name: ["Apple", "Arrow", "Wooden Sword"],
+    name: ["item.apple.name", "item.arrow.name", "item.swordWood.name"],
     meta: [["apple",0],["arrow",0],["sword",0]],
     id: [260, 262, 268],
     dam: [0,0,0],
-    cost: [1,2,3]
+    cost: [1,2,3],
+	count: [1,1,1]
 };
 
 Trade.MAINPW = null;
@@ -25,39 +28,43 @@ Trade.init = function() {
         mainLayout.addView(back);
         var header = Utils.showHeader("Trade");
         mainLayout.addView(header);
-        var itemback = Utils.showItemBackground(35, 64);
+        var itemback = Utils.showItemBackground(25+18+16, 65);
         mainLayout.addView(itemback);
-        var emerald = Utils.renderItem("emerald", 0, 38, 67, 2);
+        var emerald = Utils.renderItem("emerald", 0, 25+18+16+3, 68, 2);
         mainLayout.addView(emerald);
-        var cost = Utils.renderItem("emerald", 0, 170+18+40, 60+50+2, 1);
+        var cost = Utils.justText("", 25+18+16+4, 69);
         mainLayout.addView(cost);
-        var costt = Utils.justText("", 170+18+40+16, 60+50+8);
-        mainLayout.addView(costt);
-        var arrow = Utils.renderArrow(108, (Utils.getContext().getScreenHeight()/Utils.FOUR)/2);
+        var arrow = Utils.renderArrow(141, 60+17);
         mainLayout.addView(arrow);
-        var left = Utils.showButton(170, 60, 18, 50, "<", function() {
+        var left = Utils.showButton(25, 60, 18, 50, "<", function() {
             Utils.minusPage();
-            Utils.updateTradeList(name, itemback2, costt);
+            Utils.updateTradeList(name, itemback2, cost, count);
         });
         mainLayout.addView(left);
         var right = Utils.showButton(170+18+40+32, 60, 18, 50, ">", function() {
             Utils.plusPage();
-            Utils.updateTradeList(name, itemback2, costt);
+            Utils.updateTradeList(name, itemback2, cost, count);
         });
         mainLayout.addView(right);
-        var buy = Utils.showButton(170, 130, 64+36+8, 32, "Buy!", function() {
+        var buy = Utils.showButton(170, 130, 64+36+8, 32, "Buy", function() {
             Utils.buyThing();
         });
         mainLayout.addView(buy);
-        var itemback2 = Utils.showItemBackground(170+18+16, 65);
+		var sell = Utils.showButton(25, 130, 64+36+8, 32, "Sell", function() {
+            
+        });
+        mainLayout.addView(sell);
+        var itemback2 = Utils.showItemBackground(204, 65);
         mainLayout.addView(itemback2);
+		var count = Utils.justText("", 204+4, 69);
+		mainLayout.addView(count);
         var dismiss = Utils.showButton(4, 4, 38, 18, "Back", function() {
             mainPw.dismiss();
         });
         mainLayout.addView(dismiss);
         var name = Utils.justText("", 170, 40, 36+40+32);
         mainLayout.addView(name);
-        Utils.updateTradeList(name, itemback2, costt);
+        Utils.updateTradeList(name, itemback2, cost, count);
         mainPw.setContentView(mainLayout);
         mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
         mainPw.setWidth(ctx.getScreenWidth());
@@ -306,12 +313,13 @@ Utils.getItemImage = function(text, data) {
     return android.graphics.Bitmap.createBitmap(items, uvs[0]*items.getWidth(), uvs[1]*items.getHeight(), uvs[2]*items.getWidth()-uvs[0]*items.getWidth(), uvs[3]*items.getHeight()-uvs[1]*items.getHeight());
 };
 
-Utils.updateTradeList = function(namev, itemv, costv) {
+Utils.updateTradeList = function(namev, itemv, costv, countv) {
     var page = Trade.PAGE;
-    namev.setText(Trade.Items.name[page]);
+    namev.setText(Lang.getData(Trade.Items.name[page]));
     var item = Utils.getItemImage(Trade.Items.meta[page][0], Trade.Items.meta[page][1]);
     itemv.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*1.6, item.getHeight()*Utils.FOUR*1.6, false));
-    costv.setText("x "+Trade.Items.cost[page]);
+    costv.setText(""+Trade.Items.cost[page]);
+	countv.setText(""+Trade.Items.count[page]);
 };
 
 Utils.getAllEmeralds = function() {
@@ -351,6 +359,26 @@ Utils.warn = function(txt) {
     });
 };
 
+var Lang = {};
+
+Lang.readLang = function() {
+	var lang = new java.lang.String(ModPE.getBytesFromTexturePack("lang/en_US.lang"))+"";
+	var split1 = lang.split("\n");
+	var result = split1.map(function(e) {
+		return e.split("=");
+	});
+	Trade.LANG_KEY = result.map(function(e) {
+		return e[0];
+	});
+	Trade.LANG_DATA = result.map(function(e) {
+		return e[1];
+	});
+};
+
+Lang.getData = function(key) {
+	return Trade.LANG_DATA[Trade.LANG_KEY.indexOf(key)];
+};
+
 
 
 
@@ -366,6 +394,11 @@ function modTick() {
         Trade.MAINPW = 0;
         Trade.init();
     }
+	if(Trade.LANG_KEY == null&&Trade.LANG_DATA == null) {
+		Trade.LANG_KEY = 0;
+		Trade.LANG_DATA = 0;
+		Lang.readLang();
+	}
 }
 
 function useItem() {
