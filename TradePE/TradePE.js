@@ -1,6 +1,8 @@
 //TODO: make
 Trade = {};
 
+//Variables
+Trade.HANDING_EME = false;
 Trade.PAGE = 0;
 Trade.EME_COUNT = 0;
 Trade.META = null;
@@ -8,15 +10,18 @@ Trade.META_MAPPED = null;
 Trade.LANG_KEY = null;
 Trade.LANG_DATA = null;
 
+//Trade items
 Trade.Items = {
     name: ["item.apple.name", "item.arrow.name", "item.swordWood.name"],
     meta: [["apple",0],["arrow",0],["sword",0]],
     id: [260, 262, 268],
     dam: [0,0,0],
     cost: [1,2,3],
-	count: [1,1,1]
+    count: [1,1,1]
 };
 
+//Gui
+Trade.INTERACTPW = null;
 Trade.MAINPW = null;
 
 Trade.init = function() {
@@ -50,14 +55,14 @@ Trade.init = function() {
             Utils.buyThing();
         });
         mainLayout.addView(buy);
-		var sell = Utils.showButton(25, 130, 64+36+8, 32, "Sell", function() {
+        var sell = Utils.showButton(25, 130, 64+36+8, 32, "Sell", function() {
             
         });
         mainLayout.addView(sell);
         var itemback2 = Utils.showItemBackground(204, 65);
         mainLayout.addView(itemback2);
-		var count = Utils.justText("", 204+4, 69);
-		mainLayout.addView(count);
+        var count = Utils.justText("", 204+4, 69);
+        mainLayout.addView(count);
         var dismiss = Utils.showButton(4, 4, 38, 18, "Back", function() {
             mainPw.dismiss();
         });
@@ -197,6 +202,7 @@ Utils.showHeader = function(text) {
 Utils.showButton = function(x, y, width, height, text, onclick) {
     var ctx = Utils.getContext();
     var button = new android.widget.Button(ctx);
+    button.setPadding(0, 0, 0, 0);
     var params = new android.widget.RelativeLayout.LayoutParams(width*Utils.FOUR, height*Utils.FOUR);
     params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
     button.setLayoutParams(params);
@@ -204,7 +210,12 @@ Utils.showButton = function(x, y, width, height, text, onclick) {
     list.addState([android.R.attr.state_pressed], Utils.getStretchedImage(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 0, 32, 8, 8), 8*Utils.FOUR, 8*Utils.FOUR, false), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 4*Utils.FOUR, width*Utils.FOUR, height*Utils.FOUR));
     list.addState([], Utils.getStretchedImage(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 8, 32, 8, 8), 8*Utils.FOUR, 8*Utils.FOUR, false), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 4*Utils.FOUR, width*Utils.FOUR, height*Utils.FOUR));
     button.setBackgroundDrawable(list);
-    button.setText(text);
+    if(Utils.hasNonAscii(text)) {
+        var unclicked = Utils.getStringBuilder(text, "#e1e1e1");
+        button.setText(unclicked);
+        var clicked = Utils.getStringBuilder(text, "#ffffa1");
+    } else
+        button.setText(text);
     button.setTypeface(Utils.getTypeface());
     button.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
     button.setTextSize(4*Utils.FOUR);
@@ -215,16 +226,25 @@ Utils.showButton = function(x, y, width, height, text, onclick) {
             switch(event.getAction()) {
                 case android.view.MotionEvent.ACTION_DOWN:
                     view.setTextColor(android.graphics.Color.parseColor("#ffffa1"));
+                    if(Utils.hasNonAscii(text))
+                        button.setText(clicked);
                     break;
                 case android.view.MotionEvent.ACTION_MOVE:
                     if(event.getX() < 0 || event.getY() <0 || event.getX() > width*Utils.FOUR || event.getY() > height*Utils.FOUR) {
                         view.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
+                        if(Utils.hasNonAscii(text))
+                            button.setText(unclicked);
                         current = true;
-                    } else if(!current)
+                    } else if(!current) {
+                        if(Utils.hasNonAscii(text))
+                            button.setText(clicked);
                         view.setTextColor(android.graphics.Color.parseColor("#ffffa1"));
+                    }
                     break;
                 case android.view.MotionEvent.ACTION_UP:
                     view.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
+                    if(Utils.hasNonAscii(text))
+                        button.setText(unclicked);
                     if(current == false && !(event.getX() < 0 || event.getY() <0 || event.getX() > width*Utils.FOUR || event.getY() > height*Utils.FOUR)) {
                         if(typeof onclick === "function")
                             onclick();
@@ -270,7 +290,7 @@ Utils.justText = function(str, x, y, width) {
         params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
     params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
     text.setLayoutParams(params);
-    text.setText(str);
+    text.setText(Utils.hasNonAscii(str) ? Utils.getStringBuilder(str) : str);
     text.setGravity(android.view.Gravity.CENTER);
     text.setTypeface(Utils.getTypeface());
     text.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
@@ -315,11 +335,14 @@ Utils.getItemImage = function(text, data) {
 
 Utils.updateTradeList = function(namev, itemv, costv, countv) {
     var page = Trade.PAGE;
-    namev.setText(Lang.getData(Trade.Items.name[page]));
+    if(Utils.hasNonAscii(Lang.getData(Trade.Items.name[page])))
+        namev.setText(Utils.getStringBuilder(Lang.getData(Trade.Items.name[page]), "#e1e1e1"));
+    else
+        namev.setText(Lang.getData(Trade.Items.name[page]));
     var item = Utils.getItemImage(Trade.Items.meta[page][0], Trade.Items.meta[page][1]);
     itemv.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*1.6, item.getHeight()*Utils.FOUR*1.6, false));
     costv.setText(""+Trade.Items.cost[page]);
-	countv.setText(""+Trade.Items.count[page]);
+    countv.setText(""+Trade.Items.count[page]);
 };
 
 Utils.getAllEmeralds = function() {
@@ -335,9 +358,8 @@ Utils.buyThing = function() {
     if(Trade.EME_COUNT > Trade.Items.cost[Trade.PAGE]) {
         Trade.EME_COUNT-=Trade.Items.cost[Trade.PAGE];
         //TODO: remake the addItemInventory function
-        //      make warning function
         addItemInventory(388, -Trade.Items.cost[Trade.PAGE], 0);
-        addItemInventory(Trade.Items.id[Trade.PAGE], 1, Trade.Items.dam[Trade.PAGE]);
+        addItemInventory(Trade.Items.id[Trade.PAGE], Trade.Items.count[Trade.PAGE], Trade.Items.dam[Trade.PAGE]);
     } else
         Utils.warn("Not Enough Emeralds!");
 };
@@ -359,24 +381,96 @@ Utils.warn = function(txt) {
     });
 };
 
+Utils.getStringBuilder = function(text, color) {
+    if(text.charCodeAt(text.length-1) == 13)
+        text = text.substring(0, text.length-1);
+    if(color != null)
+        color = android.graphics.Color.parseColor(color);
+    var divide = function(a) {
+        var b = 0;
+        if (a > 256)
+            b = a % 256;
+        else
+            b = a;
+        return [b, Math.floor(a / 256)];    
+    };
+    var builder = new android.text.SpannableStringBuilder(text);
+    for(var i = 0; i < text.length; i++) {
+        if(text.charAt(i) == " ")
+            continue;
+        var d = divide(text.charCodeAt(i));
+        var x = (((parseInt(d[0], 10)) % 16)) * 16;
+        var y = Math.floor(parseInt(d[0], 10) / 16) * 16;
+        var num = parseInt(d[1], 10).toString(16).toUpperCase();
+        if(num.length < 2)
+            num = "0"+num;
+        var font = android.graphics.BitmapFactory.decodeStream(ModPE.openInputStreamFromTexturePack("images/font/glyph_"+num+".png"));
+        var bitmap = Utils.trimImage(font, x, y, 15, 16);
+        var result = android.graphics.Bitmap.createBitmap(16, 18, android.graphics.Bitmap.Config.ARGB_8888);
+        var canvas = new android.graphics.Canvas(result);
+        var p = new android.graphics.Paint();
+        var p2 = new android.graphics.Paint();
+        p.setColorFilter(new android.graphics.PorterDuffColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY));
+        canvas.drawBitmap(bitmap, 2, 2, p);
+        p2.setColorFilter(new android.graphics.PorterDuffColorFilter(color, android.graphics.PorterDuff.Mode.MULTIPLY));
+        canvas.drawBitmap(bitmap, 0, 0, p2);
+        builder.setSpan(new android.text.style.ImageSpan(Utils.getContext(), android.graphics.Bitmap.createScaledBitmap(result, 8*Utils.FOUR, 9*Utils.FOUR, false)), i, i+1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
+    return builder;
+};
+
+Utils.hasNonAscii = function(str) {
+    return str.split("").some(function(e) {
+        return e.charCodeAt(0) > 255;
+    });
+};
+
+Utils.interactInit = function() {
+    var text = new android.widget.TextView(Utils.getContext());
+    text.setText("Trade");
+    text.setGravity(android.view.Gravity.CENTER);
+    text.setTypeface(Utils.getTypeface());
+    text.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
+    text.setTextSize(4*Utils.FOUR);
+    text.setOnClickListener(new android.view.View.OnClickListener({
+        onClick: function() {
+            Trade.showScreen();
+        }
+    }));
+    var drawable = new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getGui(), 0, 164, 118, 20), 118*0.75*Utils.FOUR, 20*Utils.FOUR, false));
+    drawable.setAlpha(200);
+    var pw = new android.widget.PopupWindow(Utils.getContext());
+    pw.setContentView(text);
+    pw.setWidth(118*0.75*Utils.FOUR);
+    pw.setHeight(20*Utils.FOUR);
+    pw.setBackgroundDrawable(drawable);
+    Trade.INTERACTPW = pw;
+};
+
+Utils.showInteractPw = function() {
+    Utils.createUiThread(function(ctx) {
+        Trade.INTERACTPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER | android.view.Gravity.BOTTOM, 0, 24*Utils.FOUR);
+    });
+};
+
 var Lang = {};
 
 Lang.readLang = function() {
-	var lang = new java.lang.String(ModPE.getBytesFromTexturePack("lang/en_US.lang"))+"";
-	var split1 = lang.split("\n");
-	var result = split1.map(function(e) {
-		return e.split("=");
-	});
-	Trade.LANG_KEY = result.map(function(e) {
-		return e[0];
-	});
-	Trade.LANG_DATA = result.map(function(e) {
-		return e[1];
-	});
+    var lang = new java.lang.String(ModPE.getBytesFromTexturePack("lang/en_US.lang"))+"";
+    var split1 = lang.split("\n");
+    var result = split1.map(function(e) {
+        return e.split("=");
+    });
+    Trade.LANG_KEY = result.map(function(e) {
+        return e[0];
+    });
+    Trade.LANG_DATA = result.map(function(e) {
+        return e[1];
+    });
 };
 
 Lang.getData = function(key) {
-	return Trade.LANG_DATA[Trade.LANG_KEY.indexOf(key)];
+    return Trade.LANG_DATA[Trade.LANG_KEY.indexOf(key)];
 };
 
 
@@ -384,6 +478,7 @@ Lang.getData = function(key) {
 
 
 function modTick() {
+    //Initialing
     if(Trade.META == null)
         eval("Trade.META = "+new java.lang.String(ModPE.getBytesFromTexturePack("images/items.meta"))+";");
     if(Trade.META_MAPPED == null)
@@ -394,15 +489,32 @@ function modTick() {
         Trade.MAINPW = 0;
         Trade.init();
     }
-	if(Trade.LANG_KEY == null&&Trade.LANG_DATA == null) {
-		Trade.LANG_KEY = 0;
-		Trade.LANG_DATA = 0;
-		Lang.readLang();
-	}
+    if(Trade.INTERACTPW == null) {
+        Trade.INTERACTPW = 0;
+        Utils.interactInit();
+    }
+    if(Trade.LANG_KEY == null && Trade.LANG_DATA == null) {
+        Trade.LANG_KEY = 0;
+        Trade.LANG_DATA = 0;
+        Lang.readLang();
+    }
+    
+    //Handing Emerald
+    if(Player.getCarriedItem() == 388)
+        Trade.HANDING_EME = true;
+    if(Trade.HANDING_EME && Entity.getEntityTypeId(Player.getPointedEntity()) == 15) {
+        if(!Trade.INTERACTPW.isShowing()) {
+            Utils.showInteractPw();
+        }
+    }
+    if(Trade.HANDING_EME && (Player.getCarriedItem() != 388 || Entity.getEntityTypeId(Player.getPointedEntity()) != 15)) {
+        Trade.HANDING_EME = false;
+        Utils.createUiThread(function() {
+            Trade.INTERACTPW.dismiss();
+        });
+    }
 }
 
-function useItem() {
-    Trade.showScreen();
+function newLevel() {
+    Player.addItemCreativeInv(388, 1, 0);
 }
-
-void(modTick); void(useItem);
