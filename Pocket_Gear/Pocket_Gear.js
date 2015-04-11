@@ -8,8 +8,7 @@ var _FONT = new java.io.File(_MAIN_MOD_DIR, "minecraft.ttf");
 var _SETTING = new java.io.File(_MOD_DIR, "config.json");
 function _MAP_DIR() {return new java.io.File(_SD_CARD, "games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/mods")};
 function _MAP_STEP_DATA() {return new java.io.File(_MAP_DIR(), "gear.json")};
-var uiThread = function(fc) {return ctx.runOnUiThread(new java.lang.Runnable({run: fc}))};
-var thread = function(fc) {return new java.lang.Thread(new java.lang.Runnable( {run: fc}))};
+
 
 //마인크래프트 리소스
 var mcpeCPC = ctx.createPackageContext("com.mojang.minecraftpe", android.content.Context.CONTEXT_IGNORE_SECURITY);
@@ -282,6 +281,20 @@ function toasts(str) {
 	));
 }
 
+function uiThread(fc) {
+	return ctx.runOnUiThread(new java.lang.Runnable({run: fc}))
+};
+function thread(fc) {
+	return new java.lang.Thread(new java.lang.Runnable( {run: fc}))
+};
+function multiThread(fc) {
+	if(Level.getWorldDir() !== null) {
+		new java.lang.Thread(new java.lang.Runnable( {run: fc})).start()
+	}else {
+		uiThread(fc)
+	}
+};
+
 if(!_FONT.exists()) {
 	thread( function(){try {
 		downloadFile(_FONT, "https://www.dropbox.com/s/y1o46b2jkbxwl3o/minecraft.ttf?dl=1");
@@ -290,58 +303,58 @@ if(!_FONT.exists()) {
 	}}).start();
 };
 
-//Pedometer_Step function
-var Pms = {};
-Pms.mainWindow = null;
-Pms.saveCount = 0;
-Pms.mod = 2;
-//RECENT, OVERALL, CLOCK
+//PocketGear function
+var Gear = {};
+Gear.mainWindow = null;
+Gear.saveCount = 0;
+Gear.mod = 3;
+//RECENT, OVERALL, CLOCK, INGAME_CLOCK
 
-Pms.layout = new android.widget.RelativeLayout(ctx);
-Pms.layout.setBackgroundDrawable(mcpeBGT9);
-Pms.layout.setPadding(dp(8), dp(8), dp(8), dp(8));
+Gear.layout = new android.widget.RelativeLayout(ctx);
+Gear.layout.setBackgroundDrawable(mcpeBGT9);
+Gear.layout.setPadding(dp(8), dp(8), dp(8), dp(8));
 
-Pms.textView = new android.widget.TextView(ctx);
-Pms.textView.setId(721);
-Pms.textView_param = new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-Pms.textView.setLayoutParams(Pms.textView_param);
-Pms.textView.setBackgroundDrawable(mcpeTextView9);
-Pms.textView.setPadding(dp(4), dp(4), dp(4), dp(4));
-Pms.textView.setGravity(android.view.Gravity.RIGHT);
-Pms.textView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, dp(10));
-Pms.textView.setTextColor(android.graphics.Color.WHITE);
-Pms.textView.getPaint().setAntiAlias(false);
+Gear.textView = new android.widget.TextView(ctx);
+Gear.textView.setId(721);
+Gear.textView_param = new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+Gear.textView.setLayoutParams(Gear.textView_param);
+Gear.textView.setBackgroundDrawable(mcpeTextView9);
+Gear.textView.setPadding(dp(4), dp(4), dp(4), dp(4));
+Gear.textView.setGravity(android.view.Gravity.RIGHT);
+Gear.textView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, dp(10));
+Gear.textView.setTextColor(android.graphics.Color.WHITE);
+Gear.textView.getPaint().setAntiAlias(false);
 if(_FONT.exists()) {
-	Pms.textView.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"));
+	Gear.textView.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"));
 }
-Pms.textView.setText("Loading...");
-Pms.layout.addView(Pms.textView);
+Gear.textView.setText("Loading...");
+Gear.layout.addView(Gear.textView);
 
-Pms.moveButton = new android.widget.Button(ctx);
-Pms.moveButton.setId(722);
-Pms.moveButton_param = new android.widget.RelativeLayout.LayoutParams(dp(40), dp(20));
-Pms.moveButton_param.setMargins(0,dp(2),0,0);
-Pms.moveButton_param.addRule(android.widget.RelativeLayout.BELOW, Pms.textView.getId());
-Pms.moveButton.setLayoutParams(Pms.moveButton_param);
-//Pms.moveButton.setAlpha(0);
-Pms.moveButton.setPadding(dp(4),dp(1),0,0);
-Pms.moveButton_drawable = new android.graphics.drawable.GradientDrawable();
-Pms.moveButton_drawable.mutate().setColor(android.graphics.Color.rgb(0x3a, 0x39, 0x3a));
-Pms.moveButton_drawable.setCornerRadius(10);
-Pms.moveButton.setBackgroundDrawable(Pms.moveButton_drawable);
-Pms.moveButton.setOnTouchListener(new android.view.View.OnTouchListener({ onTouch: function(view, event) {
+Gear.moveButton = new android.widget.Button(ctx);
+Gear.moveButton.setId(722);
+Gear.moveButton_param = new android.widget.RelativeLayout.LayoutParams(dp(40), dp(20));
+Gear.moveButton_param.setMargins(0,dp(2),0,0);
+Gear.moveButton_param.addRule(android.widget.RelativeLayout.BELOW, Gear.textView.getId());
+Gear.moveButton.setLayoutParams(Gear.moveButton_param);
+//Gear.moveButton.setAlpha(0);
+Gear.moveButton.setPadding(dp(4),dp(1),0,0);
+Gear.moveButton_drawable = new android.graphics.drawable.GradientDrawable();
+Gear.moveButton_drawable.mutate().setColor(android.graphics.Color.rgb(0x3a, 0x39, 0x3a));
+Gear.moveButton_drawable.setCornerRadius(10);
+Gear.moveButton.setBackgroundDrawable(Gear.moveButton_drawable);
+Gear.moveButton.setOnTouchListener(new android.view.View.OnTouchListener({ onTouch: function(view, event) {
 	switch(event.action) {
 		case android.view.MotionEvent.ACTION_DOWN:
-				Pms.viewX = event.getX();
-				Pms.viewY = event.getY();
+				Gear.viewX = event.getX();
+				Gear.viewY = event.getY();
 				break;
 		case android.view.MotionEvent.ACTION_MOVE:
 			var screenX = event.getRawX();
 			var screenY = event.getRawY();
-			var x = screenX - Pms.viewX;
-			var y = screenY - Pms.viewY;
+			var x = screenX - Gear.viewX;
+			var y = screenY - Gear.viewY;
 			uiThread(function() {try {
-			Pms.mainWindow.update(x, y-dp(40), Pms.mainWindow.getWidth(), Pms.mainWindow.getHeight(), true);
+			Gear.mainWindow.update(x - dp(17), y-dp(30), Gear.mainWindow.getWidth(), Gear.mainWindow.getHeight(), true);
 			}catch(e) {
 				showError(e);
 			}});
@@ -349,24 +362,24 @@ Pms.moveButton.setOnTouchListener(new android.view.View.OnTouchListener({ onTouc
 		}
 	return true;
 }}));
-Pms.moveButton.setGravity(android.view.Gravity.CENTER);
-Pms.moveButton.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, dp(8));
-Pms.moveButton.setTextColor(android.graphics.Color.WHITE);
-Pms.moveButton.getPaint().setAntiAlias(false);
+Gear.moveButton.setGravity(android.view.Gravity.CENTER);
+Gear.moveButton.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, dp(8));
+Gear.moveButton.setTextColor(android.graphics.Color.WHITE);
+Gear.moveButton.getPaint().setAntiAlias(false);
 if(_FONT.exists()) {
-	Pms.moveButton.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"));}
-Pms.moveButton.setText("Gear");
-Pms.layout.addView(Pms.moveButton);
+	Gear.moveButton.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"));}
+Gear.moveButton.setText("Gear");
+Gear.layout.addView(Gear.moveButton);
 
-Pms.resetButton = new android.widget.Button(ctx);
-Pms.resetButton.setId(723);
-Pms.resetButton.setBackgroundDrawable(mcpeMiniBtn9);
-Pms.resetButton_param = new android.widget.RelativeLayout.LayoutParams(dp(20), dp(20));
-Pms.resetButton_param.setMargins(dp(4),dp(2),0,0);
-Pms.resetButton_param.addRule(android.widget.RelativeLayout.BELOW, Pms.textView.getId());
-Pms.resetButton_param.addRule(android.widget.RelativeLayout.RIGHT_OF, Pms.moveButton.getId());
-Pms.resetButton.setLayoutParams(Pms.resetButton_param);
-Pms.resetButton.setOnTouchListener( new android.view.View.OnTouchListener({ onTouch: 
+Gear.resetButton = new android.widget.Button(ctx);
+Gear.resetButton.setId(723);
+Gear.resetButton.setBackgroundDrawable(mcpeMiniBtn9);
+Gear.resetButton_param = new android.widget.RelativeLayout.LayoutParams(dp(20), dp(20));
+Gear.resetButton_param.setMargins(dp(4),dp(2),0,0);
+Gear.resetButton_param.addRule(android.widget.RelativeLayout.BELOW, Gear.textView.getId());
+Gear.resetButton_param.addRule(android.widget.RelativeLayout.RIGHT_OF, Gear.moveButton.getId());
+Gear.resetButton.setLayoutParams(Gear.resetButton_param);
+Gear.resetButton.setOnTouchListener( new android.view.View.OnTouchListener({ onTouch: 
 	function(view, event){
 		switch(event.action){
 			case android.view.MotionEvent.ACTION_DOWN:
@@ -381,43 +394,47 @@ Pms.resetButton.setOnTouchListener( new android.view.View.OnTouchListener({ onTo
 		return false;
 	}
 }));
-Pms.resetButton.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
-		Pms.currentStepLock = Pms.floorStep;
+Gear.resetButton.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+		Gear.currentStepLock = Gear.floorStep;
 		uiThread(function() {try {
-			Pms.mod = 0;
-			Pms.textView.setTextColor(android.graphics.Color.WHITE);
-			Pms.textView.setText((Pms.floorStep - Pms.currentStepLock) + "");
+			if(Gear.mod !== 0) {
+				Gear.mod = 0;
+				 saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+			}
+			Gear.textView.setTextColor(android.graphics.Color.WHITE);
+			Gear.textView.setText((Gear.floorStep - Gear.currentStepLock) + "");
 		}catch(e) {
 			showError(e);
 		}});
-		saveData(_MAP_STEP_DATA(), "CURRENT_STEP_LOCK", Pms.currentStepLock);
+		saveData(_MAP_STEP_DATA(), "CURRENT_STEP_LOCK", Gear.currentStepLock);
 	}catch(e) {
 		showError(e);
 	}}});
-Pms.resetButton.setOnLongClickListener(new android.view.View.OnLongClickListener() {onLongClick: function(view, event) {try {
+Gear.resetButton.setOnLongClickListener(new android.view.View.OnLongClickListener() {onLongClick: function(view, event) {try {
 	print("test...");
 	return true;
 }catch(e) {
 	showError();
 }}});
-Pms.layout.addView(Pms.resetButton);
+Gear.layout.addView(Gear.resetButton);
 
-Pms.mainWindow = new android.widget.PopupWindow(Pms.layout, dp(80) , dp(55), false);
-Pms.mainWindow.setSplitTouchEnabled(true);
-Pms.mainWindow.setOutsideTouchable(true);
-//Pms.mainWindow.setTouchable(false);
+Gear.mainWindow = new android.widget.PopupWindow(Gear.layout, dp(82) , dp(55), false);
+Gear.mainWindow.setSplitTouchEnabled(true);
+Gear.mainWindow.setOutsideTouchable(true);
+//Gear.mainWindow.setTouchable(false);
 
-Pms.mainDialog = new android.app.AlertDialog.Builder(ctx);
-Pms.mainDialogScroll = new android.widget.ScrollView(ctx);
-Pms.mainDialog.setTitle("Gear setting");
-Pms.mainDialogLayout = new android.widget.LinearLayout(ctx);
-Pms.mainDialogLayout.setOrientation(1);
+Gear.mainDialog = new android.app.AlertDialog.Builder(ctx);
+Gear.mainDialogScroll = new android.widget.ScrollView(ctx);
+Gear.mainDialog.setTitle("Gear setting");
+Gear.mainDialogLayout = new android.widget.LinearLayout(ctx);
+Gear.mainDialogLayout.setOrientation(1);
 
 function newLevel(str) {
 	if(Level.getWorldDir() === null) {
 		//MultiPlayer
-		Pms.step = 0;
-		Pms.floorStep = 0;
+		Gear.step = 0;
+		Gear.floorStep = 0;
+		Gear.mod = 0;
 	}else {
 		if(!_MAP_DIR().exists()) {
 			_MAP_DIR().mkdir();
@@ -425,34 +442,35 @@ function newLevel(str) {
 		if(!_MAP_STEP_DATA().exists()) {
 			_MAP_STEP_DATA().createNewFile();
 		}
-		Pms.step = parseInt(loadData(_MAP_STEP_DATA(), "STEP"));
-		if(Pms.step + "" == "NaN") {
-			Pms.step = 0;
+		Gear.step = parseInt(loadData(_MAP_STEP_DATA(), "STEP"));
+		if(Gear.step + "" == "NaN") {
+			Gear.step = 0;
 			saveData(_MAP_STEP_DATA(), "STEP", 0);
 		}
-		Pms.floorStep = Math.floor(Pms.step);
-		Pms.currentStepLock = parseInt(loadData(_MAP_STEP_DATA(), "CURRENT_STEP_LOCK"));
-		if(Pms.currentStepLock + "" === "NaN") {
-			Pms.currentStepLock = 0;
-			saveData(_MAP_STEP_DATA(), "CURRENT_STEP_LOCK", Pms.currentStepLock);
+		Gear.floorStep = Math.floor(Gear.step);
+		Gear.currentStepLock = parseInt(loadData(_MAP_STEP_DATA(), "CURRENT_STEP_LOCK"));
+		if(Gear.currentStepLock + "" === "NaN") {
+			Gear.currentStepLock = 0;
+			saveData(_MAP_STEP_DATA(), "CURRENT_STEP_LOCK", Gear.currentStepLock);
+		}
+		Gear.mod = parseInt(loadData(_MAP_STEP_DATA(), "MOD"));
+		if(Gear.mod + "" === "NaN") {
+			Gear.mod = 0;
 		}
 	}
 	uiThread(function() {try {
-		Pms.mainWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, ctx.getWindowManager().getDefaultDisplay().getWidth(), ctx.getWindowManager().getDefaultDisplay().getHeight());
-		/*try {
-			Pms.textView.setText((Pms.floorStep - Pms.currentStepLock) + "");
-		}catch(e) {
-		};*/
+		Gear.mainWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, ctx.getWindowManager().getDefaultDisplay().getWidth() - dp(82), ctx.getWindowManager().getDefaultDisplay().getHeight() - dp(55));
 	}catch(e) {
 		showError(e);
 	}});
 }
 
 function leaveGame() {
-	if(Pms.mainWindow != null) {
+	saveData(_MAP_STEP_DATA(), "STEP", Gear.floorStep);
+	saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+	if(Gear.mainWindow != null) {
 		uiThread(function() {try {
-			Pms.mainWindow.dismiss();
-			Pms.mainWindow = null;
+			Gear.mainWindow.dismiss();
 		}catch(e) {
 			showError(e);
 		}});
@@ -460,28 +478,28 @@ function leaveGame() {
 }
 
 function modTick() {
-	switch(Pms.mod) {
+	switch(Gear.mod) {
 		case 0:
 		case 1:
 			var x = Entity.getVelX(Player.getEntity());
 			var z = Entity.getVelZ(Player.getEntity());
 			if(x !== 0| z !== 0) {
-				Pms.step += Math.sqrt(Math.pow(x, 2) + Math.pow(z, 2));
-				if(Math.floor(Pms.step) !== Pms.floorStep) {
-					Pms.floorStep = Math.floor(Pms.step);
+				Gear.step += Math.sqrt(Math.pow(x, 2) + Math.pow(z, 2));
+				if(Math.floor(Gear.step) !== Gear.floorStep) {
+					Gear.floorStep = Math.floor(Gear.step);
 					uiThread(function() {try {
-						if(Pms.mod === 0) {
-							Pms.textView.setText((Pms.floorStep - Pms.currentStepLock) + "");
+						if(Gear.mod === 0) {
+							Gear.textView.setText((Gear.floorStep - Gear.currentStepLock) + "");
 						}else {
-							Pms.textView.setText(Pms.floorStep + "");
+							Gear.textView.setText(Gear.floorStep + "");
 						}
 					}catch(e) {
 						showError(e);
 					}});
-					if(Pms.saveCount++ > 200 && Level.getWorldDir() !== null) {
-						Pms.saveCount = 0;
+					if(Gear.saveCount++ > 200 && Level.getWorldDir() !== null) {
+						Gear.saveCount = 0;
 						thread(function() {
-							saveData(_MAP_STEP_DATA(), "STEP", Pms.floorStep);
+							saveData(_MAP_STEP_DATA(), "STEP", Gear.floorStep);
 						}).start();
 					}
 				}
@@ -491,7 +509,19 @@ function modTick() {
 			var time = new Date();
 			var min = time.getMinutes() < 10 ? "0" + time.getMinutes() : time.getMinutes();
 			uiThread(function() {try {
-				Pms.textView.setText((time.getHours() < 12 ? "AM " : "PM ") + time.getHours()%12 + ":" + min);
+				Gear.textView.setText((time.getHours() < 12 ? "AM " : "PM ") + time.getHours()%12 + ":" + min);
+			}catch(e) {
+				showError(e);
+			}});
+			break;
+		case 3:
+			var time = Level.getTime() + 4800;
+			var convert = Math.floor((time % 19200) * 1440 / 19200);
+			var hour = Math.floor(convert / 60);
+			var min = convert % 60;
+			var minc = min < 10 ? "0" + min : min;
+			uiThread(function() {try {
+				Gear.textView.setText((hour < 12 ? "MAM " : "MPM ") + hour % 12 + ":" + minc);
 			}catch(e) {
 				showError(e);
 			}});
