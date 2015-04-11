@@ -424,7 +424,7 @@ Gear.mainWindow.setOutsideTouchable(true);
 //Gear.mainWindow.setTouchable(false);
 
 function gearSetting() {uiThread(function() {try {
-	Gear.mainDialog = new android.app.AlertDialog.Builder(ctx);
+	Gear.mainDialog = new android.app.AlertDialog.Builder(ctx); 
 	Gear.mainDialog.setTitle("Gear setting");
 	
 	Gear.mainDialogScroll = new android.widget.ScrollView(ctx);
@@ -434,18 +434,124 @@ function gearSetting() {uiThread(function() {try {
 	
 	Gear.mod0 = new android.widget.Button(ctx);
 	Gear.mod0.setText("Recent Pedometer");
+	if(Gear.mod === 0) {
+		Gear.mod0.setTextColor(android.graphics.Color.YELLOW);
+	}else {
+		Gear.mod0.setTextColor(android.graphics.Color.WHITE);
+	}
+	Gear.mod0.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+		switch(Gear.mod) {
+			case 0:
+				Gear.mod0.setTextColor(android.graphics.Color.WHITE);
+				break;
+			case 1:
+				Gear.mod1.setTextColor(android.graphics.Color.WHITE);
+				break;
+			case 2:
+				Gear.mod2.setTextColor(android.graphics.Color.WHITE);
+				break;
+			case 3:
+				Gear.mod3.setTextColor(android.graphics.Color.WHITE);
+				break;
+		}
+		view.setTextColor(android.graphics.Color.YELLOW);
+		Gear.mod = 0;
+		Gear.textView.setText((Gear.floorStep - Gear.currentStepLock) + "");
+		saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+	}catch(e) {
+		errorShow(e);
+	}}});
 	Gear.mainDialogLayout.addView(Gear.mod0);
 	
 	Gear.mod1 = new android.widget.Button(ctx);
 	Gear.mod1.setText("Overall Pedometer");
+	if(Gear.mod === 1) {
+		Gear.mod1.setTextColor(android.graphics.Color.YELLOW);
+	}else {
+		Gear.mod1.setTextColor(android.graphics.Color.WHITE);
+	}
+	Gear.mod1.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+		switch(Gear.mod) {
+			case 0:
+				Gear.mod0.setTextColor(android.graphics.Color.WHITE);
+				break;
+			case 1:
+				Gear.mod1.setTextColor(android.graphics.Color.WHITE);
+				break;
+			case 2:
+				Gear.mod2.setTextColor(android.graphics.Color.WHITE);
+				break;
+			case 3:
+				Gear.mod3.setTextColor(android.graphics.Color.WHITE);
+				break;
+		}
+		view.setTextColor(android.graphics.Color.YELLOW);
+		Gear.mod = 1;
+		Gear.textView.setText(Gear.floorStep + "");
+		saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+	}catch(e) {
+		errorShow(e);
+	}}});
 	Gear.mainDialogLayout.addView(Gear.mod1);
 	
 	Gear.mod2 = new android.widget.Button(ctx);
 	Gear.mod2.setText("Time");
+	if(Gear.mod === 2) {
+		Gear.mod2.setTextColor(android.graphics.Color.YELLOW);
+	}else {
+		Gear.mod2.setTextColor(android.graphics.Color.WHITE);
+	}
+	Gear.mod2.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+		switch(Gear.mod) {
+			case 0:
+				Gear.mod0.setTextColor(android.graphics.Color.WHITE);
+				break;
+			case 1:
+				Gear.mod1.setTextColor(android.graphics.Color.WHITE);
+				break;
+			case 2:
+				Gear.mod2.setTextColor(android.graphics.Color.WHITE);
+				break;
+			case 3:
+				Gear.mod3.setTextColor(android.graphics.Color.WHITE);
+				break;
+		}
+		view.setTextColor(android.graphics.Color.YELLOW);
+		Gear.mod = 2;
+		saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+	}catch(e) {
+		errorShow(e);
+	}}});
 	Gear.mainDialogLayout.addView(Gear.mod2);
 	
 	Gear.mod3 = new android.widget.Button(ctx);
 	Gear.mod3.setText("Minecraft Time");
+	if(Gear.mod === 3) {
+		Gear.mod3.setTextColor(android.graphics.Color.YELLOW);
+	}else {
+		Gear.mod3.setTextColor(android.graphics.Color.WHITE);
+	}
+	Gear.mod3.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+		switch(Gear.mod) {
+			case 0:
+				Gear.mod0.setTextColor(android.graphics.Color.WHITE);
+				break;
+			case 1:
+				Gear.mod1.setTextColor(android.graphics.Color.WHITE);
+				break;
+			case 2:
+				Gear.mod2.setTextColor(android.graphics.Color.WHITE);
+				break;
+			case 3:
+				Gear.mod3.setTextColor(android.graphics.Color.WHITE);
+				break;
+		}
+		view.setTextColor(android.graphics.Color.YELLOW);
+		Gear.mod = 3;
+		saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+	}catch(e) {
+		errorShow(e);
+	}}});
 	Gear.mainDialogLayout.addView(Gear.mod3);
 	
 	Gear.mainDialogScroll.addView(Gear.mainDialogLayout);
@@ -494,8 +600,10 @@ function newLevel(str) {
 }
 
 function leaveGame() {
-	saveData(_MAP_STEP_DATA(), "STEP", Gear.floorStep);
-	saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+	thread(function() {
+		saveData(_MAP_STEP_DATA(), "STEP", Gear.floorStep);
+		saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+	}).start();
 	if(Gear.mainWindow != null) {
 		uiThread(function() {try {
 			Gear.mainWindow.dismiss();
