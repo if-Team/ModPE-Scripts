@@ -411,7 +411,7 @@ Gear.resetButton.setOnClickListener(new android.view.View.OnClickListener() {o
 		showError(e);
 	}}});
 Gear.resetButton.setOnLongClickListener(new android.view.View.OnLongClickListener() {onLongClick: function(view, event) {try {
-	print("test...");
+	gearSetting();
 	return true;
 }catch(e) {
 	showError();
@@ -423,11 +423,39 @@ Gear.mainWindow.setSplitTouchEnabled(true);
 Gear.mainWindow.setOutsideTouchable(true);
 //Gear.mainWindow.setTouchable(false);
 
-Gear.mainDialog = new android.app.AlertDialog.Builder(ctx);
-Gear.mainDialogScroll = new android.widget.ScrollView(ctx);
-Gear.mainDialog.setTitle("Gear setting");
-Gear.mainDialogLayout = new android.widget.LinearLayout(ctx);
-Gear.mainDialogLayout.setOrientation(1);
+function gearSetting() {uiThread(function() {try {
+	Gear.mainDialog = new android.app.AlertDialog.Builder(ctx);
+	Gear.mainDialog.setTitle("Gear setting");
+	
+	Gear.mainDialogScroll = new android.widget.ScrollView(ctx);
+	
+	Gear.mainDialogLayout = new android.widget.LinearLayout(ctx);
+	Gear.mainDialogLayout.setOrientation(1);
+	
+	Gear.mod0 = new android.widget.Button(ctx);
+	Gear.mod0.setText("Recent Pedometer");
+	Gear.mainDialogLayout.addView(Gear.mod0);
+	
+	Gear.mod1 = new android.widget.Button(ctx);
+	Gear.mod1.setText("Overall Pedometer");
+	Gear.mainDialogLayout.addView(Gear.mod1);
+	
+	Gear.mod2 = new android.widget.Button(ctx);
+	Gear.mod2.setText("Time");
+	Gear.mainDialogLayout.addView(Gear.mod2);
+	
+	Gear.mod3 = new android.widget.Button(ctx);
+	Gear.mod3.setText("Minecraft Time");
+	Gear.mainDialogLayout.addView(Gear.mod3);
+	
+	Gear.mainDialogScroll.addView(Gear.mainDialogLayout);
+	
+	Gear.mainDialog.setView(Gear.mainDialogScroll);
+	Gear.mainDialog.create();
+	Gear.mainDialog.show();
+}catch(e) {
+	showError(e);
+}})};
 
 function newLevel(str) {
 	if(Level.getWorldDir() === null) {
