@@ -297,22 +297,16 @@ Pms.saveCount = 0;
 Pms.mod = 2;
 //RECENT, OVERALL, CLOCK
 
-Pms.layout = new android.widget.LinearLayout(ctx);
-Pms.layout.setOrientation(1);
+Pms.layout = new android.widget.RelativeLayout(ctx);
 Pms.layout.setBackgroundDrawable(mcpeBGT9);
-//Pms.layout.setPadding(dp(8), dp(8), dp(8), dp(8));
-
-Pms.btnLayout = new android.widget.LinearLayout(ctx);
-//Pms.btnLayout.setOrientation(0);
-//Pms.btnLayout.setPadding(0,0,0,0);
-//Pms.btnLayout.setGravity(android.view.Gravity.RIGHT|android.view.Gravity.TOP);
-Pms.btnLayout_param = new android.widget.LinearLayout.LayoutParams(-2, -2);
-//Pms.btnLayout_param.setMargins(0,dp(2),0,0);
-Pms.btnLayout.setLayoutParams(Pms.btnLayout_param);
+Pms.layout.setPadding(dp(8), dp(8), dp(8), dp(8));
 
 Pms.textView = new android.widget.TextView(ctx);
+Pms.textView.setId(721);
+Pms.textView_param = new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+Pms.textView.setLayoutParams(Pms.textView_param);
 Pms.textView.setBackgroundDrawable(mcpeTextView9);
-//Pms.textView.setPadding(dp(4), dp(4), dp(4), dp(4));
+Pms.textView.setPadding(dp(4), dp(4), dp(4), dp(4));
 Pms.textView.setGravity(android.view.Gravity.RIGHT);
 Pms.textView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, dp(10));
 Pms.textView.setTextColor(android.graphics.Color.WHITE);
@@ -324,12 +318,17 @@ Pms.textView.setText("Loading...");
 Pms.layout.addView(Pms.textView);
 
 Pms.moveButton = new android.widget.Button(ctx);
-Pms.moveButton_param = new android.widget.LinearLayout.LayoutParams(dp(40), dp(20));
-Pms.moveButton_param.setMargins(0,0,0,0);
+Pms.moveButton.setId(722);
+Pms.moveButton_param = new android.widget.RelativeLayout.LayoutParams(dp(40), dp(20));
+Pms.moveButton_param.setMargins(0,dp(2),0,0);
+Pms.moveButton_param.addRule(android.widget.RelativeLayout.BELOW, Pms.textView.getId());
 Pms.moveButton.setLayoutParams(Pms.moveButton_param);
 //Pms.moveButton.setAlpha(0);
-//Pms.moveButton.setPadding(dp(5),dp(3),0,dp(5));
-Pms.moveButton.setBackgroundColor(android.graphics.Color.rgb(0x3a, 0x39, 0x3a));
+Pms.moveButton.setPadding(dp(4),dp(1),0,0);
+Pms.moveButton_drawable = new android.graphics.drawable.GradientDrawable();
+Pms.moveButton_drawable.mutate().setColor(android.graphics.Color.rgb(0x3a, 0x39, 0x3a));
+Pms.moveButton_drawable.setCornerRadius(10);
+Pms.moveButton.setBackgroundDrawable(Pms.moveButton_drawable);
 Pms.moveButton.setOnTouchListener(new android.view.View.OnTouchListener({ onTouch: function(view, event) {
 	switch(event.action) {
 		case android.view.MotionEvent.ACTION_DOWN:
@@ -357,14 +356,15 @@ Pms.moveButton.getPaint().setAntiAlias(false);
 if(_FONT.exists()) {
 	Pms.moveButton.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"));}
 Pms.moveButton.setText("Gear");
-Pms.btnLayout.addView(Pms.moveButton);
+Pms.layout.addView(Pms.moveButton);
 
 Pms.resetButton = new android.widget.Button(ctx);
+Pms.resetButton.setId(723);
 Pms.resetButton.setBackgroundDrawable(mcpeMiniBtn9);
-//Pms.resetButton.setWidth(dp(20));
-//Pms.resetButton.setHeight(dp(20));
-Pms.resetButton_param = new android.widget.LinearLayout.LayoutParams(dp(20), dp(20));
-//Pms.resetButton_param.setMargins(dp(4),0,0,0);
+Pms.resetButton_param = new android.widget.RelativeLayout.LayoutParams(dp(20), dp(20));
+Pms.resetButton_param.setMargins(dp(4),dp(2),0,0);
+Pms.resetButton_param.addRule(android.widget.RelativeLayout.BELOW, Pms.textView.getId());
+Pms.resetButton_param.addRule(android.widget.RelativeLayout.RIGHT_OF, Pms.moveButton.getId());
 Pms.resetButton.setLayoutParams(Pms.resetButton_param);
 Pms.resetButton.setOnTouchListener( new android.view.View.OnTouchListener({ onTouch: 
 	function(view, event){
@@ -400,11 +400,9 @@ Pms.resetButton.setOnLongClickListener(new android.view.View.OnLongClickListener
 }catch(e) {
 	showError();
 }}});
-Pms.btnLayout.addView(Pms.resetButton);
+Pms.layout.addView(Pms.resetButton);
 
-Pms.layout.addView(Pms.btnLayout);
-
-Pms.mainWindow = new android.widget.PopupWindow(Pms.layout, dp(180) , dp(155), false);
+Pms.mainWindow = new android.widget.PopupWindow(Pms.layout, dp(80) , dp(55), false);
 Pms.mainWindow.setSplitTouchEnabled(true);
 Pms.mainWindow.setOutsideTouchable(true);
 //Pms.mainWindow.setTouchable(false);
@@ -491,8 +489,9 @@ function modTick() {
 			break;
 		case 2:
 			var time = new Date();
+			var min = time.getMinutes() < 10 ? "0" + time.getMinutes() : time.getMinutes();
 			uiThread(function() {try {
-				Pms.textView.setText((time.getHours() < 12 ? "AM " : "PM ") + time.getHours()%12 + ":" + time.getMinutes());
+				Pms.textView.setText((time.getHours() < 12 ? "AM " : "PM ") + time.getHours()%12 + ":" + min);
 			}catch(e) {
 				showError(e);
 			}});
