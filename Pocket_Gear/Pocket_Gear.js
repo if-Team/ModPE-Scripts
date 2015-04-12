@@ -68,28 +68,39 @@ var mcpeTextView9 = ninePatch1(mcpeTextView, dp(3), dp(3), dp(4), dp(4));
 //-NinePatch JS
 //Copyright® 2015 affogatoman(colombia2)
 //==============================
-function ninePatch1(bitmap, x, y, xx, yy, w, h){
-	var NO_COLOR = 0x00000001;
-	var buffer = java.nio.ByteBuffer.allocate(56).order(java.nio.ByteOrder.nativeOrder());
-	buffer.put(0x01);
-	buffer.put(0x02);
-	buffer.put(0x02);
-	buffer.put(0x02);
-	buffer.putInt(0);
-	buffer.putInt(0);
-	buffer.putInt(0);
-	buffer.putInt(0);
-	buffer.putInt(0);
-	buffer.putInt(0);
-	buffer.putInt(0);
-	buffer.putInt(y-1); 
-	buffer.putInt(yy);
-	buffer.putInt(x-1); 
-	buffer.putInt(xx); 
-	buffer.putInt(NO_COLOR);
-	buffer.putInt(NO_COLOR); 
-	var drawable = new android.graphics.drawable.NinePatchDrawable(ctx.getResources(), bitmap, buffer.array(), new android.graphics.Rect(), null);
-	return drawable;
+function ninePatch1(bitmap, top, left, bottom, right, width, height) {
+	var getByteBuffer = function(top, left, bottom, right) {
+		var NO_COLOR = 0x00000001;
+		var buffer = java.nio.ByteBuffer.allocate(84).order(java.nio.ByteOrder.nativeOrder());
+		buffer.put(0x01);
+		buffer.put(0x02);
+		buffer.put(0x02);
+		buffer.put(0x09);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(left);
+		buffer.putInt(right);
+		buffer.putInt(top);
+		buffer.putInt(bottom);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		return buffer;
+	};
+	var buffer = getByteBuffer(top, left, bottom, right);
+	var patch = new android.graphics.drawable.NinePatchDrawable(ctx.getResources(), bitmap, buffer.array(), new android.graphics.Rect(), "");
+	return patch;
 }
 function ninePatch2(bitmap, top, left, bottom, right, width, height) {
 	var getByteBuffer = function(top, left, bottom, right) {
