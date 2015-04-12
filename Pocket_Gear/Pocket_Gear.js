@@ -349,17 +349,24 @@ Gear.moveButton.setOnTouchListener(new android.view.View.OnTouchListener({ onTou
 				Gear.viewY = event.getY();
 				break;
 		case android.view.MotionEvent.ACTION_MOVE:
-			var screenX = event.getRawX();
-			var screenY = event.getRawY();
-			var x = screenX - Gear.viewX;
-			var y = screenY - Gear.viewY;
+			Gear.screenX = event.getRawX();
+			Gear.screenY = event.getRawY();
+			Gear.Wx = Gear.screenX - Gear.viewX;
+			Gear.Wy = Gear.screenY - Gear.viewY;
 			uiThread(function() {try {
-			Gear.mainWindow.update(x - dp(17), y-dp(30), Gear.mainWindow.getWidth(), Gear.mainWindow.getHeight(), true);
+				Gear.mainWindow.update(Gear.Wx - dp(17), Gear.Wy - dp(30), Gear.mainWindow.getWidth(), Gear.mainWindow.getHeight(), true);
+				debug("move" + Gear.Wx + " " + Gear.Wy);
 			}catch(e) {
 				showError(e);
 			}});
 			break;
-		}
+		case android.view.MotionEvent.ACTION_UP:
+			if(Level.getWorldDir() !== null) {
+				saveData(_MAP_STEP_DATA(), "WINDOW_X", Gear.Wx);
+				saveData(_MAP_STEP_DATA(), "WINDOW_Y", Gear.Wy);
+			};
+			break;
+	}
 	return true;
 }}));
 Gear.moveButton.setGravity(android.view.Gravity.CENTER);
@@ -617,8 +624,9 @@ function newLevel(str) {
 			Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		}
 	}
+	
 	uiThread(function() {try {
-		Gear.mainWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, ctx.getWindowManager().getDefaultDisplay().getWidth() - dp(82), ctx.getWindowManager().getDefaultDisplay().getHeight() - dp(55));
+		Gear.mainWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, ((loadData(_MAP_STEP_DATA(), "WINDOW_X") == null || loadData(_MAP_STEP_DATA(), "WINDOW_X") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getWidth() - dp(82) : loadData(_MAP_STEP_DATA(), "WINDOW_X") - dp(17)), ((loadData(_MAP_STEP_DATA(), "WINDOW_Y") == null || loadData(_MAP_STEP_DATA(), "WINDOW_Y") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getHeight() - dp(55) : loadData(_MAP_STEP_DATA(), "WINDOW_Y") - dp(30)));
 	}catch(e) {
 		showError(e);
 	}});
