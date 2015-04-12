@@ -13,54 +13,54 @@ Trade.SELLER = null;
 
 //Trade items
 Trade.Items = {
-	butcher: {
-    	name: ["butcher"],
-    	meta: [["apple",0]],
-    	id: [260],
-    	dam: [0],
-    	cost: [1],
-    	count: [1]
-	},
-	farmer: {
-		name: ["farmer"],
-    	meta: [["apple",0]],
-    	id: [260],
-    	dam: [0],
-    	cost: [1],
-    	count: [1]
-	},
-	librarian: {
-		name: ["librarian"],
-    	meta: [["apple",0]],
-    	id: [260],
-    	dam: [0],
-    	cost: [1],
-    	count: [1]
-	},
-	priest: {
-		name: ["priest"],
-    	meta: [["apple",0]],
-    	id: [260],
-    	dam: [0],
-    	cost: [1],
-    	count: [1]
-	},
-	smith: {
-		name: ["smith"],
-    	meta: [["apple",0]],
-    	id: [260],
-    	dam: [0],
-    	cost: [1],
-    	count: [1]
-	},
-	villager: {
-		name: ["villager"],
-    	meta: [["apple",0]],
-    	id: [260],
-    	dam: [0],
-    	cost: [1],
-    	count: [1]
-	}
+    butcher: {
+        name: ["butcher"],
+        meta: [["apple",0]],
+        id: [260],
+        dam: [0],
+        cost: [1],
+        count: [1]
+    },
+    farmer: {
+        name: ["farmer"],
+        meta: [["apple",0]],
+        id: [260],
+        dam: [0],
+        cost: [1],
+        count: [1]
+    },
+    librarian: {
+        name: ["librarian"],
+        meta: [["apple",0]],
+        id: [260],
+        dam: [0],
+        cost: [1],
+        count: [1]
+    },
+    priest: {
+        name: ["priest"],
+        meta: [["apple",0]],
+        id: [260],
+        dam: [0],
+        cost: [1],
+        count: [1]
+    },
+    smith: {
+        name: ["smith"],
+        meta: [["apple",0]],
+        id: [260],
+        dam: [0],
+        cost: [1],
+        count: [1]
+    },
+    villager: {
+        name: ["villager"],
+        meta: [["apple",0]],
+        id: [260],
+        dam: [0],
+        cost: [1],
+        count: [1]
+    }
 };
 
 //Gui
@@ -121,17 +121,17 @@ Trade.init = function() {
         mainPw.setWidth(ctx.getScreenWidth());
         mainPw.setHeight(ctx.getScreenHeight());
         Trade.MAINPW = mainPw;
-		Trade.NAME = name;
-		Trade.ITEMBACK = itemback2;
-		Trade.COST = cost;
-		Trade.COUNT = count;
+        Trade.NAME = name;
+        Trade.ITEMBACK = itemback2;
+        Trade.COST = cost;
+        Trade.COUNT = count;
     });
 };
 
 Trade.showScreen = function() {
     Utils.createUiThread(function(ctx) {
         Trade.EME_COUNT = Utils.getAllItems(388, 0);
-		Utils.updateTradeList(Trade.NAME, Trade.ITEMBACK, Trade.COST, Trade.COUNT);
+        Utils.updateTradeList(Trade.NAME, Trade.ITEMBACK, Trade.COST, Trade.COUNT);
         Trade.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
     });
 };
@@ -173,7 +173,7 @@ Utils.trimImage = function(bitmap, x, y, width, height) {
 };
 
 Utils.plusPage = function() {
-	var type = Utils.getVillagerType(Trade.SELLER);
+    var type = Utils.getVillagerType(Trade.SELLER);
     if(Trade.PAGE != Trade.Items[type].name.length-1)
         Trade.PAGE++;
 };
@@ -387,7 +387,7 @@ Utils.getItemImage = function(text, data) {
 
 Utils.updateTradeList = function(namev, itemv, costv, countv) {
     var page = Trade.PAGE;
-	var type = Utils.getVillagerType(Trade.SELLER);
+    var type = Utils.getVillagerType(Trade.SELLER);
     if(Utils.hasNonAscii(Lang.getData(Trade.Items[type].name[page])))
         namev.setText(Utils.getStringBuilder(Lang.getData(Trade.Items[type].name[page]), "#e1e1e1"));
     else
@@ -408,8 +408,8 @@ Utils.getAllItems = function(id, dam) {
 };
 
 Utils.buyThing = function() {
-	var type = Utils.getVillagerType(Trade.SELLER);
-    if(Trade.EME_COUNT > Trade.Items[type].cost[Trade.PAGE]) {
+    var type = Utils.getVillagerType(Trade.SELLER);
+    if(Trade.EME_COUNT >= Trade.Items[type].cost[Trade.PAGE]) {
         Trade.EME_COUNT-=Trade.Items[type].cost[Trade.PAGE];
         //TODO: remake the addItemInventory function
         addItemInventory(388, -Trade.Items[type].cost[Trade.PAGE], 0);
@@ -436,7 +436,13 @@ Utils.warn = function(txt) {
 };
 
 Utils.sellThing = function() {
-    //bx lr
+    var type = Utils.getVillagerType(Trade.SELLER);
+    var counts = Utils.getAllItems(Trade.Items[type].id[Trade.PAGE], Trade.Items[type].dam[Trade.PAGE]);
+    if(counts >= Trade.Items[type].count[Trade.PAGE]) {
+        addItemInventory(388, Trade.Items[type].cost[Trade.PAGE], 0);
+        addItemInventory(Trade.Items[type].id[Trade.PAGE], -Trade.Items[type].count[Trade.PAGE], Trade.Items[type].dam[Trade.PAGE]);
+    } else
+        Utils.warn("Not Enough Items!");
 };
 
 Utils.getStringBuilder = function(text, color) {
@@ -512,8 +518,8 @@ Utils.showInteractPw = function() {
 };
 
 Utils.getVillagerType = function(ent) {
-	var path = Entity.getMobSkin(ent);
-	return path.substring(path.lastIndexOf("/")+1, path.length-4)
+    var path = Entity.getMobSkin(ent);
+    return path.substring(path.lastIndexOf("/")+1, path.length-4)
 };
 
 var Lang = {};
@@ -533,10 +539,10 @@ Lang.readLang = function() {
 };
 
 Lang.getData = function(key) {
-	var data = Trade.LANG_DATA[Trade.LANG_KEY.indexOf(key)];
-	if(typeof data === "undefined")
-		return key;
-	return data;
+    var data = Trade.LANG_DATA[Trade.LANG_KEY.indexOf(key)];
+    if(typeof data === "undefined")
+        return key;
+    return data;
 };
 
 
@@ -570,7 +576,7 @@ function modTick() {
         Trade.HANDING_EME = true;
     if(Trade.HANDING_EME && Entity.getEntityTypeId(Player.getPointedEntity()) == 15) {
         if(!Trade.INTERACTPW.isShowing()) {
-			Trade.SELLER = Player.getPointedEntity();
+            Trade.SELLER = Player.getPointedEntity();
             Utils.showInteractPw();
         }
     }
