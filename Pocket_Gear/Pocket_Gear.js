@@ -332,7 +332,7 @@ Gear.layout.addView(Gear.textView);
 
 Gear.moveButton = new android.widget.Button(ctx);
 Gear.moveButton.setId(722);
-Gear.moveButton_param = new android.widget.RelativeLayout.LayoutParams(dp(40), dp(20));
+Gear.moveButton_param = new android.widget.RelativeLayout.LayoutParams(dp(42), dp(20));
 Gear.moveButton_param.setMargins(0,dp(2),0,0);
 Gear.moveButton_param.addRule(android.widget.RelativeLayout.BELOW, Gear.textView.getId());
 Gear.moveButton.setLayoutParams(Gear.moveButton_param);
@@ -458,7 +458,9 @@ function gearSetting() {uiThread(function() {try {
 		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.mod = 0;
 		Gear.textView.setText((Gear.floorStep - Gear.currentStepLock) + "");
-		saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+		if(Level.getWorldDir() !== null) {
+			saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+		}
 	}catch(e) {
 		errorShow(e);
 	}}});
@@ -490,7 +492,9 @@ function gearSetting() {uiThread(function() {try {
 		Gear.textView.setTextColor(android.graphics.Color.YELLOW);
 		Gear.mod = 1;
 		Gear.textView.setText(Gear.floorStep + "");
-		saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+		if(Level.getWorldDir() !== null) {
+			saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+		}
 	}catch(e) {
 		errorShow(e);
 	}}});
@@ -521,7 +525,9 @@ function gearSetting() {uiThread(function() {try {
 		view.setTextColor(android.graphics.Color.YELLOW);
 		Gear.textView.setTextColor(android.graphics.Color.YELLOW);
 		Gear.mod = 2;
-		saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+		if(Level.getWorldDir() !== null) {
+			saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+		}
 	}catch(e) {
 		errorShow(e);
 	}}});
@@ -552,7 +558,9 @@ function gearSetting() {uiThread(function() {try {
 		view.setTextColor(android.graphics.Color.YELLOW);
 		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.mod = 3;
-		saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+		if(Level.getWorldDir() !== null) {
+			saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+		}
 	}catch(e) {
 		errorShow(e);
 	}}});
@@ -584,17 +592,24 @@ function newLevel(str) {
 		debug("Gear.overall " + Gear.step);
 		if(Gear.step + "" == "NaN") {
 			Gear.step = 0;
-			saveData(_MAP_STEP_DATA(), "STEP", 0);
+			if(Level.getWorldDir() !== null) {
+				saveData(_MAP_STEP_DATA(), "STEP", 0);
+			}
 		}
 		Gear.floorStep = Math.floor(Gear.step);
 		Gear.currentStepLock = parseInt(loadData(_MAP_STEP_DATA(), "CURRENT_STEP_LOCK"));
 		if(Gear.currentStepLock + "" === "NaN") {
 			Gear.currentStepLock = 0;
-			saveData(_MAP_STEP_DATA(), "CURRENT_STEP_LOCK", Gear.currentStepLock);
+			if(Level.getWorldDir() !== null) {
+				saveData(_MAP_STEP_DATA(), "CURRENT_STEP_LOCK", Gear.currentStepLock);
+			}
 		}
 		Gear.mod = parseInt(loadData(_MAP_STEP_DATA(), "MOD"));
 		if(Gear.mod + "" === "NaN") {
 			Gear.mod = 0;
+			if(Level.getWorldDir() !== null) {
+				saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+			}
 		}
 		if(Gear.mod == 1 || Gear.mod == 2) {
 			 Gear.textView.setTextColor(android.graphics.Color.YELLOW);
@@ -610,10 +625,10 @@ function newLevel(str) {
 }
 
 function leaveGame() {
-	thread(function() {
+	if(Level.getWorldDir() !== null) {
 		saveData(_MAP_STEP_DATA(), "STEP", Gear.floorStep);
 		saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
-	}).start();
+	}
 	if(Gear.mainWindow != null) {
 		uiThread(function() {try {
 			Gear.mainWindow.dismiss();
@@ -647,6 +662,7 @@ function modTick() {
 				showError(e);
 			}});
 			break;
+			
 		case 1:
 			uiThread(function() {try {
 				Gear.textView.setText(Gear.floorStep + "");
