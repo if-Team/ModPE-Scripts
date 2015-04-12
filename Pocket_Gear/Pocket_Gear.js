@@ -5,7 +5,8 @@ var _SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsoluteP
 var _MAIN_MOD_DIR = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/mods");
 var _MOD_DIR = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/mods/Gear");
 var _FONT = new java.io.File(_MAIN_MOD_DIR, "minecraft.ttf");
-var _SETTING = new java.io.File(_MOD_DIR, "config.json");
+var _MOD_DATA = new java.io.File(_MOD_DIR, "data.json");
+var _MOD_TEST = new java.io.File(_MOD_DIR, "test.txt");
 function _MAP_DIR() {return new java.io.File(_SD_CARD, "games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/mods")};
 function _MAP_STEP_DATA() {return new java.io.File(_MAP_DIR(), "gear.json")};
 
@@ -219,7 +220,11 @@ function showError(e) {
 
 function saveData(file, article, value) {
 	//읽기
-	var fileInputStream = new java.io.FileInputStream(file);
+	try{
+		var fileInputStream = new java.io.FileInputStream(file);
+	}catch(e) {
+		return "NoFile";
+	}
 	var inputStreamReader = new java.io.InputStreamReader(fileInputStream);
 	var bufferedReader = new java.io.BufferedReader(inputStreamReader);
 	var tempRead, tempReadString;
@@ -246,7 +251,11 @@ function saveData(file, article, value) {
 
 function loadData(file, article) {
 	//읽기
-	var fileInputStream = new java.io.FileInputStream(file);
+	try{
+		var fileInputStream = new java.io.FileInputStream(file);
+	}catch(e) {
+		return "NoFile";
+	}
 	var inputStreamReader = new java.io.InputStreamReader(fileInputStream);
 	var bufferedReader = new java.io.BufferedReader(inputStreamReader);
 	var tempRead, tempReadString;
@@ -260,6 +269,61 @@ function loadData(file, article) {
 			inputStreamReader.close();
 			bufferedReader.close();
 			return tempReadString.split("¶")[1];
+		}
+	}
+	//못 찾음
+	fileInputStream.close();
+	inputStreamReader.close();
+	bufferedReader.close();
+	//없으면 반환
+	return null;
+}
+
+function saveSetting(article, value) {
+	//읽기
+	var fileInputStream = new java.io.FileInputStream(new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/options.txt"));
+	var inputStreamReader = new java.io.InputStreamReader(fileInputStream);
+	var bufferedReader = new java.io.BufferedReader(inputStreamReader);
+	var tempRead, tempReadString;
+	var tempSaved = "";
+	while((tempRead = bufferedReader.readLine()) != null){
+		tempReadString = tempRead.toString();
+		//지금 새로 저장할 데이터는 읽지 않기
+		if(tempReadString.split(":")[0] == article)
+			continue;
+		tempSaved += tempReadString + "\n";
+	}
+	//읽어오기 완료
+	fileInputStream.close();
+	inputStreamReader.close();
+	bufferedReader.close();
+	//쓰기
+	var fileOutputStream = new java.io.FileOutputStream(new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/options.txt"));
+	var outputStreamWriter = new java.io.OutputStreamWriter(fileOutputStream);
+	outputStreamWriter.write(tempSaved + article + ":" + value);
+	//쓰기 완료
+	outputStreamWriter.close();
+	fileOutputStream.close();
+	//this is not work
+	net.zhuoweizhang.mcpelauncher.ScriptManager.requestGraphicsReset();
+}
+
+function loadSetting(article) {
+	//읽기
+	var fileInputStream = new java.io.FileInputStream(new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/options.txt"));
+	var inputStreamReader = new java.io.InputStreamReader(fileInputStream);
+	var bufferedReader = new java.io.BufferedReader(inputStreamReader);
+	var tempRead, tempReadString;
+
+	while((tempRead = bufferedReader.readLine()) != null){
+		tempReadString = tempRead.toString();
+		//불러올 데이터 찾기
+		if(tempReadString.split(":")[0] == article){
+			//찾았으면 끝내고 반환
+			fileInputStream.close();
+			inputStreamReader.close();
+			bufferedReader.close();
+			return tempReadString.split(":")[1];
 		}
 	}
 	//못 찾음
@@ -314,12 +378,38 @@ if(!_FONT.exists()) {
 	}}).start();
 };
 
+if(!_MOD_DIR.exists()) {
+	_MOD_DIR.mkdirs();
+}
+
+if(!_MOD_DATA.exists()) {
+	_MOD_DATA.createNewFile();
+}
+
+//Minecraft function
+function newLevel(str) {
+	Gear.newLevel(str);
+}
+
+function leaveGame() {
+	Gear.leaveGame();
+}
+
+function modTick() {
+	Gear.pedometerTick();
+	Gear.textViewTick();
+	Gear.autoSaveTick();
+}
+
 //PocketGear function
 var Gear = {};
 Gear.mainWindow = null;
 Gear.saveCount = 0;
 Gear.mod = 0;
 //RECENT, OVERALL, CLOCK, INGAME_CLOCK
+Gear.isRemote = false;
+Gear.allowRemote = (loadData(_MOD_DATA, "ALLOW_REMOTE") == "true" ? true : false);
+Gear.isWindowAlive = false;
 
 Gear.layout = new android.widget.RelativeLayout(ctx);
 Gear.layout.setBackgroundDrawable(mcpeBGT9);
@@ -373,8 +463,8 @@ Gear.moveButton.setOnTouchListener(new android.view.View.OnTouchListener({ onTou
 			break;
 		case android.view.MotionEvent.ACTION_UP:
 			if(Level.getWorldDir() !== null) {
-				saveData(_MAP_STEP_DATA(), "WINDOW_X", Gear.Wx);
-				saveData(_MAP_STEP_DATA(), "WINDOW_Y", Gear.Wy);
+				saveData(_MOD_DATA, "WINDOW_X", Gear.Wx);
+				saveData(_MOD_DATA, "WINDOW_Y", Gear.Wy);
 			};
 			break;
 	}
@@ -425,6 +515,11 @@ Gear.resetButton.setOnClickListener(new android.view.View.OnClickListener() {o
 			showError(e);
 		}});
 		saveData(_MAP_STEP_DATA(), "CURRENT_STEP_LOCK", Gear.currentStepLock);
+		if(net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote && !Gear.isRemote && Gear.allowRemote) {
+		net.zhuoweizhang.mcpelauncher.ScriptManager.handleMessagePacketCallback("", "BlockLauncher, enable scripts, please and thank you");
+		Gear.isRemote = true;
+		newLevel("multi");
+		}
 	}catch(e) {
 		showError(e);
 	}}});
@@ -442,7 +537,7 @@ Gear.mainWindow.setOutsideTouchable(true);
 //Gear.mainWindow.setTouchable(false);
 
 function gearSetting() {uiThread(function() {try {
-	Gear.mainDialog = new android.app.AlertDialog.Builder(ctx); 
+	Gear.mainDialog = new android.app.AlertDialog.Builder(ctx, 2); 
 	Gear.mainDialog.setTitle("Gear setting");
 	
 	Gear.mainDialogScroll = new android.widget.ScrollView(ctx);
@@ -457,6 +552,7 @@ function gearSetting() {uiThread(function() {try {
 	}else {
 		Gear.mod0.setTextColor(android.graphics.Color.WHITE);
 	}
+	Gear.mod0.setBackgroundColor(android.graphics.Color.BLACK);
 	Gear.mod0.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
 		switch(Gear.mod) {
 			case 0:
@@ -491,6 +587,7 @@ function gearSetting() {uiThread(function() {try {
 	}else {
 		Gear.mod1.setTextColor(android.graphics.Color.WHITE);
 	}
+	Gear.mod1.setBackgroundColor(android.graphics.Color.BLACK);
 	Gear.mod1.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
 		switch(Gear.mod) {
 			case 0:
@@ -525,6 +622,7 @@ function gearSetting() {uiThread(function() {try {
 	}else {
 		Gear.mod2.setTextColor(android.graphics.Color.WHITE);
 	}
+	Gear.mod2.setBackgroundColor(android.graphics.Color.BLACK);
 	Gear.mod2.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
 		switch(Gear.mod) {
 			case 0:
@@ -541,7 +639,8 @@ function gearSetting() {uiThread(function() {try {
 				break;
 		}
 		view.setTextColor(android.graphics.Color.YELLOW);
-		Gear.textView.setTextColor(android.graphics.Color.YELLOW);
+		Gear.textView.setText("Loading...");
+		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.mod = 2;
 		if(Level.getWorldDir() !== null) {
 			saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
@@ -558,6 +657,7 @@ function gearSetting() {uiThread(function() {try {
 	}else {
 		Gear.mod3.setTextColor(android.graphics.Color.WHITE);
 	}
+	Gear.mod3.setBackgroundColor(android.graphics.Color.BLACK);
 	Gear.mod3.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
 		switch(Gear.mod) {
 			case 0:
@@ -574,6 +674,7 @@ function gearSetting() {uiThread(function() {try {
 				break;
 		}
 		view.setTextColor(android.graphics.Color.YELLOW);
+		Gear.textView.setText("Loading...");
 		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.mod = 3;
 		if(Level.getWorldDir() !== null) {
@@ -584,6 +685,41 @@ function gearSetting() {uiThread(function() {try {
 	}}});
 	Gear.mainDialogLayout.addView(Gear.mod3);
 	
+	Gear.multiBtn = new android.widget.Button(ctx);
+	Gear.multiBtn.setText("Visible in Multiplay");
+	Gear.multiBtn.setTextColor(android.graphics.Color.WHITE);
+	if(Gear.allowRemote) {
+		Gear.multiBtn.setBackgroundColor(android.graphics.Color.BLUE);
+	}else {
+		Gear.multiBtn.setBackgroundColor(android.graphics.Color.BLACK);
+	}
+	Gear.multiBtn.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+		if(Gear.allowRemote) {
+			Gear.multiBtn.setBackgroundColor(android.graphics.Color.BLACK);
+			Gear.allowRemote = false;
+			saveData(_MOD_DATA, "ALLOW_REMOTE", false);
+		}else {
+			Gear.multiBtn.setBackgroundColor(android.graphics.Color.BLUE);
+			Gear.allowRemote = true;
+			saveData(_MOD_DATA, "ALLOW_REMOTE", true);
+			
+		}
+	}catch(e) {
+		errorShow(e);
+	}}});
+	Gear.mainDialogLayout.addView(Gear.multiBtn);
+	
+	Gear.authorBtn = new android.widget.Button(ctx);
+	Gear.authorBtn.setText("Info");
+	Gear.authorBtn.setTextColor(android.graphics.Color.WHITE);
+	Gear.authorBtn.setBackgroundColor(android.graphics.Color.BLACK);
+	Gear.authorBtn.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+		print("hello");
+	}catch(e) {
+		errorShow(e);
+	}}});
+	Gear.mainDialogLayout.addView(Gear.authorBtn);
+	
 	Gear.mainDialogScroll.addView(Gear.mainDialogLayout);
 	
 	Gear.mainDialog.setView(Gear.mainDialogScroll);
@@ -593,7 +729,16 @@ function gearSetting() {uiThread(function() {try {
 	showError(e);
 }})};
 
-function newLevel(str) {
+uiThread(function() {try {
+	if(!Gear.isWindowAlive && Gear.allowRemote) {
+		Gear.mainWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, ((loadData(_MOD_DATA, "WINDOW_X") == null || loadData(_MOD_DATA, "WINDOW_X") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getWidth() - dp(82) : loadData(_MOD_DATA, "WINDOW_X") - dp(17)), ((loadData(_MOD_DATA, "WINDOW_Y") == null || loadData(_MOD_DATA, "WINDOW_Y") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getHeight() - dp(55) : loadData(_MOD_DATA, "WINDOW_Y") - dp(30)));
+		Gear.isWindowAlive = true;
+	}
+}catch(e) {
+	showError(e);
+}});
+
+Gear.newLevel = function(str) {
 	if(Level.getWorldDir() === null) {
 		//MultiPlayer
 		Gear.step = 0;
@@ -629,35 +774,46 @@ function newLevel(str) {
 				saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
 			}
 		}
-		if(Gear.mod == 1 || Gear.mod == 2) {
-			 Gear.textView.setTextColor(android.graphics.Color.YELLOW);
-		}else {
-			Gear.textView.setTextColor(android.graphics.Color.WHITE);
-		}
+		uiThread(function() {
+			if(Gear.mod == 1) {
+				 Gear.textView.setTextColor(android.graphics.Color.YELLOW);
+			}else {
+				Gear.textView.setTextColor(android.graphics.Color.WHITE);
+			}
+		});
 	}
 	
 	uiThread(function() {try {
-		Gear.mainWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, ((loadData(_MAP_STEP_DATA(), "WINDOW_X") == null || loadData(_MAP_STEP_DATA(), "WINDOW_X") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getWidth() - dp(82) : loadData(_MAP_STEP_DATA(), "WINDOW_X") - dp(17)), ((loadData(_MAP_STEP_DATA(), "WINDOW_Y") == null || loadData(_MAP_STEP_DATA(), "WINDOW_Y") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getHeight() - dp(55) : loadData(_MAP_STEP_DATA(), "WINDOW_Y") - dp(30)));
+		if(!Gear.isWindowAlive) {
+			Gear.mainWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, ((loadData(_MOD_DATA, "WINDOW_X") == null || loadData(_MOD_DATA, "WINDOW_X") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getWidth() - dp(82) : loadData(_MOD_DATA, "WINDOW_X") - dp(17)), ((loadData(_MOD_DATA, "WINDOW_Y") == null || loadData(_MOD_DATA, "WINDOW_Y") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getHeight() - dp(55) : loadData(_MOD_DATA, "WINDOW_Y") - dp(30)));
+			Gear.isWindowAlive = true;
+		}
 	}catch(e) {
 		showError(e);
 	}});
 }
 
-function leaveGame() {
+Gear.leaveGame = function() {
+	uiThread(function() {
+		Gear.textView.setText("Loading...");
+		Gear.textView.setTextColor(android.graphics.Color.WHITE);
+	});
+	Gear.isremote = false;
 	if(Level.getWorldDir() !== null) {
 		saveData(_MAP_STEP_DATA(), "STEP", Gear.floorStep);
 		saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
 	}
-	if(Gear.mainWindow != null) {
+	if(Gear.mainWindow != null && !Gear.allowRemote && Gear.isWindowAlive) {
 		uiThread(function() {try {
 			Gear.mainWindow.dismiss();
+			Gear.isWindowAlive = false;
 		}catch(e) {
 			showError(e);
 		}});
 	}
 }
 
-function modTick() {
+Gear.pedometerTick = function() {
 	var x = Entity.getVelX(Player.getEntity());
 	var z = Entity.getVelZ(Player.getEntity());
 	if(x !== 0| z !== 0) {
@@ -666,6 +822,9 @@ function modTick() {
 			Gear.floorStep = Math.floor(Gear.step);
 		}
 	}
+}
+
+Gear.autoSaveTick = function() {
 	if(++Gear.saveCount > 200 && Level.getWorldDir() !== null) {
 		debug("Gear.autoSaveStep " + Gear.floorStep);
 		Gear.saveCount = 0;
@@ -673,6 +832,9 @@ function modTick() {
 			saveData(_MAP_STEP_DATA(), "STEP", Gear.floorStep);
 		}).start();
 	}
+}
+
+Gear.textViewTick = function() {
 	switch(Gear.mod) {
 		case 0:
 			uiThread(function() {try {
