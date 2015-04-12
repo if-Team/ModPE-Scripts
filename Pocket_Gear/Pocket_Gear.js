@@ -307,7 +307,7 @@ if(!_FONT.exists()) {
 var Gear = {};
 Gear.mainWindow = null;
 Gear.saveCount = 0;
-Gear.mod = 3;
+Gear.mod = 0;
 //RECENT, OVERALL, CLOCK, INGAME_CLOCK
 
 Gear.layout = new android.widget.RelativeLayout(ctx);
@@ -455,6 +455,7 @@ function gearSetting() {uiThread(function() {try {
 				break;
 		}
 		view.setTextColor(android.graphics.Color.YELLOW);
+		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.mod = 0;
 		Gear.textView.setText((Gear.floorStep - Gear.currentStepLock) + "");
 		saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
@@ -486,6 +487,7 @@ function gearSetting() {uiThread(function() {try {
 				break;
 		}
 		view.setTextColor(android.graphics.Color.YELLOW);
+		Gear.textView.setTextColor(android.graphics.Color.YELLOW);
 		Gear.mod = 1;
 		Gear.textView.setText(Gear.floorStep + "");
 		saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
@@ -517,6 +519,7 @@ function gearSetting() {uiThread(function() {try {
 				break;
 		}
 		view.setTextColor(android.graphics.Color.YELLOW);
+		Gear.textView.setTextColor(android.graphics.Color.YELLOW);
 		Gear.mod = 2;
 		saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
 	}catch(e) {
@@ -547,6 +550,7 @@ function gearSetting() {uiThread(function() {try {
 				break;
 		}
 		view.setTextColor(android.graphics.Color.YELLOW);
+		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.mod = 3;
 		saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
 	}catch(e) {
@@ -577,6 +581,7 @@ function newLevel(str) {
 			_MAP_STEP_DATA().createNewFile();
 		}
 		Gear.step = parseInt(loadData(_MAP_STEP_DATA(), "STEP"));
+		debug("Gear.overall " + Gear.step);
 		if(Gear.step + "" == "NaN") {
 			Gear.step = 0;
 			saveData(_MAP_STEP_DATA(), "STEP", 0);
@@ -590,6 +595,11 @@ function newLevel(str) {
 		Gear.mod = parseInt(loadData(_MAP_STEP_DATA(), "MOD"));
 		if(Gear.mod + "" === "NaN") {
 			Gear.mod = 0;
+		}
+		if(Gear.mod == 1 || Gear.mod == 2) {
+			 Gear.textView.setTextColor(android.graphics.Color.YELLOW);
+		}else {
+			Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		}
 	}
 	uiThread(function() {try {
@@ -614,32 +624,35 @@ function leaveGame() {
 }
 
 function modTick() {
+	var x = Entity.getVelX(Player.getEntity());
+	var z = Entity.getVelZ(Player.getEntity());
+	if(x !== 0| z !== 0) {
+		Gear.step += Math.sqrt(Math.pow(x, 2) + Math.pow(z, 2));
+		if(Math.floor(Gear.step) !== Gear.floorStep) {
+			Gear.floorStep = Math.floor(Gear.step);
+		}
+	}
+	if(++Gear.saveCount > 200 && Level.getWorldDir() !== null) {
+		debug("Gear.autoSaveStep " + Gear.floorStep);
+		Gear.saveCount = 0;
+		thread(function() {
+			saveData(_MAP_STEP_DATA(), "STEP", Gear.floorStep);
+		}).start();
+	}
 	switch(Gear.mod) {
 		case 0:
+			uiThread(function() {try {
+				Gear.textView.setText((Gear.floorStep - Gear.currentStepLock) + "");
+			}catch(e) {
+				showError(e);
+			}});
+			break;
 		case 1:
-			var x = Entity.getVelX(Player.getEntity());
-			var z = Entity.getVelZ(Player.getEntity());
-			if(x !== 0| z !== 0) {
-				Gear.step += Math.sqrt(Math.pow(x, 2) + Math.pow(z, 2));
-				if(Math.floor(Gear.step) !== Gear.floorStep) {
-					Gear.floorStep = Math.floor(Gear.step);
-					uiThread(function() {try {
-						if(Gear.mod === 0) {
-							Gear.textView.setText((Gear.floorStep - Gear.currentStepLock) + "");
-						}else {
-							Gear.textView.setText(Gear.floorStep + "");
-						}
-					}catch(e) {
-						showError(e);
-					}});
-					if(Gear.saveCount++ > 200 && Level.getWorldDir() !== null) {
-						Gear.saveCount = 0;
-						thread(function() {
-							saveData(_MAP_STEP_DATA(), "STEP", Gear.floorStep);
-						}).start();
-					}
-				}
-			}
+			uiThread(function() {try {
+				Gear.textView.setText(Gear.floorStep + "");
+			}catch(e) {
+				showError(e);
+			}});
 			break;
 		case 2:
 			var time = new Date();
