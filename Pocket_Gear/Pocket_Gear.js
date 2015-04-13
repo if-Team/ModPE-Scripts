@@ -465,6 +465,34 @@ function viewSide2(yaw) {
 		return "NaY(" + yaw + ")";
 }
 
+//TTS Test(Dark)
+
+var tts = new android.speech.tts.TextToSpeech (ctx, new android.speech.tts.TextToSpeech.OnInitListener ( {
+	onInit: function (status) {
+		//tts.setLanguage(java.util.Locale.KOREAN);
+	}
+}), "com.samsung.SMT");
+
+//var GearVoice = new android.speech.tts.Voice("GearVoice", java.util.Locale.KOREAN, android.speech.tts.Voice.QUALITY_NORMAL, android.speech.tts.Voice.LATENCY_NORMAL, false, "gear");
+
+tts.setPitch(3);
+tts.setLanguage(java.util.Locale.KOREAN);
+tts.setSpeechRate(1.5);
+//tts.setVoice(GearVoice);
+toast(tts.getEngines() + "");
+
+function ttsIt(str, pitch, speed) {
+	tts.setPitch(pitch);
+	tts.setSpeechRate(speed);
+	tts.speak(str, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null);
+}
+
+function chatHook (str) {
+	tts.setPitch(1);
+	tts.setSpeechRate(1);
+	tts.speak (str, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null);
+}
+
 if(!_MOD_DIR.exists()) {
 	_MOD_DIR.mkdirs();
 }
@@ -472,6 +500,7 @@ if(!_MOD_DIR.exists()) {
 if(!_MOD_DATA.exists()) {
 	_MOD_DATA.createNewFile();
 	toast("[Pocket Gear]\n\n첫 부팅을 환영합니다\n<Copyright® 2015 CodeInside>");
+	//ttsIt("Pocket Gear 가동 합니다", 0.9, 0.9);
 }
 
 if(!_FONT.exists()) {
@@ -658,7 +687,7 @@ Gear.mainWindow.setOutsideTouchable(true);
 
 function gearSetting() {uiThread(function() {try {
 	Gear.mainDialog = new android.app.AlertDialog.Builder(ctx, 2); 
-	Gear.mainDialog.setTitle("Gear setting");
+	Gear.mainDialog.setTitle("Gear");
 	
 	Gear.mainDialogScroll = new android.widget.ScrollView(ctx);
 	
@@ -855,6 +884,35 @@ function gearSetting() {uiThread(function() {try {
 	}}});
 	Gear.mainDialogLayout.addView(Gear.mod4);
 	
+	Gear.authorBtn = new android.widget.Button(ctx);
+	Gear.authorBtn.setText("Setting");
+	Gear.authorBtn.setTextColor(android.graphics.Color.WHITE);
+	Gear.authorBtn.setBackgroundColor(android.graphics.Color.BLACK);
+	Gear.authorBtn.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+		Gear.info();
+	}catch(e) {
+		errorShow(e);
+	}}});
+	Gear.mainDialogLayout.addView(Gear.authorBtn);
+	
+	Gear.mainDialogScroll.addView(Gear.mainDialogLayout);
+	
+	Gear.mainDialog.setView(Gear.mainDialogScroll);
+	Gear.mainDialog.create();
+	Gear.mainDialog.show();
+}catch(e) {
+	showError(e);
+}})};
+
+Gear.info = function() {uiThread(function() {try {
+	Gear.settingDialog = new android.app.AlertDialog.Builder(ctx, 2); 
+	Gear.settingDialog.setTitle("Gear setting");
+	
+	Gear.settingDialogScroll = new android.widget.ScrollView(ctx);
+	
+	Gear.settingDialogLayout = new android.widget.LinearLayout(ctx);
+	Gear.settingDialogLayout.setOrientation(1);
+	
 	Gear.multiBtn = new android.widget.Button(ctx);
 	Gear.multiBtn.setText("Visible in Multiplay");
 	Gear.multiBtn.setTextColor(android.graphics.Color.WHITE);
@@ -872,29 +930,17 @@ function gearSetting() {uiThread(function() {try {
 			Gear.multiBtn.setBackgroundColor(android.graphics.Color.BLUE);
 			Gear.allowRemote = true;
 			saveData(_MOD_DATA, "ALLOW_REMOTE", true);
-			
 		}
 	}catch(e) {
 		errorShow(e);
 	}}});
-	Gear.mainDialogLayout.addView(Gear.multiBtn);
+	Gear.settingDialogLayout.addView(Gear.multiBtn);
 	
-	Gear.authorBtn = new android.widget.Button(ctx);
-	Gear.authorBtn.setText("Info");
-	Gear.authorBtn.setTextColor(android.graphics.Color.WHITE);
-	Gear.authorBtn.setBackgroundColor(android.graphics.Color.BLACK);
-	Gear.authorBtn.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
-		print("hello");
-	}catch(e) {
-		errorShow(e);
-	}}});
-	Gear.mainDialogLayout.addView(Gear.authorBtn);
+	Gear.settingDialogScroll.addView(Gear.settingDialogLayout);
 	
-	Gear.mainDialogScroll.addView(Gear.mainDialogLayout);
-	
-	Gear.mainDialog.setView(Gear.mainDialogScroll);
-	Gear.mainDialog.create();
-	Gear.mainDialog.show();
+	Gear.settingDialog.setView(Gear.settingDialogScroll);
+	Gear.settingDialog.create();
+	Gear.settingDialog.show();
 }catch(e) {
 	showError(e);
 }})};
@@ -1043,7 +1089,6 @@ Gear.slowModTick = function() {
 			for(var e = 0; e < Gear.players.length; e++) {
 				var ent = Gear.players[e];
 				if(!Player.isPlayer(ent) || Gear.voidClip.indexOf(Level.getTile(Entity.getX(ent), Entity.getY(ent) + 0.6, Entity.getZ(ent))) === -1 || Player.getEntity() == ent) {
-					//clientMessage(ent + "splice due: " + (!Player.isPlayer(ent)) + " " + (Gear.voidClip.indexOf(Level.getTile(Entity.getX(ent), Entity.getY(ent) + 0.6, Entity.getZ(ent))) === -1) + " " + (Player.getEntity() == ent));
 					Gear.players.splice(e, 1);
 				}
 			}
@@ -1088,6 +1133,7 @@ Gear.slowModTick = function() {
 					}
 					Gear.noPlayer = 0;
 					Gear.textView.setText(Gear.playerRangeMinName + "\n" + Math.floor(Gear.playerRange[Gear.playerRangeMin]) + "m " + Entity.getHealth(Gear.players[Gear.playerRangeMin]) + "hp" + "\n" + viewSide2(Entity.getYaw(Player.getEntity()) - ryaw) + "시 방향");
+					//clientMessage( Entity.getMobSkin(Gear.playerRangeMinEnt) );
 				}
 			}catch(e) {
 				showError(e);
@@ -1104,6 +1150,8 @@ Gear.slowestModTick = function() {
 	}
 	switch(Gear.mod) {
 		case 4:
+		case 5:
+		case 6:
 			Gear.temp = Entity.getAll();
 			for(var e = 0; e < Gear.temp.length; e++) {
 				var ent = Gear.temp[e]
@@ -1140,22 +1188,3 @@ Gear.playerRemoved = function(ent) {
 		Gear.players.splice(Gear.players.indexOf(ent), 1);
 	}
 };
-
-/**
-TTS Test(Dark)
-var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get ();
-
-var tts = new android.speech.tts.TextToSpeech (ctx, new android.speech.tts.TextToSpeech.OnInitListener ( {
-	onInit: function (status) {
-		tts.setLanguage (java.util.Locale.KOREAN);
-	}
-}));
-
-tts.setPitch (float);
-tts.setSpeechLanguage (float);
-//속도
-
-function chatHook (str) {
-    tts.speak (str, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null);
-}
-*/
