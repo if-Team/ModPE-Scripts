@@ -370,13 +370,100 @@ function multiThread(fc) {
 	}
 };
 
-if(!_FONT.exists()) {
-	thread( function(){try {
-		downloadFile(_FONT, "https://www.dropbox.com/s/y1o46b2jkbxwl3o/minecraft.ttf?dl=1");
-	}catch(e) {
-		showError(e);
-	}}).start();
+function getYaw(x, y, z) {
+	var apil = Math.sqrt(Math.pow(x, 2)+Math.pow(z, 2));
+	var apisinHorizontal = x/apil;
+	var apicosHorizontal = z/apil;
+	var apitanHorizontal = x/z;
+	var apiacosHorizontal = Math.acos(z/apil)*180/Math.PI;
+	var apiatanVertical = Math.atan(y/apil);
+	var alpha = 0;
+	if(apisinHorizontal > 0 && apicosHorizontal > 0 && apitanHorizontal > 0)
+		alpha = 360 - apiacosHorizontal;
+	else if(apisinHorizontal > 0 && apicosHorizontal < 0 && apitanHorizontal < 0) 
+		alpha = 360 - apiacosHorizontal;
+	else if(apisinHorizontal < 0 && apicosHorizontal < 0 && apitanHorizontal > 0) 
+		alpha = apiacosHorizontal;
+	else if(apisinHorizontal < 0 && apicosHorizontal > 0 && apitanHorizontal < 0) 
+		alpha = apiacosHorizontal;
+	else if(apicosHorizontal == 1) alpha = 0;
+	else if(apisinHorizontal == 1) alpha = 90;
+	else if(apicosHorizontal == -1) alpha = 180;
+	else if(apisinHorizontal == -1) alpha = 270;
+	else if(apisinHorizontal == 0 && apicosHorizontal == 1 && apitanHorizontal == 0) null;
+	return alpha;
 };
+
+function viewSide(yaw) {
+	var temp = yaw % 360;
+	if((temp >= 0 && temp < 11.25) || (temp >= 348.75 && temp < 360))
+		return "북(Z+)";
+	else if(temp >= 11.25 && temp < 33.75)
+		return "북북동";
+	else if(temp >= 33.75 && temp < 56.25)
+		return "북동";
+	else if(temp >= 56.25 && temp < 78.75)
+		return "북동동";
+	else if(temp >= 78.75 && temp < 101.25)
+		return "동(-X)";
+	else if(temp >= 101.25 && temp < 123.75)
+		return "남동동";
+	else if(temp >= 123.75 && temp < 146.25)
+		return "남동";
+	else if(temp >= 146.25 && temp < 168.75)
+		return "남남동";
+	else if(temp >= 168.75 && temp < 191.25)
+		return "남(Z-)";
+	else if(temp >= 191.25 && temp < 213.75)
+		return "남남서";
+	else if(temp >= 213.75 && temp < 236.25)
+		return "남서";
+	else if(temp >= 236.25 && temp < 258.75)
+		return "남서서";
+	else if(temp >= 258.75 && temp < 281.25)
+		return "서(X+)";
+	else if(temp >= 281.25 && temp < 303.75)
+		return "북서서";
+	else if(temp >= 303.75 && temp < 326.25)
+		return "북서";
+	else if(temp >= 326.25 && temp < 348.75)
+		return "북북서";
+	else
+		return "NaY";
+}
+
+function viewSide2(yaw) {
+	while(yaw < 0) {
+		yaw += 360;
+	}
+	var temp = yaw % 360;
+	if((temp >= 0 && temp < 15) || (temp >= 345 && temp < 360))
+		return 12;
+	else if(temp >= 15 && temp < 45)
+		return 11;
+	else if(temp >= 45 && temp < 75)
+		return 10;
+	else if(temp >= 75 && temp < 105)
+		return 9;
+	else if(temp >= 105 && temp < 135)
+		return 8;
+	else if(temp >= 135 && temp < 165)
+		return 7;
+	else if(temp >= 165 && temp < 195)
+		return 6;
+	else if(temp >= 195 && temp < 225)
+		return 5;
+	else if(temp >= 225 && temp < 255)
+		return 4;
+	else if(temp >= 255 && temp < 285)
+		return 3;
+	else if(temp >= 285 && temp < 315)
+		return 2;
+	else if(temp >= 315 && temp < 345)
+		return 1;
+	else
+		return "NaY(" + yaw + ")";
+}
 
 if(!_MOD_DIR.exists()) {
 	_MOD_DIR.mkdirs();
@@ -384,32 +471,67 @@ if(!_MOD_DIR.exists()) {
 
 if(!_MOD_DATA.exists()) {
 	_MOD_DATA.createNewFile();
+	toast("[Pocket Gear]\n\n첫 부팅을 환영합니다\n<Copyright® 2015 CodeInside>");
 }
+
+if(!_FONT.exists()) {
+	if(!downloadFile(_FONT, "https://www.dropbox.com/s/y1o46b2jkbxwl3o/minecraft.ttf?dl=1")) {
+		toast("[Pocket Gear]\n\n폰트를 다운로드하지 못했습니다\n아마도 인터넷이 연결되어 있지 않습니다");
+		toasts("[Pocket Gear]\n\n시스템 폰트를 적용합니다...");
+	}
+};
 
 //Minecraft function
 function newLevel(str) {
 	Gear.newLevel(str);
+	Gear.loadPlayers();
 }
 
 function leaveGame() {
 	Gear.leaveGame();
+	Gear.players = [];
 }
 
 function modTick() {
 	Gear.pedometerTick();
 	Gear.textViewTick();
 	Gear.autoSaveTick();
+	if(++Gear.slowTick > 5) {
+		Gear.slowTick = 0;
+		Gear.slowModTick();
+	}
+	if(++Gear.slowestTick > 20) {
+		Gear.slowestTick = 0;
+		Gear.slowestModTick();
+	}
 }
 
+function entityAddedHook(ent) {
+	Gear.playerAdded(ent);
+}
+
+function entityRemovedHook(ent) {
+	Gear.playerRemoved(ent);
+}
 //PocketGear function
 var Gear = {};
 Gear.mainWindow = null;
 Gear.saveCount = 0;
-Gear.mod = 0;
+Gear.mod = parseInt(loadData(_MOD_DATA, "MOD"));
+if(Gear.mod + "" === "NaN") {
+	Gear.mod = 0;
+	saveData(_MOD_DATA, "MOD", Gear.mod);
+}
 //RECENT, OVERALL, CLOCK, INGAME_CLOCK
 Gear.isRemote = false;
 Gear.allowRemote = (loadData(_MOD_DATA, "ALLOW_REMOTE") == "true" ? true : false);
 Gear.isWindowAlive = false;
+Gear.players = new Array();
+Gear.chattyPlayers = new Array();
+Gear.slowTick = 0;
+Gear.slowestTick = 0;
+Gear.noPlayer = 0;
+Gear.voidClip = [0,6,8,9,10,11,26,27,30,31,32,37,38,39,40,50,51,59,63,64,65,66,68,71,78,83,92,95,96,104,105,106,111,126,127,141,142,175,244];
 
 Gear.layout = new android.widget.RelativeLayout(ctx);
 Gear.layout.setBackgroundDrawable(mcpeBGT9);
@@ -417,7 +539,7 @@ Gear.layout.setPadding(dp(8), dp(8), dp(8), dp(8));
 
 Gear.textView = new android.widget.TextView(ctx);
 Gear.textView.setId(721);
-Gear.textView_param = new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+Gear.textView_param = new android.widget.RelativeLayout.LayoutParams(dp(80), android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 Gear.textView.setLayoutParams(Gear.textView_param);
 Gear.textView.setBackgroundDrawable(mcpeTextView9);
 Gear.textView.setPadding(dp(4), dp(4), dp(4), dp(4));
@@ -428,12 +550,12 @@ Gear.textView.getPaint().setAntiAlias(false);
 if(_FONT.exists()) {
 	Gear.textView.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"));
 }
-Gear.textView.setText("Loading...");
+Gear.textView.setText("Idle mode");
 Gear.layout.addView(Gear.textView);
 
 Gear.moveButton = new android.widget.Button(ctx);
 Gear.moveButton.setId(722);
-Gear.moveButton_param = new android.widget.RelativeLayout.LayoutParams(dp(42), dp(20));
+Gear.moveButton_param = new android.widget.RelativeLayout.LayoutParams(dp(56), dp(20));
 Gear.moveButton_param.setMargins(0,dp(2),0,0);
 Gear.moveButton_param.addRule(android.widget.RelativeLayout.BELOW, Gear.textView.getId());
 Gear.moveButton.setLayoutParams(Gear.moveButton_param);
@@ -462,10 +584,8 @@ Gear.moveButton.setOnTouchListener(new android.view.View.OnTouchListener({ onTou
 			}});
 			break;
 		case android.view.MotionEvent.ACTION_UP:
-			if(Level.getWorldDir() !== null) {
-				saveData(_MOD_DATA, "WINDOW_X", Gear.Wx);
-				saveData(_MOD_DATA, "WINDOW_Y", Gear.Wy);
-			};
+			saveData(_MOD_DATA, "WINDOW_X", Gear.Wx);
+			saveData(_MOD_DATA, "WINDOW_Y", Gear.Wy);
 			break;
 	}
 	return true;
@@ -507,7 +627,7 @@ Gear.resetButton.setOnClickListener(new android.view.View.OnClickListener() {o
 		uiThread(function() {try {
 			if(Gear.mod !== 0) {
 				Gear.mod = 0;
-				 saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+				saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
 			}
 			Gear.textView.setTextColor(android.graphics.Color.WHITE);
 			Gear.textView.setText((Gear.floorStep - Gear.currentStepLock) + "");
@@ -531,7 +651,7 @@ Gear.resetButton.setOnLongClickListener(new android.view.View.OnLongClickListene
 }}});
 Gear.layout.addView(Gear.resetButton);
 
-Gear.mainWindow = new android.widget.PopupWindow(Gear.layout, dp(82) , dp(55), false);
+Gear.mainWindow = new android.widget.PopupWindow(Gear.layout, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, false);
 Gear.mainWindow.setSplitTouchEnabled(true);
 Gear.mainWindow.setOutsideTouchable(true);
 //Gear.mainWindow.setTouchable(false);
@@ -567,11 +687,14 @@ function gearSetting() {uiThread(function() {try {
 			case 3:
 				Gear.mod3.setTextColor(android.graphics.Color.WHITE);
 				break;
+			case 4:
+				Gear.mod4.setTextColor(android.graphics.Color.WHITE);
+				break;
 		}
 		view.setTextColor(android.graphics.Color.YELLOW);
 		Gear.textView.setTextColor(android.graphics.Color.WHITE);
+		Gear.textView.setText("loading...");
 		Gear.mod = 0;
-		Gear.textView.setText((Gear.floorStep - Gear.currentStepLock) + "");
 		if(Level.getWorldDir() !== null) {
 			saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
 		}
@@ -602,11 +725,14 @@ function gearSetting() {uiThread(function() {try {
 			case 3:
 				Gear.mod3.setTextColor(android.graphics.Color.WHITE);
 				break;
+			case 4:
+				Gear.mod4.setTextColor(android.graphics.Color.WHITE);
+				break;
 		}
 		view.setTextColor(android.graphics.Color.YELLOW);
 		Gear.textView.setTextColor(android.graphics.Color.YELLOW);
+		Gear.textView.setText("loading...");
 		Gear.mod = 1;
-		Gear.textView.setText(Gear.floorStep + "");
 		if(Level.getWorldDir() !== null) {
 			saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
 		}
@@ -637,9 +763,12 @@ function gearSetting() {uiThread(function() {try {
 			case 3:
 				Gear.mod3.setTextColor(android.graphics.Color.WHITE);
 				break;
+			case 4:
+				Gear.mod4.setTextColor(android.graphics.Color.WHITE);
+				break;
 		}
 		view.setTextColor(android.graphics.Color.YELLOW);
-		Gear.textView.setText("Loading...");
+		Gear.textView.setText("loading...");
 		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.mod = 2;
 		if(Level.getWorldDir() !== null) {
@@ -672,9 +801,12 @@ function gearSetting() {uiThread(function() {try {
 			case 3:
 				Gear.mod3.setTextColor(android.graphics.Color.WHITE);
 				break;
+			case 4:
+				Gear.mod4.setTextColor(android.graphics.Color.WHITE);
+				break;
 		}
 		view.setTextColor(android.graphics.Color.YELLOW);
-		Gear.textView.setText("Loading...");
+		Gear.textView.setText("loading...");
 		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.mod = 3;
 		if(Level.getWorldDir() !== null) {
@@ -684,6 +816,44 @@ function gearSetting() {uiThread(function() {try {
 		errorShow(e);
 	}}});
 	Gear.mainDialogLayout.addView(Gear.mod3);
+	
+	Gear.mod4 = new android.widget.Button(ctx);
+	Gear.mod4.setText("Show nearest Player");
+	if(Gear.mod === 4) {
+		Gear.mod4.setTextColor(android.graphics.Color.YELLOW);
+	}else {
+		Gear.mod4.setTextColor(android.graphics.Color.WHITE);
+	}
+	Gear.mod4.setBackgroundColor(android.graphics.Color.BLACK);
+	Gear.mod4.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+		switch(Gear.mod) {
+			case 0:
+				Gear.mod0.setTextColor(android.graphics.Color.WHITE);
+				break;
+			case 1:
+				Gear.mod1.setTextColor(android.graphics.Color.WHITE);
+				break;
+			case 2:
+				Gear.mod2.setTextColor(android.graphics.Color.WHITE);
+				break;
+			case 3:
+				Gear.mod3.setTextColor(android.graphics.Color.WHITE);
+				break;
+			case 4:
+				Gear.mod4.setTextColor(android.graphics.Color.WHITE);
+				break;
+		}
+		view.setTextColor(android.graphics.Color.YELLOW);
+		Gear.textView.setText("loading...");
+		Gear.textView.setTextColor(android.graphics.Color.WHITE);
+		Gear.mod = 4;
+		if(Level.getWorldDir() !== null) {
+			saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
+		}
+	}catch(e) {
+		errorShow(e);
+	}}});
+	Gear.mainDialogLayout.addView(Gear.mod4);
 	
 	Gear.multiBtn = new android.widget.Button(ctx);
 	Gear.multiBtn.setText("Visible in Multiplay");
@@ -767,22 +937,14 @@ Gear.newLevel = function(str) {
 				saveData(_MAP_STEP_DATA(), "CURRENT_STEP_LOCK", Gear.currentStepLock);
 			}
 		}
-		Gear.mod = parseInt(loadData(_MAP_STEP_DATA(), "MOD"));
-		if(Gear.mod + "" === "NaN") {
-			Gear.mod = 0;
-			if(Level.getWorldDir() !== null) {
-				saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
-			}
-		}
 		uiThread(function() {
-			if(Gear.mod == 1) {
-				 Gear.textView.setTextColor(android.graphics.Color.YELLOW);
+			if(Gear.mod === 1) {
+				Gear.textView.setTextColor(android.graphics.Color.YELLOW)
 			}else {
-				Gear.textView.setTextColor(android.graphics.Color.WHITE);
+				Gear.textView.setTextColor(android.graphics.Color.WHITE)
 			}
 		});
 	}
-	
 	uiThread(function() {try {
 		if(!Gear.isWindowAlive) {
 			Gear.mainWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, ((loadData(_MOD_DATA, "WINDOW_X") == null || loadData(_MOD_DATA, "WINDOW_X") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getWidth() - dp(82) : loadData(_MOD_DATA, "WINDOW_X") - dp(17)), ((loadData(_MOD_DATA, "WINDOW_Y") == null || loadData(_MOD_DATA, "WINDOW_Y") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getHeight() - dp(55) : loadData(_MOD_DATA, "WINDOW_Y") - dp(30)));
@@ -795,7 +957,7 @@ Gear.newLevel = function(str) {
 
 Gear.leaveGame = function() {
 	uiThread(function() {
-		Gear.textView.setText("Loading...");
+		Gear.textView.setText("Idle mode");
 		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 	});
 	Gear.isremote = false;
@@ -872,6 +1034,110 @@ Gear.textViewTick = function() {
 				showError(e);
 			}});
 			break;
+	}
+};
+
+Gear.slowModTick = function() {
+	switch(Gear.mod) {
+		case 4:
+			for(var e = 0; e < Gear.players.length; e++) {
+				var ent = Gear.players[e];
+				if(!Player.isPlayer(ent) || Gear.voidClip.indexOf(Level.getTile(Entity.getX(ent), Entity.getY(ent) + 0.6, Entity.getZ(ent))) === -1 || Player.getEntity() == ent) {
+					//clientMessage(ent + "splice due: " + (!Player.isPlayer(ent)) + " " + (Gear.voidClip.indexOf(Level.getTile(Entity.getX(ent), Entity.getY(ent) + 0.6, Entity.getZ(ent))) === -1) + " " + (Player.getEntity() == ent));
+					Gear.players.splice(e, 1);
+				}
+			}
+			Gear.playerRange = [];
+			for(var e = 0; e < Gear.players.length; e++) {
+				var ent = Gear.players[e];
+				Gear.playerRange[e] = Math.sqrt(Math.pow(Player.getX() - Entity.getX(ent), 2) + Math.pow(Player.getY() - Entity.getY(ent), 2) + Math.pow(Player.getZ() - Entity.getZ(ent), 2));
+			}
+			Gear.playerRangeMin = Gear.playerRange.indexOf(Math.min.apply(null, Gear.playerRange));
+			Gear.playerRangeMinEnt = Gear.players[Gear.playerRangeMin];
+			Gear.playerRangeMinName = Player.getName(Gear.playerRangeMinEnt);
+			if(Gear.playerRangeMinName.indexOf("[") < Gear.playerRangeMinName.indexOf("]") && Gear.playerRangeMinName.indexOf("]") !== Gear.playerRangeMinName.length - 1) {
+				Gear.playerRangeMinName = Gear.playerRangeMinName.substring(Gear.playerRangeMinName.indexOf("]") + 1, Gear.playerRangeMinName.length - 1);
+			}else if(Gear.playerRangeMinName.indexOf("<") < Gear.playerRangeMinName.indexOf(">") && Gear.playerRangeMinName.indexOf(">") !== Gear.playerRangeMinName.length - 1) {
+				Gear.playerRangeMinName = Gear.playerRangeMinName.substring(Gear.playerRangeMinName.indexOf(">") + 1, Gear.playerRangeMinName.length - 1);
+			}
+			if(Gear.playerRangeMinName.length > 16) {
+				Gear.playerRangeMinName = Gear.playerRangeMinName.substring(0, 15);
+			}
+			uiThread(function() {try {
+				if(Gear.playerRangeMin === -1) {
+					if(Gear.noPlayer < 20) {
+						 Gear.textView.setTextColor(android.graphics.Color.RED);
+						 Gear.noPlayer++;
+					}else {
+						 Gear.textView.setTextColor(android.graphics.Color.WHITE);
+						 Gear.textView.setText("No User");
+					}
+				} else {
+					Gear.textView.setTextColor(android.graphics.Color.WHITE);
+					var ryaw = getYaw(Entity.getX(Gear.playerRangeMinEnt) - Player.getX(), Entity.getY(Gear.playerRangeMinEnt) - Player.getY(), Entity.getZ(Gear.playerRangeMinEnt) - Player.getZ());
+					var tyaw = Entity.getYaw(Gear.playerRangeMinName) + 180;
+					while(tyaw < 0) {
+						tyaw += 360;
+					}
+					var ryawm = (ryaw + 330) % 360;
+					var ryawM = (ryaw + 30) % 360;
+					if(((ryaw + 330) % 360 <= tyaw % 360 && (ryaw + 30) % 360 > tyaw) || ((ryaw >= 330 || ryaw < 30) && ((ryaw + 330) % 360 <= tyaw || ((ryaw + 30) % 360 > tyaw)))) {
+						Gear.textView.setTextColor(android.graphics.Color.YELLOW);
+					}else {
+						Gear.textView.setTextColor(android.graphics.Color.WHITE);
+					}
+					Gear.noPlayer = 0;
+					Gear.textView.setText(Gear.playerRangeMinName + "\n" + Math.floor(Gear.playerRange[Gear.playerRangeMin]) + "m " + Entity.getHealth(Gear.players[Gear.playerRangeMin]) + "hp" + "\n" + viewSide2(Entity.getYaw(Player.getEntity()) - ryaw) + "시 방향");
+				}
+			}catch(e) {
+				showError(e);
+			}});
+			break;
+	}
+}
+
+Gear.slowestModTick = function() {
+	if(net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote && !Gear.isRemote && Gear.allowRemote) {
+		net.zhuoweizhang.mcpelauncher.ScriptManager.handleMessagePacketCallback("", "BlockLauncher, enable scripts, please and thank you");
+		Gear.isRemote = true;
+		newLevel("multi");
+	}
+	switch(Gear.mod) {
+		case 4:
+			Gear.temp = Entity.getAll();
+			for(var e = 0; e < Gear.temp.length; e++) {
+				var ent = Gear.temp[e]
+				if(Player.isPlayer(ent) && Player.getEntity() != ent && Gear.players.indexOf(ent) < 0 && Gear.voidClip.indexOf(Level.getTile(Entity.getX(ent), Entity.getY(ent) + 0.6, Entity.getZ(ent))) !== -1) {
+				Gear.players.push(ent);
+				}
+			}
+			break;
+	}
+}
+
+Gear.loadPlayers = function() {
+	Gear.temp2 = Entity.getAll();
+	for(var e = 0; e < Gear.temp2.length; e++) {
+		var ent = Gear.temp2[e];
+		if(Player.isPlayer(ent) && Player.getEntity() !== ent) {
+			Gear.players.push(ent);
+		}
+	}
+};
+
+Gear.playerAdded = function(ent) {
+/*	if(Player.isPlayer(ent) && Gear.players.indexOf(ent) == -1 && ent !== Player.getEntity()) {
+		try {
+			Gear.players.push(ent);
+		}catch(e) {
+			showError(e);
+		}
+	}*/
+};
+
+Gear.playerRemoved = function(ent) {
+	if(Gear.players.indexOf(ent) < 1) {
+		Gear.players.splice(Gear.players.indexOf(ent), 1);
 	}
 };
 
