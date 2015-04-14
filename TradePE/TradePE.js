@@ -14,20 +14,20 @@ Trade.SELLER = null;
 //Trade items
 Trade.Items = {
     butcher: {
-        name: ["butcher"],
-        meta: [["apple",0]],
-        id: [260],
-        dam: [0],
-        cost: [1],
-        count: [1]
+        name: ["item.beefCooked.name", "item.porkchopCooked.name", "item.helmetCloth.name", "item.chestplateCloth.name", "item.leggingsCloth.name", "item.bootsCloth.name", "item.beefRaw.name", "item.porkchopRaw.name", "item.coal.name", "item.ingotGold.name"],
+        meta: [["beef_cooked",0], ["porkchop_cooked",0], ["helmet", 0], ["chestplate", 0], ["leggings", 0], ["boots", 0], ["beef_raw", 0], ["porkchop_raw", 0], ["coal", 0], ["gold_ingot", 0]],
+        id: [364, 320, 298, 299, 300, 301, 363, 319, 263, 266],
+        dam: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        cost: [1, 1, 2, 4, 2, 2, 1, 1, 1, 1],
+        count: [6, 6, 1, 1, 1, 1, 15, 15, 20, 8]
     },
     farmer: {
-        name: ["farmer"],
-        meta: [["apple",0]],
-        id: [260],
-        dam: [0],
-        cost: [1],
-        count: [1]
+        name: ["item.apple.name", "item.bread.name", "item.chickenCooked.name", "item.cookie.name", "item.melon.name", "item.arrow.name"],
+        meta: [["apple",0], ["bread", 0], ["chicken_cooked", 0], ["cookie", 0], ["melon", 0], ["arrow", 0]],
+        id: [260, 297, 366, 357, 369, 262],
+        dam: [0, 0, 0, 0, 0, 0],
+        cost: [1, 1, 1, 1, 1, 1],
+        count: [6, 3, 7, 9, 6, 5]
     },
     librarian: {
         name: ["librarian"],
@@ -82,8 +82,8 @@ Trade.init = function() {
         mainLayout.addView(header);
         var itemback = Utils.showItemBackground(25+18+16, 65);
         mainLayout.addView(itemback);
-        var emerald = Utils.renderItem("emerald", 0, 25+18+16+3, 68, 2);
-        mainLayout.addView(emerald);
+		var item = Utils.getItemImage("emerald", 0);
+		itemback.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*1.6, item.getHeight()*Utils.FOUR*1.6, false));
         var cost = Utils.justText("", 25+18+16+4, 69);
         mainLayout.addView(cost);
         var arrow = Utils.renderArrow(141, 60+17);
@@ -131,6 +131,7 @@ Trade.init = function() {
 Trade.showScreen = function() {
     Utils.createUiThread(function(ctx) {
         Trade.EME_COUNT = Utils.getAllItems(388, 0);
+		Trade.PAGE = 0;
         Utils.updateTradeList(Trade.NAME, Trade.ITEMBACK, Trade.COST, Trade.COUNT);
         Trade.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
     });
@@ -300,6 +301,7 @@ Utils.showButton = function(x, y, width, height, text, onclick) {
                     if(current == false && !(event.getX() < 0 || event.getY() <0 || event.getX() > width*Utils.FOUR || event.getY() > height*Utils.FOUR)) {
                         if(typeof onclick === "function")
                             onclick();
+							Utils.clickSound();
                     }
                     current = false;
                     break;
@@ -421,7 +423,10 @@ Utils.buyThing = function() {
 Utils.warn = function(txt) {
     Utils.createUiThread(function(ctx) {
         var text = new android.widget.TextView(ctx);
-        text.setText(txt);
+		if(Utils.hasNonAscii(txt))
+            text.setText(Utils.getStringBuilder(txt, "#ff0000", 2, "#410000"));
+		else
+            text.setText(txt);
         text.setSingleLine(true);
         text.setLineSpacing(Utils.FOUR*1.5, 1);
         text.setTypeface(Utils.getTypeface());
@@ -442,10 +447,16 @@ Utils.sellThing = function() {
         addItemInventory(388, Trade.Items[type].cost[Trade.PAGE], 0);
         addItemInventory(Trade.Items[type].id[Trade.PAGE], -Trade.Items[type].count[Trade.PAGE], Trade.Items[type].dam[Trade.PAGE]);
     } else
-        Utils.warn("Not Enough Items!");
+        Utils.warn("Not Enough items!");
 };
 
-Utils.getStringBuilder = function(text, color) {
+Utils.getStringBuilder = function(text, color, scale, shadowc) {
+	if(scale == null)
+		scale = 1;
+	if(shadowc == null)
+		shadowc = android.graphics.Color.DKGRAY;
+	else
+		shadowc = android.graphics.Color.parseColor(shadowc);
     if(text.charCodeAt(text.length-1) == 13)
         text = text.substring(0, text.length-1);
     if(color != null)
@@ -474,11 +485,11 @@ Utils.getStringBuilder = function(text, color) {
         var canvas = new android.graphics.Canvas(result);
         var p = new android.graphics.Paint();
         var p2 = new android.graphics.Paint();
-        p.setColorFilter(new android.graphics.PorterDuffColorFilter(android.graphics.Color.DKGRAY, android.graphics.PorterDuff.Mode.MULTIPLY));
+        p.setColorFilter(new android.graphics.PorterDuffColorFilter(shadowc, android.graphics.PorterDuff.Mode.MULTIPLY));
         canvas.drawBitmap(bitmap, 2, 2, p);
         p2.setColorFilter(new android.graphics.PorterDuffColorFilter(color, android.graphics.PorterDuff.Mode.MULTIPLY));
         canvas.drawBitmap(bitmap, 0, 0, p2);
-        builder.setSpan(new android.text.style.ImageSpan(Utils.getContext(), android.graphics.Bitmap.createScaledBitmap(result, 8*Utils.FOUR, 9*Utils.FOUR, false)), i, i+1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        builder.setSpan(new android.text.style.ImageSpan(Utils.getContext(), android.graphics.Bitmap.createScaledBitmap(result, scale*8*Utils.FOUR, scale*9*Utils.FOUR, false)), i, i+1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
     return builder;
 };
@@ -520,6 +531,10 @@ Utils.showInteractPw = function() {
 Utils.getVillagerType = function(ent) {
     var path = Entity.getMobSkin(ent);
     return path.substring(path.lastIndexOf("/")+1, path.length-4)
+};
+
+Utils.clickSound = function() {
+	Level.playSound(getPlayerX(), getPlayerY(), getPlayerZ(), "random.click", 7 ,7);
 };
 
 var Lang = {};
