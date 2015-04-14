@@ -1,3 +1,32 @@
+var ScriptName = "Pocket Gear";
+var Version = "v1";
+var author = "CodeInside";
+
+/**
+ *—————Change Log—————
+ *v1(20150415)
+ *	-출시
+ */
+
+/**
+ *Apache License, Version 2.0
+ *
+ *아파치 라이선스 버전 2.0
+ *
+ *==============================
+ *Copyright (c) <2015> <CodeInside>
+ *==============================
+ *
+ *Apache LicenseVersion 2.0, January 2004
+ *
+ *Apache License 버전 2.0(본 라이선스)의 적용을 받음. 이 파일을 사용하기 위해서는 반드시 본 라이선스를 따라야 합니다.본 라이선스의 사본은 다음 사이트에서 구할 수 있습니다.
+ *
+ *http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *관련 법규나 서면 동의에 의해 구속되지 않는 한, 본 라이선스에따라 배포되는 소프트웨어는 어떠한 보증이나 조건도 명시적으로나 묵시적으로 설정되지 않는  “있는 그대로”의 상태로 배포됩니다. 본 라이선스가 허용하거나 제한하는 사항을 규정한 문언에 대해서는 라이선스를 참조하십시오.
+ *
+ */
+
 var debugging = false;
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
@@ -65,10 +94,91 @@ mcpeTextView.setPixels(mcpeTextViewRaw, 0, 6, 0, 0, 6, 6);
 mcpeTextView = android.graphics.Bitmap.createScaledBitmap(mcpeTextView, dp(6), dp(6), false);
 var mcpeTextView9 = ninePatch1(mcpeTextView, dp(3), dp(3), dp(4), dp(4));
 
+function dp(dips) {
+	return parseInt(dips * ctx.getResources().getDisplayMetrics().density + 0.5);
+}
+
+function debug(str) {
+	if(debugging) {
+		if(Level.getWorldName() === null) {
+			 ctx.runOnUiThread(new java.lang.Runnable({ run: function(){
+		android.widget.Toast.makeText(ctx, "[Debug]\n" + str, android.widget.Toast.LENGTH_LONG).show();
+			}}));
+		}else {
+			clientMessage("[debug] " + str);
+		}
+	}
+}
+
+function showError(e) {
+	if(Level.getWorldName() === null) {
+		ctx.runOnUiThread(new java.lang.Runnable({ run: function(){
+	android.widget.Toast.makeText(ctx, "[Debug]\n" + e, android.widget.Toast.LENGTH_LONG).show();
+		}}));
+	}else {
+		var t = (e + "").split(" ");
+		var c = "";
+		var temp = "";
+		for(var l in t) {
+			if(temp.split("").length > 30) {
+				c+= ("\n" + ChatColor.DARK_RED)
+				temp = "";
+			}
+			c += t[l] + " ";
+			temp += t[l];
+		}
+		clientMessage(ChatColor.DARK_RED + "[" + ScriptName + " ERROR LINE: " + e.lineNumber + "]\n" + ChatColor.DARK_RED + c);
+	}
+};
+
+function toast(str) {
+	ctx.runOnUiThread(new java.lang.Runnable( {
+		run: function(){
+			try{
+				android.widget.Toast.makeText(ctx, str, android.widget.Toast.LENGTH_LONG).show();
+			}catch(e) {}
+		}
+	}
+	));
+} void(toast);
+
+function toasts(str) {
+	ctx.runOnUiThread(new java.lang.Runnable( {
+		run: function(){
+			try{
+				android.widget.Toast.makeText(ctx, str, android.widget.Toast.LENGTH_SHORT).show();
+			}catch(e) {}
+		}
+	}
+	));
+}
+
+function uiThread(fc) {
+	return ctx.runOnUiThread(new java.lang.Runnable({run: fc}))
+};
+function thread(fc) {
+	return new java.lang.Thread(new java.lang.Runnable( {run: fc}))
+};
+function multiThread(fc) {
+	if(Level.getWorldDir() !== null) {
+		new java.lang.Thread(new java.lang.Runnable( {run: fc})).start()
+	}else {
+		uiThread(fc)
+	}
+};
+
+
 //==============================
 //-NinePatch JS
 //Copyright® 2015 affogatoman(colombia2)
 //==============================
+/**
+ * Nine Patch
+ *
+ * @since 2015-??-??
+ * @author affogatoman
+ */
+
 function ninePatch1(bitmap, top, left, bottom, right, width, height) {
 	var getByteBuffer = function(top, left, bottom, right) {
 		var NO_COLOR = 0x00000001;
@@ -139,9 +249,13 @@ function ninePatch2(bitmap, top, left, bottom, right, width, height) {
 	return patch;
 }
 
-function dp(dips) {
-	return parseInt(dips * ctx.getResources().getDisplayMetrics().density + 0.5);
-}
+
+/**
+ * Change texture
+ *
+ * @since 2015-04-01
+ * @author CodeInside
+ */
 
 function setTexture(prototypeFile, innerPath){
 	try{
@@ -160,6 +274,14 @@ function setTexture(prototypeFile, innerPath){
 		toasts(prototypeFile.getAbsolutePath() + " 리소스파일이 없습니다");
 	}
 }
+
+
+/**
+ * Download file
+ *
+ * @since 2015-01-10
+ * @author CodeInside
+ */
 
 function downloadFile(path, url) {
 	try{
@@ -185,38 +307,13 @@ function downloadFile(path, url) {
 	}
 }
 
-function debug(str) {
-	if(debugging) {
-		if(Level.getWorldName() === null) {
-			 ctx.runOnUiThread(new java.lang.Runnable({ run: function(){
-		android.widget.Toast.makeText(ctx, "[Debug]\n" + str, android.widget.Toast.LENGTH_LONG).show();
-			}}));
-		}else {
-			clientMessage("[debug] " + str);
-		}
-	}
-}
 
-function showError(e) {
-	if(Level.getWorldName() === null) {
-		ctx.runOnUiThread(new java.lang.Runnable({ run: function(){
-	android.widget.Toast.makeText(ctx, "[Debug]\n" + e, android.widget.Toast.LENGTH_LONG).show();
-		}}));
-	}else {
-		var t = (e + "").split(" ");
-		var c = "";
-		var temp = "";
-		for(var l in t) {
-			if(temp.split("").length > 30) {
-				c+= ("\n" + ChatColor.DARK_RED)
-				temp = "";
-			}
-			c += t[l] + " ";
-			temp += t[l];
-		}
-		clientMessage(ChatColor.DARK_RED + "[Pedometer_Step ERROR LINE: " + e.lineNumber + "]\n" + ChatColor.DARK_RED + c);
-	}
-};
+/**
+ * save/load Data
+ *
+ * @since 2015-02-11
+ * @author CodeInside
+ */
 
 function saveData(file, article, value) {
 	//읽기
@@ -279,6 +376,14 @@ function loadData(file, article) {
 	return null;
 }
 
+
+/**
+ * load/save Minecraft Setting
+ *
+ * @since 2015-04-12
+ * @author CodeInside
+ */
+
 function saveSetting(article, value) {
 	//읽기
 	var fileInputStream = new java.io.FileInputStream(new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/options.txt"));
@@ -334,41 +439,13 @@ function loadSetting(article) {
 	return null;
 }
 
-function toast(str) {
-	ctx.runOnUiThread(new java.lang.Runnable( {
-		run: function(){
-			try{
-				android.widget.Toast.makeText(ctx, str, android.widget.Toast.LENGTH_LONG).show();
-			}catch(e) {}
-		}
-	}
-	));
-} void(toast);
 
-function toasts(str) {
-	ctx.runOnUiThread(new java.lang.Runnable( {
-		run: function(){
-			try{
-				android.widget.Toast.makeText(ctx, str, android.widget.Toast.LENGTH_SHORT).show();
-			}catch(e) {}
-		}
-	}
-	));
-}
-
-function uiThread(fc) {
-	return ctx.runOnUiThread(new java.lang.Runnable({run: fc}))
-};
-function thread(fc) {
-	return new java.lang.Thread(new java.lang.Runnable( {run: fc}))
-};
-function multiThread(fc) {
-	if(Level.getWorldDir() !== null) {
-		new java.lang.Thread(new java.lang.Runnable( {run: fc})).start()
-	}else {
-		uiThread(fc)
-	}
-};
+/**
+ * get Yaw
+ *
+ * @since 2014-??-??
+ * @author ToonRaOn
+ */
 
 function getYaw(x, y, z) {
 	var apil = Math.sqrt(Math.pow(x, 2)+Math.pow(z, 2));
@@ -393,6 +470,14 @@ function getYaw(x, y, z) {
 	else if(apisinHorizontal == 0 && apicosHorizontal == 1 && apitanHorizontal == 0) null;
 	return alpha;
 };
+
+
+/**
+ * View Side
+ *
+ * @since 2015-04-13
+ * @author CodeInside
+ */
 
 function viewSide(yaw) {
 	var temp = yaw % 360;
@@ -464,6 +549,14 @@ function viewSide2(yaw) {
 	else
 		return "NaY(" + yaw + ")";
 }
+
+
+/**
+ * Battery Checker
+ *
+ * @since 2015-04-14
+ * @author CodeInside
+ */
 
 var ifilter = new android.content.IntentFilter(android.content.Intent.ACTION_BATTERY_CHANGED);
 
@@ -550,7 +643,13 @@ Battery.health = function() {
 	}
 };
 
-//TTS Test(Dark)
+
+/**
+ * TextToSpeach
+ *
+ * @since 2015-04-??
+ * @author Dark
+ */
 
 var tts = new android.speech.tts.TextToSpeech (ctx, new android.speech.tts.TextToSpeech.OnInitListener ( {
 	onInit: function (status) {
@@ -564,7 +663,7 @@ tts.setPitch(3);
 tts.setLanguage(java.util.Locale.KOREAN);
 tts.setSpeechRate(1.5);
 //tts.setVoice(GearVoice);
-toast(tts.getEngines() + "");
+//toast(tts.getEngines() + "");
 
 function ttsIt(str, pitch, speed) {
 	tts.setPitch(pitch);
@@ -1152,7 +1251,7 @@ Gear.newLevel = function(str) {
 
 Gear.leaveGame = function() {
 	Gear.mainWindowReset();
-	Gear.isRemote  = false;
+	Gear.isRemote = false;
 	if(Level.getWorldDir() !== null) {
 		saveData(_MAP_STEP_DATA(), "STEP", Gear.floorStep);
 	}
