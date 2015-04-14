@@ -790,9 +790,8 @@ function gearSetting() {uiThread(function() {try {
 	Gear.mod0.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
 		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
-		Gear.textView.setTextColor(android.graphics.Color.WHITE);
-		Gear.textView.setText("loading...");
 		Gear.mod = 0;
+		Gear.mainWindowReset();
 		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
@@ -810,9 +809,8 @@ function gearSetting() {uiThread(function() {try {
 	Gear.mod1.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
 		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
-		Gear.textView.setTextColor(android.graphics.Color.YELLOW);
-		Gear.textView.setText("loading...");
 		Gear.mod = 1;
+		Gear.mainWindowReset();
 		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
@@ -830,9 +828,8 @@ function gearSetting() {uiThread(function() {try {
 	Gear.mod2.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
 		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
-		Gear.textView.setText("loading...");
-		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.mod = 2;
+		Gear.mainWindowReset();
 		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
@@ -850,9 +847,8 @@ function gearSetting() {uiThread(function() {try {
 	Gear.mod3.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
 		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
-		Gear.textView.setText("loading...");
-		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.mod = 3;
+		Gear.mainWindowReset();
 		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
@@ -870,9 +866,8 @@ function gearSetting() {uiThread(function() {try {
 	Gear.mod4.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
 		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
-		Gear.textView.setText("loading...");
-		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.mod = 4;
+		Gear.mainWindowReset();
 		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
@@ -890,9 +885,8 @@ function gearSetting() {uiThread(function() {try {
 	Gear.mod7.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
 		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
-		Gear.textView.setText("loading...");
-		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.mod = 7;
+		Gear.mainWindowReset();
 		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
@@ -910,9 +904,8 @@ function gearSetting() {uiThread(function() {try {
 	Gear.mod8.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
 		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
-		Gear.textView.setText("loading...");
-		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.mod = 8;
+		Gear.mainWindowReset();
 		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
@@ -930,9 +923,8 @@ function gearSetting() {uiThread(function() {try {
 	Gear.mod10.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
 		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
-		Gear.textView.setText("loading...");
-		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.mod = 10;
+		Gear.mainWindowReset();
 		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
@@ -1081,6 +1073,7 @@ Gear.help = function() {uiThread(function() {try {
 }})};
 
 Gear.textDialog = function(title, text) {
+	debug("new dialog: " + title);
 	var temp = new android.app.AlertDialog.Builder(ctx, 2);
 	temp.setTitle(title);
 	var temp3 = new android.widget.ScrollView(ctx);
@@ -1092,6 +1085,19 @@ Gear.textDialog = function(title, text) {
 	temp3.addView(temp2);
 	temp.setView(temp3);
 	temp.create().show();
+}
+
+Gear.mainWindowReset = function() {
+	debug("main window reset");
+	uiThread(function() {
+		Gear.textView.setText("loading...");
+		Gear.textView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, dp(10));
+		if(Gear.mod === 1) {
+			Gear.textView.setTextColor(android.graphics.Color.YELLOW)
+		}else {
+			Gear.textView.setTextColor(android.graphics.Color.WHITE)
+		}
+	});
 }
 
 uiThread(function() {try {
@@ -1133,13 +1139,7 @@ Gear.newLevel = function(str) {
 			}
 		}
 	}
-	uiThread(function() {
-		if(Gear.mod === 1) {
-			Gear.textView.setTextColor(android.graphics.Color.YELLOW)
-		}else {
-			Gear.textView.setTextColor(android.graphics.Color.WHITE)
-		}
-	});
+	Gear.mainWindowReset();
 	uiThread(function() {try {
 		if(!Gear.isWindowAlive) {
 			Gear.mainWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, ((loadData(_MOD_DATA, "WINDOW_X") == null || loadData(_MOD_DATA, "WINDOW_X") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getWidth() - dp(82) : loadData(_MOD_DATA, "WINDOW_X") - dp(17)), ((loadData(_MOD_DATA, "WINDOW_Y") == null || loadData(_MOD_DATA, "WINDOW_Y") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getHeight() - dp(55) : loadData(_MOD_DATA, "WINDOW_Y") - dp(30)));
@@ -1151,11 +1151,8 @@ Gear.newLevel = function(str) {
 }
 
 Gear.leaveGame = function() {
-	uiThread(function() {
-		Gear.textView.setText("Idle mode");
-		Gear.textView.setTextColor(android.graphics.Color.WHITE);
-	});
-	Gear.isRemote = false;
+	Gear.mainWindowReset();
+	Gear.isRemote  = false;
 	if(Level.getWorldDir() !== null) {
 		saveData(_MAP_STEP_DATA(), "STEP", Gear.floorStep);
 	}
@@ -1277,8 +1274,8 @@ Gear.slowModTick = function() {
 						 Gear.textView.setTextColor(android.graphics.Color.RED);
 						 Gear.noPlayer++;
 					}else {
-						 Gear.textView.setTextColor(android.graphics.Color.WHITE);
-						 Gear.textView.setText("No User");
+						 Gear.textView.setTextColor(android.graphics.Color.GRAY);
+						 Gear.textView.setText("Scanning...");
 					}
 				} else {
 					Gear.textView.setTextColor(android.graphics.Color.WHITE);
@@ -1296,8 +1293,7 @@ Gear.slowModTick = function() {
 					}
 					Gear.noPlayer = 0;
 					debug(Math.round(ryaw) + " " + Math.round(tyaw));
-					Gear.textView.setText(Gear.playerRangeMinName + "\n" + Math.floor(Gear.playerRange[Gear.playerRangeMin]) + "m " + Entity.getHealth(Gear.players[Gear.playerRangeMin]) + "hp" + "\n" + viewSide2(Entity.getYaw(Player.getEntity()) - ryaw) + "시 방향");
-					//clientMessage( Entity.getMobSkin(Gear.playerRangeMinEnt) );
+					Gear.textView.setText(Gear.playerRangeMinName + "\n" + Entity.getHealth(Gear.players[Gear.playerRangeMin]) + "hp " + Math.floor(Gear.playerRange[Gear.playerRangeMin]) + "m" + "\n" + viewSide2(Entity.getYaw(Player.getEntity()) - ryaw) + "시 방향");
 				}
 			}catch(e) {
 				showError(e);
