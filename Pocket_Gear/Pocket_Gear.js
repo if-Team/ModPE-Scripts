@@ -511,7 +511,7 @@ Battery.temp = function() {
 Battery.volt = function() {
 	var batteryStatus = ctx.registerReceiver(null, ifilter);
 	var volt = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_VOLTAGE, -1);
-	return volt / 100;
+	return volt / 1000;
 };
 
 Battery.tec = function() {
