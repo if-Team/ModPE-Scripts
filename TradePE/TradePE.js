@@ -82,8 +82,8 @@ Trade.init = function() {
         mainLayout.addView(header);
         var itemback = Utils.showItemBackground(25+18+16, 65);
         mainLayout.addView(itemback);
-		var item = Utils.getItemImage("emerald", 0);
-		itemback.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*1.6, item.getHeight()*Utils.FOUR*1.6, false));
+        var item = Utils.getItemImage("emerald", 0);
+        itemback.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*1.6, item.getHeight()*Utils.FOUR*1.6, false));
         var cost = Utils.justText("", 25+18+16+4, 69);
         mainLayout.addView(cost);
         var arrow = Utils.renderArrow(141, 60+17);
@@ -131,7 +131,7 @@ Trade.init = function() {
 Trade.showScreen = function() {
     Utils.createUiThread(function(ctx) {
         Trade.EME_COUNT = Utils.getAllItems(388, 0);
-		Trade.PAGE = 0;
+        Trade.PAGE = 0;
         Utils.updateTradeList(Trade.NAME, Trade.ITEMBACK, Trade.COST, Trade.COUNT);
         Trade.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
     });
@@ -301,7 +301,7 @@ Utils.showButton = function(x, y, width, height, text, onclick) {
                     if(current == false && !(event.getX() < 0 || event.getY() <0 || event.getX() > width*Utils.FOUR || event.getY() > height*Utils.FOUR)) {
                         if(typeof onclick === "function")
                             onclick();
-							Utils.clickSound();
+                            Utils.clickSound();
                     }
                     current = false;
                     break;
@@ -423,9 +423,9 @@ Utils.buyThing = function() {
 Utils.warn = function(txt) {
     Utils.createUiThread(function(ctx) {
         var text = new android.widget.TextView(ctx);
-		if(Utils.hasNonAscii(txt))
+        if(Utils.hasNonAscii(txt))
             text.setText(Utils.getStringBuilder(txt, "#ff0000", 2, "#410000"));
-		else
+        else
             text.setText(txt);
         text.setSingleLine(true);
         text.setLineSpacing(Utils.FOUR*1.5, 1);
@@ -451,12 +451,12 @@ Utils.sellThing = function() {
 };
 
 Utils.getStringBuilder = function(text, color, scale, shadowc) {
-	if(scale == null)
-		scale = 1;
-	if(shadowc == null)
-		shadowc = android.graphics.Color.DKGRAY;
-	else
-		shadowc = android.graphics.Color.parseColor(shadowc);
+    if(scale == null)
+        scale = 1;
+    if(shadowc == null)
+        shadowc = android.graphics.Color.DKGRAY;
+    else
+        shadowc = android.graphics.Color.parseColor(shadowc);
     if(text.charCodeAt(text.length-1) == 13)
         text = text.substring(0, text.length-1);
     if(color != null)
@@ -534,7 +534,7 @@ Utils.getVillagerType = function(ent) {
 };
 
 Utils.clickSound = function() {
-	Level.playSound(getPlayerX(), getPlayerY(), getPlayerZ(), "random.click", 7 ,7);
+    Level.playSound(getPlayerX(), getPlayerY(), getPlayerZ(), "random.click", 7 ,7);
 };
 
 var Lang = {};
