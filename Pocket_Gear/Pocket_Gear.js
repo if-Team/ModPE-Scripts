@@ -1,4 +1,4 @@
-var debugging = true;
+var debugging = false;
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
 var _SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -465,6 +465,91 @@ function viewSide2(yaw) {
 		return "NaY(" + yaw + ")";
 }
 
+var ifilter = new android.content.IntentFilter(android.content.Intent.ACTION_BATTERY_CHANGED);
+
+Battery = {};
+
+Battery.isCharging = function() {
+	var batteryStatus = ctx.registerReceiver(null, ifilter);
+	var status = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_STATUS, -1);
+	return status == android.os.BatteryManager.BATTERY_STATUS_CHARGING;
+};
+
+Battery.isFullCharging = function() {
+	var batteryStatus = ctx.registerReceiver(null, ifilter);
+	var status = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_STATUS, -1);
+	return status == android.os.BatteryManager.BATTERY_STATUS_FULL;
+};
+	
+Battery.plugType = function() {
+	var batteryStatus = ctx.registerReceiver(null, ifilter);
+	var chargePlug = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_PLUGGED, -1);
+	var usbCharge = chargePlug == android.os.BatteryManager.BATTERY_PLUGGED_USB;
+	var acCharge = chargePlug == android.os.BatteryManager.BATTERY_PLUGGED_AC;
+	if(usbCharge) {
+		return "USB"
+	}else if(acCharge) {
+		return "AC"
+	}else {
+		return null	
+	}
+};
+
+Battery.level = function() {
+	var batteryStatus = ctx.registerReceiver(null, ifilter);
+	var level = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1);
+	var scale = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, -1);
+	return Math.round(level / scale * 100);
+};
+
+Battery.temp = function() {
+	var batteryStatus = ctx.registerReceiver(null, ifilter);
+	var temp = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_TEMPERATURE, -1);
+	return Math.round(temp) / 10;
+};
+
+Battery.volt = function() {
+	var batteryStatus = ctx.registerReceiver(null, ifilter);
+	var volt = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_VOLTAGE, -1);
+	return volt / 100;
+};
+
+Battery.tec = function() {
+	var batteryStatus = ctx.registerReceiver(null, ifilter);
+	var tec = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_TECHNOLOGY, -1);
+	return tec;
+};
+
+Battery.health = function() {
+	var batteryStatus = ctx.registerReceiver(null, ifilter);
+	var health = batteryStatus.getIntExtra(android.os.BatteryManager. EXTRA_HEALTH, -1);
+	switch(health) {
+		case android.os.BatteryManager.BATTERY_HEALTH_GOOD:
+			return 0;//normal
+			break;
+		case android.os.BatteryManager.BATTERY_HEALTH_DEAD:
+			return 1;//battery life span is nearly end
+			break;
+		case android.os.BatteryManager.BATTERY_HEALTH_COLD:
+			return 2;//battery is too cold for work
+			break;
+		case android.os.BatteryManager.BATTERY_HEALTH_OVERHEAT:
+			return 3;//battery buning XD
+			break;
+		case android.os.BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE:
+			return 4;//battery voltage is too high
+			break;
+		case android.os.BatteryManager.BATTERY_HEALTH_UNSPECIFIED_FAILURE:
+			return 5;//unKnow!
+			break;
+		case android.os.BatteryManager.BATTERY_HEALTH_UNSPECIFIED_FAILURE:
+			return 6;//I don't know why fail but someting wrong.
+			break;
+		default:
+			return -1;//i can't read it maybe your phone API version is higher
+	}
+};
+
 //TTS Test(Dark)
 
 var tts = new android.speech.tts.TextToSpeech (ctx, new android.speech.tts.TextToSpeech.OnInitListener ( {
@@ -703,30 +788,12 @@ function gearSetting() {uiThread(function() {try {
 	}
 	Gear.mod0.setBackgroundColor(android.graphics.Color.BLACK);
 	Gear.mod0.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
-		switch(Gear.mod) {
-			case 0:
-				Gear.mod0.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 1:
-				Gear.mod1.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 2:
-				Gear.mod2.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 3:
-				Gear.mod3.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 4:
-				Gear.mod4.setTextColor(android.graphics.Color.WHITE);
-				break;
-		}
+		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
 		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.textView.setText("loading...");
 		Gear.mod = 0;
-		if(Level.getWorldDir() !== null) {
-			saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
-		}
+		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
 	}}});
@@ -741,30 +808,12 @@ function gearSetting() {uiThread(function() {try {
 	}
 	Gear.mod1.setBackgroundColor(android.graphics.Color.BLACK);
 	Gear.mod1.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
-		switch(Gear.mod) {
-			case 0:
-				Gear.mod0.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 1:
-				Gear.mod1.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 2:
-				Gear.mod2.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 3:
-				Gear.mod3.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 4:
-				Gear.mod4.setTextColor(android.graphics.Color.WHITE);
-				break;
-		}
+		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
 		Gear.textView.setTextColor(android.graphics.Color.YELLOW);
 		Gear.textView.setText("loading...");
 		Gear.mod = 1;
-		if(Level.getWorldDir() !== null) {
-			saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
-		}
+		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
 	}}});
@@ -779,30 +828,12 @@ function gearSetting() {uiThread(function() {try {
 	}
 	Gear.mod2.setBackgroundColor(android.graphics.Color.BLACK);
 	Gear.mod2.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
-		switch(Gear.mod) {
-			case 0:
-				Gear.mod0.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 1:
-				Gear.mod1.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 2:
-				Gear.mod2.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 3:
-				Gear.mod3.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 4:
-				Gear.mod4.setTextColor(android.graphics.Color.WHITE);
-				break;
-		}
+		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
 		Gear.textView.setText("loading...");
 		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.mod = 2;
-		if(Level.getWorldDir() !== null) {
-			saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
-		}
+		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
 	}}});
@@ -817,37 +848,19 @@ function gearSetting() {uiThread(function() {try {
 	}
 	Gear.mod3.setBackgroundColor(android.graphics.Color.BLACK);
 	Gear.mod3.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
-		switch(Gear.mod) {
-			case 0:
-				Gear.mod0.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 1:
-				Gear.mod1.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 2:
-				Gear.mod2.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 3:
-				Gear.mod3.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 4:
-				Gear.mod4.setTextColor(android.graphics.Color.WHITE);
-				break;
-		}
+		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
 		Gear.textView.setText("loading...");
 		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.mod = 3;
-		if(Level.getWorldDir() !== null) {
-			saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
-		}
+		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
 	}}});
 	Gear.mainDialogLayout.addView(Gear.mod3);
 	
 	Gear.mod4 = new android.widget.Button(ctx);
-	Gear.mod4.setText("Show nearest Player");
+	Gear.mod4.setText("Nearest player info");
 	if(Gear.mod === 4) {
 		Gear.mod4.setTextColor(android.graphics.Color.YELLOW);
 	}else {
@@ -855,45 +868,98 @@ function gearSetting() {uiThread(function() {try {
 	}
 	Gear.mod4.setBackgroundColor(android.graphics.Color.BLACK);
 	Gear.mod4.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
-		switch(Gear.mod) {
-			case 0:
-				Gear.mod0.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 1:
-				Gear.mod1.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 2:
-				Gear.mod2.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 3:
-				Gear.mod3.setTextColor(android.graphics.Color.WHITE);
-				break;
-			case 4:
-				Gear.mod4.setTextColor(android.graphics.Color.WHITE);
-				break;
-		}
+		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
 		Gear.textView.setText("loading...");
 		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 		Gear.mod = 4;
-		if(Level.getWorldDir() !== null) {
-			saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
-		}
+		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
 	}}});
 	Gear.mainDialogLayout.addView(Gear.mod4);
 	
-	Gear.authorBtn = new android.widget.Button(ctx);
-	Gear.authorBtn.setText("Setting");
-	Gear.authorBtn.setTextColor(android.graphics.Color.WHITE);
-	Gear.authorBtn.setBackgroundColor(android.graphics.Color.BLACK);
-	Gear.authorBtn.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
-		Gear.info();
+	Gear.mod7 = new android.widget.Button(ctx);
+	Gear.mod7.setText("Location");
+	if(Gear.mod === 7) {
+		Gear.mod7.setTextColor(android.graphics.Color.YELLOW);
+	}else {
+		Gear.mod7.setTextColor(android.graphics.Color.WHITE);
+	}
+	Gear.mod7.setBackgroundColor(android.graphics.Color.BLACK);
+	Gear.mod7.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+		Gear.reloadMainDialog();
+		view.setTextColor(android.graphics.Color.YELLOW);
+		Gear.textView.setText("loading...");
+		Gear.textView.setTextColor(android.graphics.Color.WHITE);
+		Gear.mod = 7;
+		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
 	}}});
-	Gear.mainDialogLayout.addView(Gear.authorBtn);
+	Gear.mainDialogLayout.addView(Gear.mod7);
+	
+	Gear.mod8 = new android.widget.Button(ctx);
+	Gear.mod8.setText("Chank, Biome");
+	if(Gear.mod === 8) {
+		Gear.mod8.setTextColor(android.graphics.Color.YELLOW);
+	}else {
+		Gear.mod8.setTextColor(android.graphics.Color.WHITE);
+	}
+	Gear.mod8.setBackgroundColor(android.graphics.Color.BLACK);
+	Gear.mod8.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+		Gear.reloadMainDialog();
+		view.setTextColor(android.graphics.Color.YELLOW);
+		Gear.textView.setText("loading...");
+		Gear.textView.setTextColor(android.graphics.Color.WHITE);
+		Gear.mod = 8;
+		saveData(_MOD_DATA, "MOD", Gear.mod);
+	}catch(e) {
+		errorShow(e);
+	}}});
+	Gear.mainDialogLayout.addView(Gear.mod8);
+	
+	 	Gear.mod10 = new android.widget.Button(ctx);
+	Gear.mod10.setText("Battery");
+	if(Gear.mod === 10) {
+		Gear.mod10.setTextColor(android.graphics.Color.YELLOW);
+	}else {
+		Gear.mod10.setTextColor(android.graphics.Color.WHITE);
+	}
+	Gear.mod10.setBackgroundColor(android.graphics.Color.BLACK);
+	Gear.mod10.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+		Gear.reloadMainDialog();
+		view.setTextColor(android.graphics.Color.YELLOW);
+		Gear.textView.setText("loading...");
+		Gear.textView.setTextColor(android.graphics.Color.WHITE);
+		Gear.mod = 10;
+		saveData(_MOD_DATA, "MOD", Gear.mod);
+	}catch(e) {
+		errorShow(e);
+	}}});
+	Gear.mainDialogLayout.addView(Gear.mod10);
+	
+	Gear.settingBtn = new android.widget.Button(ctx);
+	Gear.settingBtn.setText("Setting");
+	Gear.settingBtn.setTextColor(android.graphics.Color.WHITE);
+	Gear.settingBtn.setBackgroundColor(android.graphics.Color.BLACK);
+	Gear.settingBtn.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+		Gear.setting();
+	}catch(e) {
+		errorShow(e);
+	}}});
+	Gear.mainDialogLayout.addView(Gear.settingBtn);
+	
+	Gear.helpBtn = new android.widget.Button(ctx);
+	Gear.helpBtn.setText("Help");
+	Gear.helpBtn.setTextColor(android.graphics.Color.WHITE);
+	Gear.helpBtn.setBackgroundColor(android.graphics.Color.BLACK);
+	Gear.helpBtn.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+		Gear.help();
+	}catch(e) {
+		errorShow(e);
+	}}});
+	Gear.mainDialogLayout.addView(Gear.helpBtn);
 	
 	Gear.mainDialogScroll.addView(Gear.mainDialogLayout);
 	
@@ -904,7 +970,47 @@ function gearSetting() {uiThread(function() {try {
 	showError(e);
 }})};
 
-Gear.info = function() {uiThread(function() {try {
+Gear.reloadMainDialog = function() {try {
+	switch(Gear.mod) {
+		case 0:
+			Gear.mod0.setTextColor(android.graphics.Color.WHITE);
+			break;
+		case 1:
+			Gear.mod1.setTextColor(android.graphics.Color.WHITE);
+			break;
+		case 2:
+			Gear.mod2.setTextColor(android.graphics.Color.WHITE);
+			break;
+		case 3:
+			Gear.mod3.setTextColor(android.graphics.Color.WHITE);
+			break;
+		case 4:
+			Gear.mod4.setTextColor(android.graphics.Color.WHITE);
+			break;
+		case 5:
+			Gear.mod5.setTextColor(android.graphics.Color.WHITE);
+			break;
+		case 6:
+			Gear.mod6.setTextColor(android.graphics.Color.WHITE);
+			break;
+		case 7:
+			Gear.mod7.setTextColor(android.graphics.Color.WHITE);
+			break;
+		case 8:
+			Gear.mod8.setTextColor(android.graphics.Color.WHITE);
+			break;
+		case 9:
+			Gear.mod9.setTextColor(android.graphics.Color.WHITE);
+			break;
+		case 10:
+			Gear.mod10.setTextColor(android.graphics.Color.WHITE);
+			break;
+	}
+}catch(e) {
+	showError(e);
+}};
+
+Gear.setting = function() {uiThread(function() {try {
 	Gear.settingDialog = new android.app.AlertDialog.Builder(ctx, 2); 
 	Gear.settingDialog.setTitle("Gear setting");
 	
@@ -945,6 +1051,49 @@ Gear.info = function() {uiThread(function() {try {
 	showError(e);
 }})};
 
+Gear.help = function() {uiThread(function() {try {
+	Gear.helpDialog = new android.app.AlertDialog.Builder(ctx, 2); 
+	Gear.helpDialog.setTitle("Gear help");
+	
+	Gear.helpDialogScroll = new android.widget.ScrollView(ctx);
+	
+	Gear.helpDialogLayout = new android.widget.LinearLayout(ctx);
+	Gear.helpDialogLayout.setOrientation(1);
+	
+	Gear.multiBtn = new android.widget.Button(ctx);
+	Gear.multiBtn.setText('"' + Gear.mod0.getText() + '" help');
+	Gear.multiBtn.setTextColor(android.graphics.Color.WHITE);
+	Gear.multiBtn.setBackgroundColor(android.graphics.Color.BLACK);
+	Gear.multiBtn.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+		Gear.textDialog(".", ".");
+	}catch(e) {
+		errorShow(e);
+	}}});
+	Gear.helpDialogLayout.addView(Gear.multiBtn);
+	
+	Gear.helpDialogScroll.addView(Gear.helpDialogLayout);
+	
+	Gear.helpDialog.setView(Gear.helpDialogScroll);
+	Gear.helpDialog.create();
+	Gear.helpDialog.show();
+}catch(e) {
+	showError(e);
+}})};
+
+Gear.textDialog = function(title, text) {
+	var temp = new android.app.AlertDialog.Builder(ctx, 2);
+	temp.setTitle(title);
+	var temp3 = new android.widget.ScrollView(ctx);
+	var temp2 = new android.widget.TextView(ctx);
+	temp2.setTextColor(android.graphics.Color.WHITE);
+	temp2.setBackgroundColor(android.graphics.Color.BLACK);
+	temp2.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, dp(16));
+	temp2.setText(text);
+	temp3.addView(temp2);
+	temp.setView(temp3);
+	temp.create().show();
+}
+
 uiThread(function() {try {
 	if(!Gear.isWindowAlive && Gear.allowRemote) {
 		Gear.mainWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, ((loadData(_MOD_DATA, "WINDOW_X") == null || loadData(_MOD_DATA, "WINDOW_X") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getWidth() - dp(82) : loadData(_MOD_DATA, "WINDOW_X") - dp(17)), ((loadData(_MOD_DATA, "WINDOW_Y") == null || loadData(_MOD_DATA, "WINDOW_Y") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getHeight() - dp(55) : loadData(_MOD_DATA, "WINDOW_Y") - dp(30)));
@@ -959,7 +1108,7 @@ Gear.newLevel = function(str) {
 		//MultiPlayer
 		Gear.step = 0;
 		Gear.floorStep = 0;
-		Gear.mod = 0;
+		Gear.currentStepLock = 0;
 	}else {
 		if(!_MAP_DIR().exists()) {
 			_MAP_DIR().mkdir();
@@ -983,14 +1132,14 @@ Gear.newLevel = function(str) {
 				saveData(_MAP_STEP_DATA(), "CURRENT_STEP_LOCK", Gear.currentStepLock);
 			}
 		}
-		uiThread(function() {
-			if(Gear.mod === 1) {
-				Gear.textView.setTextColor(android.graphics.Color.YELLOW)
-			}else {
-				Gear.textView.setTextColor(android.graphics.Color.WHITE)
-			}
-		});
 	}
+	uiThread(function() {
+		if(Gear.mod === 1) {
+			Gear.textView.setTextColor(android.graphics.Color.YELLOW)
+		}else {
+			Gear.textView.setTextColor(android.graphics.Color.WHITE)
+		}
+	});
 	uiThread(function() {try {
 		if(!Gear.isWindowAlive) {
 			Gear.mainWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, ((loadData(_MOD_DATA, "WINDOW_X") == null || loadData(_MOD_DATA, "WINDOW_X") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getWidth() - dp(82) : loadData(_MOD_DATA, "WINDOW_X") - dp(17)), ((loadData(_MOD_DATA, "WINDOW_Y") == null || loadData(_MOD_DATA, "WINDOW_Y") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getHeight() - dp(55) : loadData(_MOD_DATA, "WINDOW_Y") - dp(30)));
@@ -1006,11 +1155,11 @@ Gear.leaveGame = function() {
 		Gear.textView.setText("Idle mode");
 		Gear.textView.setTextColor(android.graphics.Color.WHITE);
 	});
-	Gear.isremote = false;
+	Gear.isRemote = false;
 	if(Level.getWorldDir() !== null) {
 		saveData(_MAP_STEP_DATA(), "STEP", Gear.floorStep);
-		saveData(_MAP_STEP_DATA(), "MOD", Gear.mod);
 	}
+	saveData(_MOD_DATA, "MOD", Gear.mod);
 	if(Gear.mainWindow != null && !Gear.allowRemote && Gear.isWindowAlive) {
 		uiThread(function() {try {
 			Gear.mainWindow.dismiss();
@@ -1080,6 +1229,20 @@ Gear.textViewTick = function() {
 				showError(e);
 			}});
 			break;
+		case 7:
+			var x = Math.round(Player.getX()*100)/100;
+			var y = Math.round(Player.getY()*100)/100;
+			var z = Math.round(Player.getZ()*100)/100;
+					uiThread(function(){try {Gear.textView.setText("X: "+x+"\nY: "+y+"\nZ: "+z)}catch(e) {showError(e)}});
+			break;
+		case 8:
+			var x = Math.round(Player.getX()*100)/100;
+			var y = Math.round(Player.getY()*100)/100;
+			var z = Math.round(Player.getZ()*100)/100;
+					uiThread(function(){try {Gear.textView.setText(("chunkX: "+Math.floor(x/16)+"\nchunkZ: "+Math.floor(z/16)+"\n"+Level.getBiomeName(x,y,z)).toString())}catch(e) {showError(e)}});
+			break;
+		case 9:
+			break;
 	}
 };
 
@@ -1120,21 +1283,34 @@ Gear.slowModTick = function() {
 				} else {
 					Gear.textView.setTextColor(android.graphics.Color.WHITE);
 					var ryaw = getYaw(Entity.getX(Gear.playerRangeMinEnt) - Player.getX(), Entity.getY(Gear.playerRangeMinEnt) - Player.getY(), Entity.getZ(Gear.playerRangeMinEnt) - Player.getZ());
-					var tyaw = Entity.getYaw(Gear.playerRangeMinName) + 180;
+					var tyaw = (Entity.getYaw(Gear.playerRangeMinEnt) + 180) % 360;
 					while(tyaw < 0) {
 						tyaw += 360;
 					}
-					var ryawm = (ryaw + 330) % 360;
-					var ryawM = (ryaw + 30) % 360;
-					if(((ryaw + 330) % 360 <= tyaw % 360 && (ryaw + 30) % 360 > tyaw) || ((ryaw >= 330 || ryaw < 30) && ((ryaw + 330) % 360 <= tyaw || ((ryaw + 30) % 360 > tyaw)))) {
+					var ryawm = (ryaw + 350) % 360;
+					var ryawM = (ryaw + 10) % 360;
+					if((ryawm <= tyaw && ryawM > tyaw) || ((ryaw >= 350 || ryaw < 10) && (ryawm <= tyaw || ryawM > tyaw))) {
 						Gear.textView.setTextColor(android.graphics.Color.YELLOW);
 					}else {
 						Gear.textView.setTextColor(android.graphics.Color.WHITE);
 					}
 					Gear.noPlayer = 0;
+					debug(Math.round(ryaw) + " " + Math.round(tyaw));
 					Gear.textView.setText(Gear.playerRangeMinName + "\n" + Math.floor(Gear.playerRange[Gear.playerRangeMin]) + "m " + Entity.getHealth(Gear.players[Gear.playerRangeMin]) + "hp" + "\n" + viewSide2(Entity.getYaw(Player.getEntity()) - ryaw) + "시 방향");
 					//clientMessage( Entity.getMobSkin(Gear.playerRangeMinEnt) );
 				}
+			}catch(e) {
+				showError(e);
+			}});
+			break;
+		case 10:
+			if(Battery.plugType() !== null) {
+				Gear.extraInfo = "\n" + " charging…" + "\n<" + Battery.plugType() + ">";
+			}else {
+				Gear.extraInfo = "";
+			}
+			uiThread(function() {try {
+				Gear.textView.setText("Level " + Battery.level() + "%\n" + (Math.round(Battery.volt()*10)/10) + "V " + Battery.temp() + "C°" + Gear.extraInfo);
 			}catch(e) {
 				showError(e);
 			}});
