@@ -606,3 +606,12 @@ function modTick() {
 function newLevel() {
     Player.addItemCreativeInv(388, 1, 0);
 }
+
+function leaveHook() {
+    Utils.createUiThread(function() {
+        if(!Trade.MAINPW.isShowing())
+            Trade.MAINPW.dismiss();
+        if(!Trade.INTERACTPW.isShowing())
+            Trade.INTERACTPW.dismiss();
+    });
+}
