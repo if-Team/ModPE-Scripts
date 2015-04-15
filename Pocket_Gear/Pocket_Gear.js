@@ -41,47 +41,59 @@ function _MAP_STEP_DATA() {return new java.io.File(_MAP_DIR(), "gear.json")};
 
 
 //마인크래프트 리소스
+//NOT USE(TEXTURE PACK MISSING)
 var mcpeCPC = ctx.createPackageContext("com.mojang.minecraftpe", android.content.Context.CONTEXT_IGNORE_SECURITY);
 var mcpeAssets = mcpeCPC.getAssets();
 //spritesheet.png 파일 접근
-var mcpeSS = mcpeAssets.open("images/gui/spritesheet.png");
+//var mcpeSS = mcpeAssets.open("images/gui/spritesheet.png");
+var mcpeSS = ModPE.openInputStreamFromTexturePack("images/gui/spritesheet.png");
 var mcpeSS_BF = new android.graphics.BitmapFactory.decodeStream(mcpeSS);
 //touchgui.png 파일 접근
-var mcpeTG = mcpeAssets.open("images/gui/touchgui.png");
+//var mcpeTG = mcpeAssets.open("images/gui/touchgui.png");
+var mcpeTG = ModPE.openInputStreamFromTexturePack("images/gui/touchgui.png");
 var mcpeTG_BF = new android.graphics.BitmapFactory.decodeStream(mcpeTG);
-//배경 나인패치
-var mcpeBG = new android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(mcpeSS_BF, 0, 0, 16, 16), dp(32), dp(32), false);
+//꽉찬배경 나인패치
+var mcpeBGRaw = new android.graphics.Bitmap.createBitmap(mcpeSS_BF, 0, 0, 16, 16);
+var mcpeBG = new android.graphics.Bitmap.createScaledBitmap(mcpeBGRaw, dp(32), dp(32), false);
 var mcpeBG9 = ninePatch1(mcpeBG, dp(12), dp(12), dp(24), dp(24));
 //배경 나인패치
-var mcpeBGT = new android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(mcpeSS_BF, 34, 43, 14, 14), dp(32), dp(32), false);
+var mcpeBGTRaw = new android.graphics.Bitmap.createBitmap(mcpeSS_BF, 34, 43, 14, 14);
+var mcpeBGT = new android.graphics.Bitmap.createScaledBitmap(mcpeBGTRaw, dp(32), dp(32), false);
 var mcpeBGT9 = ninePatch1(mcpeBGT, dp(12), dp(12), dp(22), dp(22));
 //타이틀바 나인패치
-var mcpeTitleBar = new android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(mcpeTG_BF, 150, 26, 14, 25), dp(28), dp(50), false);
+var mcpeTitleBarRaw = new android.graphics.Bitmap.createBitmap(mcpeTG_BF, 150, 26, 14, 25);
+var mcpeTitleBar = new android.graphics.Bitmap.createScaledBitmap(mcpeTitleBarRaw, dp(28), dp(50), false);
 var mcpeTitleBar9 = ninePatch1(mcpeTitleBar, dp(8), dp(8), dp(20), dp(22));
 //종료 버튼 나인패치
-var mcpeExit = new android.graphics.Bitmap.createScaledBitmap(new android.graphics.Bitmap.createBitmap(mcpeSS_BF, 60, 0, 18, 18), 18*FOUR, 18*FOUR, false);
+var mcpeExitRaw = new android.graphics.Bitmap.createBitmap(mcpeSS_BF, 60, 0, 18, 18);
+var mcpeExit = new android.graphics.Bitmap.createScaledBitmap(mcpeExitRaw, 18*FOUR, 18*FOUR, false);
 var mcpeExit9 = ninePatch1(mcpeExit, dp(6), dp(6), dp(30), dp(30));
 var mcpeExitB = new android.graphics.drawable.BitmapDrawable(ctx.getResources(), mcpeExit);
 mcpeExitB.setAntiAlias(false);
 //종료 버튼(클릭) 나인패치
-var mcpeExitClick = new android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(mcpeSS_BF, 78, 0, 18, 18), dp(36), dp(36), false);
+var mcpeExitClickRaw = new android.graphics.Bitmap.createBitmap(mcpeSS_BF, 78, 0, 18, 18);
+var mcpeExitClick = new android.graphics.Bitmap.createScaledBitmap(mcpeExitClickRaw, dp(36), dp(36), false);
 var mcpeExitClick9 = ninePatch1(mcpeExitClick, dp(6), dp(6), dp(32), dp(32));
 //버튼 나인패치
-var mcpeBtn = new android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(mcpeSS_BF,8,32,8,8),dp(16),dp(16),false);
+var mcpeBtnRaw = new android.graphics.Bitmap.createBitmap(mcpeSS_BF,8,32,8,8);
+var mcpeBtn = new android.graphics.Bitmap.createScaledBitmap(mcpeBtnRaw,dp(16),dp(16),false);
 var mcpeBtn9 = ninePatch1(mcpeBtn,dp(6),dp(4),dp(14),dp(14));
 //버튼(클릭) 나인패치
-var mcpeBtnClick = new android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(mcpeSS_BF,0,32,8,8),dp(16),dp(16),false);
+var mcpeBtnClickRaw = new android.graphics.Bitmap.createBitmap(mcpeSS_BF,0,32,8,8);
+var mcpeBtnClick = new android.graphics.Bitmap.createScaledBitmap(mcpeBtnClickRaw,dp(16),dp(16),false);
 var mcpeBtnClick9 = ninePatch1(mcpeBtnClick,dp(4),dp(4),dp(12),dp(14));
 //미니버튼 나인패치
-var mcpeMiniBtn = new android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(mcpeSS_BF,8,33,8,7),dp(16),dp(14),false);
+var mcpeMiniBtnRaw = android.graphics.Bitmap.createBitmap(mcpeSS_BF,8,33,8,7);
+var mcpeMiniBtn = new android.graphics.Bitmap.createScaledBitmap(mcpeMiniBtnRaw,dp(16),dp(14),false);
 var mcpeMiniBtn9 = ninePatch1(mcpeMiniBtn,dp(6),dp(2),dp(14),dp(12));
 //미니버튼(클릭) 나인패치
-var mcpeMiniBtnClick = new android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(mcpeSS_BF,0,32,8,7),dp(16),dp(14),false);
+var mcpeMiniBtnClickRaw = new android.graphics.Bitmap.createBitmap(mcpeSS_BF,0,32,8,7);
+var mcpeMiniBtnClick = new android.graphics.Bitmap.createScaledBitmap(mcpeMiniBtnClickRaw,dp(16),dp(14),false);
 var mcpeMiniBtnClick9 = ninePatch1(mcpeMiniBtnClick,dp(4),dp(4),dp(12),dp(12));
 //텍스트뷰 나인패치
 var b = android.graphics.Color.parseColor("#6b6163");
 var i = android.graphics.Color.parseColor("#3a393a");
-var mcpeTextViewRaw = [
+var mcpeTextViewPixel = [
 b,b,b,b,b,b,
 b,b,b,b,b,b,
 b,b,i,i,b,b,
@@ -89,10 +101,84 @@ b,b,i,i,b,b,
 b,b,b,b,b,b,
 b,b,b,b,b,b
 ];
-var mcpeTextView = android.graphics.Bitmap.createBitmap(6, 6, android.graphics.Bitmap.Config.ARGB_8888);
-mcpeTextView.setPixels(mcpeTextViewRaw, 0, 6, 0, 0, 6, 6);
-mcpeTextView = android.graphics.Bitmap.createScaledBitmap(mcpeTextView, dp(6), dp(6), false);
+var mcpeTextViewRaw = android.graphics.Bitmap.createBitmap(6, 6, android.graphics.Bitmap.Config.ARGB_8888);
+mcpeTextViewRaw.setPixels(mcpeTextViewPixel, 0, 6, 0, 0, 6, 6);
+var mcpeTextView = android.graphics.Bitmap.createScaledBitmap(mcpeTextViewRaw, dp(6), dp(6), false);
 var mcpeTextView9 = ninePatch1(mcpeTextView, dp(3), dp(3), dp(4), dp(4));
+/*
+var A = android.graphics.Color.parseColor("#d4cdc8");
+var B = android.graphics.Color.parseColor("#bcb1aa");
+var C = android.graphics.Color.parseColor("#868686");
+var D = android.graphics.Color.parseColor("#28272a");
+var E = android.graphics.Color.parseColor("#28272a");
+var F = android.graphics.Color.parseColor("#8a7b76");
+var G = android.graphics.Color.parseColor("#e9e5e1");
+var H = android.graphics.Color.parseColor("#3a3a3a");
+
+
+var mcpeBtnBG_EMPTY = [
+B,A,A,A,A,A,A,A,A,A,A,A,A,A,A,A,A,C,
+B,B,A,A,A,A,A,A,A,A,A,A,A,A,A,A,C,D,
+B,B,F,F,F,F,F,F,F,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,F,F,F,F,F,F,D,D,
+B,C,E,E,E,E,E,E,E,E,E,E,E,E,E,E,D,D,
+C,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,D
+]
+
+[
+B,A,A,A,A,A,A,A,A,A,A,A,A,A,A,A,A,C,
+B,B,A,A,A,A,A,A,A,A,A,A,A,A,A,A,C,D,
+B,B,F,F,F,F,F,F,F,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,G,F,F,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,G,G,F,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,G,G,G,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,G,G,G,G,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,G,G,G,G,G,F,F,F,F,F,D,D,
+B,B,F,F,F,F,G,G,G,G,G,G,F,F,F,F,D,D,
+B,B,F,F,F,F,G,G,G,G,G,G,H,F,F,F,D,D,
+B,B,F,F,F,F,G,G,G,G,G,H,H,F,F,F,D,D,
+B,B,F,F,F,F,G,G,G,G,H,H,F,F,F,F,D,D,
+B,B,F,F,F,F,G,G,G,H,H,F,F,F,F,F,D,D,
+B,B,F,F,F,F,G,G,H,H,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,G,H,H,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,F,H,F,F,F,F,F,F,F,F,D,D,
+B,C,E,E,E,E,E,E,E,E,E,E,E,E,E,E,D,D,
+C,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,D
+]
+
+[
+B,A,A,A,A,A,A,A,A,A,A,A,A,A,A,A,A,C,
+B,B,A,A,A,A,A,A,A,A,A,A,A,A,A,A,C,D,
+B,B,F,F,F,F,F,F,F,F,F,F,F,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,F,G,F,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,G,G,H,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,G,G,G,H,F,F,F,D,D,
+B,B,F,F,F,F,F,F,G,G,G,G,H,F,F,F,D,D,
+B,B,F,F,F,F,F,G,G,G,G,G,H,F,F,F,D,D,
+B,B,F,F,F,F,G,G,G,G,G,G,H,F,F,F,D,D,
+B,B,F,F,F,F,G,G,G,G,G,G,H,F,F,F,D,D,
+B,B,F,F,F,F,F,G,G,G,G,G,H,F,F,F,D,D,
+B,B,F,F,F,F,F,F,G,G,G,G,H,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,G,G,G,H,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,G,G,H,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,F,G,H,F,F,F,D,D,
+B,B,F,F,F,F,F,F,F,F,F,F,H,F,F,F,D,D,
+B,C,E,E,E,E,E,E,E,E,E,E,E,E,E,E,D,D,
+C,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,D
+]*/
+
 
 function dp(dips) {
 	return parseInt(dips * ctx.getResources().getDisplayMetrics().density + 0.5);
@@ -698,6 +784,7 @@ if(!_FONT.exists()) {
 function newLevel(str) {
 	Gear.newLevel(str);
 	Gear.loadPlayers();
+	//Gear.newWeb("http://www.naver.com/");
 }
 
 function leaveGame() {
@@ -868,6 +955,31 @@ Gear.mainWindow = new android.widget.PopupWindow(Gear.layout, android.view.View
 Gear.mainWindow.setSplitTouchEnabled(true);
 Gear.mainWindow.setOutsideTouchable(true);
 //Gear.mainWindow.setTouchable(false);
+
+Gear.newWeb = function(url) {
+	uiThread(function() {try {
+	Gear.webLayout = new android.widget.RelativeLayout(ctx);
+	Gear.webLayout.setBackgroundDrawable(mcpeBGT9);
+	Gear.webLayout.setPadding(dp(8), dp(8), dp(8), dp(8));
+
+	Gear.webView = new android.webkit.WebView(ctx);
+	Gear.webView.setWebChromeClient(new android.webkit.WebChromeClient());
+	Gear.webView.setWebViewClient(new android.webkit.WebViewClient());
+	Gear.webView_param = new android.widget.RelativeLayout.LayoutParams(dp(200), dp(200));
+	Gear.webView_param.setMargins(0,dp(4),0,dp(4));
+	Gear.webView.setLayoutParams(Gear.webView_param);
+	Gear.webLayout.addView(Gear.webView);
+
+	Gear.webWindow = new android.widget.PopupWindow(Gear.webLayout, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, false);
+	Gear.webWindow.setSplitTouchEnabled(true);
+	Gear.webWindow.setOutsideTouchable(true);
+	
+	Gear.webView.loadUrl(url);
+	Gear.webWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+	}catch(e) {
+		showError(e)
+	}})
+};
 
 function gearSetting() {uiThread(function() {try {
 	Gear.mainDialog = new android.app.AlertDialog.Builder(ctx, 2); 
