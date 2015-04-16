@@ -601,6 +601,10 @@ function modTick() {
             Trade.INTERACTPW.dismiss();
         });
     }
+    
+    if(Entity.getHealth(Player.getEntity()) <= 0) {
+        leaveHook();
+    }
 }
 
 function newLevel() {
@@ -609,9 +613,9 @@ function newLevel() {
 
 function leaveHook() {
     Utils.createUiThread(function() {
-        if(!Trade.MAINPW.isShowing())
+        if(Trade.MAINPW.isShowing())
             Trade.MAINPW.dismiss();
-        if(!Trade.INTERACTPW.isShowing())
+        if(Trade.INTERACTPW.isShowing())
             Trade.INTERACTPW.dismiss();
     });
 }
