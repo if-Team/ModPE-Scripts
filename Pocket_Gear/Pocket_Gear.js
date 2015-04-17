@@ -757,11 +757,11 @@ function ttsIt(str, pitch, speed) {
 	tts.speak(str, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null);
 }
 
-function chatHook (str) {
+/*function chatHook (str) {
 	tts.setPitch(1);
 	tts.setSpeechRate(1);
 	tts.speak (str, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null);
-}
+}*/
 
 if(!_MOD_DIR.exists()) {
 	_MOD_DIR.mkdirs();
