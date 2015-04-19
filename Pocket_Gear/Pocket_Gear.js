@@ -29,15 +29,19 @@ var author = "CodeInside";
 
 var debugging = false;
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
-var FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, ctx.getResources().getDisplayMetrics());
+var FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 1, ctx.getResources().getDisplayMetrics());
+var DIP = FOUR * loadData(_MOD_DATA, "DIPS");
+if(DIP + "" === "NaN"){
+	DIP = FOUR;
+};
 var _SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
 var _MAIN_MOD_DIR = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/mods");
 var _MOD_DIR = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/mods/Gear");
 var _FONT = new java.io.File(_MAIN_MOD_DIR, "minecraft.ttf");
-var _MOD_DATA = new java.io.File(_MOD_DIR, "data.json");
+var _MOD_DATA = new java.io.File(_MOD_DIR, "data.data");
 var _MOD_TEST = new java.io.File(_MOD_DIR, "test.txt");
 function _MAP_DIR() {return new java.io.File(_SD_CARD, "games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/mods")};
-function _MAP_STEP_DATA() {return new java.io.File(_MAP_DIR(), "gear.json")};
+function _MAP_STEP_DATA() {return new java.io.File(_MAP_DIR(), "gear.data")};
 
 
 //마인크래프트 리소스
@@ -45,12 +49,19 @@ function _MAP_STEP_DATA() {return new java.io.File(_MAP_DIR(), "gear.json")};
 var mcpeCPC = ctx.createPackageContext("com.mojang.minecraftpe", android.content.Context.CONTEXT_IGNORE_SECURITY);
 var mcpeAssets = mcpeCPC.getAssets();
 //spritesheet.png 파일 접근
-//var mcpeSS = mcpeAssets.open("images/gui/spritesheet.png");
-var mcpeSS = ModPE.openInputStreamFromTexturePack("images/gui/spritesheet.png");
+try{
+	var mcpeSS = ModPE.openInputStreamFromTexturePack("images/gui/spritesheet.png");
+}catch(e) {
+	//옛날 버전에 대한 호환성
+	var mcpeSS = mcpeAssets.open("images/gui/spritesheet.png");
+};
 var mcpeSS_BF = new android.graphics.BitmapFactory.decodeStream(mcpeSS);
 //touchgui.png 파일 접근
-//var mcpeTG = mcpeAssets.open("images/gui/touchgui.png");
-var mcpeTG = ModPE.openInputStreamFromTexturePack("images/gui/touchgui.png");
+try {
+	var mcpeTG = ModPE.openInputStreamFromTexturePack("images/gui/touchgui.png");
+}catch(e) {
+	var mcpeTG = mcpeAssets.open("images/gui/touchgui.png");
+};
 var mcpeTG_BF = new android.graphics.BitmapFactory.decodeStream(mcpeTG);
 //꽉찬배경 나인패치
 var mcpeBGRaw = new android.graphics.Bitmap.createBitmap(mcpeSS_BF, 0, 0, 16, 16);
@@ -85,7 +96,7 @@ var mcpeBtnClick9 = ninePatch1(mcpeBtnClick,dp(4),dp(4),dp(12),dp(14));
 //미니버튼 나인패치
 var mcpeMiniBtnRaw = android.graphics.Bitmap.createBitmap(mcpeSS_BF,8,33,8,7);
 var mcpeMiniBtn = new android.graphics.Bitmap.createScaledBitmap(mcpeMiniBtnRaw,dp(16),dp(14),false);
-var mcpeMiniBtn9 = ninePatch1(mcpeMiniBtn,dp(6),dp(2),dp(14),dp(12));
+var mcpeMiniBtn9 = ninePatch1(mcpeMiniBtn,dp(2),dp(2),dp(12),dp(14));
 //미니버튼(클릭) 나인패치
 var mcpeMiniBtnClickRaw = new android.graphics.Bitmap.createBitmap(mcpeSS_BF,0,32,8,7);
 var mcpeMiniBtnClick = new android.graphics.Bitmap.createScaledBitmap(mcpeMiniBtnClickRaw,dp(16),dp(14),false);
@@ -181,7 +192,7 @@ C,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,D
 
 
 function dp(dips) {
-	return parseInt(dips * ctx.getResources().getDisplayMetrics().density + 0.5);
+	return dips*DIP//parseInt(dips * ctx.getResources().getDisplayMetrics().density + 0.5);
 }
 
 function debug(str) {
@@ -835,16 +846,16 @@ Gear.voidClip = [0,6,8,9,10,11,26,27,30,31,32,37,38,39,40,50,51,59,63,64,65,66,6
 
 Gear.layout = new android.widget.RelativeLayout(ctx);
 Gear.layout.setBackgroundDrawable(mcpeBGT9);
-Gear.layout.setPadding(dp(8), dp(8), dp(8), dp(8));
+Gear.layout.setPadding(DIP*8, DIP*8, DIP*8, DIP*8);
 
 Gear.textView = new android.widget.TextView(ctx);
 Gear.textView.setId(721);
-Gear.textView_param = new android.widget.RelativeLayout.LayoutParams(dp(80), android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+Gear.textView_param = new android.widget.RelativeLayout.LayoutParams(DIP*80, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 Gear.textView.setLayoutParams(Gear.textView_param);
 Gear.textView.setBackgroundDrawable(mcpeTextView9);
-Gear.textView.setPadding(dp(4), dp(4), dp(4), dp(4));
+Gear.textView.setPadding(DIP*4, DIP*4, DIP*4, DIP*4);
 Gear.textView.setGravity(android.view.Gravity.RIGHT);
-Gear.textView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, dp(10));
+Gear.textView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*10);
 Gear.textView.setTextColor(android.graphics.Color.WHITE);
 Gear.textView.getPaint().setAntiAlias(false);
 if(_FONT.exists()) {
@@ -855,15 +866,15 @@ Gear.layout.addView(Gear.textView);
 
 Gear.moveButton = new android.widget.Button(ctx);
 Gear.moveButton.setId(722);
-Gear.moveButton_param = new android.widget.RelativeLayout.LayoutParams(dp(56), dp(20));
-Gear.moveButton_param.setMargins(0,dp(2),0,0);
+Gear.moveButton_param = new android.widget.RelativeLayout.LayoutParams(DIP*56, DIP*20);
+Gear.moveButton_param.setMargins(0,DIP*2,0,0);
 Gear.moveButton_param.addRule(android.widget.RelativeLayout.BELOW, Gear.textView.getId());
 Gear.moveButton.setLayoutParams(Gear.moveButton_param);
 //Gear.moveButton.setAlpha(0);
-Gear.moveButton.setPadding(dp(4),dp(1),0,0);
+Gear.moveButton.setPadding(DIP*4,DIP,0,0);
 Gear.moveButton_drawable = new android.graphics.drawable.GradientDrawable();
 Gear.moveButton_drawable.mutate().setColor(android.graphics.Color.rgb(0x3a, 0x39, 0x3a));
-Gear.moveButton_drawable.setCornerRadius(10);
+Gear.moveButton_drawable.setCornerRadius(DIP*5);
 Gear.moveButton.setBackgroundDrawable(Gear.moveButton_drawable);
 Gear.moveButton.setOnTouchListener(new android.view.View.OnTouchListener({ onTouch: function(view, event) {
 	switch(event.action) {
@@ -877,7 +888,7 @@ Gear.moveButton.setOnTouchListener(new android.view.View.OnTouchListener({ onTou
 			Gear.Wx = Gear.screenX - Gear.viewX;
 			Gear.Wy = Gear.screenY - Gear.viewY;
 			uiThread(function() {try {
-				Gear.mainWindow.update(Gear.Wx - dp(17), Gear.Wy - dp(30), Gear.mainWindow.getWidth(), Gear.mainWindow.getHeight(), true);
+				Gear.mainWindow.update(Gear.Wx - DIP*17, Gear.Wy - DIP*30, Gear.mainWindow.getWidth(), Gear.mainWindow.getHeight(), true);
 				debug("move" + Gear.Wx + " " + Gear.Wy);
 			}catch(e) {
 				showError(e);
@@ -891,7 +902,7 @@ Gear.moveButton.setOnTouchListener(new android.view.View.OnTouchListener({ onTou
 	return true;
 }}));
 Gear.moveButton.setGravity(android.view.Gravity.CENTER);
-Gear.moveButton.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, dp(8));
+Gear.moveButton.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*8);
 Gear.moveButton.setTextColor(android.graphics.Color.WHITE);
 Gear.moveButton.getPaint().setAntiAlias(false);
 if(_FONT.exists()) {
@@ -902,8 +913,8 @@ Gear.layout.addView(Gear.moveButton);
 Gear.resetButton = new android.widget.Button(ctx);
 Gear.resetButton.setId(723);
 Gear.resetButton.setBackgroundDrawable(mcpeMiniBtn9);
-Gear.resetButton_param = new android.widget.RelativeLayout.LayoutParams(dp(20), dp(20));
-Gear.resetButton_param.setMargins(dp(4),dp(2),0,0);
+Gear.resetButton_param = new android.widget.RelativeLayout.LayoutParams(DIP*20, DIP*20);
+Gear.resetButton_param.setMargins(DIP*4,DIP*2,0,0);
 Gear.resetButton_param.addRule(android.widget.RelativeLayout.BELOW, Gear.textView.getId());
 Gear.resetButton_param.addRule(android.widget.RelativeLayout.RIGHT_OF, Gear.moveButton.getId());
 Gear.resetButton.setLayoutParams(Gear.resetButton_param);
@@ -960,13 +971,13 @@ Gear.newWeb = function(url) {
 	uiThread(function() {try {
 	Gear.webLayout = new android.widget.RelativeLayout(ctx);
 	Gear.webLayout.setBackgroundDrawable(mcpeBGT9);
-	Gear.webLayout.setPadding(dp(8), dp(8), dp(8), dp(8));
+	Gear.webLayout.setPadding(DIP*8, DIP*8, DIP*8, DIP*8);
 
 	Gear.webView = new android.webkit.WebView(ctx);
 	Gear.webView.setWebChromeClient(new android.webkit.WebChromeClient());
 	Gear.webView.setWebViewClient(new android.webkit.WebViewClient());
-	Gear.webView_param = new android.widget.RelativeLayout.LayoutParams(dp(200), dp(200));
-	Gear.webView_param.setMargins(0,dp(4),0,dp(4));
+	Gear.webView_param = new android.widget.RelativeLayout.LayoutParams(DIP*300, DIP*200);
+	Gear.webView_param.setMargins(0,0,0,0);
 	Gear.webView.setLayoutParams(Gear.webView_param);
 	Gear.webLayout.addView(Gear.webView);
 
@@ -1291,7 +1302,7 @@ Gear.textDialog = function(title, text) {
 	var temp2 = new android.widget.TextView(ctx);
 	temp2.setTextColor(android.graphics.Color.WHITE);
 	temp2.setBackgroundColor(android.graphics.Color.BLACK);
-	temp2.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, dp(16));
+	temp2.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*16);
 	temp2.setText(text);
 	temp3.addView(temp2);
 	temp.setView(temp3);
@@ -1302,7 +1313,7 @@ Gear.mainWindowReset = function() {
 	debug("main window reset");
 	uiThread(function() {
 		Gear.textView.setText("loading...");
-		Gear.textView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, dp(10));
+		Gear.textView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*10);
 		if(Gear.mod === 1) {
 			Gear.textView.setTextColor(android.graphics.Color.YELLOW)
 		}else {
@@ -1313,7 +1324,7 @@ Gear.mainWindowReset = function() {
 
 uiThread(function() {try {
 	if(!Gear.isWindowAlive && Gear.allowRemote) {
-		Gear.mainWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, ((loadData(_MOD_DATA, "WINDOW_X") == null || loadData(_MOD_DATA, "WINDOW_X") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getWidth() - dp(82) : loadData(_MOD_DATA, "WINDOW_X") - dp(17)), ((loadData(_MOD_DATA, "WINDOW_Y") == null || loadData(_MOD_DATA, "WINDOW_Y") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getHeight() - dp(55) : loadData(_MOD_DATA, "WINDOW_Y") - dp(30)));
+		Gear.mainWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, ((loadData(_MOD_DATA, "WINDOW_X") == null || loadData(_MOD_DATA, "WINDOW_X") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getWidth() - DIP-82 : loadData(_MOD_DATA, "WINDOW_X") - DIP*16), ((loadData(_MOD_DATA, "WINDOW_Y") == null || loadData(_MOD_DATA, "WINDOW_Y") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getHeight() - dp(55) : loadData(_MOD_DATA, "WINDOW_Y") - DIP*30));
 		Gear.isWindowAlive = true;
 	}
 }catch(e) {
@@ -1353,7 +1364,7 @@ Gear.newLevel = function(str) {
 	Gear.mainWindowReset();
 	uiThread(function() {try {
 		if(!Gear.isWindowAlive) {
-			Gear.mainWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, ((loadData(_MOD_DATA, "WINDOW_X") == null || loadData(_MOD_DATA, "WINDOW_X") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getWidth() - dp(82) : loadData(_MOD_DATA, "WINDOW_X") - dp(17)), ((loadData(_MOD_DATA, "WINDOW_Y") == null || loadData(_MOD_DATA, "WINDOW_Y") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getHeight() - dp(55) : loadData(_MOD_DATA, "WINDOW_Y") - dp(30)));
+			Gear.mainWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, ((loadData(_MOD_DATA, "WINDOW_X") == null || loadData(_MOD_DATA, "WINDOW_X") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getWidth() - DIP*82 : loadData(_MOD_DATA, "WINDOW_X") - dp(17)), ((loadData(_MOD_DATA, "WINDOW_Y") == null || loadData(_MOD_DATA, "WINDOW_Y") == "undefined") ? ctx.getWindowManager().getDefaultDisplay().getHeight() - DIP*55 : loadData(_MOD_DATA, "WINDOW_Y") - DIP*30));
 			Gear.isWindowAlive = true;
 		}
 	}catch(e) {
@@ -1535,23 +1546,36 @@ Gear.slowestModTick = function() {
 		case 4:
 		case 5:
 		case 6:
-			Gear.temp = Entity.getAll();
-			for(var e = 0; e < Gear.temp.length; e++) {
-				var ent = Gear.temp[e]
-				if(Player.isPlayer(ent) && Player.getEntity() != ent && Gear.players.indexOf(ent) < 0 && Gear.voidClip.indexOf(Level.getTile(Entity.getX(ent), Entity.getY(ent) + 0.6, Entity.getZ(ent))) !== -1) {
-				Gear.players.push(ent);
+			try{
+				Gear.temp = Entity.getAll();
+				for(var e = 0; e < Gear.temp.length; e++) {
+					var ent = Gear.temp[e]
+					if(Player.isPlayer(ent) && Player.getEntity() != ent && Gear.players.indexOf(ent) < 0 && Gear.voidClip.indexOf(Level.getTile(Entity.getX(ent), Entity.getY(ent) + 0.6, Entity.getZ(ent))) !== -1) {
+						Gear.players.push(ent);
+					}
 				}
+			}catch(e) {
+				Gear.mod = 2;
+				clientMessage(ChatColor.DARK_RED + "[Pocket Gear] 플레이어 데이터를 읽을 수 없습니다.");
+				clientMessage(ChatColor.DARK_RED + "[Pocket Gear] 혹시 Block Luncher의 버전이 너무 낮은가요?")
 			}
 			break;
 	}
 }
 
 Gear.loadPlayers = function() {
-	Gear.temp2 = Entity.getAll();
-	for(var e = 0; e < Gear.temp2.length; e++) {
-		var ent = Gear.temp2[e];
-		if(Player.isPlayer(ent) && Player.getEntity() !== ent) {
-			Gear.players.push(ent);
+	if(Gear.isMap) {
+		try{
+			Gear.temp2 = Entity.getAll();
+			for(var e = 0; e < Gear.temp2.length; e++) {
+				var ent = Gear.temp2[e];
+				if(Player.isPlayer(ent) && Player.getEntity() !== ent) {
+					Gear.players.push(ent);
+				}
+			}
+		}catch(e) {
+			clientMessage(ChatColor.DARK_RED + "[Pocket Gear] 플레이어 데이터를 읽을 수 없습니다.");
+			clientMessage(ChatColor.DARK_RED + "[Pocket Gear] 혹시 Block Luncher의 버전이 너무 낮은가요?")
 		}
 	}
 };
