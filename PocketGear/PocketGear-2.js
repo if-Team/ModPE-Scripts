@@ -111,6 +111,7 @@ GearMenu.prototype = {
 
     /**
      * @param {Gear} gear
+     * @returns {string}
      * @abstract
      */
     tick: function(gear){
@@ -132,3 +133,29 @@ GearMenu.prototype = {
         return another instanceof GearMenu && this.name === another.name;
     }
 };
+
+/**
+ * @param {string} name
+ * @constructor
+ * @extends GearMenu
+ */
+function TimeMenu(name){
+    GearMenu.call(this, name);
+}
+TimeMenu.DATE_FORMAT = new java.text.SimpleDateFormat("hh:mm a"); //09:33 PM
+
+TimeMenu.prototype = Object.create(GearMenu.prototype);
+TimeMenu.prototype.constructor = TimeMenu;
+
+/**
+ * @param {Gear} gear
+ * @returns {string}
+ */
+TimeMenu.prototype.tick = function(gear){
+    return TimeMenu.DATE_FORMAT.format(new java.util.Date());
+};
+
+//---------------------------------------------
+
+var gear = new Gear();
+gear.addMenu(new TimeMenu("Time"));
