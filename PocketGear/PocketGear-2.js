@@ -192,6 +192,13 @@ TimeMenu.prototype.tick = function(gear){
     gear.setDisplay(TimeMenu.DATE_FORMAT.format(new java.util.Date()) + "");
 };
 
+/**
+ * @returns {string}
+ */
+TimeMenu.prototype.toString = function(){
+    return "[TimeMenu " + this.getName() + "]";
+};
+
 //---------------------------------------------
 
 const MAX_TICK = 20;
