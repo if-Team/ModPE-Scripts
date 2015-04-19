@@ -20,16 +20,34 @@
 const VERSION = "0.1-SNAPSHOT";
 
 /**
+ * @param {number} updateInterval
  * @constructor
  */
-function Gear(){
+function Gear(updateInterval){
+    /**
+     * @type {number}
+     */
+    this.updateInterval = updateInterval;
+
     /**
      * @type {GearMenu[]}
      */
     this.menus = [];
+
+    /**
+     * @type {number}
+     */
+    this.currentIndex = 0;
 }
 
 Gear.prototype = {
+    /**
+     * @returns {number}
+     */
+    getUpdateInterval: function(){
+        return this.updateInterval;
+    },
+
     /**
      * @returns {GearMenu[]}
      */
@@ -82,6 +100,20 @@ Gear.prototype = {
     },
 
     /**
+     * @returns {number}
+     */
+    getCurrentIndex: function(){
+        return this.currentIndex;
+    },
+
+    /**
+     * @returns {GearMenu}
+     */
+    getCurrentMenu: function(){
+        return this.getMenus()[this.getCurrentIndex()];
+    },
+
+    /**
      * @returns {string}
      */
     toString: function(){
@@ -115,7 +147,7 @@ GearMenu.prototype = {
      * @abstract
      */
     tick: function(gear){
-        throw new ReferenceError("This instance is abstract.");
+        throw new ReferenceError("This method is abstract.");
     },
 
     /**
@@ -157,5 +189,18 @@ TimeMenu.prototype.tick = function(gear){
 
 //---------------------------------------------
 
-var gear = new Gear();
+const MAX_TICK = 20;
+var tick = 0;
+
+var gear = new Gear(10);
 gear.addMenu(new TimeMenu("Time"));
+
+function modTick(){
+    if(++tick >= MAX_TICK){
+        tick = 0;
+    }
+
+    if(tick % gear.getUpdateInterval() === 0){
+        gear.getCurrentMenu().tick(gear);
+    }
+}
