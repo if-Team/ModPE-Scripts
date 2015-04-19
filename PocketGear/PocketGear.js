@@ -33,15 +33,15 @@ var FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLE
 var DIP = FOUR * loadData(_MOD_DATA, "DIPS");
 if(DIP + "" === "NaN"){
 	DIP = FOUR;
-};
+}
 var _SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
 var _MAIN_MOD_DIR = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/mods");
 var _MOD_DIR = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/mods/Gear");
 var _FONT = new java.io.File(_MAIN_MOD_DIR, "minecraft.ttf");
 var _MOD_DATA = new java.io.File(_MOD_DIR, "data.data");
 var _MOD_TEST = new java.io.File(_MOD_DIR, "test.txt");
-function _MAP_DIR() {return new java.io.File(_SD_CARD, "games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/mods")};
-function _MAP_STEP_DATA() {return new java.io.File(_MAP_DIR(), "gear.data")};
+function _MAP_DIR() {return new java.io.File(_SD_CARD, "games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/mods")}
+function _MAP_STEP_DATA() {return new java.io.File(_MAP_DIR(), "gear.data")}
 
 
 //마인크래프트 리소스
@@ -49,57 +49,59 @@ function _MAP_STEP_DATA() {return new java.io.File(_MAP_DIR(), "gear.data")};
 var mcpeCPC = ctx.createPackageContext("com.mojang.minecraftpe", android.content.Context.CONTEXT_IGNORE_SECURITY);
 var mcpeAssets = mcpeCPC.getAssets();
 //spritesheet.png 파일 접근
+var mcpeSS;
 try{
-	var mcpeSS = ModPE.openInputStreamFromTexturePack("images/gui/spritesheet.png");
+	mcpeSS = ModPE.openInputStreamFromTexturePack("images/gui/spritesheet.png");
 }catch(e) {
 	//옛날 버전에 대한 호환성
-	var mcpeSS = mcpeAssets.open("images/gui/spritesheet.png");
-};
-var mcpeSS_BF = new android.graphics.BitmapFactory.decodeStream(mcpeSS);
+	mcpeSS = mcpeAssets.open("images/gui/spritesheet.png");
+}
+var mcpeSS_BF = android.graphics.BitmapFactory.decodeStream(mcpeSS);
 //touchgui.png 파일 접근
+var mcpeTG;
 try {
-	var mcpeTG = ModPE.openInputStreamFromTexturePack("images/gui/touchgui.png");
+	mcpeTG = ModPE.openInputStreamFromTexturePack("images/gui/touchgui.png");
 }catch(e) {
-	var mcpeTG = mcpeAssets.open("images/gui/touchgui.png");
-};
-var mcpeTG_BF = new android.graphics.BitmapFactory.decodeStream(mcpeTG);
+	mcpeTG = mcpeAssets.open("images/gui/touchgui.png");
+}
+var mcpeTG_BF = android.graphics.BitmapFactory.decodeStream(mcpeTG);
 //꽉찬배경 나인패치
-var mcpeBGRaw = new android.graphics.Bitmap.createBitmap(mcpeSS_BF, 0, 0, 16, 16);
-var mcpeBG = new android.graphics.Bitmap.createScaledBitmap(mcpeBGRaw, dp(32), dp(32), false);
+var mcpeBGRaw = android.graphics.Bitmap.createBitmap(mcpeSS_BF, 0, 0, 16, 16);
+var mcpeBG = android.graphics.Bitmap.createScaledBitmap(mcpeBGRaw, dp(32), dp(32), false);
 var mcpeBG9 = ninePatch1(mcpeBG, dp(12), dp(12), dp(24), dp(24));
 //배경 나인패치
-var mcpeBGTRaw = new android.graphics.Bitmap.createBitmap(mcpeSS_BF, 34, 43, 14, 14);
-var mcpeBGT = new android.graphics.Bitmap.createScaledBitmap(mcpeBGTRaw, dp(32), dp(32), false);
+var mcpeBGTRaw = android.graphics.Bitmap.createBitmap(mcpeSS_BF, 34, 43, 14, 14);
+var mcpeBGT = android.graphics.Bitmap.createScaledBitmap(mcpeBGTRaw, dp(32), dp(32), false);
 var mcpeBGT9 = ninePatch1(mcpeBGT, dp(12), dp(12), dp(22), dp(22));
 //타이틀바 나인패치
-var mcpeTitleBarRaw = new android.graphics.Bitmap.createBitmap(mcpeTG_BF, 150, 26, 14, 25);
-var mcpeTitleBar = new android.graphics.Bitmap.createScaledBitmap(mcpeTitleBarRaw, dp(28), dp(50), false);
+var mcpeTitleBarRaw = android.graphics.Bitmap.createBitmap(mcpeTG_BF, 150, 26, 14, 25);
+var mcpeTitleBar = android.graphics.Bitmap.createScaledBitmap(mcpeTitleBarRaw, dp(28), dp(50), false);
 var mcpeTitleBar9 = ninePatch1(mcpeTitleBar, dp(8), dp(8), dp(20), dp(22));
 //종료 버튼 나인패치
-var mcpeExitRaw = new android.graphics.Bitmap.createBitmap(mcpeSS_BF, 60, 0, 18, 18);
-var mcpeExit = new android.graphics.Bitmap.createScaledBitmap(mcpeExitRaw, 18*FOUR, 18*FOUR, false);
+var mcpeExitRaw = android.graphics.Bitmap.createBitmap(mcpeSS_BF, 60, 0, 18, 18);
+var mcpeExit = android.graphics.Bitmap.createScaledBitmap(mcpeExitRaw, 18*FOUR, 18*FOUR, false);
 var mcpeExit9 = ninePatch1(mcpeExit, dp(6), dp(6), dp(30), dp(30));
 var mcpeExitB = new android.graphics.drawable.BitmapDrawable(ctx.getResources(), mcpeExit);
 mcpeExitB.setAntiAlias(false);
 //종료 버튼(클릭) 나인패치
-var mcpeExitClickRaw = new android.graphics.Bitmap.createBitmap(mcpeSS_BF, 78, 0, 18, 18);
-var mcpeExitClick = new android.graphics.Bitmap.createScaledBitmap(mcpeExitClickRaw, dp(36), dp(36), false);
+var mcpeExitClickRaw = android.graphics.Bitmap.createBitmap(mcpeSS_BF, 78, 0, 18, 18);
+var mcpeExitClick = android.graphics.Bitmap.createScaledBitmap(mcpeExitClickRaw, dp(36), dp(36), false);
 var mcpeExitClick9 = ninePatch1(mcpeExitClick, dp(6), dp(6), dp(32), dp(32));
 //버튼 나인패치
-var mcpeBtnRaw = new android.graphics.Bitmap.createBitmap(mcpeSS_BF,8,32,8,8);
-var mcpeBtn = new android.graphics.Bitmap.createScaledBitmap(mcpeBtnRaw,dp(16),dp(16),false);
+var mcpeBtnRaw = android.graphics.Bitmap.createBitmap(mcpeSS_BF,8,32,8,8);
+var mcpeBtn = android.graphics.Bitmap.createScaledBitmap(mcpeBtnRaw,dp(16),dp(16),false);
 var mcpeBtn9 = ninePatch1(mcpeBtn,dp(6),dp(4),dp(14),dp(14));
 //버튼(클릭) 나인패치
-var mcpeBtnClickRaw = new android.graphics.Bitmap.createBitmap(mcpeSS_BF,0,32,8,8);
-var mcpeBtnClick = new android.graphics.Bitmap.createScaledBitmap(mcpeBtnClickRaw,dp(16),dp(16),false);
+var mcpeBtnClickRaw = android.graphics.Bitmap.createBitmap(mcpeSS_BF,0,32,8,8);
+var mcpeBtnClick = android.graphics.Bitmap.createScaledBitmap(mcpeBtnClickRaw,dp(16),dp(16),false);
 var mcpeBtnClick9 = ninePatch1(mcpeBtnClick,dp(4),dp(4),dp(12),dp(14));
 //미니버튼 나인패치
 var mcpeMiniBtnRaw = android.graphics.Bitmap.createBitmap(mcpeSS_BF,8,33,8,7);
-var mcpeMiniBtn = new android.graphics.Bitmap.createScaledBitmap(mcpeMiniBtnRaw,dp(16),dp(14),false);
+var mcpeMiniBtn = android.graphics.Bitmap.createScaledBitmap(mcpeMiniBtnRaw,dp(16),dp(14),false);
 var mcpeMiniBtn9 = ninePatch1(mcpeMiniBtn,dp(2),dp(2),dp(12),dp(14));
 //미니버튼(클릭) 나인패치
-var mcpeMiniBtnClickRaw = new android.graphics.Bitmap.createBitmap(mcpeSS_BF,0,32,8,7);
-var mcpeMiniBtnClick = new android.graphics.Bitmap.createScaledBitmap(mcpeMiniBtnClickRaw,dp(16),dp(14),false);
+var mcpeMiniBtnClickRaw = android.graphics.Bitmap.createBitmap(mcpeSS_BF,0,32,8,7);
+var mcpeMiniBtnClick = android.graphics.Bitmap.createScaledBitmap(mcpeMiniBtnClickRaw,dp(16),dp(14),false);
 var mcpeMiniBtnClick9 = ninePatch1(mcpeMiniBtnClick,dp(4),dp(4),dp(12),dp(12));
 //텍스트뷰 나인패치
 var b = android.graphics.Color.parseColor("#6b6163");
@@ -192,7 +194,7 @@ C,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,D
 
 
 function dp(dips) {
-	return dips*DIP//parseInt(dips * ctx.getResources().getDisplayMetrics().density + 0.5);
+	return dips*DIP; //parseInt(dips * ctx.getResources().getDisplayMetrics().density + 0.5);
 }
 
 function debug(str) {
@@ -216,9 +218,9 @@ function showError(e) {
 		var t = (e + "").split(" ");
 		var c = "";
 		var temp = "";
-		for(var l in t) {
+		for(var l = 0; l < t.length; l++) {
 			if(temp.split("").length > 30) {
-				c+= ("\n" + ChatColor.DARK_RED)
+				c += ("\n" + ChatColor.DARK_RED);
 				temp = "";
 			}
 			c += t[l] + " ";
@@ -226,7 +228,7 @@ function showError(e) {
 		}
 		clientMessage(ChatColor.DARK_RED + "[" + ScriptName + " ERROR LINE: " + e.lineNumber + "]\n" + ChatColor.DARK_RED + c);
 	}
-};
+}
 
 function toast(str) {
 	ctx.runOnUiThread(new java.lang.Runnable( {
@@ -252,17 +254,17 @@ function toasts(str) {
 
 function uiThread(fc) {
 	return ctx.runOnUiThread(new java.lang.Runnable({run: fc}))
-};
+}
 function thread(fc) {
 	return new java.lang.Thread(new java.lang.Runnable( {run: fc}))
-};
+}
 function multiThread(fc) {
 	if(Level.getWorldDir() !== null) {
 		new java.lang.Thread(new java.lang.Runnable( {run: fc})).start()
 	}else {
 		uiThread(fc)
 	}
-};
+}
 
 
 //==============================
@@ -307,8 +309,7 @@ function ninePatch1(bitmap, top, left, bottom, right, width, height) {
 		return buffer;
 	};
 	var buffer = getByteBuffer(top, left, bottom, right);
-	var patch = new android.graphics.drawable.NinePatchDrawable(ctx.getResources(), bitmap, buffer.array(), new android.graphics.Rect(), "");
-	return patch;
+    return new android.graphics.drawable.NinePatchDrawable(ctx.getResources(), bitmap, buffer.array(), new android.graphics.Rect(), "");
 }
 function ninePatch2(bitmap, top, left, bottom, right, width, height) {
 	var getByteBuffer = function(top, left, bottom, right) {
@@ -342,7 +343,7 @@ function ninePatch2(bitmap, top, left, bottom, right, width, height) {
 	};
 	var buffer = getByteBuffer(top, left, bottom, right);
 	var patch = new android.graphics.drawable.NinePatchDrawable(ctx.getResources(), bitmap, buffer.array(), new android.graphics.Rect(), "");
-	var bm = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
+	//var bm = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
 	return patch;
 }
 
@@ -566,7 +567,7 @@ function getYaw(x, y, z) {
 	else if(apisinHorizontal == -1) alpha = 270;
 	else if(apisinHorizontal == 0 && apicosHorizontal == 1 && apitanHorizontal == 0) null;
 	return alpha;
-};
+}
 
 
 /**
@@ -789,7 +790,7 @@ if(!_FONT.exists()) {
 		toast("[Pocket Gear]\n\n폰트를 다운로드하지 못했습니다\n아마도 인터넷이 연결되어 있지 않습니다");
 		toasts("[Pocket Gear]\n\n시스템 폰트를 적용합니다...");
 	}
-};
+}
 
 //Minecraft function
 function newLevel(str) {
@@ -835,10 +836,10 @@ if(Gear.mod + "" === "NaN") {
 }
 //RECENT, OVERALL, CLOCK, INGAME_CLOCK
 Gear.isRemote = false;
-Gear.allowRemote = (loadData(_MOD_DATA, "ALLOW_REMOTE") == "true" ? true : false);
+Gear.allowRemote = (loadData(_MOD_DATA, "ALLOW_REMOTE") == "true");
 Gear.isWindowAlive = false;
-Gear.players = new Array();
-Gear.chattyPlayers = new Array();
+Gear.players = [];
+Gear.chattyPlayers = [];
 Gear.slowTick = 0;
 Gear.slowestTick = 0;
 Gear.noPlayer = 0;
@@ -933,7 +934,7 @@ Gear.resetButton.setOnTouchListener( new android.view.View.OnTouchListener({ onT
 		return false;
 	}
 }));
-Gear.resetButton.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+Gear.resetButton.setOnClickListener(new android.view.View.OnClickListener({onClick: function(view, event) {try {
 		Gear.currentStepLock = Gear.floorStep;
 		uiThread(function() {try {
 			if(Gear.mod !== 0) {
@@ -953,13 +954,13 @@ Gear.resetButton.setOnClickListener(new android.view.View.OnClickListener() {o
 		}
 	}catch(e) {
 		showError(e);
-	}}});
-Gear.resetButton.setOnLongClickListener(new android.view.View.OnLongClickListener() {onLongClick: function(view, event) {try {
+	}}}));
+Gear.resetButton.setOnLongClickListener(new android.view.View.OnLongClickListener({onLongClick: function(view, event) {try {
 	gearSetting();
 	return true;
 }catch(e) {
 	showError();
-}}});
+}}}));
 Gear.layout.addView(Gear.resetButton);
 
 Gear.mainWindow = new android.widget.PopupWindow(Gear.layout, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, false);
@@ -1009,7 +1010,7 @@ function gearSetting() {uiThread(function() {try {
 		Gear.mod0.setTextColor(android.graphics.Color.WHITE);
 	}
 	Gear.mod0.setBackgroundColor(android.graphics.Color.BLACK);
-	Gear.mod0.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+	Gear.mod0.setOnClickListener(new android.view.View.OnClickListener({onClick: function(view, event) {try {
 		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
 		Gear.mod = 0;
@@ -1017,7 +1018,7 @@ function gearSetting() {uiThread(function() {try {
 		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
-	}}});
+	}}}));
 	Gear.mainDialogLayout.addView(Gear.mod0);
 	
 	Gear.mod1 = new android.widget.Button(ctx);
@@ -1028,7 +1029,7 @@ function gearSetting() {uiThread(function() {try {
 		Gear.mod1.setTextColor(android.graphics.Color.WHITE);
 	}
 	Gear.mod1.setBackgroundColor(android.graphics.Color.BLACK);
-	Gear.mod1.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+	Gear.mod1.setOnClickListener(new android.view.View.OnClickListener({onClick: function(view, event) {try {
 		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
 		Gear.mod = 1;
@@ -1036,7 +1037,7 @@ function gearSetting() {uiThread(function() {try {
 		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
-	}}});
+	}}}));
 	Gear.mainDialogLayout.addView(Gear.mod1);
 	
 	Gear.mod2 = new android.widget.Button(ctx);
@@ -1047,7 +1048,7 @@ function gearSetting() {uiThread(function() {try {
 		Gear.mod2.setTextColor(android.graphics.Color.WHITE);
 	}
 	Gear.mod2.setBackgroundColor(android.graphics.Color.BLACK);
-	Gear.mod2.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+	Gear.mod2.setOnClickListener(new android.view.View.OnClickListener({onClick: function(view, event) {try {
 		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
 		Gear.mod = 2;
@@ -1055,7 +1056,7 @@ function gearSetting() {uiThread(function() {try {
 		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
-	}}});
+	}}}));
 	Gear.mainDialogLayout.addView(Gear.mod2);
 	
 	Gear.mod3 = new android.widget.Button(ctx);
@@ -1066,7 +1067,7 @@ function gearSetting() {uiThread(function() {try {
 		Gear.mod3.setTextColor(android.graphics.Color.WHITE);
 	}
 	Gear.mod3.setBackgroundColor(android.graphics.Color.BLACK);
-	Gear.mod3.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+	Gear.mod3.setOnClickListener(new android.view.View.OnClickListener({onClick: function(view, event) {try {
 		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
 		Gear.mod = 3;
@@ -1074,7 +1075,7 @@ function gearSetting() {uiThread(function() {try {
 		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
-	}}});
+	}}}));
 	Gear.mainDialogLayout.addView(Gear.mod3);
 	
 	Gear.mod4 = new android.widget.Button(ctx);
@@ -1085,7 +1086,7 @@ function gearSetting() {uiThread(function() {try {
 		Gear.mod4.setTextColor(android.graphics.Color.WHITE);
 	}
 	Gear.mod4.setBackgroundColor(android.graphics.Color.BLACK);
-	Gear.mod4.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+	Gear.mod4.setOnClickListener(new android.view.View.OnClickListener({onClick: function(view, event) {try {
 		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
 		Gear.mod = 4;
@@ -1093,7 +1094,7 @@ function gearSetting() {uiThread(function() {try {
 		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
-	}}});
+	}}}));
 	Gear.mainDialogLayout.addView(Gear.mod4);
 	
 	Gear.mod7 = new android.widget.Button(ctx);
@@ -1104,7 +1105,7 @@ function gearSetting() {uiThread(function() {try {
 		Gear.mod7.setTextColor(android.graphics.Color.WHITE);
 	}
 	Gear.mod7.setBackgroundColor(android.graphics.Color.BLACK);
-	Gear.mod7.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+	Gear.mod7.setOnClickListener(new android.view.View.OnClickListener({onClick: function(view, event) {try {
 		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
 		Gear.mod = 7;
@@ -1112,7 +1113,7 @@ function gearSetting() {uiThread(function() {try {
 		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
-	}}});
+	}}}));
 	Gear.mainDialogLayout.addView(Gear.mod7);
 	
 	Gear.mod8 = new android.widget.Button(ctx);
@@ -1123,7 +1124,7 @@ function gearSetting() {uiThread(function() {try {
 		Gear.mod8.setTextColor(android.graphics.Color.WHITE);
 	}
 	Gear.mod8.setBackgroundColor(android.graphics.Color.BLACK);
-	Gear.mod8.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+	Gear.mod8.setOnClickListener(new android.view.View.OnClickListener({onClick: function(view, event) {try {
 		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
 		Gear.mod = 8;
@@ -1131,7 +1132,7 @@ function gearSetting() {uiThread(function() {try {
 		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
-	}}});
+	}}}));
 	Gear.mainDialogLayout.addView(Gear.mod8);
 	
 	 	Gear.mod10 = new android.widget.Button(ctx);
@@ -1142,7 +1143,7 @@ function gearSetting() {uiThread(function() {try {
 		Gear.mod10.setTextColor(android.graphics.Color.WHITE);
 	}
 	Gear.mod10.setBackgroundColor(android.graphics.Color.BLACK);
-	Gear.mod10.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+	Gear.mod10.setOnClickListener(new android.view.View.OnClickListener({onClick: function(view, event) {try {
 		Gear.reloadMainDialog();
 		view.setTextColor(android.graphics.Color.YELLOW);
 		Gear.mod = 10;
@@ -1150,29 +1151,29 @@ function gearSetting() {uiThread(function() {try {
 		saveData(_MOD_DATA, "MOD", Gear.mod);
 	}catch(e) {
 		errorShow(e);
-	}}});
+	}}}));
 	Gear.mainDialogLayout.addView(Gear.mod10);
 	
 	Gear.settingBtn = new android.widget.Button(ctx);
 	Gear.settingBtn.setText("Setting");
 	Gear.settingBtn.setTextColor(android.graphics.Color.WHITE);
 	Gear.settingBtn.setBackgroundColor(android.graphics.Color.BLACK);
-	Gear.settingBtn.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+	Gear.settingBtn.setOnClickListener(new android.view.View.OnClickListener({onClick: function(view, event) {try {
 		Gear.setting();
 	}catch(e) {
 		errorShow(e);
-	}}});
+	}}}));
 	Gear.mainDialogLayout.addView(Gear.settingBtn);
 	
 	Gear.helpBtn = new android.widget.Button(ctx);
 	Gear.helpBtn.setText("Help");
 	Gear.helpBtn.setTextColor(android.graphics.Color.WHITE);
 	Gear.helpBtn.setBackgroundColor(android.graphics.Color.BLACK);
-	Gear.helpBtn.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+	Gear.helpBtn.setOnClickListener(new android.view.View.OnClickListener({onClick: function(view, event) {try {
 		Gear.help();
 	}catch(e) {
 		errorShow(e);
-	}}});
+	}}}));
 	Gear.mainDialogLayout.addView(Gear.helpBtn);
 	
 	Gear.mainDialogScroll.addView(Gear.mainDialogLayout);
@@ -1241,7 +1242,7 @@ Gear.setting = function() {uiThread(function() {try {
 	}else {
 		Gear.multiBtn.setBackgroundColor(android.graphics.Color.BLACK);
 	}
-	Gear.multiBtn.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+	Gear.multiBtn.setOnClickListener(new android.view.View.OnClickListener({onClick: function(view, event) {try {
 		if(Gear.allowRemote) {
 			Gear.multiBtn.setBackgroundColor(android.graphics.Color.BLACK);
 			Gear.allowRemote = false;
@@ -1253,7 +1254,7 @@ Gear.setting = function() {uiThread(function() {try {
 		}
 	}catch(e) {
 		errorShow(e);
-	}}});
+	}}}));
 	Gear.settingDialogLayout.addView(Gear.multiBtn);
 	
 	Gear.settingDialogScroll.addView(Gear.settingDialogLayout);
@@ -1278,11 +1279,11 @@ Gear.help = function() {uiThread(function() {try {
 	Gear.multiBtn.setText('"' + Gear.mod0.getText() + '" help');
 	Gear.multiBtn.setTextColor(android.graphics.Color.WHITE);
 	Gear.multiBtn.setBackgroundColor(android.graphics.Color.BLACK);
-	Gear.multiBtn.setOnClickListener(new android.view.View.OnClickListener() {onClick: function(view, event) {try {
+	Gear.multiBtn.setOnClickListener(new android.view.View.OnClickListener({onClick: function(view, event) {try {
 		Gear.textDialog(".", ".");
 	}catch(e) {
 		errorShow(e);
-	}}});
+	}}}));
 	Gear.helpDialogLayout.addView(Gear.multiBtn);
 	
 	Gear.helpDialogScroll.addView(Gear.helpDialogLayout);
@@ -1307,7 +1308,7 @@ Gear.textDialog = function(title, text) {
 	temp3.addView(temp2);
 	temp.setView(temp3);
 	temp.create().show();
-}
+};
 
 Gear.mainWindowReset = function() {
 	debug("main window reset");
@@ -1320,7 +1321,7 @@ Gear.mainWindowReset = function() {
 			Gear.textView.setTextColor(android.graphics.Color.WHITE)
 		}
 	});
-}
+};
 
 uiThread(function() {try {
 	if(!Gear.isWindowAlive && Gear.allowRemote) {
@@ -1370,7 +1371,7 @@ Gear.newLevel = function(str) {
 	}catch(e) {
 		showError(e);
 	}});
-}
+};
 
 Gear.leaveGame = function() {
 	Gear.mainWindowReset();
@@ -1387,18 +1388,18 @@ Gear.leaveGame = function() {
 			showError(e);
 		}});
 	}
-}
+};
 
 Gear.pedometerTick = function() {
 	var x = Entity.getVelX(Player.getEntity());
 	var z = Entity.getVelZ(Player.getEntity());
-	if(x !== 0| z !== 0) {
+	if(x !== 0 || z !== 0) {
 		Gear.step += Math.sqrt(Math.pow(x, 2) + Math.pow(z, 2));
 		if(Math.floor(Gear.step) !== Gear.floorStep) {
 			Gear.floorStep = Math.floor(Gear.step);
 		}
 	}
-}
+};
 
 Gear.autoSaveTick = function() {
 	if(++Gear.saveCount > 200 && Level.getWorldDir() !== null) {
@@ -1408,9 +1409,10 @@ Gear.autoSaveTick = function() {
 			saveData(_MAP_STEP_DATA(), "STEP", Gear.floorStep);
 		}).start();
 	}
-}
+};
 
 Gear.textViewTick = function() {
+    var time, min, x, y, z;
 	switch(Gear.mod) {
 		case 0:
 			uiThread(function() {try {
@@ -1428,8 +1430,8 @@ Gear.textViewTick = function() {
 			}});
 			break;
 		case 2:
-			var time = new Date();
-			var min = time.getMinutes() < 10 ? "0" + time.getMinutes() : time.getMinutes();
+			time = new Date();
+			min = time.getMinutes() < 10 ? "0" + time.getMinutes() : time.getMinutes();
 			uiThread(function() {try {
 				Gear.textView.setText((time.getHours() < 12 ? "AM " : "PM ") + time.getHours()%12 + ":" + min);
 			}catch(e) {
@@ -1437,10 +1439,10 @@ Gear.textViewTick = function() {
 			}});
 			break;
 		case 3:
-			var time = Level.getTime() + 4800;
+			time = Level.getTime() + 4800;
 			var convert = Math.floor((time % 19200) * 1440 / 19200);
 			var hour = Math.floor(convert / 60);
-			var min = convert % 60;
+			min = convert % 60;
 			var minc = min < 10 ? "0" + min : min;
 			uiThread(function() {try {
 				Gear.textView.setText((hour < 12 ? "MAM " : "MPM ") + hour % 12 + ":" + minc);
@@ -1449,15 +1451,15 @@ Gear.textViewTick = function() {
 			}});
 			break;
 		case 7:
-			var x = Math.round(Player.getX()*100)/100;
-			var y = Math.round(Player.getY()*100)/100;
-			var z = Math.round(Player.getZ()*100)/100;
+			x = Math.round(Player.getX()*100)/100;
+			y = Math.round(Player.getY()*100)/100;
+			z = Math.round(Player.getZ()*100)/100;
 					uiThread(function(){try {Gear.textView.setText("X: "+x+"\nY: "+y+"\nZ: "+z)}catch(e) {showError(e)}});
 			break;
 		case 8:
-			var x = Math.round(Player.getX()*100)/100;
-			var y = Math.round(Player.getY()*100)/100;
-			var z = Math.round(Player.getZ()*100)/100;
+			x = Math.round(Player.getX()*100)/100;
+			y = Math.round(Player.getY()*100)/100;
+			z = Math.round(Player.getZ()*100)/100;
 					uiThread(function(){try {Gear.textView.setText(("chunkX: "+Math.floor(x/16)+"\nchunkZ: "+Math.floor(z/16)+"\n"+Level.getBiomeName(x,y,z)).toString())}catch(e) {showError(e)}});
 			break;
 		case 9:
@@ -1466,17 +1468,18 @@ Gear.textViewTick = function() {
 };
 
 Gear.slowModTick = function() {
+    var e, ent;
 	switch(Gear.mod) {
 		case 4:
-			for(var e = 0; e < Gear.players.length; e++) {
-				var ent = Gear.players[e];
+			for(e = 0; e < Gear.players.length; e++) {
+				ent = Gear.players[e];
 				if(!Player.isPlayer(ent) || Gear.voidClip.indexOf(Level.getTile(Entity.getX(ent), Entity.getY(ent) + 0.6, Entity.getZ(ent))) === -1 || Player.getEntity() == ent) {
 					Gear.players.splice(e, 1);
 				}
 			}
 			Gear.playerRange = [];
-			for(var e = 0; e < Gear.players.length; e++) {
-				var ent = Gear.players[e];
+			for(e = 0; e < Gear.players.length; e++) {
+				ent = Gear.players[e];
 				Gear.playerRange[e] = Math.sqrt(Math.pow(Player.getX() - Entity.getX(ent), 2) + Math.pow(Player.getY() - Entity.getY(ent), 2) + Math.pow(Player.getZ() - Entity.getZ(ent), 2));
 			}
 			Gear.playerRangeMin = Gear.playerRange.indexOf(Math.min.apply(null, Gear.playerRange));
@@ -1534,7 +1537,7 @@ Gear.slowModTick = function() {
 			}});
 			break;
 	}
-}
+};
 
 Gear.slowestModTick = function() {
 	if(net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote && !Gear.isRemote && Gear.allowRemote) {
@@ -1549,7 +1552,7 @@ Gear.slowestModTick = function() {
 			try{
 				Gear.temp = Entity.getAll();
 				for(var e = 0; e < Gear.temp.length; e++) {
-					var ent = Gear.temp[e]
+					var ent = Gear.temp[e];
 					if(Player.isPlayer(ent) && Player.getEntity() != ent && Gear.players.indexOf(ent) < 0 && Gear.voidClip.indexOf(Level.getTile(Entity.getX(ent), Entity.getY(ent) + 0.6, Entity.getZ(ent))) !== -1) {
 						Gear.players.push(ent);
 					}
@@ -1561,7 +1564,7 @@ Gear.slowestModTick = function() {
 			}
 			break;
 	}
-}
+};
 
 Gear.loadPlayers = function() {
 	if(Gear.isMap) {
