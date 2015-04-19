@@ -114,6 +114,13 @@ Gear.prototype = {
     },
 
     /**
+     * @param {string} text
+     */
+    setDisplay: function(text){
+        //TODO: Implement this method
+    },
+
+    /**
      * @returns {string}
      */
     toString: function(){
@@ -143,7 +150,6 @@ GearMenu.prototype = {
 
     /**
      * @param {Gear} gear
-     * @returns {string}
      * @abstract
      */
     tick: function(gear){
@@ -181,10 +187,9 @@ TimeMenu.prototype.constructor = TimeMenu;
 
 /**
  * @param {Gear} gear
- * @returns {string}
  */
 TimeMenu.prototype.tick = function(gear){
-    return TimeMenu.DATE_FORMAT.format(new java.util.Date());
+    gear.setDisplay(TimeMenu.DATE_FORMAT.format(new java.util.Date()) + "");
 };
 
 //---------------------------------------------
