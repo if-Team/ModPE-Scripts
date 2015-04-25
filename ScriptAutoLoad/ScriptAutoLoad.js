@@ -1,11 +1,12 @@
-var ScriptName = "Pocket Gear";
-var Version = "v1";
+var ScriptName = "ScriptAutoLoad";
+var Version = "dev-v0.1";
+var VersionCode = "100";
 var author = "CodeInside";
 
 /**
- *—————Change Log—————
- *v1(20150415)
- *	-출시
+ * —————Change Log—————
+ * dev-v0.1(20150425)[100]
+ * 	-시작
  */
 
 /**
@@ -30,18 +31,18 @@ var author = "CodeInside";
 var debugging = false;
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 1, ctx.getResources().getDisplayMetrics());
+var _SD_CARD = android.os.Environment.getExternalStorageDirectory()/*.getAbsolutePath()*/;
+var _MAIN_MOD_DIR = new java.io.File(_SD_CARD, "games/com.mojang/minecraftpe/mods");
+var _MOD_DIR = new java.io.File(_SD_CARD, "games/com.mojang/minecraftpe/mods/" + ScriptName);
+var _FONT = new java.io.File(_MAIN_MOD_DIR, "minecraft.ttf");
+var _MOD_DATA = new java.io.File(_MOD_DIR, ScriptName + ".dat");
+var _MOD_TEST = new java.io.File(_MOD_DIR, "test.txt");
+function _MAP_DIR() {return new java.io.File(_SD_CARD, "games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/mods")}
+function _MAP_DATA() {return new java.io.File(_MAP_DIR(), ScriptName + ".data")}
 var DIP = FOUR * loadData(_MOD_DATA, "DIPS");
 if(DIP + "" === "NaN"){
 	DIP = FOUR;
 }
-var _SD_CARD = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
-var _MAIN_MOD_DIR = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/mods");
-var _MOD_DIR = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/mods/Gear");
-var _FONT = new java.io.File(_MAIN_MOD_DIR, "minecraft.ttf");
-var _MOD_DATA = new java.io.File(_MOD_DIR, "data.data");
-var _MOD_TEST = new java.io.File(_MOD_DIR, "test.txt");
-function _MAP_DIR() {return new java.io.File(_SD_CARD, "games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/mods")}
-function _MAP_STEP_DATA() {return new java.io.File(_MAP_DIR(), "gear.data")}
 
 
 //마인크래프트 리소스
@@ -536,3 +537,9 @@ function loadSetting(article) {
 	//없으면 반환
 	return null;
 };
+
+/**
+ * ScriptAutoLoad
+ */
+ 
+ 
