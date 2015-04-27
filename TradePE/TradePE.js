@@ -22,16 +22,16 @@ Trade.Items = {
         count: [6, 6, 1, 1, 1, 1, 15, 15, 20, 8]
     },
     farmer: {
-        name: ["item.apple.name", "item.bread.name", "item.chickenCooked.name", "item.cookie.name", "item.melon.name", "item.arrow.name"],
-        meta: [["apple",0], ["bread", 0], ["chicken_cooked", 0], ["cookie", 0], ["melon", 0], ["arrow", 0]],
-        id: [260, 297, 366, 357, 369, 262],
-        dam: [0, 0, 0, 0, 0, 0],
-        cost: [1, 1, 1, 1, 1, 1],
-        count: [6, 3, 7, 9, 6, 5]
+        name: ["item.apple.name", "item.bread.name", "item.chickenCooked.name", "item.cookie.name", "item.melon.name", "item.arrow.name", "item.flintAndSteel.name", "item.shears.name", "item.chickenRaw.name", "item.wheat.name", "item.fishCooked.name"],
+        meta: [["apple",0], ["bread", 0], ["chicken_cooked", 0], ["cookie", 0], ["melon", 0], ["arrow", 0], ["flint_and_steel", 0], ["shears", 0], ["chicken_raw", 0], ["wheat", 0], ["fish_cooked", 0]],
+        id: [260, 297, 366, 357, 369, 262, 259, 359, 365, 296, 350],
+        dam: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        cost: [1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1],
+        count: [6, 3, 7, 9, 6, 5, 1, 1, 16, 19, 11]
     },
     librarian: {
         name: ["librarian"],
-        meta: [["apple",0]],
+        meta: [["apple", 0]],
         id: [260],
         dam: [0],
         cost: [1],
@@ -72,60 +72,59 @@ Trade.COST = null;
 Trade.COUNT = null;
 
 Trade.init = function() {
-    Utils.createUiThread(function(ctx) {
-        var mainPw = new android.widget.PopupWindow(ctx);
-        var mainLayout = new android.widget.RelativeLayout(ctx);
+    var ctx = Utils.getContext();
+    var mainPw = new android.widget.PopupWindow(ctx);
+    var mainLayout = new android.widget.RelativeLayout(ctx);
 
-        var back = Utils.showBackground();
-        mainLayout.addView(back);
-        var header = Utils.showHeader("Trade");
-        mainLayout.addView(header);
-        var itemback = Utils.showItemBackground(25+18+16, 65);
-        mainLayout.addView(itemback);
-        var item = Utils.getItemImage("emerald", 0);
-        itemback.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*1.6, item.getHeight()*Utils.FOUR*1.6, false));
-        var cost = Utils.justText("", 25+18+16+4, 69);
-        mainLayout.addView(cost);
-        var arrow = Utils.renderArrow(141, 60+17);
-        mainLayout.addView(arrow);
-        var left = Utils.showButton(25, 60, 18, 50, "<", function() {
-            Utils.minusPage();
-            Utils.updateTradeList(name, itemback2, cost, count);
-        });
-        mainLayout.addView(left);
-        var right = Utils.showButton(170+18+40+32, 60, 18, 50, ">", function() {
-            Utils.plusPage();
-            Utils.updateTradeList(name, itemback2, cost, count);
-        });
-        mainLayout.addView(right);
-        var buy = Utils.showButton(170, 130, 64+36+8, 32, "Buy", function() {
-            Utils.buyThing();
-        });
-        mainLayout.addView(buy);
-        var sell = Utils.showButton(25, 130, 64+36+8, 32, "Sell", function() {
-            Utils.sellThing();
-        });
-        mainLayout.addView(sell);
-        var itemback2 = Utils.showItemBackground(204, 65);
-        mainLayout.addView(itemback2);
-        var count = Utils.justText("", 204+4, 69);
-        mainLayout.addView(count);
-        var dismiss = Utils.showButton(4, 4, 38, 18, "Back", function() {
-            mainPw.dismiss();
-        });
-        mainLayout.addView(dismiss);
-        var name = Utils.justText("", 170, 40, 36+40+32);
-        mainLayout.addView(name);
-        mainPw.setContentView(mainLayout);
-        mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-        mainPw.setWidth(ctx.getScreenWidth());
-        mainPw.setHeight(ctx.getScreenHeight());
-        Trade.MAINPW = mainPw;
-        Trade.NAME = name;
-        Trade.ITEMBACK = itemback2;
-        Trade.COST = cost;
-        Trade.COUNT = count;
+    var back = Utils.showBackground();
+    mainLayout.addView(back);
+    var header = Utils.showHeader("Trade");
+    mainLayout.addView(header);
+    var itemback = Utils.showItemBackground(25+18+16, 65);
+    mainLayout.addView(itemback);
+    var item = Utils.getItemImage("emerald", 0);
+    itemback.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*1.6, item.getHeight()*Utils.FOUR*1.6, false));
+    var cost = Utils.justText("", 25+18+16+4, 69);
+    mainLayout.addView(cost);
+    var arrow = Utils.renderArrow(141, 60+17);
+    mainLayout.addView(arrow);
+    var left = Utils.showButton(25, 60, 18, 50, "<", function() {
+        Utils.minusPage();
+        Utils.updateTradeList(name, itemback2, cost, count);
     });
+    mainLayout.addView(left);
+    var right = Utils.showButton(170+18+40+32, 60, 18, 50, ">", function() {
+        Utils.plusPage();
+        Utils.updateTradeList(name, itemback2, cost, count);
+    });
+    mainLayout.addView(right);
+    var buy = Utils.showButton(170, 130, 64+36+8, 32, "Buy", function() {
+        Utils.buyThing();
+    });
+    mainLayout.addView(buy);
+    var sell = Utils.showButton(25, 130, 64+36+8, 32, "Sell", function() {
+        Utils.sellThing();
+    });
+    mainLayout.addView(sell);
+    var itemback2 = Utils.showItemBackground(204, 65);
+    mainLayout.addView(itemback2);
+    var count = Utils.justText("", 204+4, 69);
+    mainLayout.addView(count);
+    var dismiss = Utils.showButton(4, 4, 38, 18, "Back", function() {
+        mainPw.dismiss();
+    });
+    mainLayout.addView(dismiss);
+    var name = Utils.justText("", 170, 40, 36+40+32);
+    mainLayout.addView(name);
+    mainPw.setContentView(mainLayout);
+    mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+    mainPw.setWidth(ctx.getScreenWidth());
+    mainPw.setHeight(ctx.getScreenHeight());
+    Trade.MAINPW = mainPw;
+    Trade.NAME = name;
+    Trade.ITEMBACK = itemback2;
+    Trade.COST = cost;
+    Trade.COUNT = count;
 };
 
 Trade.showScreen = function() {
