@@ -648,6 +648,13 @@ SAL.manuListAdd = function(layout, views) {
 					btn.setBackgroundColor(android.graphics.Color.parseColor("#000000"));
 			}
 		}
+		btn.setOnClickListener(android.view.View.OnClickListener({
+			onClick: function(view, event) {try {
+				SAL.mainWindowShow(false);
+			}catch(e) {
+				showError(e);
+			}}
+		}));
 		layout.addView(btn);
 	}
 };
@@ -663,6 +670,19 @@ SAL.loadScriptListData = function() {
 			if(f.exists() && f.isFile() && !f.canRead()) {
 				toast(TAG + list[e].name + "는(은) 읽을 수 없는 파일입니다");
 			}
+		}
+	}
+	return SAL.setListIDs(list);
+}
+
+SAL.setListIDs = function(list) {
+	for(var e = 0; e < list.length; e++) {
+		try {
+			if(!(list[e].ID >= 7220)) {
+				list[e].ID = SAL.getListMaxID() + 1;
+			}
+		}catch(e) {
+			list[e].ID = SAL.getListMaxID() + 1;
 		}
 	}
 	return list;
@@ -971,10 +991,6 @@ SAL.addList = function() {;
 
 
 
-SAL.mainBtnWindowLoad();
-
-
-
 uiThread(function() {
 	loadingText.setText(TAG+"리소스 체크중...");
 });
@@ -995,8 +1011,12 @@ if(!_FONT.exists()) {
 	}
 }
 
+
+
 uiThread(function() {
-	java.lang.Thread.sleep(500);
+	java.lang.Thread.sleep(100);
+	loadingText.setText(TAG+"레이아웃 로딩중...");
+	SAL.mainBtnWindowLoad();
 	SAL.mainBtnWindowShow(true);
 	loadingWindow.dismiss();
 });
