@@ -625,6 +625,7 @@ SAL.manuListAdd = function(layout, views) {
 	for(var e = 0; e < views.length; e++) {
 		var btn = new android.widget.Button(ctx);
 		btn.setText(views[e].name);
+		btn.setId(views[e].ID);
 		btn.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*11);
 		btn.getPaint().setAntiAlias(false);
 		if(_FONT.exists()) {
@@ -650,7 +651,7 @@ SAL.manuListAdd = function(layout, views) {
 		}
 		btn.setOnClickListener(android.view.View.OnClickListener({
 			onClick: function(view, event) {try {
-				SAL.mainWindowShow(false);
+				toast(SAL.list[SAL.findPathByID(SAL.list, view.getId())].path);
 			}catch(e) {
 				showError(e);
 			}}
@@ -664,29 +665,51 @@ SAL.loadScriptListData = function() {
 	for(var e = 0; e < list.length; e++) {
 		var f = new java.io.File(list[e].path);
 		if(f.exists() && f.isFile() && f.canRead()) {
-			list[e].isExist = true;
+			list[e].isExist = true
 		}else {
 			list[e].isExist = false;
 			if(f.exists() && f.isFile() && !f.canRead()) {
-				toast(TAG + list[e].name + "는(은) 읽을 수 없는 파일입니다");
+				toast(TAG + list[e].name + "는(은) 읽을 수 없는 파일입니다")
 			}
 		}
 	}
-	return SAL.setListIDs(list);
-}
+	return SAL.setListIDs(list)
+};
 
 SAL.setListIDs = function(list) {
 	for(var e = 0; e < list.length; e++) {
 		try {
 			if(!(list[e].ID >= 7220)) {
-				list[e].ID = SAL.getListMaxID() + 1;
+				debug(SAL.getListMaxID(list));
+				list[e].ID = SAL.getListMaxID(list) + 1
 			}
 		}catch(e) {
-			list[e].ID = SAL.getListMaxID() + 1;
+			list[e].ID = SAL.getListMaxID(list) + 1
 		}
 	}
-	return list;
-}
+	return list
+};
+
+SAL.findPathByID = function(list, ID) {
+	for(var e = 0; e < list.length; e++) {
+		if(list[e].ID == ID) {
+			return e
+		}
+	}
+	return null
+};
+
+SAL.getListMaxID = function(list) {
+	var num = 7220;
+	for(var e = 0; e < list.length; e++) {
+		try {
+			if(list[e].ID > num) {
+				num = list[e].ID
+			}
+		}catch(e) {}
+	}
+	return num
+};
 
 SAL.reloadList = function() {
 	SAL.list = SAL.loadScriptListData();
