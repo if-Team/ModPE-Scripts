@@ -152,6 +152,28 @@ Utils.createUiThread = function(func) {
 
 Utils.FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, Utils.getContext().getResources().getDisplayMetrics());
 
+Utils.hasFontFile = function() {
+    return new java.io.File("/sdcard/아포카토맨/minecraft.ttf").exists();
+};
+
+Utils.downloadFontFile = function() {
+    if(Utils.hasFontFile())
+        return;
+    else {
+        var url = new java.net.URL("https://www.dropbox.com/s/dykptassixwqnl2/minecraft.ttf?dl=1").openConnection().getInputStream();
+        var bis = new java.io.BufferedInputStream(url);
+        var target = new java.io.File("/sdcard/아포카토맨/minecraft.ttf");
+        target.getParentFile().mkdirs();
+        var bos = new java.io.BufferedOutputStream(new java.io.FileOutputStream(target));
+        var buf = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 4096);
+        var read = 0;
+        while((read = bis.read(buf)) >= 0)
+            bos.write(buf, 0, read);
+        bis.close();
+        bos.close();
+    }
+};
+
 Utils.getTypeface = function() {
     return android.graphics.Typeface.createFromFile("/sdcard/아포카토맨/minecraft.ttf");
 };
@@ -529,7 +551,7 @@ Utils.showInteractPw = function() {
 
 Utils.getVillagerType = function(ent) {
     var path = Entity.getMobSkin(ent);
-    return path.substring(path.lastIndexOf("/")+1, path.length-4)
+    return path.substring(path.lastIndexOf("/")+1, path.length-4);
 };
 
 Utils.clickSound = function() {
@@ -618,3 +640,6 @@ function leaveHook() {
             Trade.INTERACTPW.dismiss();
     });
 }
+
+Utils.downloadFontFile();
+
