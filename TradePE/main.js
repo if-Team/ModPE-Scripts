@@ -616,7 +616,7 @@ function modTick() {
     }
     
     if(Entity.getHealth(Player.getEntity()) <= 0) {
-        leaveHook();
+        leaveGame();
     }
 }
 
@@ -624,7 +624,7 @@ function newLevel() {
     Player.addItemCreativeInv(388, 1, 0);
 }
 
-function leaveHook() {
+function leaveGame() {
     Utils.createUiThread(function() {
         if(Trade.MAINPW.isShowing())
             Trade.MAINPW.dismiss();
