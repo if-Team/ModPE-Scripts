@@ -1,6 +1,6 @@
 var ScriptName = "Script AutoLoad";
-var Version = "dev-v0.3";
-var VersionCode = "102";
+var Version = "dev-v0.5";
+var VersionCode = "104";
 var author = "CodeInside";
 
 /**
@@ -20,6 +20,13 @@ var author = "CodeInside";
  * dev-v0.4(20150429)[103]
  * 	-ScriptInfo
  * 	-fix NinePatch
+ *
+ * dev-v0.5(20150504)[104]
+ * 	-scriptEnabled function complete
+ * 	-AutoLoad function complete
+ * 	-File Explore window complete
+ * 	-READY TO REALEASE
+ *
  */
 
 /**
@@ -41,7 +48,7 @@ var author = "CodeInside";
  *
  */
 
-var debugging = true;
+var debugging = false;
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 1, ctx.getResources().getDisplayMetrics());
 var _SD_CARD = android.os.Environment.getExternalStorageDirectory()/*.getAbsolutePath()*/;
@@ -71,6 +78,7 @@ var loadingProgress = new android.widget.ProgressBar(ctx);
 loadingLayout.addView(loadingProgress);
 var loadingText = new android.widget.TextView(ctx);
 loadingText.setText(TAG+"스크립트를 불러오는중입니다...");
+loadingText.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
 loadingText = toMcpeTextM(loadingText);
 loadingText.setGravity(android.view.Gravity.CENTER);
 loadingLayout.addView(loadingText);
@@ -268,6 +276,8 @@ function toMcpeTextS(TextView) {
 	if(_FONT.exists()) {
 		TextView.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"))
 	};
+TextView.setTransformationMethod(null);
+TextView.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
 	TextView.setShadowLayer(1/Math.pow(10,10), DIP*10/7, DIP*10/7, android.graphics.Color.DKGRAY);
 	return TextView
 };
@@ -277,6 +287,8 @@ function toMcpeTextM(TextView) {
 	if(_FONT.exists()) {
 		TextView.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"))
 	};
+TextView.setTransformationMethod(null);
+TextView.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
 	TextView.setShadowLayer(1/Math.pow(10,10), DIP*12/7, DIP*12/7, android.graphics.Color.DKGRAY);
 	return TextView
 };
@@ -623,7 +635,7 @@ function loadSetting(article) {
 };
 
 function newLevel(str) {
-	//SAL.mainBtnWindowShow(false);
+	SAL.mainBtnWindowShow(false);
 };
 
 function leaveGame() {
@@ -651,9 +663,10 @@ SAL.manuListAdd = function(layout, views) {
 	for(var e = 0; e < views.length; e++) {
 		var btn = new android.widget.Button(ctx);
 		btn.setText(views[e].name);
+		btn.setTransformationMethod(null);
+		btn.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
 		btn.setId(views[e].ID);
 		btn.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*11);
-		btn.getPaint().setAntiAlias(false);
 		if(_FONT.exists()) {
 			btn.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"));
 		};
@@ -677,41 +690,7 @@ SAL.manuListAdd = function(layout, views) {
 		btn.setOnClickListener(android.view.View.OnClickListener({
 			onClick: function(view, event) {try {
 				SAL.lastIndex = SAL.findDataNumByID(SAL.list, view.getId());
-				toast(SAL.list[SAL.lastIndex].path);
-				SAL.MMSName.setText("Name: " + SAL.list[SAL.lastIndex].name);
-				SAL.MMSPath.setText("Path: " + SAL.list[SAL.lastIndex].path);
-				var file = new java.io.File(SAL.list[SAL.lastIndex].path);
-				if(file.exists() && file.isFile()) {
-					var e = SAL.list[SAL.lastIndex].active;
-					if(e == 0) {
-						SAL.mainSwNewBtn.setText("Active");
-						SAL.mainSwNewBtn.setTextColor(android.graphics.Color.WHITE);
-						SAL.MMSState2.setText("Deactivation");
-						SAL.MMSState2.setTextColor(android.graphics.Color.RED);
-					}else if(e == 1) {
-						SAL.mainSwNewBtn.setText("Deactive");
-						SAL.mainSwNewBtn.setTextColor(android.graphics.Color.WHITE);
-						SAL.MMSState2.setText("Activation");
-						SAL.MMSState2.setTextColor(android.graphics.Color.GREEN);
-					}else {
-						SAL.mainSwNewBtn.setText("Unknown");
-						SAL.mainSwNewBtn.setTextColor(android.graphics.Color.parseColor("#bababa"));
-						SAL.MMSState2.setText("Unknown");
-						SAL.MMSState2.setTextColor(android.graphics.Color.BLUE);
-					}
-				}else {
-					if(!file.exists()) {
-						SAL.mainSwNewBtn.setText("Unknown");
-						SAL.mainSwNewBtn.setTextColor(android.graphics.Color.parseColor("#bababa"));
-						SAL.MMSState2.setText("No File");
-						SAL.MMSState2.setTextColor(android.graphics.Color.parseColor("#ff7000"));
-					}else {
-						SAL.mainSwNewBtn.setText("Unknown");
-						SAL.mainSwNewBtn.setTextColor(android.graphics.Color.parseColor("#bababa"));
-						SAL.MMSState2.setText("This is not File");
-						SAL.MMSState2.setTextColor(android.graphics.Color.parseColor("#ff7000"));
-					}
-				}
+				SAL.mainSelectWindowReload();
 				SAL.mainWindowShow(false);
 				SAL.mainSelectWindowShow(true);
 			}catch(e) {
@@ -723,33 +702,32 @@ SAL.manuListAdd = function(layout, views) {
 };
 
 SAL.loadScriptListData = function() {
-	var list = loadData(_MOD_DATA, "MANU_LIST") !== null ? JSON.parse(loadData(_MOD_DATA, "MANU_LIST")) : [];
-	for(var e = 0; e < list.length; e++) {
-		var f = new java.io.File(list[e].path);
+
+	for(var e = 0; e < SAL.list.length; e++) {
+		var f = new java.io.File(SAL.list[e].path);
 		if(f.exists() && f.isFile() && f.canRead()) {
-			list[e].isExist = 1
+			SAL.list[e].isExist = 1
 		}else {
-			list[e].isExist = 0;
+			SAL.list[e].isExist = 0;
 			if(f.exists() && f.isFile() && !f.canRead()) {
-				toast(TAG + list[e].name + "는(은) 읽을 수 없는 파일입니다")
+				toast(TAG + SAL.list[e].name + "는(은) 읽을 수 없는 파일입니다")
 			}
 		}
 		try {
-			if(!(list[e].ID >= 7220)) {
-				debug(SAL.getListMaxID(list));
-				list[e].ID = SAL.getListMaxID(list) + 1
+			if(!(SAL.list[e].ID >= 7220)) {
+				debug("setId" + SAL.getListMaxID(SAL.list));
+				SAL.list[e].ID = SAL.getListMaxID(SAL.list) + 1
 			}
 		}catch(e) {
-			list[e].ID = SAL.getListMaxID(list) + 1
+			SAL.list[e].ID = SAL.getListMaxID(SAL.list) + 1
 		}
 	}
-	SAL.list = list;
 	SAL.saveAll();
 };
 
 SAL.findDataNumByID = function(list, ID) {
 	for(var e = 0; e < list.length; e++) {
-		debug(list[e].ID + " " + list[e].ID == ID);
+		debug("findDataNumByID" + list[e].ID + " " + list[e].ID == ID);
 		if(list[e].ID == ID) {
 			return e
 		}
@@ -770,6 +748,7 @@ SAL.getListMaxID = function(list) {
 };
 
 SAL.preActiveScript = function() {
+	SAL.list = loadData(_MOD_DATA, "MANU_LIST") !== null ? JSON.parse(loadData(_MOD_DATA, "MANU_LIST")) : [];
 	for(var e = 0; e < SAL.list.length; e++) {
 		if(SAL.list[e].autoLoad == 1 && SAL.list[e].isExist == 1) {
 			SAL.list[e].active = 1;
@@ -781,17 +760,116 @@ SAL.preActiveScript = function() {
 };
 
 SAL.activeScript = function(id) {
-	toasts("Active: " + SAL.list[SAL.findDataNumByID(SAL.list, id)].name)
+	var num = SAL.findDataNumByID(SAL.list, id);
+	toasts("Active: " + SAL.list[num].name)
+	try {
+		net.zhuoweizhang.mcpelauncher.ScriptManager.loadScript(new java.io.FileReader(new java.io.File(SAL.list[num].path)), SAL.list[num].name);
+		}catch(e) {
+			toast(TAG+ SAL.list[num].name + "는(은) 사용할 수 없는 스크립트 형식입니다");
+		}
 };
 
 SAL.deactiveScript = function(id) {
-	toasts("Deactive: " + SAL.list[SAL.findDataNumByID(SAL.list, id)].name)
+	var num = SAL.findDataNumByID(SAL.list, id);
+	toasts("Deactive: " + SAL.list[num].name);
+	try {
+		net.zhuoweizhang.mcpelauncher.ScriptManager.removeScript(SAL.list[num].name);
+	}catch(e) {
+		toast(TAG + SAL.list[num].name + "는(은) 사용할 수 없는 스크립트 형식입니다");
+	}
 };
+
+SAL.changeFileList = function(layout, path) {
+	layout.removeAllViews();
+	var backBtn = new android.widget.Button(ctx);
+	backBtn.setText("..(" + path.getName() + ")");
+	backBtn.setTransformationMethod(null);
+	backBtn.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
+	backBtn.setBackgroundDrawable(mcpeManuContent9());
+	backBtn.setTextColor(android.graphics.Color.WHITE);
+		backBtn.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*11);
+	if(_FONT.exists()) {
+		backBtn.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"));
+	};
+	backBtn.setShadowLayer(1/Math.pow(10,10), DIP*10/7, DIP*10/7, android.graphics.Color.DKGRAY);
+	var btn_param = new android.widget.RelativeLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, DIP*36);
+	backBtn.setLayoutParams(btn_param);
+	backBtn.setOnClickListener(android.view.View.OnClickListener({
+	onClick: function(view, event) {try {
+		SAL.changeFileList(SAL.mainFileScrollLayout, SAL.lastPath.getParentFile());
+	}catch(e) {
+		showError(e);
+	}}
+}));
+	layout.addView(backBtn);
+	
+	var files = path.listFiles();
+	for(var e = 0; e < files.length;e++) {
+		if(files[e].isDirectory()) {
+			var btn = new android.widget.Button(ctx);
+			btn.setPadding(0,0,0,0);
+			btn.setText(files[e].getName() + "");
+			btn.setTransformationMethod(null);
+			btn.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
+			btn.setBackgroundDrawable(mcpeManuContent9());
+			btn.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*11);
+			if(_FONT.exists()) {
+				btn.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"));
+			};
+			btn.setShadowLayer(1/Math.pow(10,10), DIP*10/7, DIP*10/7, android.graphics.Color.DKGRAY);
+			var btn_param = new android.widget.RelativeLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, DIP*36);
+			btn.setLayoutParams(btn_param);
+			btn.setTextColor(android.graphics.Color.WHITE);
+			btn.setOnClickListener(android.view.View.OnClickListener({
+				onClick: function(view, event) {try {
+					SAL.changeFileList(SAL.mainFileScrollLayout, new java.io.File(SAL.lastPath.getPath(), view.getText()));
+				}catch(e) {
+					showError(e);
+				}}
+			}));
+			layout.addView(btn);
+		}
+	}
+	for(var e = 0; e < files.length;e++) {
+		if(files[e].isFile()) {
+			var btn = new android.widget.Button(ctx);
+			btn.setPadding(0,0,0,0);
+			btn.setText(files[e].getName() + "");
+			btn.setTransformationMethod(null);
+			btn.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
+			btn.setBackgroundDrawable(mcpeManuContent9());
+			btn.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*11);
+			if(_FONT.exists()) {
+				btn.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"));
+			};
+			btn.setShadowLayer(1/Math.pow(10,10), DIP*10/7, DIP*10/7, android.graphics.Color.DKGRAY);
+			var btn_param = new android.widget.RelativeLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, DIP*36);
+			btn.setLayoutParams(btn_param);
+			btn.setTextColor(android.graphics.Color.WHITE);
+			btn.setOnClickListener(android.view.View.OnClickListener({
+				onClick: function(view, event) {try {
+					var file = new java.io.File(SAL.lastPath.getPath(), view.getText())
+					SAL.list.push({name: file.getName() + "", active: 0, autoLoad: 0, isExist: (file.exists() && file.isFile() && file.canRead()) ? 1 : 0, ID: 0, path: SAL.lastPath.getPath() + "/" + view.getText() + ""});
+					saveData(_MOD_DATA, "MANU_LIST", JSON.stringify(SAL.list));
+					SAL.mainFileWindowShow(false);
+					SAL.loadScriptListData();
+					SAL.mainWindowLoad();
+					SAL.mainWindowShow(true);
+				}catch(e) {
+					showError(e);
+				}}
+			}));
+			layout.addView(btn);
+		}
+	}
+	SAL.lastPath = path;
+}
 
 SAL.mainBtnMod = false;
 SAL.mainBtnWindowAlive = false;
 SAL.mainWindowAlive = false;
 SAL.mainSelectWindowAlive = false;
+SAL.mainFileWindowAlive = false;
 SAL.mX = 0;
 SAL.mY = 0;
 SAL.lastIndex = null;
@@ -801,7 +879,10 @@ SAL.mainBtnWindowLoad = function() {
 
 SAL.mainBtnLayout = new android.widget.RelativeLayout(ctx);
 SAL.mainBtn = new android.widget.Button(ctx);
+SAL.mainBtn.setPadding(0,0,0,0);
 SAL.mainBtn.setText(ScriptName);
+SAL.mainBtn.setTransformationMethod(null);
+SAL.mainBtn.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
 SAL.mainBtn.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*11);
 if(_FONT.exists()) {
 	SAL.mainBtn.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"));
@@ -851,7 +932,7 @@ SAL.mainBtn.setOnTouchListener(android.view.View.OnTouchListener({
 
 SAL.mainBtn.setOnClickListener(android.view.View.OnClickListener({
 	onClick: function(view, event) {try {
-		if(!SAL.mainWindowAlive) {
+		if(!SAL.mainWindowAlive && !SAL.mainSelectWindowAlive && !SAL.mainFileWindowAlive) {
 			SAL.mainWindowLoad();
 			SAL.mainWindowShow(true);
 		};
@@ -894,6 +975,8 @@ SAL.mainTitleLayout.setBackgroundDrawable(mcpeTitleBar9());
 SAL.mainBackBtn = new android.widget.Button(ctx);
 SAL.mainBackBtn.setBackgroundDrawable(mcpeBtn9());
 SAL.mainBackBtn.setText("Back");
+SAL.mainBackBtn.setTransformationMethod(null);
+SAL.mainBackBtn.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
 SAL.mainBackBtn.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*16);
 SAL.mainBackBtn.getPaint().setAntiAlias(false);
 if(_FONT.exists()) {
@@ -939,6 +1022,7 @@ SAL.mainTitleLayout.addView(SAL.mainBackBtn);
 
 SAL.mainTitleText = new android.widget.TextView(ctx);
 SAL.mainTitleText.setText(ScriptName);
+SAL.mainTitleText.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
 SAL.mainTitleText.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*16);
 SAL.mainTitleText.getPaint().setAntiAlias(false);
 if(_FONT.exists()) {
@@ -957,6 +1041,8 @@ SAL.mainLayout.addView(SAL.mainTitleLayout);
 SAL.mainNewBtn = new android.widget.Button(ctx);
 SAL.mainNewBtn.setBackgroundDrawable(mcpeBtn9());
 SAL.mainNewBtn.setText("New");
+SAL.mainNewBtn.setTransformationMethod(null);
+SAL.mainNewBtn.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
 SAL.mainNewBtn.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*16);
 if(_FONT.exists()) {
 	SAL.mainNewBtn.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"));
@@ -992,11 +1078,22 @@ SAL.mainNewBtn.setOnTouchListener(android.view.View.OnTouchListener({
 }));
 SAL.mainNewBtn.setOnClickListener(android.view.View.OnClickListener({
 	onClick: function(view, event) {try {
-		SAL.addList();
+		SAL.mainFileWindowShow(true);
+		SAL.changeFileList(SAL.mainFileScrollLayout, _SD_CARD);
 	}catch(e) {
 		showError(e);
 	}}
 }));
+
+SAL.mainNewBtn.setOnLongClickListener(android.view.View.OnLongClickListener({
+	onLongClick: function(view, event) {try {
+		SAL.addList();
+		return false;
+	}catch(e) {
+		showError(e);
+	}}
+}));
+
 SAL.mainTitleLayout.addView(SAL.mainNewBtn);
 
 SAL.mainScroll_ex = new android.widget.RelativeLayout(ctx);
@@ -1042,6 +1139,8 @@ SAL.mainSwTitleLayout.setBackgroundDrawable(mcpeTitleBar9());
 SAL.mainSwBackBtn = new android.widget.Button(ctx);
 SAL.mainSwBackBtn.setBackgroundDrawable(mcpeBtn9());
 SAL.mainSwBackBtn.setText("Back");
+SAL.mainSwBackBtn.setTransformationMethod(null);
+SAL.mainSwBackBtn.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
 SAL.mainSwBackBtn.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*16);
 SAL.mainSwBackBtn.getPaint().setAntiAlias(false);
 if(_FONT.exists()) {
@@ -1088,6 +1187,7 @@ SAL.mainSwTitleLayout.addView(SAL.mainSwBackBtn);
 
 SAL.mainSwTitleText = new android.widget.TextView(ctx);
 SAL.mainSwTitleText.setText("Script Info");
+SAL.mainSwTitleText.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
 SAL.mainSwTitleText.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*16);
 SAL.mainSwTitleText.getPaint().setAntiAlias(false);
 if(_FONT.exists()) {
@@ -1106,8 +1206,10 @@ SAL.mainSwLayout.addView(SAL.mainSwTitleLayout);
 SAL.mainSwNewBtn = new android.widget.Button(ctx);
 SAL.mainSwNewBtn.setBackgroundDrawable(mcpeBtn9());
 SAL.mainSwNewBtn.setText("---");
+SAL.mainSwNewBtn.setPadding(0,0,0,0);
+SAL.mainSwNewBtn.setTransformationMethod(null);
+SAL.mainSwNewBtn.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
 SAL.mainSwNewBtn.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*16);
-SAL.mainSwNewBtn.getPaint().setAntiAlias(false);
 if(_FONT.exists()) {
 	SAL.mainSwNewBtn.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"));
 };
@@ -1146,20 +1248,18 @@ SAL.mainSwNewBtn.setOnTouchListener(android.view.View.OnTouchListener({
 }));
 SAL.mainSwNewBtn.setOnClickListener(android.view.View.OnClickListener({
 	onClick: function(view, event) {try {
-		var num = SAL.findDataNumByID(SAL.list, view.getId());
-		toast(view.getId() + " " + num);
-		var e = SAL.list[num];
-		if(e.isExist == 1) {
-			if(e.active == 0) {
-				SAL.activeScript(e.ID);
-				SAL.list[num].active = 1;
-				SAL.mainSwNewBtn.setText("Active");
-			}else if(e.active == 1) {
-				SAL.deactiveScript(e.ID);
-				SAL.list[num].active = 0;
-				SAL.mainSwNewBtn.setText("Deactive");
+		if(SAL.list[SAL.lastIndex].isExist == 1) {
+			if(SAL.list[SAL.lastIndex].active == 0) {
+				SAL.list[SAL.lastIndex].active = 1;
+				//SAL.mainSwNewBtn.setText("Deactive");
+				SAL.activeScript(SAL.list[SAL.lastIndex].ID);
+			}else if(SAL.list[SAL.lastIndex].active == 1) {
+				SAL.list[SAL.lastIndex].active = 0;
+				//SAL.mainSwNewBtn.setText("Active");
+				SAL.deactiveScript(SAL.list[SAL.lastIndex].ID);
 			}
 		}
+		SAL.mainSelectWindowReload();
 	}catch(e) {
 		showError(e);
 	}}
@@ -1217,7 +1317,10 @@ SAL.MSBLayout = new android.widget.LinearLayout(ctx);
 SAL.MSBLayout.setOrientation(1);
 
 SAL.MSAB = new android.widget.Button(ctx);
+SAL.MSAB.setPadding(0,0,0,0);
 SAL.MSAB.setText("Auto Load");
+SAL.MSAB.setTransformationMethod(null);
+SAL.MSAB.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
 SAL.MSAB.setTextColor(android.graphics.Color.WHITE);
 SAL.MSAB = toMcpeTextM(SAL.MSAB);
 SAL.MSAB.setBackgroundDrawable(mcpeBtn9());
@@ -1234,9 +1337,11 @@ SAL.MSAB.setOnTouchListener(android.view.View.OnTouchListener({
 					view.setPadding(0, DIP*3, 0, 0);
 					break;
 				case android.view.MotionEvent.ACTION_UP:
-					view.setBackgroundDrawable(mcpeBtn9());
+					if(SAL.list[SAL.lastIndex].autoLoad == 1) {
+						view.setBackgroundDrawable(mcpeBtn9());
+						view.setPadding(0, 0, 0, 0);
+					}
 					view.setTextColor(android.graphics.Color.WHITE);
-					view.setPadding(0, 0, 0, 0);
 					break;
 			}
 		}catch(e) {
@@ -1247,7 +1352,13 @@ SAL.MSAB.setOnTouchListener(android.view.View.OnTouchListener({
 }));
 SAL.MSAB.setOnClickListener(android.view.View.OnClickListener({
 	onClick: function(view, event) {try {
-		
+		if(SAL.list[SAL.lastIndex].autoLoad == 0) {
+			SAL.list[SAL.lastIndex].autoLoad = 1;
+		}else {
+			SAL.list[SAL.lastIndex].autoLoad = 0;
+		}
+		SAL.saveAll();
+		SAL.mainSelectWindowReload();
 	}catch(e) {
 		showError(e);
 	}}
@@ -1256,6 +1367,8 @@ SAL.MSBLayout.addView(SAL.MSAB);
 
 SAL.MSDB = new android.widget.Button(ctx);
 SAL.MSDB.setText("Delete");
+SAL.MSDB.setTransformationMethod(null);
+SAL.MSDB.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
 SAL.MSDB.setTextColor(android.graphics.Color.RED);
 SAL.MSDB = toMcpeTextM(SAL.MSDB);
 SAL.MSDB.setBackgroundDrawable(mcpeBtn9());
@@ -1288,6 +1401,7 @@ SAL.MSDB.setOnClickListener(android.view.View.OnClickListener({
 		SAL.list.splice(SAL.lastIndex, 1);
 		SAL.saveAll();
 		SAL.mainSelectWindowShow(false);
+		SAL.mainWindowLoad();
 		SAL.mainWindowShow(true);
 	}catch(e) {
 		showError(e);
@@ -1307,6 +1421,207 @@ SAL.mainSelectWindow.setOutsideTouchable(false);
 //SAL.mainSelectWindow.setTouchable(false);
 
 }
+
+
+
+SAL.mainFileWindowLoad = function() {
+
+SAL.mainFileLayout = new android.widget.LinearLayout(ctx);
+SAL.mainFileLayout.setOrientation(1);
+SAL.mainFileLayout.setBackgroundDrawable(mcpeBGT9());
+
+SAL.mainFileTitleLayout = new android.widget.RelativeLayout(ctx);
+//SAL.mainTitleLayout.setOrientation(0);
+SAL.mainFileTitleLayout.setBackgroundDrawable(mcpeTitleBar9());
+//SAL.mainTitleLayout.setGravity(android.view.Gravity.CENTER);
+
+SAL.mainFileBackBtn = new android.widget.Button(ctx);
+SAL.mainFileBackBtn.setBackgroundDrawable(mcpeBtn9());
+SAL.mainFileBackBtn.setText("Back");
+SAL.mainFileBackBtn.setTransformationMethod(null);
+SAL.mainFileBackBtn.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
+SAL.mainFileBackBtn.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*16);
+if(_FONT.exists()) {
+	SAL.mainFileBackBtn.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"));
+};
+SAL.mainFileBackBtn.setTextColor(android.graphics.Color.WHITE);
+SAL.mainFileBackBtn.setShadowLayer(1/Math.pow(10,10), DIP*12/7, DIP*12/7, android.graphics.Color.DKGRAY);
+SAL.mainFileBackBtn.setId(7211);
+SAL.mainFileBackBtn_param = new android.widget.RelativeLayout.LayoutParams(DIP*72, DIP*36);
+SAL.mainFileBackBtn_param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT, -1);
+SAL.mainFileBackBtn_param.addRule(android.widget.RelativeLayout.CENTER_VERTICAL, -1);
+SAL.mainFileBackBtn_param.setMargins(DIP*10,0,0,0);
+SAL.mainFileBackBtn.setLayoutParams(SAL.mainFileBackBtn_param);
+SAL.mainFileBackBtn.setOnTouchListener(android.view.View.OnTouchListener({
+	onTouch: function(view, event) {
+		try {
+			switch(event.action){
+				case android.view.MotionEvent.ACTION_DOWN:;
+					view.setBackgroundDrawable(mcpeBtnClick9());
+					view.setTextColor(android.graphics.Color.parseColor("#fbfa9a"));
+					view.setPadding(0, DIP*3, 0, 0);
+					break;
+				case android.view.MotionEvent.ACTION_UP:
+					view.setBackgroundDrawable(mcpeBtn9());
+					view.setTextColor(android.graphics.Color.WHITE);
+					view.setPadding(0, 0, 0, 0);
+					break;
+			}
+		}catch(e) {
+			showError(e);
+		}
+		return false;
+	}
+}));
+SAL.mainFileBackBtn.setOnClickListener(android.view.View.OnClickListener({
+	onClick: function(view, event) {try {
+		SAL.mainFileWindowShow(false);
+	}catch(e) {
+		showError(e);
+	}}
+}));
+SAL.mainFileTitleLayout.addView(SAL.mainFileBackBtn);
+
+SAL.mainFileTitleText = new android.widget.TextView(ctx);
+SAL.mainFileTitleText.setText("Select Script...");
+SAL.mainFileTitleText.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
+SAL.mainFileTitleText.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*16);
+if(_FONT.exists()) {
+	SAL.mainFileTitleText.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"));
+};
+SAL.mainFileTitleText.setTextColor(android.graphics.Color.WHITE);
+SAL.mainFileTitleText.setShadowLayer(1/Math.pow(10,10), DIP*12/7, DIP*12/7, android.graphics.Color.DKGRAY);
+SAL.mainFileTitleText.setId(7214);
+SAL.mainFileTitleText_param = new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+SAL.mainFileTitleText_param.addRule(android.widget.RelativeLayout.CENTER_IN_PARENT, -1);
+SAL.mainFileTitleText_param.setMargins(0,0,0,0);
+SAL.mainFileTitleText.setLayoutParams(SAL.mainFileTitleText_param);
+SAL.mainFileTitleLayout.addView(SAL.mainFileTitleText);
+SAL.mainFileLayout.addView(SAL.mainFileTitleLayout);
+
+SAL.mainFileNewBtn = new android.widget.Button(ctx);
+SAL.mainFileNewBtn.setBackgroundDrawable(mcpeBtn9());
+SAL.mainFileNewBtn.setPadding(0,0,0,0);
+SAL.mainFileNewBtn.setText("SD CARD");
+SAL.mainFileNewBtn.setTransformationMethod(null);
+SAL.mainFileNewBtn.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
+SAL.mainFileNewBtn.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*16);
+if(_FONT.exists()) {
+	SAL.mainFileNewBtn.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"));
+};
+SAL.mainFileNewBtn.setTextColor(android.graphics.Color.WHITE);
+SAL.mainFileNewBtn.setShadowLayer(1/Math.pow(10,10), DIP*12/7, DIP*12/7, android.graphics.Color.DKGRAY);
+SAL.mainFileNewBtn.setId(7211);
+SAL.mainFileNewBtn_param = new android.widget.RelativeLayout.LayoutParams(DIP*72, DIP*36);
+SAL.mainFileNewBtn_param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT, -1);
+SAL.mainFileNewBtn_param.addRule(android.widget.RelativeLayout.CENTER_VERTICAL, -1);
+SAL.mainFileNewBtn_param.setMargins(0,0,DIP*10,0);
+SAL.mainFileNewBtn.setLayoutParams(SAL.mainFileNewBtn_param);
+SAL.mainFileNewBtn.setOnTouchListener(android.view.View.OnTouchListener({
+	onTouch: function(view, event) {
+		try {
+			switch(event.action){
+				case android.view.MotionEvent.ACTION_DOWN:;
+					view.setBackgroundDrawable(mcpeBtnClick9());
+					view.setTextColor(android.graphics.Color.parseColor("#fbfa9a"));
+					view.setPadding(0, DIP*3, 0, 0);
+					break;
+				case android.view.MotionEvent.ACTION_UP:
+					view.setBackgroundDrawable(mcpeBtn9());
+					view.setTextColor(android.graphics.Color.WHITE);
+					view.setPadding(0, 0, 0, 0);
+					break;
+			}
+		}catch(e) {
+			showError(e);
+		}
+		return false;
+	}
+}));
+SAL.mainFileNewBtn.setOnClickListener(android.view.View.OnClickListener({
+	onClick: function(view, event) {try {
+		SAL.changeFileList(SAL.mainFileScrollLayout, _SD_CARD);
+	}catch(e) {
+		showError(e);
+	}}
+}));
+//SAL.mainFileTitleLayout.addView(SAL.mainFileNewBtn);
+
+SAL.mainFileScroll_ex = new android.widget.RelativeLayout(ctx);
+SAL.mainFileScroll_ex.setBackgroundDrawable(mcpeScroll9());
+SAL.mainFileScroll_ex.setPadding(DIP*2, DIP*4, DIP*2, DIP*4);
+SAL.mainFileScroll_ex_param = new android.widget.LinearLayout.LayoutParams(DIP*330, DIP*234);
+SAL.mainFileScroll_ex_param.setMargins(DIP*10,DIP*6,DIP*10, DIP*10);
+SAL.mainFileScroll_ex.setLayoutParams(SAL.mainFileScroll_ex_param);
+SAL.mainFileScroll = new android.widget.ScrollView(ctx);
+SAL.mainFileScroll_param = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT);
+SAL.mainFileScroll.setLayoutParams(SAL.mainFileScroll_param);
+SAL.mainFileScrollLayout = new android.widget.LinearLayout(ctx);
+SAL.mainFileScrollLayout.setPadding(0,0,0,0);
+SAL.mainFileScrollLayout.setOrientation(1);
+//SAL.manuListAdd(SAL.mainFileScrollLayout, SAL.list);
+
+SAL.mainFileScroll.addView(SAL.mainFileScrollLayout);
+
+SAL.mainFileScroll_ex.addView(SAL.mainFileScroll);
+
+SAL.mainFileLayout.addView(SAL.mainFileScroll_ex);
+
+SAL.mainFileWindow = new android.widget.PopupWindow(SAL.mainFileLayout, DIP*350, DIP*300, false);
+SAL.mainFileWindow.setSplitTouchEnabled(true);
+SAL.mainFileWindow.setOutsideTouchable(false);
+//SAL.mainFileWindow.setTouchable(false);
+
+};
+
+
+
+SAL.mainSelectWindowReload = function() {
+
+SAL.MMSName.setText("Name: " + SAL.list[SAL.lastIndex].name);
+SAL.MMSPath.setText("Path: " + SAL.list[SAL.lastIndex].path);
+var file = new java.io.File(SAL.list[SAL.lastIndex].path);
+if(file.exists() && file.isFile()) {
+	var e = SAL.list[SAL.lastIndex].active;
+	if(e == 0) {
+		SAL.mainSwNewBtn.setText("Active");
+		SAL.mainSwNewBtn.setTextColor(android.graphics.Color.WHITE);
+		SAL.MMSState2.setText("Disabled");
+		SAL.MMSState2.setTextColor(android.graphics.Color.RED);
+	}else if(e == 1) {
+		SAL.mainSwNewBtn.setText("Deactive");
+		SAL.mainSwNewBtn.setTextColor(android.graphics.Color.WHITE);
+		SAL.MMSState2.setText("Enabled");
+			SAL.MMSState2.setTextColor(android.graphics.Color.GREEN);
+	}else {
+		SAL.mainSwNewBtn.setText("Unknown");
+		SAL.mainSwNewBtn.setTextColor(android.graphics.Color.parseColor("#bababa"));
+		SAL.MMSState2.setText("Unknown");
+		SAL.MMSState2.setTextColor(android.graphics.Color.BLUE);
+	}
+}else {
+	if(!file.exists()) {
+		SAL.mainSwNewBtn.setText("Unknown");
+		SAL.mainSwNewBtn.setTextColor(android.graphics.Color.parseColor("#bababa"));
+		SAL.MMSState2.setText("No File");
+		SAL.MMSState2.setTextColor(android.graphics.Color.parseColor("#ff7000"));
+	}else {
+		SAL.mainSwNewBtn.setText("Unknown");
+		SAL.mainSwNewBtn.setTextColor(android.graphics.Color.parseColor("#bababa"));
+		SAL.MMSState2.setText("This is not File");
+		SAL.MMSState2.setTextColor(android.graphics.Color.parseColor("#ff7000"));
+	}
+}
+var e = SAL.list[SAL.lastIndex].autoLoad;
+if(e == 0) {
+	SAL.MSAB.setBackgroundDrawable(mcpeBtn9());
+	SAL.MSAB.setPadding(0, 0, 0, 0);
+}else if(e == 1) {
+	SAL.MSAB.setBackgroundDrawable(mcpeBtnClick9());
+	SAL.MSAB.setPadding(0, DIP*3, 0, 0);
+}
+
+};
 
 
 
@@ -1359,12 +1674,34 @@ SAL.mainSelectWindowShow = function(visible) {
 		if(visible) {
 			if(SAL.mainSelectWindowAlive) return;
 			SAL.mainSelectWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+				SAL.mainSelectWindowReload();
 			SAL.mainSelectWindowAlive = true;
 		}else if(!visible) {
 			if(!SAL.mainSelectWindowAlive) return;
 			SAL.mainSelectWindow.dismiss();
 			SAL.mainSelectWindowAlive = false;
 			SAL.saveAll();
+		}else {
+			var e = {name:"Unknown visible"};
+			showError(e);
+		}
+	}catch(e) {
+		showError(e);
+	}});
+};
+
+
+
+SAL.mainFileWindowShow = function(visible) {
+	uiThread(function() {try {
+		if(visible) {
+			if(SAL.mainFileWindowAlive) return;
+			SAL.mainFileWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+			SAL.mainFileWindowAlive = true;
+		}else if(!visible) {
+			if(!SAL.mainFileWindowAlive) return;
+			SAL.mainFileWindow.dismiss();
+			SAL.mainFileWindowAlive = false;
 		}else {
 			var e = {name:"Unknown visible"};
 			showError(e);
@@ -1391,7 +1728,7 @@ SAL.addList = function() {;
 				SAL.list.push({name: file.getName() + "", active: 0, autoLoad: 0, isExist: (file.exists() && file.isFile() && file.canRead()) ? 1 : 0, ID: 0, path: SAL.addDialog_et.getText() + ""});
 				saveData(_MOD_DATA, "MANU_LIST", JSON.stringify(SAL.list));
 				SAL.mainWindowShow(false);
-				SAL.loadScriptListData()
+				SAL.loadScriptListData();
 				SAL.mainWindowLoad();
 				SAL.mainWindowShow(true);
 			}catch(e){
@@ -1430,11 +1767,12 @@ uiThread(function() { try{
 	loadingText.setText(TAG+"레이아웃 로딩중...");
 	SAL.mainBtnWindowLoad();
 	SAL.mainSelectWindowLoad();
+	SAL.mainFileWindowLoad();
 	loadingText.setText(TAG+"저장된 데이터 로딩중...");
+	SAL.preActiveScript();
 	SAL.loadScriptListData();
 	SAL.mainBtnWindowShow(true);
 	loadingWindow.dismiss();
-	SAL.preActiveScript();
 }catch(e) {
 	loadingText.setTextColor(android.graphics.Color.RED);
 	loadingText.setText(TAG+"Critical Error!");
