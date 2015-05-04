@@ -1,10 +1,11 @@
 var ScriptName = "Script AutoLoad";
-var Version = "dev-v0.5";
-var VersionCode = "104";
+var Version = "v0.1";
+var VersionCode = "105";
 var author = "CodeInside";
 
 /**
  * —————Change Log—————
+ *(Sorry my english is horrible)
  * dev-v0.1(20150425)[100]
  * 	-develop start
  * 
@@ -25,8 +26,16 @@ var author = "CodeInside";
  * 	-scriptEnabled function complete
  * 	-AutoLoad function complete
  * 	-File Explore window complete
- * 	-READY TO REALEASE
+ * 	-READY TO RELEASE
  *
+ * beta-v0.1(20150505)[105]
+ * 	-fix: no more repetition script
+ * 	-fix: escape root folder in FileExplore
+ * 	-if you use other file instead of JS file it can warning you
+ * 	-can't use same name file in the same time
+ *
+ * v0.1(20150505)[106]
+ * 	-RELEASE
  */
 
 /**
@@ -77,7 +86,7 @@ loadingLayout.setBackgroundDrawable(loadingLayoutDrawable);
 var loadingProgress = new android.widget.ProgressBar(ctx);
 loadingLayout.addView(loadingProgress);
 var loadingText = new android.widget.TextView(ctx);
-loadingText.setText(TAG+"스크립트를 불러오는중입니다...");
+loadingText.setText(TAG+"Reading script...");
 loadingText.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
 loadingText = toMcpeTextM(loadingText);
 loadingText.setGravity(android.view.Gravity.CENTER);
@@ -99,9 +108,9 @@ try{
 	mcpeSS = ModPE.openInputStreamFromTexturePack("images/gui/spritesheet.png");
 }catch(e) {
 	//옛날 버전에 대한 호환성
-	toasts(TAG+"Block Luncher 버전이 너무 낮습니다. \n텍스쳐팩을 불러올 수 없습니다.");
+	toasts(TAG+"Block Luncher version is too low. \ncan't load texturepack.");
 	mcpeSS = mcpeAssets.open("images/gui/spritesheet.png");
-	toasts(TAG+"내부 텍스쳐팩에 액세스합니다.");
+	toasts(TAG+"using interner texturepack.");
 }
 var mcpeSS_BF = android.graphics.BitmapFactory.decodeStream(mcpeSS);
 //touchgui.png 파일 접근
@@ -308,7 +317,7 @@ function debug(str) {
 function showError(e) {
 	if(Level.getWorldName() === null) {
 		ctx.runOnUiThread(new java.lang.Runnable({ run: function(){
-	android.widget.Toast.makeText(ctx, TAG + "<Code: " + e.lineNumber + "> " + e, android.widget.Toast.LENGTH_LONG).show();
+	android.widget.Toast.makeText(ctx, TAG + "<" + e.fileName + " - Error Line: " + e.lineNumber + "> " + e.message, android.widget.Toast.LENGTH_LONG).show();
 		}}));
 	}else {
 		var t = (e + "").split(" ");
@@ -671,6 +680,7 @@ SAL.manuListAdd = function(layout, views) {
 			btn.setTypeface(android.graphics.Typeface.createFromFile(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/Mods/minecraft.ttf"));
 		};
 		btn.setShadowLayer(1/Math.pow(10,10), DIP*10/7, DIP*10/7, android.graphics.Color.DKGRAY);
+		btn.setPadding(DIP*2, DIP*2, DIP*2, DIP*2);
 		var btn_param = new android.widget.RelativeLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, DIP*36);
 		btn.setLayoutParams(btn_param);
 		if(!views[e].isExist) {
@@ -759,25 +769,22 @@ SAL.preActiveScript = function() {
 	}
 };
 
-SAL.activeScript = function(id) {
+SAL.activeScript = function(id) {try {
 	var num = SAL.findDataNumByID(SAL.list, id);
 	toasts("Active: " + SAL.list[num].name)
-	try {
-		net.zhuoweizhang.mcpelauncher.ScriptManager.loadScript(new java.io.FileReader(new java.io.File(SAL.list[num].path)), SAL.list[num].name);
-		}catch(e) {
-			toast(TAG+ SAL.list[num].name + "는(은) 사용할 수 없는 스크립트 형식입니다");
-		}
-};
+	var file = new java.io.File(SAL.list[num].path);
+	net.zhuoweizhang.mcpelauncher.ScriptManager.loadScript(new java.io.FileReader(file), SAL.list[num].name);
+}catch(e) {
+	showError(e);
+}};
 
-SAL.deactiveScript = function(id) {
+SAL.deactiveScript = function(id) {try {
 	var num = SAL.findDataNumByID(SAL.list, id);
 	toasts("Deactive: " + SAL.list[num].name);
-	try {
-		net.zhuoweizhang.mcpelauncher.ScriptManager.removeScript(SAL.list[num].name);
-	}catch(e) {
-		toast(TAG + SAL.list[num].name + "는(은) 사용할 수 없는 스크립트 형식입니다");
-	}
-};
+	net.zhuoweizhang.mcpelauncher.ScriptManager.removeScript(SAL.list[num].name);
+}catch(e) {
+	showError(e);
+}};
 
 SAL.changeFileList = function(layout, path) {
 	layout.removeAllViews();
@@ -796,7 +803,11 @@ SAL.changeFileList = function(layout, path) {
 	backBtn.setLayoutParams(btn_param);
 	backBtn.setOnClickListener(android.view.View.OnClickListener({
 	onClick: function(view, event) {try {
-		SAL.changeFileList(SAL.mainFileScrollLayout, SAL.lastPath.getParentFile());
+		if(SAL.lastPath.getParentFile() == null) {
+			toast(TAG + "This is Root folder");
+		}else {
+			SAL.changeFileList(SAL.mainFileScrollLayout, SAL.lastPath.getParentFile());
+		}
 	}catch(e) {
 		showError(e);
 	}}
@@ -848,9 +859,20 @@ SAL.changeFileList = function(layout, path) {
 			btn.setTextColor(android.graphics.Color.WHITE);
 			btn.setOnClickListener(android.view.View.OnClickListener({
 				onClick: function(view, event) {try {
-					var file = new java.io.File(SAL.lastPath.getPath(), view.getText())
+					var file = new java.io.File(SAL.lastPath.getPath(), view.getText());
+					for(var e = 0; e < SAL.list.length; e++) {
+						if(SAL.list[e].name == view.getText()) {
+							toast(TAG + "Already exist File name");
+							return;
+						}
+					}
+					var p = /.\.js/;
+					if(!p.test(view.getText())) {
+						toast(TAG + "This is not JavaScript file!\nit may cause CRASH");
+					}
 					SAL.list.push({name: file.getName() + "", active: 0, autoLoad: 0, isExist: (file.exists() && file.isFile() && file.canRead()) ? 1 : 0, ID: 0, path: SAL.lastPath.getPath() + "/" + view.getText() + ""});
 					saveData(_MOD_DATA, "MANU_LIST", JSON.stringify(SAL.list));
+					SAL.mainWindowShow(false);
 					SAL.mainFileWindowShow(false);
 					SAL.loadScriptListData();
 					SAL.mainWindowLoad();
@@ -944,7 +966,7 @@ SAL.mainBtn.setOnLongClickListener(android.view.View.OnLongClickListener({
 	onLongClick: function(view, event) {
 		try {
 			SAL.mainBtnMod = true;
-			toasts("버튼을 이동할 위치로 드래그 하세요");
+			toasts("drag it!");
 		}catch(e) {
 			showError(e);
 		}
@@ -1251,15 +1273,14 @@ SAL.mainSwNewBtn.setOnClickListener(android.view.View.OnClickListener({
 		if(SAL.list[SAL.lastIndex].isExist == 1) {
 			if(SAL.list[SAL.lastIndex].active == 0) {
 				SAL.list[SAL.lastIndex].active = 1;
-				//SAL.mainSwNewBtn.setText("Deactive");
 				SAL.activeScript(SAL.list[SAL.lastIndex].ID);
 			}else if(SAL.list[SAL.lastIndex].active == 1) {
 				SAL.list[SAL.lastIndex].active = 0;
-				//SAL.mainSwNewBtn.setText("Active");
 				SAL.deactiveScript(SAL.list[SAL.lastIndex].ID);
 			}
 		}
 		SAL.mainSelectWindowReload();
+		SAL.mainWindowLoad();
 	}catch(e) {
 		showError(e);
 	}}
@@ -1267,8 +1288,7 @@ SAL.mainSwNewBtn.setOnClickListener(android.view.View.OnClickListener({
 SAL.mainSwTitleLayout.addView(SAL.mainSwNewBtn);
 
 SAL.mainSwScroll = new android.widget.ScrollView(ctx);
-SAL.mainSwScroll_param = new android.widget.LinearLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT);
-SAL.mainSwScroll_param.setMargins(DIP*10,DIP*6,DIP*10, DIP*10);
+SAL.mainSwScroll_param = new android.widget.LinearLayout.LayoutParams(DIP*200, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT);
 SAL.mainSwScroll.setLayoutParams(SAL.mainSwScroll_param);
 SAL.mainSwScrollLayout = new android.widget.LinearLayout(ctx);
 SAL.mainSwScrollLayout.setPadding(0, 0, 0, 0);
@@ -1409,16 +1429,19 @@ SAL.MSDB.setOnClickListener(android.view.View.OnClickListener({
 }));
 SAL.MSBLayout.addView(SAL.MSDB);
 
-SAL.mainSwScrollLayout.addView(SAL.MSBLayout);
-
 SAL.mainSwScroll.addView(SAL.mainSwScrollLayout);
 
-SAL.mainSwLayout.addView(SAL.mainSwScroll);
+SAL.mainSwContent = new android.widget.LinearLayout(ctx);
+SAL.mainSwContent.setOrientation(0);
+SAL.mainSwContent.setPadding(DIP*10,DIP*6,DIP*10, DIP*10);
+SAL.mainSwContent.addView(SAL.mainSwScroll);
+SAL.mainSwContent.addView(SAL.MSBLayout);
+
+SAL.mainSwLayout.addView(SAL.mainSwContent);
 
 SAL.mainSelectWindow = new android.widget.PopupWindow(SAL.mainSwLayout, DIP*350, DIP*170, false);
 SAL.mainSelectWindow.setSplitTouchEnabled(true);
 SAL.mainSelectWindow.setOutsideTouchable(false);
-//SAL.mainSelectWindow.setTouchable(false);
 
 }
 
@@ -1746,29 +1769,29 @@ SAL.addList = function() {;
 
 
 uiThread(function() {
-	loadingText.setText(TAG+"리소스 체크중...");
+	loadingText.setText(TAG+"Checking Resources...");
 });
 if(!_FONT.exists()) {
 	uiThread(function() {
-		loadingText.setText(TAG+"리소스 다운로드중...");
+		loadingText.setText(TAG+"Download Resources...");
 	});
 	if(!downloadFile(_FONT, "https://www.dropbox.com/s/y1o46b2jkbxwl3o/minecraft.ttf?dl=1")) {
 		uiThread(function() {
-			loadingText.setText(TAG+"실패...");
+			loadingText.setText(TAG+"fail...");
 		});
-		toast("[" + ScriptName + "]\n\n폰트를 다운로드하지 못했습니다\n아마도 인터넷이 연결되어 있지 않습니다");
-		toasts("[" + ScriptName + "]\n\n시스템 폰트를 적용합니다...");
+		toast("[" + ScriptName + "]\n\ncan't download font resource\nmaybe internet disconnected");
+		toasts("[" + ScriptName + "]\n\nUsing System font...");
 	}
 }
 
 
 
 uiThread(function() { try{
-	loadingText.setText(TAG+"레이아웃 로딩중...");
+	loadingText.setText(TAG+"Loading Layouts...");
 	SAL.mainBtnWindowLoad();
 	SAL.mainSelectWindowLoad();
 	SAL.mainFileWindowLoad();
-	loadingText.setText(TAG+"저장된 데이터 로딩중...");
+	loadingText.setText(TAG+"Loading Setting...");
 	SAL.preActiveScript();
 	SAL.loadScriptListData();
 	SAL.mainBtnWindowShow(true);
