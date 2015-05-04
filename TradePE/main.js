@@ -52,14 +52,6 @@ Trade.Items = {
         dam: [0],
         cost: [1],
         count: [1]
-    },
-    villager: {
-        name: ["villager"],
-        meta: [["apple",0]],
-        id: [260],
-        dam: [0],
-        cost: [1],
-        count: [1]
     }
 };
 
@@ -86,19 +78,19 @@ Trade.init = function() {
     itemback.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*1.6, item.getHeight()*Utils.FOUR*1.6, false));
     var cost = Utils.justText("", 25+18+16+4, 69);
     mainLayout.addView(cost);
-    var arrow = Utils.renderArrow(141, 60+17);
+    var arrow = Utils.renderArrow(ctx.getScreenWidth()/Utils.FOUR/2-8, 60+17);
     mainLayout.addView(arrow);
     var left = Utils.showButton(25, 60, 18, 50, "<", function() {
         Utils.minusPage();
         Utils.updateTradeList(name, itemback2, cost, count);
     });
     mainLayout.addView(left);
-    var right = Utils.showButton(170+18+40+32, 60, 18, 50, ">", function() {
+    var right = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-25-18, 60, 18, 50, ">", function() {
         Utils.plusPage();
         Utils.updateTradeList(name, itemback2, cost, count);
     });
     mainLayout.addView(right);
-    var buy = Utils.showButton(170, 130, 64+36+8, 32, "Buy", function() {
+    var buy = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-25-108, 130, 108, 32, "Buy", function() {
         Utils.buyThing();
     });
     mainLayout.addView(buy);
@@ -106,15 +98,15 @@ Trade.init = function() {
         Utils.sellThing();
     });
     mainLayout.addView(sell);
-    var itemback2 = Utils.showItemBackground(204, 65);
+    var itemback2 = Utils.showItemBackground(ctx.getScreenWidth()/Utils.FOUR-25-18-16-40, 65);
     mainLayout.addView(itemback2);
-    var count = Utils.justText("", 204+4, 69);
+    var count = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-25-18-16-40+4, 69);
     mainLayout.addView(count);
     var dismiss = Utils.showButton(4, 4, 38, 18, "Back", function() {
         mainPw.dismiss();
     });
     mainLayout.addView(dismiss);
-    var name = Utils.justText("", 170, 40, 36+40+32);
+    var name = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-(36+40+32)-25, 40, 36+40+32);
     mainLayout.addView(name);
     mainPw.setContentView(mainLayout);
     mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -533,7 +525,7 @@ Utils.interactInit = function() {
             Trade.showScreen();
         }
     }));
-    var drawable = new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getGui(), 0, 164, 118, 20), 118*0.75*Utils.FOUR, 20*Utils.FOUR, false));
+    var drawable = new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getGui(), 0, Utils.getGui().getHeight()*0.640625, Utils.getGui().getWidth()*0.4609375, Utils.getGui().getHeight()*0.078125), 118*0.75*Utils.FOUR, 20*Utils.FOUR, false));
     drawable.setAlpha(200);
     var pw = new android.widget.PopupWindow(Utils.getContext());
     pw.setContentView(text);
