@@ -133,60 +133,65 @@ Model.create = function() {
 		clientMessage("[Model] Xsize:" + (lX + 1) + " Ysize:" + (lY + 1) + " Zsize:" + (lZ + 1));
 		if(!OUTPUT.exists())
 			OUTPUT.delete();
+		clientMessage("[Model] Searching...");
+		var used = [];
+		for(var cY = 0; cY <= lY; cY++) {for(var cX = 0; cX <= lX; cX++) {for(var cZ = 0; cZ <= lZ; cZ++) {
+			var idt = Level.getTile(rX + cX, rY + cY, rZ + cZ) + ":" + Level.getData(rX + cX, rY + cY, rZ + cZ);
+			if(used.indexOf(idt) == -1) {
+				used.push(idt);
+			}
+		}}}
+		clientMessage("[Model] " + JSON.stringify(used));
+		clientMessage("[Model] Build model...");
 		progress = 0;
 		var bw = new java.io.BufferedWriter(new java.io.FileWriter(OUTPUT));
 		bw.write("var X = 0;\n");
 		bw.write("var Y = 0;\n");
 		bw.write("var Z = 0;\n");
-		for(var cY = 0; cY <= lY; cY++) {for(var cX = 0; cX <= lX; cX++) {for(var cZ = 0; cZ <= lZ; cZ++) {
-			var tile = Level.getTile(rX + cX, rY + cY, rZ + cZ);
-			var data = Level.getData(rX + cX, rY + cY, rZ + cZ);
-			if(blankModel.indexOf(tile) == -1) {
-				if(tile == lastCode && data == lastData) {
-					switch(side) {
-						case "x+":
-							bw.write(modelType + ".addBox(" + (((sZ + cZ) * (1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sX + cX) * (1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
-							break;
-						case "x-":
-							bw.write(modelType + ".addBox(" + (((sZ + cZ) * (-1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sX + cX) * (-1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
-							break;
-						case "z+":
-							bw.write(modelType + ".addBox(" + (((sX + cX) * (1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sZ + cZ) * (-1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
-							break;
-						case "z-":
-							bw.write(modelType + ".addBox(" + (((sX + cX) * (-1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sZ + cZ) * (1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
-							break;
-						default:
-							clientMessage("[Error] 'get Side' Crash!");
-					}
-				}else {
-					lastCode = tile;
-					lastData = data;
-					bw.write(modelType + ".setTextureOffset(" + colorOffsetX(tile, data) + ", " + colorOffsetY(tile, data) + ", true);\n");
-					switch(side) {
-						case "x+":
-							bw.write(modelType + ".addBox(" + (((sZ + cZ) * (1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sX + cX) * (1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
-							break;
-						case "x-":
-							bw.write(modelType + ".addBox(" + (((sZ + cZ) * (-1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sX + cX) * (-1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
-							break;
-						case "z+":
-							bw.write(modelType + ".addBox(" + (((sX + cX) * (1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sZ + cZ) * (-1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
-							break;
-						case "z-":
-							bw.write(modelType + ".addBox(" + (((sX + cX) * (-1) * size) - ((size - 1) / 2)) + " + X, " + (((sY + cY) * (-1) * size) - ((size - 1) / 2)) + " + Y, " + (((sZ + cZ) * (1) * size) - ((size - 1) / 2)) + " + Z, 1, 1, 1, " + ((size - 1) / 2) + ");\n");
-							break;
-						default:
-							clientMessage("[Error] 'get Side' Crash!");
+		var B = [];
+		for(var bid = 0; bid < 256; bid++) {
+			for(var bdt = 0; bdt < 16; bdt++) {
+				if(used.indexOf(bid + ":" + bdt) != -1) {
+					for(var cY = 0; cY <= lY; cY++) {for(var cX = 0; cX <= lX; cX++) {for(var cZ = 0; cZ <= lZ; cZ++) {
+						var tile = Level.getTile(rX + cX, rY + cY, rZ + cZ);
+						var data = Level.getData(rX + cX, rY + cY, rZ + cZ);
+						if(blankModel.indexOf(tile) == -1) {
+							if(tile == bid && data == bdt) {
+								switch(side) {
+									case "x+":
+										B.push([(((sZ + cZ) * (1) * size) - ((size - 1) / 2)), (((sY + cY) * (-1) * size) - ((size - 1) / 2)), (((sX + cX) * (1) * size) - ((size - 1) / 2)), ((size - 1) / 2)]);
+										break;
+									case "x-":
+										B.push([(((sZ + cZ) * (-1) * size) - ((size - 1) / 2)), (((sY + cY) * (-1) * size) - ((size - 1) / 2)), (((sX + cX) * (-1) * size) - ((size - 1) / 2)), ((size - 1) / 2)]);
+										break;
+									case "z+":
+										B.push([(((sX + cX) * (1) * size) - ((size - 1) / 2)), (((sY + cY) * (-1) * size) - ((size - 1) / 2)), (((sZ + cZ) * (-1) * size) - ((size - 1) / 2)), ((size - 1) / 2)]);
+										break;
+									case "z-":
+										B.push([(((sX + cX) * (-1) * size) - ((size - 1) / 2)), (((sY + cY) * (-1) * size) - ((size - 1) / 2)), (((sZ + cZ) * (1) * size) - ((size - 1) / 2)), ((size - 1) / 2)]);
+										break;
+									default:
+										clientMessage("[Error] 'get Side' Crash!");
+								}
+							}
+						}
+						progress++;
+						ModPE.showTipMessage(/*Math.round(progress * 100 / ((lX+1) * (lY+1) * (lZ+1)) * 256 * 16) + "%"*/ bid + " " + bdt);
+					}}}
+					if(B.length > 0) {
+						java.lang.Thread.sleep(1);
+						bw.write("var B = " + JSON.stringify(B) + ";\n");
+						bw.write(modelType + ".setTextureOffset(" + colorOffsetX(bid, bdt) + ", " + colorOffsetY(bid, bdt) + ", false);\n");
+						bw.write("for(var e = 0; e < " + B.length + "; e++) {" + modelType + ".addBox(B[e][0]+X, B[e][1]+Y, B[e][2]+Z, 1, 1, 1, B[e][3])};\n");
+						B = [];
 					}
 				}
-				java.lang.Thread.sleep(1);
 			}
-			progress++;
-			ModPE.showTipMessage(Math.round(progress * 100 / ((lX+1) * (lY+1) * (lZ+1))) + "%");
-		}}}
+		}
 		bw.close();
 		clientMessage("[Model] save in: " + OUTPUT);
+		lastCode = 0;
+		lastData = 0;
 		clientMessage("[Model] finish");
 	}
 }catch(err){
