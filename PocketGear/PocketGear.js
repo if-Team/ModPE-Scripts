@@ -1276,11 +1276,11 @@ Gear.help = function() {uiThread(function() {try {
 	Gear.helpDialogLayout.setOrientation(1);
 	
 	Gear.multiBtn = new android.widget.Button(ctx);
-	Gear.multiBtn.setText('"' + Gear.mod0.getText() + '" help');
+	Gear.multiBtn.setText(/*'"' + Gear.mod0.getText() + '" help'*/"Not able.");
 	Gear.multiBtn.setTextColor(android.graphics.Color.WHITE);
 	Gear.multiBtn.setBackgroundColor(android.graphics.Color.BLACK);
 	Gear.multiBtn.setOnClickListener(new android.view.View.OnClickListener({onClick: function(view, event) {try {
-		Gear.textDialog(".", ".");
+		Gear.textDialog("Title...", "Message...");
 	}catch(e) {
 		errorShow(e);
 	}}}));
