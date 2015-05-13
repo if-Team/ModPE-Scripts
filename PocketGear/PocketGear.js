@@ -239,7 +239,7 @@ function toast(str) {
 		}
 	}
 	));
-} void(toast);
+}
 
 function toasts(str) {
 	ctx.runOnUiThread(new java.lang.Runnable( {
