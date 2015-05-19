@@ -39,6 +39,21 @@ function uiThread(fc) {
 	return ctx.runOnUiThread(new java.lang.Runnable({run: fc}))
 }
 
+var tts = new android.speech.tts.TextToSpeech (ctx, new android.speech.tts.TextToSpeech.OnInitListener ( {
+	onInit: function (status) {
+	}
+}));
+
+tts.setPitch(3);
+tts.setLanguage(java.util.Locale.ENGLISH);
+tts.setSpeechRate(1.5);
+
+function ttsIt(str, pitch, speed) {
+	tts.setPitch(pitch);
+	tts.setSpeechRate(speed);
+	tts.speak(str, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null);
+}
+
 /**
  * save/load Data
  *
@@ -110,17 +125,49 @@ function loadData(file, article) {
 	return null;
 }
 
+function toast(str) {
+	ctx.runOnUiThread(new java.lang.Runnable( {
+		run: function(){
+			try{
+				android.widget.Toast.makeText(ctx, str, android.widget.Toast.LENGTH_LONG).show();
+			}catch(e) {}
+		}
+	}
+	));
+}
+
 var isOn = false;
 var lastMs = 0;
 var lastMsList = [];
 var maxRecord = 20;
+var c00 = android.graphics.Color.rgb(63, 63, 63);
+var c01 = android.graphics.Color.rgb(111, 63, 63);
+var c02 = android.graphics.Color.rgb(159, 63, 63);
+var c03 = android.graphics.Color.rgb(207, 63, 63);
+var c04 = android.graphics.Color.rgb(255, 63, 63);
+var c05 = android.graphics.Color.rgb(255, 111, 63);
+var c06 = android.graphics.Color.rgb(255, 159, 63);
+var c07 = android.graphics.Color.rgb(255, 207, 63);
+var c08 = android.graphics.Color.rgb(255, 255, 63);
+var c09 = android.graphics.Color.rgb(207, 255, 63);
+var c10 = android.graphics.Color.rgb(159, 255, 63);
+var c11 = android.graphics.Color.rgb(111, 255, 63);
+var c12 = android.graphics.Color.rgb(63, 255, 63);
+var tpsTv_drawable_colors = [c00, c00];
 var tpsTv = new android.widget.TextView(ctx);
 tpsTv.setText("TPS: --.--");
+tpsTv.setTransformationMethod(null);
+tpsTv.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
+tpsTv.setShadowLayer(0.5, FOUR, FOUR, android.graphics.Color.DKGRAY);
 tpsTv.setGravity(android.view.Gravity.LEFT);
 tpsTv.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, FOUR*11);
 tpsTv.setTextColor(android.graphics.Color.WHITE);
 var tpsTv_drawable = new android.graphics.drawable.GradientDrawable();
-tpsTv_drawable.mutate().setColor(android.graphics.Color.rgb(0x3a, 0x39, 0x3a));
+tpsTv_drawable.mutate().setStroke(FOUR*2, c00);
+tpsTv_drawable.mutate().setOrientation(android.graphics.drawable.GradientDrawable.Orientation.BOTTOM_TOP);
+tpsTv_drawable.mutate().setGradientType(android.graphics.drawable.GradientDrawable.RADIAL_GRADIENT);
+tpsTv_drawable.mutate().setGradientRadius(FOUR*50);
+tpsTv_drawable.mutate().setColors(tpsTv_drawable_colors);
 tpsTv_drawable.setCornerRadius(FOUR*5);
 tpsTv.setBackgroundDrawable(tpsTv_drawable);
 var tpsTv_param = new android.widget.RelativeLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.MATCH_PARENT);
@@ -149,6 +196,12 @@ tpsTv.setOnTouchListener(new android.view.View.OnTouchListener({ onTouch: functi
 	}
 	return false;
 }}));
+tpsTv.setOnClickListener(new android.view.View.OnClickListener({onClick: function(view, event) {try {
+	toast("=Copyright 2015 CodeInside=");
+	ttsIt("Copyright Code Inside", 1, 1);
+}catch(e) {
+	print(e);
+}}}));
 var tpsWd = new android.widget.PopupWindow(tpsTv, FOUR*60, FOUR*20, false);
 
 function TPS(ms) {
@@ -166,12 +219,62 @@ function TPS(ms) {
 	}
 	total /= lastMsList.length;
 	total = Math.round(total*100)/100;
+	var display;
+	if(total > 20) {
+		display = 20;
+	}else {
+		display = Math.ceil(total);
+	}
+	switch(display) {
+		case 20:
+			tpsTv_drawable_colors.unshift(c12);
+			break;
+		case 19:
+			tpsTv_drawable_colors.unshift(c11);
+			break;
+		case 18:
+			tpsTv_drawable_colors.unshift(c10);
+			break;
+		case 17:
+			tpsTv_drawable_colors.unshift(c09);
+			break;
+		case 16:
+			tpsTv_drawable_colors.unshift(c08);
+			break;
+		case 15:
+			tpsTv_drawable_colors.unshift(c07);
+			break;
+		case 14:
+			tpsTv_drawable_colors.unshift(c06);
+			break;
+		case 13:
+			tpsTv_drawable_colors.unshift(c05);
+			break;
+		case 12:
+			tpsTv_drawable_colors.unshift(c04);
+			break;
+		case 10:
+			tpsTv_drawable_colors.unshift(c03);
+			break;
+		case 9:
+			tpsTv_drawable_colors.unshift(c02);
+			break;
+		case 8:
+			tpsTv_drawable_colors.unshift(c01);
+			break;
+		default:
+			tpsTv_drawable_colors.unshift(c00);
+	}
+	while(tpsTv_drawable_colors.length > 10) {
+		tpsTv_drawable_colors.pop();
+	}
 	uiThread(function() {
 		if(lastMsList.length < maxRecord) {
 			tpsTv.setText("TPS: --.--");
 		}else {
 			tpsTv.setText("TPS: " + total);
 		}
+		tpsTv_drawable.mutate().setColors(tpsTv_drawable_colors);
 	});
 };
 
