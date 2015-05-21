@@ -217,7 +217,7 @@ TPS.tpsTv.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, FOUR*11);
 TPS.tpsTv.setTextColor(android.graphics.Color.WHITE);
 TPS.tpsTv_drawable = new android.graphics.drawable.GradientDrawable();
 TPS.tpsTv_drawable.mutate().setStroke(FOUR*2, TPS.c00);
-TPS.tpsTv_drawable.mutate().setOrientation(android.graphics.drawable.GradientDrawable.Orientation.BOTTOM_TOP);
+//TPS.tpsTv_drawable.mutate().setOrientation(android.graphics.drawable.GradientDrawable.Orientation.BOTTOM_TOP);
 TPS.tpsTv_drawable.mutate().setGradientType(android.graphics.drawable.GradientDrawable.RADIAL_GRADIENT);
 TPS.tpsTv_drawable.mutate().setGradientRadius(FOUR*50);
 TPS.tpsTv_drawable.mutate().setColors(TPS.tpsTv_drawable_colors);
@@ -611,7 +611,7 @@ function newLevel(str) {
 };
 
 function modTick() {
-	TPS.TPS(java.lang.System.currentTimeMillis());
+	TPS.TPS(java.lang.System.currentTimeMillis()/*Date.now()*/);
 	if(net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote && !TPS.isRemote) {
 		net.zhuoweizhang.mcpelauncher.ScriptManager.handleMessagePacketCallback("", "BlockLauncher, enable scripts, please and thank you");
 		TPS.isRemote = true;
