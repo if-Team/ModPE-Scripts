@@ -1,5 +1,5 @@
 var ScriptName = "T(ick)P(er)S(econd)";
-var Version = "v3";
+var Version = "v4";
 var author = ["CodeInside"];
 /*
  * Copyright 2015 CodeInside
@@ -29,7 +29,6 @@ var e = loadData(_MOD_DATA, "SCALE");
 var dip = (e - 1) + "" == "NaN" ? 1 : e/10;
 var FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 1, ctx.getResources().getDisplayMetrics()) * dip;
 var staticFOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 1, ctx.getResources().getDisplayMetrics());
-print(staticFOUR + " " + FOUR + " " + e);
 var _nomedia = new java.io.File(_MOD_DIR, ".nomedia");
 var _I_ci = new java.io.File(_MOD_DIR, "author.png");
 var _L_ci = "https://m.box.com/file/30395265877/https%3A%2F%2Fapp.box.com%2Fs%2Fdqxi7lj6qwx0t0iktanfl7x5dczh5yr4/preview/preview.png";
@@ -613,9 +612,16 @@ function newLevel(str) {
 
 function modTick() {
 	TPS.TPS(java.lang.System.currentTimeMillis());
+	if(net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote && !TPS.isRemote) {
+		net.zhuoweizhang.mcpelauncher.ScriptManager.handleMessagePacketCallback("", "BlockLauncher, enable scripts, please and thank you");
+		TPS.isRemote = true;
+		newLevel("multi");
+		net.zhuoweizhang.mcpelauncher.ScriptManager.nativeSendChat(ChatColor.YELLOW + "[TPS] 해당유저가 'TPS(랙 측정기)'스크립트를 사용중입니다.");
+	}
 };
 
 function leaveGame() {
+	TPS.isRemote = false;
 	uiThread(function() {
 		if(TPS.isOn) {
 			TPS.tpsWd.dismiss();
