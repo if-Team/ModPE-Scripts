@@ -11,6 +11,10 @@ Trade.LANG_KEY = null;
 Trade.LANG_DATA = null;
 Trade.SELLER = null;
 
+Trade.getVersion = function() {
+	return "1.0";
+};
+
 //Trade items
 Trade.Items = {
     butcher: {
@@ -30,28 +34,28 @@ Trade.Items = {
         count: [6, 3, 7, 9, 6, 5, 1, 1, 16, 19, 11]
     },
     librarian: {
-        name: ["librarian"],
-        meta: [["apple", 0]],
-        id: [260],
-        dam: [0],
-        cost: [1],
-        count: [1]
+        name: ["item.compass.name", "item.clock.name", "item.paper.name", "item.book.name", "item.ingotGold.name"],
+        meta: [["compass_item", 0], ["clock_item", 0], ["paper", 0], ["book", 0], ["gold_ingot", 0]],
+        id: [345, 347, 339, 340, 266],
+        dam: [0, 0, 0, 0, 0],
+        cost: [11, 11, 1, 1, 1],
+        count: [1, 1, 25, 13, 8]
     },
     priest: {
-        name: ["priest"],
-        meta: [["apple",0]],
-        id: [260],
-        dam: [0],
-        cost: [1],
-        count: [1]
+        name: ["item.redstone.name", "item.ingotGold.name"],
+        meta: [["redstone", 0], ["gold_ingot", 0]],
+        id: [331, 266],
+        dam: [0, 0],
+        cost: [1, 1],
+        count: [3, 8]
     },
     smith: {
-        name: ["smith"],
-        meta: [["apple",0]],
-        id: [260],
-        dam: [0],
-        cost: [1],
-        count: [1]
+        name: ["item.helmetDiamond.name", "item.chestplateDiamond.name", "item.leggingsDiamond.name", "item.bootsDiamond.name", "item.swordDiamond.name", "item.pickaxeDiamond.name", "item.axeDiamond.name", "item.hatchetDiamond.name", "item.hoeDiamond.name", "item.helmetChain.name", "item.chestplateChain.name", "item.leggingsChain.name", "item.bootsChain.name", "item.helmetIron.name", "item.chestplateIron.name", "item.leggingsIron.name", "item.bootsIron.name", "item.swordIron.name", "item.pickaxeIron.name", "item.axeIron.name", "item.hatchetIron.name", "item.hoeIron.name", "item.diamond.name", "item.ingotIron.name", "item.ingotGold.name", "item.coal.name"],
+        meta: [["helmet", 4], ["chestplate", 4], ["leggings", 4], ["boots", 4], ["sword", 4], ["pickaxe", 4], ["axe", 4], ["shovel", 4], ["hoe", 4], ["helmet", 1], ["chestplate", 1], ["leggings", 1], ["boots", 1], ["helmet", 2], ["chestplate", 2], ["leggings", 2], ["boots", 2], ["sword", 2], ["pickaxe", 2], ["axe", 2], ["shovel", 2], ["hoe", 2], ["diamond", 0], ["iron_ingot", 0], ["gold_ingot", 0], ["coal", 0]],
+        id: [310, 311, 312, 313, 276, 278, 279, 277, 293, 302, 303, 304, 305, 306, 307, 308, 309, 267, 257, 258, 256, 292, 264, 265, 266, 263],
+        dam: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        cost: [7, 17, 12, 7, 12, 10, 10, 7, 7, 5, 12, 9, 5, 4, 11, 8, 4, 8, 7, 6, 4, 4, 1, 1, 1, 1],
+        count: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 8, 8, 20]
     }
 };
 
@@ -291,6 +295,8 @@ Utils.showButton = function(x, y, width, height, text, onclick) {
     var current = false;
     button.setOnTouchListener(new android.view.View.OnTouchListener({
         onTouch: function(view, event) {
+			if(!view.isClickable())
+				return true;
             switch(event.getAction()) {
                 case android.view.MotionEvent.ACTION_DOWN:
                     view.setTextColor(android.graphics.Color.parseColor("#ffffa1"));
@@ -554,6 +560,14 @@ Utils.clickSound = function() {
     Level.playSound(getPlayerX(), getPlayerY(), getPlayerZ(), "random.click", 7 ,7);
 };
 
+Utils.setButtonClickable = function(view, bool) {
+	if(bool) {
+		
+	} else {
+		
+	}
+};
+
 var Lang = {};
 
 Lang.readLang = function() {
@@ -638,4 +652,3 @@ function leaveGame() {
 }
 
 Utils.downloadFontFile();
-
