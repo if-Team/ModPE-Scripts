@@ -2,7 +2,6 @@
 Trade = {};
 
 //Variables
-Trade.HANDING_EME = false;
 Trade.PAGE = 0;
 Trade.EME_COUNT = 0;
 Trade.META = null;
@@ -133,6 +132,7 @@ Trade.init = function() {
 };
 
 Trade.showScreen = function() {
+    Trade.EME_COUNT = Utils.getAllItems(388, 0);
     Utils.createUiThread(function(ctx) {
         Utils.updateTradeList(Trade.NAME, Trade.ITEMBACK, Trade.COST, Trade.COUNT);
         Trade.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
@@ -140,7 +140,6 @@ Trade.showScreen = function() {
 };
 
 Trade.onScreenEnd = function() {
-    Trade.EME_COUNT = Utils.getAllItems(388, 0);
     Trade.PAGE = 0;
 };
 
@@ -453,8 +452,8 @@ Utils.buyThing = function() {
     if(Trade.EME_COUNT >= Trade.Items[type].cost[Trade.PAGE]) {
         Trade.EME_COUNT-=Trade.Items[type].cost[Trade.PAGE];
         //TODO: remake the addItemInventory function
-        addItemInventory(388, -Trade.Items[type].cost[Trade.PAGE], 0);
-        addItemInventory(Trade.Items[type].id[Trade.PAGE], Trade.Items[type].count[Trade.PAGE], Trade.Items[type].dam[Trade.PAGE]);
+        Utils.addItemInventory(388, -Trade.Items[type].cost[Trade.PAGE], 0);
+        Utils.addItemInventory(Trade.Items[type].id[Trade.PAGE], Trade.Items[type].count[Trade.PAGE], Trade.Items[type].dam[Trade.PAGE]);
     } else
         Utils.warn("Not Enough Emeralds!");
 };
@@ -484,10 +483,35 @@ Utils.sellThing = function() {
     var type = Utils.getVillagerType(Trade.SELLER);
     var counts = Utils.getAllItems(Trade.Items[type].id[Trade.PAGE], Trade.Items[type].dam[Trade.PAGE]);
     if(counts >= Trade.Items[type].count[Trade.PAGE]) {
-        addItemInventory(388, Trade.Items[type].cost[Trade.PAGE], 0);
-        addItemInventory(Trade.Items[type].id[Trade.PAGE], -Trade.Items[type].count[Trade.PAGE], Trade.Items[type].dam[Trade.PAGE]);
+        Utils.addItemInventory(388, Trade.Items[type].cost[Trade.PAGE], 0);
+        Utils.addItemInventory(Trade.Items[type].id[Trade.PAGE], -Trade.Items[type].count[Trade.PAGE], Trade.Items[type].dam[Trade.PAGE]);
     } else
         Utils.warn("Not Enough items!");
+};
+
+Utils.addItemInventory = function(id, count, dam) {
+    if(count >= 0)
+        addItemInventory(id, count, dam);
+    else {
+        var c = -count;
+        
+        for(var i = 9; i <= 44; i++) {
+            var sid = Player.getInventorySlot(i);
+            var scount = Player.getInventorySlotCount(i);
+            var sdam = Player.getInventorySlotData(i);
+            if(sid == id && sdam == dam) {
+                if(scount > c) {
+                    Player.setInventorySlot(i, sid, scount-c, dam);
+                    c = 0;
+                } else {
+                    Player.clearInventorySlot(i);
+                    c-=scount;
+                }
+            }
+            if(c == 0)
+                break;
+        }
+    }
 };
 
 var CachedString = {};
@@ -623,6 +647,10 @@ Lang.getData = function(key) {
     return data;
 };
 
+Player.setInventorySlot = Player.setInventorySlot || function(slot, id, count, dam) {
+    net.zhuoweizhang.mcpelauncher.ScriptManager.nativeSetInventorySlot(slot, id, count, dam);
+};
+
 
 
 
@@ -649,17 +677,13 @@ function modTick() {
         Lang.readLang();
     }
     
-    //Handing Emerald
-    if(Player.getCarriedItem() == 388)
-        Trade.HANDING_EME = true;
-    if(Trade.HANDING_EME && Entity.getEntityTypeId(Player.getPointedEntity()) == 15) {
+    if(Entity.getEntityTypeId(Player.getPointedEntity()) == 15) {
         if(!Trade.INTERACTPW.isShowing()) {
             Trade.SELLER = Player.getPointedEntity();
             Utils.showInteractPw();
         }
     }
-    if(Trade.HANDING_EME && (Player.getCarriedItem() != 388 || Entity.getEntityTypeId(Player.getPointedEntity()) != 15)) {
-        Trade.HANDING_EME = false;
+    if(Entity.getEntityTypeId(Player.getPointedEntity()) != 15) {
         Utils.createUiThread(function() {
             Trade.INTERACTPW.dismiss();
         });
