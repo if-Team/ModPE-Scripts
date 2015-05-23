@@ -490,15 +490,23 @@ Utils.sellThing = function() {
         Utils.warn("Not Enough items!");
 };
 
+var CachedString = {};
+
+CachedString.KEY = [];
+CachedString.DATA = [];
+
 Utils.getStringBuilder = function(text, color, scale, shadowc) {
+    if(text.charCodeAt(text.length-1) == 13)
+        text = text.substring(0, text.length-1);
+    if(CachedString.KEY.indexOf(text) >= 0)
+        return CachedString.DATA[CachedString.KEY.indexOf(text)];
+        
     if(scale == null)
         scale = 1;
     if(shadowc == null)
         shadowc = android.graphics.Color.DKGRAY;
     else
         shadowc = android.graphics.Color.parseColor(shadowc);
-    if(text.charCodeAt(text.length-1) == 13)
-        text = text.substring(0, text.length-1);
     if(color != null)
         color = android.graphics.Color.parseColor(color);
     var divide = function(a) {
@@ -531,6 +539,8 @@ Utils.getStringBuilder = function(text, color, scale, shadowc) {
         canvas.drawBitmap(bitmap, 0, 0, p2);
         builder.setSpan(new android.text.style.ImageSpan(Utils.getContext(), android.graphics.Bitmap.createScaledBitmap(result, scale*8*Utils.FOUR, scale*9*Utils.FOUR, false)), i, i+1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
+    CachedString.KEY.push(text);
+    CachedString.DATA.push(builder);
     return builder;
 };
 
