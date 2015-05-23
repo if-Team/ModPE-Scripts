@@ -243,6 +243,7 @@ Utils.showHeader = function(text) {
     left.setLayoutParams(new android.widget.LinearLayout.LayoutParams(Utils.FOUR*2, Utils.FOUR*25));
     horiz.addView(left);
     var center = new android.widget.TextView(ctx);
+    center.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
     center.setTypeface(Utils.getTypeface());
     center.setGravity(android.view.Gravity.CENTER);
     center.setTextSize(4*Utils.FOUR);
@@ -268,6 +269,7 @@ Utils.showHeader = function(text) {
 Utils.showButton = function(x, y, width, height, text, onclick) {
     var ctx = Utils.getContext();
     var button = new android.widget.Button(ctx);
+    button.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
     button.setPadding(0, 0, 0, 0);
     var params = new android.widget.RelativeLayout.LayoutParams(width*Utils.FOUR, height*Utils.FOUR);
     params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
@@ -350,6 +352,7 @@ Utils.showItemBackground = function(x, y) {
 Utils.justText = function(str, x, y, width) {
     var text = new android.widget.TextView(Utils.getContext());
     text.setLineSpacing(Utils.FOUR, 1);
+    text.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
     var params;
     if(typeof width === "number")
         params = new android.widget.RelativeLayout.LayoutParams(width*Utils.FOUR, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -436,6 +439,7 @@ Utils.buyThing = function() {
 Utils.warn = function(txt) {
     Utils.createUiThread(function(ctx) {
         var text = new android.widget.TextView(ctx);
+        text.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
         if(Utils.hasNonAscii(txt))
             text.setText(Utils.getStringBuilder(txt, "#ff0000", 2, "#410000"));
         else
@@ -553,7 +557,7 @@ Utils.clickSound = function() {
 var Lang = {};
 
 Lang.readLang = function() {
-    var lang = new java.lang.String(ModPE.getBytesFromTexturePack("lang/en_US.lang"))+"";
+    var lang = new java.lang.String(ModPE.getBytesFromTexturePack("lang/pc-base/en_US.lang"))+"";
     var split1 = lang.split("\n");
     var result = split1.map(function(e) {
         return e.split("=");
