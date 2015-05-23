@@ -12,7 +12,7 @@ Trade.LANG_DATA = null;
 Trade.SELLER = null;
 
 Trade.getVersion = function() {
-	return "1.0";
+    return "1.0";
 };
 
 //Trade items
@@ -35,7 +35,7 @@ Trade.Items = {
     },
     librarian: {
         name: ["item.compass.name", "item.clock.name", "item.paper.name", "item.book.name", "item.ingotGold.name"],
-        meta: [["compass_item", 0], ["clock_item", 0], ["paper", 0], ["book", 0], ["gold_ingot", 0]],
+        meta: [["compass_item", 0], ["clock_item", 0], ["paper", 0], ["book_normal", 0], ["gold_ingot", 0]],
         id: [345, 347, 339, 340, 266],
         dam: [0, 0, 0, 0, 0],
         cost: [11, 11, 1, 1, 1],
@@ -43,14 +43,14 @@ Trade.Items = {
     },
     priest: {
         name: ["item.redstone.name", "item.ingotGold.name"],
-        meta: [["redstone", 0], ["gold_ingot", 0]],
+        meta: [["redstone_dust", 0], ["gold_ingot", 0]],
         id: [331, 266],
         dam: [0, 0],
         cost: [1, 1],
         count: [3, 8]
     },
     smith: {
-        name: ["item.helmetDiamond.name", "item.chestplateDiamond.name", "item.leggingsDiamond.name", "item.bootsDiamond.name", "item.swordDiamond.name", "item.pickaxeDiamond.name", "item.axeDiamond.name", "item.hatchetDiamond.name", "item.hoeDiamond.name", "item.helmetChain.name", "item.chestplateChain.name", "item.leggingsChain.name", "item.bootsChain.name", "item.helmetIron.name", "item.chestplateIron.name", "item.leggingsIron.name", "item.bootsIron.name", "item.swordIron.name", "item.pickaxeIron.name", "item.axeIron.name", "item.hatchetIron.name", "item.hoeIron.name", "item.diamond.name", "item.ingotIron.name", "item.ingotGold.name", "item.coal.name"],
+        name: ["item.helmetDiamond.name", "item.chestplateDiamond.name", "item.leggingsDiamond.name", "item.bootsDiamond.name", "item.swordDiamond.name", "item.pickaxeDiamond.name", "item.hatchetDiamond.name", "item.shovelDiamond.name", "item.hoeDiamond.name", "item.helmetChain.name", "item.chestplateChain.name", "item.leggingsChain.name", "item.bootsChain.name", "item.helmetIron.name", "item.chestplateIron.name", "item.leggingsIron.name", "item.bootsIron.name", "item.swordIron.name", "item.pickaxeIron.name", "item.hatchetIron.name", "item.shovelIron.name", "item.hoeIron.name", "item.diamond.name", "item.ingotIron.name", "item.ingotGold.name", "item.coal.name"],
         meta: [["helmet", 4], ["chestplate", 4], ["leggings", 4], ["boots", 4], ["sword", 4], ["pickaxe", 4], ["axe", 4], ["shovel", 4], ["hoe", 4], ["helmet", 1], ["chestplate", 1], ["leggings", 1], ["boots", 1], ["helmet", 2], ["chestplate", 2], ["leggings", 2], ["boots", 2], ["sword", 2], ["pickaxe", 2], ["axe", 2], ["shovel", 2], ["hoe", 2], ["diamond", 0], ["iron_ingot", 0], ["gold_ingot", 0], ["coal", 0]],
         id: [310, 311, 312, 313, 276, 278, 279, 277, 293, 302, 303, 304, 305, 306, 307, 308, 309, 267, 257, 258, 256, 292, 264, 265, 266, 263],
         dam: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -66,6 +66,8 @@ Trade.NAME = null;
 Trade.ITEMBACK = null;
 Trade.COST = null;
 Trade.COUNT = null;
+Trade.LEFT = null;
+Trade.RIGHT = null;
 
 Trade.init = function() {
     var ctx = Utils.getContext();
@@ -84,13 +86,13 @@ Trade.init = function() {
     mainLayout.addView(cost);
     var arrow = Utils.renderArrow(ctx.getScreenWidth()/Utils.FOUR/2-8, 60+17);
     mainLayout.addView(arrow);
-    var left = Utils.showButton(25, 60, 18, 50, "<", function() {
-        Utils.minusPage();
+    var left = Utils.showButton(25, 60, 18, 50, "<", function(view) {
+        Utils.minusPage(view);
         Utils.updateTradeList(name, itemback2, cost, count);
     });
     mainLayout.addView(left);
-    var right = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-25-18, 60, 18, 50, ">", function() {
-        Utils.plusPage();
+    var right = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-25-18, 60, 18, 50, ">", function(view) {
+        Utils.plusPage(view);
         Utils.updateTradeList(name, itemback2, cost, count);
     });
     mainLayout.addView(right);
@@ -116,20 +118,30 @@ Trade.init = function() {
     mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
     mainPw.setWidth(ctx.getScreenWidth());
     mainPw.setHeight(ctx.getScreenHeight());
+    mainPw.setOnDismissListener(new android.widget.PopupWindow.OnDismissListener({
+        onDismiss: function() {
+            Trade.onScreenEnd();
+        }
+    }));
     Trade.MAINPW = mainPw;
     Trade.NAME = name;
     Trade.ITEMBACK = itemback2;
     Trade.COST = cost;
     Trade.COUNT = count;
+    Trade.LEFT = left;
+    Trade.RIGHT = right;
 };
 
 Trade.showScreen = function() {
     Utils.createUiThread(function(ctx) {
-        Trade.EME_COUNT = Utils.getAllItems(388, 0);
-        Trade.PAGE = 0;
         Utils.updateTradeList(Trade.NAME, Trade.ITEMBACK, Trade.COST, Trade.COUNT);
         Trade.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
     });
+};
+
+Trade.onScreenEnd = function() {
+    Trade.EME_COUNT = Utils.getAllItems(388, 0);
+    Trade.PAGE = 0;
 };
 
 Utils = {};
@@ -190,13 +202,13 @@ Utils.trimImage = function(bitmap, x, y, width, height) {
     return android.graphics.Bitmap.createBitmap(bitmap, x, y, width, height);
 };
 
-Utils.plusPage = function() {
+Utils.plusPage = function(view) {
     var type = Utils.getVillagerType(Trade.SELLER);
     if(Trade.PAGE != Trade.Items[type].name.length-1)
         Trade.PAGE++;
 };
 
-Utils.minusPage = function() {
+Utils.minusPage = function(view) {
     if(Trade.PAGE != 0)
         Trade.PAGE--;
 };
@@ -295,8 +307,13 @@ Utils.showButton = function(x, y, width, height, text, onclick) {
     var current = false;
     button.setOnTouchListener(new android.view.View.OnTouchListener({
         onTouch: function(view, event) {
-			if(!view.isClickable())
-				return true;
+            if(!view.isClickable()) {
+                if(!(event.getX() < 0 || event.getY() <0 || event.getX() > width*Utils.FOUR || event.getY() > height*Utils.FOUR)) {
+                    if(event.getAction() == android.view.MotionEvent.ACTION_UP)
+                        Utils.clickSound();
+                }
+                return true;
+            }
             switch(event.getAction()) {
                 case android.view.MotionEvent.ACTION_DOWN:
                     view.setTextColor(android.graphics.Color.parseColor("#ffffa1"));
@@ -321,7 +338,7 @@ Utils.showButton = function(x, y, width, height, text, onclick) {
                         button.setText(unclicked);
                     if(current == false && !(event.getX() < 0 || event.getY() <0 || event.getX() > width*Utils.FOUR || event.getY() > height*Utils.FOUR)) {
                         if(typeof onclick === "function")
-                            onclick();
+                            onclick(button);
                             Utils.clickSound();
                     }
                     current = false;
@@ -561,17 +578,22 @@ Utils.clickSound = function() {
 };
 
 Utils.setButtonClickable = function(view, bool) {
-	if(bool) {
-		
-	} else {
-		
-	}
+    view.setClickable(bool);
+    if(bool) {
+        view.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
+    } else {
+        view.setTextColor(android.graphics.Color.parseColor("#9c9c9c"));
+    }
 };
 
 var Lang = {};
 
+Lang.getPath = function() {
+    return "lang/en_US.lang";
+};
+
 Lang.readLang = function() {
-    var lang = new java.lang.String(ModPE.getBytesFromTexturePack("lang/pc-base/en_US.lang"))+"";
+    var lang = new java.lang.String(ModPE.getBytesFromTexturePack(Lang.getPath()))+"";
     var split1 = lang.split("\n");
     var result = split1.map(function(e) {
         return e.split("=");
