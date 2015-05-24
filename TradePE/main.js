@@ -6,8 +6,6 @@ Trade.PAGE = 0;
 Trade.EME_COUNT = 0;
 Trade.META = null;
 Trade.META_MAPPED = null;
-Trade.LANG_KEY = null;
-Trade.LANG_DATA = null;
 Trade.SELLER = null;
 
 Trade.getVersion = function() {
@@ -67,6 +65,7 @@ Trade.COST = null;
 Trade.COUNT = null;
 Trade.LEFT = null;
 Trade.RIGHT = null;
+Trade.WARNING_TOAST = null;
 
 Trade.init = function() {
     var ctx = Utils.getContext();
@@ -107,7 +106,7 @@ Trade.init = function() {
     mainLayout.addView(itemback2);
     var count = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-25-18-16-40+4, 69);
     mainLayout.addView(count);
-    var dismiss = Utils.showButton(4, 4, 38, 18, "Back", function() {
+    var dismiss = Utils.showButton(4, 4, 38, 18, "gui.back", function() {
         mainPw.dismiss();
     });
     mainLayout.addView(dismiss);
@@ -282,6 +281,7 @@ Utils.showHeader = function(text) {
 };
 
 Utils.showButton = function(x, y, width, height, text, onclick) {
+    text = Lang.getData(text);
     var ctx = Utils.getContext();
     var button = new android.widget.Button(ctx);
     button.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
@@ -451,11 +451,13 @@ Utils.buyThing = function() {
     var type = Utils.getVillagerType(Trade.SELLER);
     if(Trade.EME_COUNT >= Trade.Items[type].cost[Trade.PAGE]) {
         Trade.EME_COUNT-=Trade.Items[type].cost[Trade.PAGE];
-        //TODO: remake the addItemInventory function
         Utils.addItemInventory(388, -Trade.Items[type].cost[Trade.PAGE], 0);
         Utils.addItemInventory(Trade.Items[type].id[Trade.PAGE], Trade.Items[type].count[Trade.PAGE], Trade.Items[type].dam[Trade.PAGE]);
-    } else
+    } else {
+        if(Utils.isWarning())
+            Trade.WARNING_TOAST.cancel();
         Utils.warn("Not Enough Emeralds!");
+    }
 };
 
 Utils.warn = function(txt) {
@@ -476,6 +478,7 @@ Utils.warn = function(txt) {
         toast.setGravity(android.view.Gravity.TOP, 0, 32*Utils.FOUR);
         toast.setView(text);
         toast.show();
+        Trade.WARNING_TOAST = toast;
     });
 };
 
@@ -485,8 +488,11 @@ Utils.sellThing = function() {
     if(counts >= Trade.Items[type].count[Trade.PAGE]) {
         Utils.addItemInventory(388, Trade.Items[type].cost[Trade.PAGE], 0);
         Utils.addItemInventory(Trade.Items[type].id[Trade.PAGE], -Trade.Items[type].count[Trade.PAGE], Trade.Items[type].dam[Trade.PAGE]);
-    } else
+    } else {
+        if(Utils.isWarning())
+            Trade.WARNING_TOAST.cancel();
         Utils.warn("Not Enough items!");
+    }
 };
 
 Utils.addItemInventory = function(id, count, dam) {
@@ -546,7 +552,7 @@ Utils.getStringBuilder = function(text, color, scale, shadowc) {
         if(text.charAt(i) == " ")
             continue;
         var d = divide(text.charCodeAt(i));
-        var x = (((parseInt(d[0], 10)) % 16)) * 16;
+        var x = ((parseInt(d[0], 10) % 16)) * 16;
         var y = Math.floor(parseInt(d[0], 10) / 16) * 16;
         var num = parseInt(d[1], 10).toString(16).toUpperCase();
         if(num.length < 2)
@@ -620,7 +626,14 @@ Utils.setButtonClickable = function(view, bool) {
     }
 };
 
+Utils.isWarning = function() {
+    return Trade.WARNING_TOAST != null && Trade.WARNING_TOAST.getView().isShown();
+};
+
 var Lang = {};
+
+Lang.KEY = null;
+Lang.DATA = null;
 
 Lang.getPath = function() {
     return "lang/en_US.lang";
@@ -632,16 +645,16 @@ Lang.readLang = function() {
     var result = split1.map(function(e) {
         return e.split("=");
     });
-    Trade.LANG_KEY = result.map(function(e) {
+    Lang.KEY = result.map(function(e) {
         return e[0];
     });
-    Trade.LANG_DATA = result.map(function(e) {
+    Lang.DATA = result.map(function(e) {
         return e[1];
     });
 };
 
 Lang.getData = function(key) {
-    var data = Trade.LANG_DATA[Trade.LANG_KEY.indexOf(key)];
+    var data = Lang.DATA[Lang.KEY.indexOf(key)];
     if(typeof data === "undefined")
         return key;
     return data;
@@ -657,6 +670,11 @@ Player.setInventorySlot = Player.setInventorySlot || function(slot, id, count, d
 
 function modTick() {
     //Initialing
+    if(Lang.KEY == null && Lang.DATA == null) {
+        Lang.KEY = 0;
+        Lang.DATA = 0;
+        Lang.readLang();
+    }
     if(Trade.META == null)
         eval("Trade.META = "+new java.lang.String(ModPE.getBytesFromTexturePack("images/items.meta"))+";");
     if(Trade.META_MAPPED == null)
@@ -670,11 +688,6 @@ function modTick() {
     if(Trade.INTERACTPW == null) {
         Trade.INTERACTPW = 0;
         Utils.interactInit();
-    }
-    if(Trade.LANG_KEY == null && Trade.LANG_DATA == null) {
-        Trade.LANG_KEY = 0;
-        Trade.LANG_DATA = 0;
-        Lang.readLang();
     }
     
     if(Entity.getEntityTypeId(Player.getPointedEntity()) == 15) {
