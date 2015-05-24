@@ -84,6 +84,8 @@ Trade.init = function() {
     mainLayout.addView(cost);
     var arrow = Utils.renderArrow(ctx.getScreenWidth()/Utils.FOUR/2-8, 60+17);
     mainLayout.addView(arrow);
+    Easter.DRAWABLE.start();
+    arrow.setBackgroundDrawable(Easter.DRAWABLE);
     var left = Utils.showButton(25, 60, 18, 50, "<", function(view) {
         Utils.minusPage(view);
         Utils.updateTradeList(name, itemback2, cost, count);
@@ -660,6 +662,21 @@ Lang.getData = function(key) {
     return data;
 };
 
+var Easter = {};
+
+Easter.DRAWABLE = null;
+
+Easter.init = function() {
+    var records = ["11", "13", "blocks", "cat", "chirp", "far", "mall", "mellohi", "stal", "strad", "wait", "ward"];
+    var drawable = new android.graphics.drawable.AnimationDrawable();
+    drawable.setOneShot(false);
+    for(var i = 0; i < 12; i++) {
+        var bm = Utils.getItemImage("record_"+records[i], 0);
+        drawable.addFrame(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(bm, bm.getWidth()*Utils.FOUR, bm.getHeight()*Utils.FOUR, false)), 50);
+    }
+    Easter.DRAWABLE = drawable;
+};
+
 Player.setInventorySlot = Player.setInventorySlot || function(slot, id, count, dam) {
     net.zhuoweizhang.mcpelauncher.ScriptManager.nativeSetInventorySlot(slot, id, count, dam);
 };
@@ -681,6 +698,10 @@ function modTick() {
         Trade.META_MAPPED = Trade.META.map(function(e) {
             return e.name;
         });
+    if(Easter.DRAWABLE == null) {
+        Easter.DRAWABLE = 0;
+        Easter.init();
+    }
     if(Trade.MAINPW == null) {
         Trade.MAINPW = 0;
         Trade.init();
