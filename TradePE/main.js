@@ -7,6 +7,8 @@ Trade.EME_COUNT = 0;
 Trade.META = null;
 Trade.META_MAPPED = null;
 Trade.SELLER = null;
+Trade.TRADING = null;
+Trade.CUR_HEALTH = null;
 
 Trade.getVersion = function() {
     return "1.0";
@@ -76,41 +78,41 @@ Trade.init = function() {
     mainLayout.addView(back);
     var header = Utils.showHeader("Trade");
     mainLayout.addView(header);
-    var itemback = Utils.showItemBackground(25+18+16, 65);
+    var itemback = Utils.showItemBackground(59, 65);
     mainLayout.addView(itemback);
     var item = Utils.getItemImage("emerald", 0);
     itemback.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*1.6, item.getHeight()*Utils.FOUR*1.6, false));
-    var cost = Utils.justText("", 25+18+16+4, 69);
+    var cost = Utils.justText("", 63, 69);
     mainLayout.addView(cost);
-    var arrow = Utils.renderArrow(ctx.getScreenWidth()/Utils.FOUR/2-8, 60+17);
+    var arrow = Utils.renderArrow(ctx.getScreenWidth()/Utils.FOUR/2-8, 77);
     mainLayout.addView(arrow);
     var left = Utils.showButton(25, 60, 18, 50, "<", function(view) {
         Utils.minusPage(view);
         Utils.updateTradeList(name, itemback2, cost, count);
     });
     mainLayout.addView(left);
-    var right = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-25-18, 60, 18, 50, ">", function(view) {
+    var right = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-43, 60, 18, 50, ">", function(view) {
         Utils.plusPage(view);
         Utils.updateTradeList(name, itemback2, cost, count);
     });
     mainLayout.addView(right);
-    var buy = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-25-108, 130, 108, 32, "Buy", function() {
+    var buy = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-133, 130, 108, 32, "Buy", function() {
         Utils.buyThing();
     });
     mainLayout.addView(buy);
-    var sell = Utils.showButton(25, 130, 64+36+8, 32, "Sell", function() {
+    var sell = Utils.showButton(25, 130, 108, 32, "Sell", function() {
         Utils.sellThing();
     });
     mainLayout.addView(sell);
-    var itemback2 = Utils.showItemBackground(ctx.getScreenWidth()/Utils.FOUR-25-18-16-40, 65);
+    var itemback2 = Utils.showItemBackground(ctx.getScreenWidth()/Utils.FOUR-99, 65);
     mainLayout.addView(itemback2);
-    var count = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-25-18-16-40+4, 69);
+    var count = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-95, 69);
     mainLayout.addView(count);
     var dismiss = Utils.showButton(4, 4, 38, 18, "gui.back", function() {
         mainPw.dismiss();
     });
     mainLayout.addView(dismiss);
-    var name = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-(36+40+32)-25, 40, 36+40+32);
+    var name = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-133, 40, 108);
     mainLayout.addView(name);
     mainPw.setContentView(mainLayout);
     mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -131,6 +133,7 @@ Trade.init = function() {
 };
 
 Trade.showScreen = function() {
+    Trade.TRADING = true;
     Trade.EME_COUNT = Utils.getAllItems(388, 0);
     Utils.createUiThread(function(ctx) {
         Utils.updateTradeList(Trade.NAME, Trade.ITEMBACK, Trade.COST, Trade.COUNT);
@@ -139,7 +142,10 @@ Trade.showScreen = function() {
 };
 
 Trade.onScreenEnd = function() {
+    Trade.TRADING = false;
     Trade.PAGE = 0;
+    if(Utils.isWarning())
+        Trade.WARNING_TOAST.cancel();
 };
 
 Utils = {};
@@ -277,6 +283,12 @@ Utils.showHeader = function(text) {
     down.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ctx.getScreenWidth(), Utils.FOUR*3));
     vert.addView(down);
     vert.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(Utils.getContext().getScreenWidth(), 28*Utils.FOUR));
+    vert.setOnLongClickListener(new android.view.View.OnLongClickListener({
+        onLongClick: function() {
+            Easter.goToTwitter();
+            return true;
+        }
+    }));
     return vert;
 };
 
@@ -691,6 +703,13 @@ Easter.init = function() {
     Easter.DRAWABLE = drawable;
 };
 
+Easter.goToTwitter = function() {
+    var ctx = Utils.getContext();
+    var uri = android.net.Uri.parse("http://twitter.com/dfak0557");
+    var intent = new android.content.Intent(android.content.Intent.ACTION_VIEW, uri);
+    ctx.startActivity(intent);
+};
+
 Player.setInventorySlot = Player.setInventorySlot || function(slot, id, count, dam) {
     net.zhuoweizhang.mcpelauncher.ScriptManager.nativeSetInventorySlot(slot, id, count, dam);
 };
@@ -736,13 +755,23 @@ function modTick() {
             Trade.INTERACTPW.dismiss();
         });
     }
+    if(Trade.TRADING) {
+        Entity.setVelX(Trade.SELLER, 0);
+        Entity.setVelY(Trade.SELLER, 0);
+        Entity.setVelZ(Trade.SELLER, 0);
+    }
     
-    if(Entity.getHealth(Player.getEntity()) <= 0) {
+    if(Entity.getHealth(Player.getEntity()) <= 0 || Entity.getHealth(Trade.SELLER) <= 0) {
+        leaveGame();
+    }
+    if(Trade.CUR_HEALTH > Entity.getHealth(Player.getEntity())) {
+        Trade.CUR_HEALTH = Entity.getHealth(Player.getEntity());
         leaveGame();
     }
 }
 
 function newLevel() {
+    Trade.CUR_HEALTH = Entity.getHealth(Player.getEntity());
     Player.addItemCreativeInv(388, 1, 0);
 }
 
@@ -756,3 +785,4 @@ function leaveGame() {
 }
 
 Utils.downloadFontFile();
+
