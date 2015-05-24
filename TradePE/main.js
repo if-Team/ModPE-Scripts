@@ -265,6 +265,10 @@ Update.check = function() {
 Update.update = function() {
     var ctx = Utils.getContext();
     try {
+        if(android.os.Build.VERSION.SDK_INT > 9) {
+            var policy = new android.os.StrictMode.ThreadPolicy.Builder().permitAll().build();
+            android.os.StrictMode.setThreadPolicy(policy);
+        }
         var url = new java.net.URL("https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/TradePE/main.js").openConnection().getInputStream();
         var bis = new java.io.BufferedInputStream(url);
         var target = new java.io.File("/data/data/"+ctx.getPackageName()+"/app_modscripts/"+Utils.getMyScriptName());
@@ -278,6 +282,7 @@ Update.update = function() {
         bos.close();
         Update.finished();
     } catch(e) {
+        print(e);
         //NO INTERNET CONNECTION
     }
 };
