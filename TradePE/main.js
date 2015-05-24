@@ -112,7 +112,7 @@ Trade.init = function() {
         mainPw.dismiss();
     });
     mainLayout.addView(dismiss);
-    var help = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-42, 4, 38, 18, "Help", function() {
+    var help = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-22, 4, 18, 18, "?", function() {
         Help.showScreen();
     });
     mainLayout.addView(help);
@@ -164,12 +164,27 @@ Help.init = function() {
    
     var back = Utils.showBackground();
     mainLayout.addView(back);
-    var head = Utils.showHeader("Help");
+    var head = Utils.showHeader("About");
     mainLayout.addView(head);
     var dismiss = Utils.showButton(4, 4, 38, 18, "Back", function() {
         mainPw.dismiss();
     });
     mainLayout.addView(dismiss);
+    var gotwitter = Utils.showButton(4, ctx.getScreenHeight()/Utils.FOUR-28, (ctx.getScreenWidth()/Utils.FOUR-12)/2, 24, "Twitter", function() {
+        Easter.goToURL("http://twitter.com/dfak0557");
+    });
+    mainLayout.addView(gotwitter);
+    var gomk = Utils.showButton(8+(ctx.getScreenWidth()/Utils.FOUR-12)/2, ctx.getScreenHeight()/Utils.FOUR-28, (ctx.getScreenWidth()/Utils.FOUR-12)/2, 24, "MCPE KOREA" , function() {
+        Easter.goToURL("http://mcpekorea.com");
+    });
+    var name = Utils.justText("TradePE", 8, 32);
+    name.setTextColor(android.graphics.Color.YELLOW);
+    var version = Utils.justText("version "+Trade.getVersion(), 8, 44);
+    var madeby =Utils.justText("Made by Affogatoman", 8, 56);
+    mainLayout.addView(name);
+    mainLayout.addView(version);
+    mainLayout.addView(madeby);
+    mainLayout.addView(gomk);
     mainPw.setContentView(mainLayout);
     mainPw.setWidth(ctx.getScreenWidth());
     mainPw.setHeight(ctx.getScreenHeight());
@@ -318,12 +333,6 @@ Utils.showHeader = function(text) {
     down.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ctx.getScreenWidth(), Utils.FOUR*3));
     vert.addView(down);
     vert.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(Utils.getContext().getScreenWidth(), 28*Utils.FOUR));
-    vert.setOnLongClickListener(new android.view.View.OnLongClickListener({
-        onLongClick: function() {
-            Easter.goToTwitter();
-            return true;
-        }
-    }));
     return vert;
 };
 
@@ -738,9 +747,9 @@ Easter.init = function() {
     Easter.DRAWABLE = drawable;
 };
 
-Easter.goToTwitter = function() {
+Easter.goToURL = function(url) {
     var ctx = Utils.getContext();
-    var uri = android.net.Uri.parse("http://twitter.com/dfak0557");
+    var uri = android.net.Uri.parse(url);
     var intent = new android.content.Intent(android.content.Intent.ACTION_VIEW, uri);
     ctx.startActivity(intent);
 };
