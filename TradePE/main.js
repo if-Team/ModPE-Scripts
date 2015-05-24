@@ -108,10 +108,14 @@ Trade.init = function() {
     mainLayout.addView(itemback2);
     var count = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-95, 69);
     mainLayout.addView(count);
-    var dismiss = Utils.showButton(4, 4, 38, 18, "gui.back", function() {
+    var dismiss = Utils.showButton(4, 4, 38, 18, "Back", function() {
         mainPw.dismiss();
     });
     mainLayout.addView(dismiss);
+    var help = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-42, 4, 38, 18, "Help", function() {
+        Help.showScreen();
+    });
+    mainLayout.addView(help);
     var name = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-133, 40, 108);
     mainLayout.addView(name);
     mainPw.setContentView(mainLayout);
@@ -146,6 +150,37 @@ Trade.onScreenEnd = function() {
     Trade.PAGE = 0;
     if(Utils.isWarning())
         Trade.WARNING_TOAST.cancel();
+};
+
+Help = {};
+
+Help.MAINPW = null;
+
+Help.init = function() {
+    var ctx = Utils.getContext();
+    var mainPw = new android.widget.PopupWindow(ctx);
+    var mainLayout = new android.widget.RelativeLayout(ctx);
+    
+   
+    var back = Utils.showBackground();
+    mainLayout.addView(back);
+    var head = Utils.showHeader("Help");
+    mainLayout.addView(head);
+    var dismiss = Utils.showButton(4, 4, 38, 18, "Back", function() {
+        mainPw.dismiss();
+    });
+    mainLayout.addView(dismiss);
+    mainPw.setContentView(mainLayout);
+    mainPw.setWidth(ctx.getScreenWidth());
+    mainPw.setHeight(ctx.getScreenHeight());
+    mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+    Help.MAINPW = mainPw;
+};
+
+Help.showScreen = function() {
+    Utils.createUiThread(function(ctx) {
+        Help.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+    });
 };
 
 Utils = {};
@@ -743,6 +778,10 @@ function modTick() {
         Trade.INTERACTPW = 0;
         Utils.interactInit();
     }
+    if(Help.MAINPW == null) {
+        Help.MAINPW = 0;
+        Help.init();
+    }
     
     if(Entity.getEntityTypeId(Player.getPointedEntity()) == 15) {
         if(!Trade.INTERACTPW.isShowing()) {
@@ -781,6 +820,8 @@ function leaveGame() {
             Trade.MAINPW.dismiss();
         if(Trade.INTERACTPW.isShowing())
             Trade.INTERACTPW.dismiss();
+        if(Help.MAINPW.isShowing())
+            Help.MAINPW.dismiss();
     });
 }
 
