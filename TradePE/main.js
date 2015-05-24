@@ -170,21 +170,29 @@ Help.init = function() {
         mainPw.dismiss();
     });
     mainLayout.addView(dismiss);
-    var gotwitter = Utils.showButton(4, ctx.getScreenHeight()/Utils.FOUR-28, (ctx.getScreenWidth()/Utils.FOUR-12)/2, 24, "Twitter", function() {
+    var gotwitter = Utils.showButton(7, ctx.getScreenHeight()/Utils.FOUR-30, (ctx.getScreenWidth()/Utils.FOUR-22)/3, 24, "Twitter", function() {
         Easter.goToURL("http://twitter.com/dfak0557");
     });
     mainLayout.addView(gotwitter);
-    var gomk = Utils.showButton(8+(ctx.getScreenWidth()/Utils.FOUR-12)/2, ctx.getScreenHeight()/Utils.FOUR-28, (ctx.getScreenWidth()/Utils.FOUR-12)/2, 24, "MCPE KOREA" , function() {
+    var gomk = Utils.showButton(11+(ctx.getScreenWidth()/Utils.FOUR-22)/3, ctx.getScreenHeight()/Utils.FOUR-30, (ctx.getScreenWidth()/Utils.FOUR-22)/3, 24, "MCPE KOREA" , function() {
         Easter.goToURL("http://mcpekorea.com");
     });
+    mainLayout.addView(gomk);
+    var gogithub = Utils.showButton(15+2*((ctx.getScreenWidth()/Utils.FOUR-22)/3), ctx.getScreenHeight()/Utils.FOUR-30, (ctx.getScreenWidth()/Utils.FOUR-22)/3, 24, "if(Team); GitHub" , function() {
+        Easter.goToURL("http://github.com/if-Team");
+    });
+    mainLayout.addView(gogithub);
     var name = Utils.justText("TradePE", 8, 32);
     name.setTextColor(android.graphics.Color.YELLOW);
     var version = Utils.justText("version "+Trade.getVersion(), 8, 44);
-    var madeby =Utils.justText("Made by Affogatoman", 8, 56);
+    var madeby = Utils.justText("Made by Affogatoman", 8, 56);
     mainLayout.addView(name);
     mainLayout.addView(version);
     mainLayout.addView(madeby);
-    mainLayout.addView(gomk);
+    var check = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-66, 32, 60, 36, "Check\nUpdate", function() {
+        Update.check();
+    });
+    mainLayout.addView(check);
     mainPw.setContentView(mainLayout);
     mainPw.setWidth(ctx.getScreenWidth());
     mainPw.setHeight(ctx.getScreenHeight());
@@ -195,6 +203,96 @@ Help.init = function() {
 Help.showScreen = function() {
     Utils.createUiThread(function(ctx) {
         Help.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+    });
+};
+
+Update = {};
+
+Update.MAINPW = null;
+
+Update.init = function() {
+    var ctx = Utils.getContext();
+    var mainPw = new android.widget.PopupWindow(ctx);
+    var mainLayout = new android.widget.RelativeLayout(ctx);
+    
+    var back = Utils.showBackground();
+    mainLayout.addView(back);
+    var head = Utils.showHeader("New version was found");
+    mainLayout.addView(head);
+    var dismiss = Utils.showButton(4, 4, 38, 18, "Back", function() {
+        mainPw.dismiss();
+    });
+    mainLayout.addView(dismiss);
+    var text = Utils.justText("New version of TradePE was found!\nWill you install it now?", 0, 48, ctx.getScreenWidth()/Utils.FOUR);
+    mainLayout.addView(text);
+    var later = Utils.showButton(7, ctx.getScreenHeight()/Utils.FOUR-30, (ctx.getScreenWidth()/Utils.FOUR-18)/2, 24, "Later", function() {
+        mainPw.dismiss();
+    });
+    mainLayout.addView(later);
+    var yes = Utils.showButton(11+(ctx.getScreenWidth()/Utils.FOUR-18)/2, ctx.getScreenHeight()/Utils.FOUR-30, (ctx.getScreenWidth()/Utils.FOUR-18)/2, 24, "Yes", function() {
+        Update.update();
+    });
+    mainLayout.addView(yes);
+    mainPw.setContentView(mainLayout);
+    mainPw.setWidth(ctx.getScreenWidth());
+    mainPw.setHeight(ctx.getScreenHeight());
+    mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+    Update.MAINPW = mainPw;
+};
+
+Update.showScreen = function() {
+    Utils.createUiThread(function(ctx) {
+        Update.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+    });
+};
+
+Update.check = function() {
+    new java.lang.Thread(new java.lang.Runnable({
+        run: function() {
+            try {
+                var url = new java.net.URL("https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/TradePE/version");
+                var stream = url.openConnection().getInputStream();
+                var version = new java.io.BufferedReader(new java.io.InputStreamReader(stream)).readLine();
+                if(version != Trade.getVersion())
+                    Update.showScreen();
+            } catch(e) {
+                //NO INTERNET CONNECTION
+            }
+        }
+    })).start();
+};
+
+Update.update = function() {
+    var ctx = Utils.getContext();
+    try {
+        var url = new java.net.URL("https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/TradePE/main.js").openConnection().getInputStream();
+        var bis = new java.io.BufferedInputStream(url);
+        var target = new java.io.File("/data/data/"+ctx.getPackageName()+"/app_modscripts/"+Utils.getMyScriptName());
+        target.getParentFile().mkdirs();
+        var bos = new java.io.BufferedOutputStream(new java.io.FileOutputStream(target));
+        var buf = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 4096);
+        var read = 0;
+        while((read = bis.read(buf)) >= 0)
+            bos.write(buf, 0, read);
+        bis.close();
+        bos.close();
+        Update.finished();
+    } catch(e) {
+        //NO INTERNET CONNECTION
+    }
+};
+
+Update.finished = function() {
+    var ctx = Utils.getContext();
+    Utils.createUiThread(function() {
+        android.widget.Toast.makeText(ctx, "Update finished! Rebooting blocklauncher...", 1).show();
+        new android.os.Handler().postDelayed(new java.lang.Runnable({
+            run: function() {
+                var i = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName());
+                i.addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                ctx.startActivity(i);
+            }
+        }),500);
     });
 };
 
@@ -216,6 +314,16 @@ Utils.FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMP
 
 Utils.hasFontFile = function() {
     return new java.io.File("/sdcard/아포카토맨/minecraft.ttf").exists();
+};
+
+Utils.getMyScriptName = function() {
+    var scripts = net.zhuoweizhang.mcpelauncher.ScriptManager.scripts;
+    for(var i = 0; i < scripts.size(); i++) {
+        var script = scripts.get(i);
+        var scope = script.scope;
+        if(org.mozilla.javascript.ScriptableObject.hasProperty(scope, "Trade") && org.mozilla.javascript.ScriptableObject.hasProperty(scope, "Utils") && org.mozilla.javascript.ScriptableObject.hasProperty(scope, "Help"))
+            return script.name;
+	}
 };
 
 Utils.downloadFontFile = function() {
@@ -358,7 +466,8 @@ Utils.showButton = function(x, y, width, height, text, onclick) {
     button.setTypeface(Utils.getTypeface());
     button.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
     button.setTextSize(4*Utils.FOUR);
-    button.setSingleLine(true);
+    if(text.indexOf("\n") < 0)
+        button.setSingleLine(true);
     var current = false;
     button.setOnTouchListener(new android.view.View.OnTouchListener({
         onTouch: function(view, event) {
@@ -592,7 +701,7 @@ Utils.addItemInventory = function(id, count, dam) {
     }
 };
 
-var CachedString = {};
+CachedString = {};
 
 CachedString.KEY = [];
 CachedString.DATA = [];
@@ -600,8 +709,8 @@ CachedString.DATA = [];
 Utils.getStringBuilder = function(text, color, scale, shadowc) {
     if(text.charCodeAt(text.length-1) == 13)
         text = text.substring(0, text.length-1);
-    if(CachedString.KEY.indexOf(text) >= 0)
-        return CachedString.DATA[CachedString.KEY.indexOf(text)];
+    if(CachedString.KEY.indexOf(text+color) >= 0)
+        return CachedString.DATA[CachedString.KEY.indexOf(text+color) ];
         
     if(scale == null)
         scale = 1;
@@ -641,7 +750,7 @@ Utils.getStringBuilder = function(text, color, scale, shadowc) {
         canvas.drawBitmap(bitmap, 0, 0, p2);
         builder.setSpan(new android.text.style.ImageSpan(Utils.getContext(), android.graphics.Bitmap.createScaledBitmap(result, scale*8*Utils.FOUR, scale*9*Utils.FOUR, false)), i, i+1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
-    CachedString.KEY.push(text);
+    CachedString.KEY.push(text+color);
     CachedString.DATA.push(builder);
     return builder;
 };
@@ -791,6 +900,10 @@ function modTick() {
         Help.MAINPW = 0;
         Help.init();
     }
+    if(Update.MAINPW == null) {
+        Update.MAINPW = 0;
+        Update.init();
+    }
     
     if(Entity.getEntityTypeId(Player.getPointedEntity()) == 15) {
         if(!Trade.INTERACTPW.isShowing()) {
@@ -820,7 +933,6 @@ function modTick() {
 
 function newLevel() {
     Trade.CUR_HEALTH = Entity.getHealth(Player.getEntity());
-    Player.addItemCreativeInv(388, 1, 0);
 }
 
 function leaveGame() {
