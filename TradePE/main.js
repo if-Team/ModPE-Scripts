@@ -84,8 +84,6 @@ Trade.init = function() {
     mainLayout.addView(cost);
     var arrow = Utils.renderArrow(ctx.getScreenWidth()/Utils.FOUR/2-8, 60+17);
     mainLayout.addView(arrow);
-    Easter.DRAWABLE.start();
-    arrow.setBackgroundDrawable(Easter.DRAWABLE);
     var left = Utils.showButton(25, 60, 18, 50, "<", function(view) {
         Utils.minusPage(view);
         Utils.updateTradeList(name, itemback2, cost, count);
@@ -417,7 +415,23 @@ Utils.renderArrow = function(x, y) {
     var params = new android.widget.RelativeLayout.LayoutParams(16*Utils.FOUR, 16*Utils.FOUR);
     params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
     view.setLayoutParams(params);
-    view.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(bitmap, 16*Utils.FOUR, 16*Utils.FOUR, false)));
+    var drawable = new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(bitmap, 16*Utils.FOUR, 16*Utils.FOUR, false));
+    view.setBackgroundDrawable(drawable);
+    view.setOnLongClickListener(new android.view.View.OnLongClickListener({
+        onLongClick: function() {
+            Utils.createUiThread(function() {
+                view.setBackgroundDrawable(Easter.DRAWABLE);
+                Easter.DRAWABLE.start();
+            });
+            new android.os.Handler().postDelayed(new java.lang.Runnable({
+                run: function() {
+                    view.setBackgroundDrawable(drawable);
+                    Easter.DRAWABLE.stop();
+                }
+            }), 1200);
+            return true;
+        }
+    }));
     return view;
 };
 
@@ -669,10 +683,10 @@ Easter.DRAWABLE = null;
 Easter.init = function() {
     var records = ["11", "13", "blocks", "cat", "chirp", "far", "mall", "mellohi", "stal", "strad", "wait", "ward"];
     var drawable = new android.graphics.drawable.AnimationDrawable();
-    drawable.setOneShot(false);
+    drawable.setOneShot(true);
     for(var i = 0; i < 12; i++) {
         var bm = Utils.getItemImage("record_"+records[i], 0);
-        drawable.addFrame(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(bm, bm.getWidth()*Utils.FOUR, bm.getHeight()*Utils.FOUR, false)), 50);
+        drawable.addFrame(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(bm, bm.getWidth()*Utils.FOUR, bm.getHeight()*Utils.FOUR, false)), 100);
     }
     Easter.DRAWABLE = drawable;
 };
