@@ -82,7 +82,7 @@ Trade.init = function() {
     mainLayout.addView(itemback);
     var item = Utils.getItemImage("emerald", 0);
     itemback.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*1.6, item.getHeight()*Utils.FOUR*1.6, false));
-    var cost = Utils.justText("", 63, 69);
+    var cost = Utils.justText("", 63, 67);
     mainLayout.addView(cost);
     var arrow = Utils.renderArrow(ctx.getScreenWidth()/Utils.FOUR/2-8, 77);
     mainLayout.addView(arrow);
@@ -106,7 +106,7 @@ Trade.init = function() {
     mainLayout.addView(sell);
     var itemback2 = Utils.showItemBackground(ctx.getScreenWidth()/Utils.FOUR-99, 65);
     mainLayout.addView(itemback2);
-    var count = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-95, 69);
+    var count = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-95, 67);
     mainLayout.addView(count);
     var dismiss = Utils.showButton(4, 4, 38, 18, "Back", function() {
         mainPw.dismiss();
@@ -254,12 +254,15 @@ Update.check = function() {
     new java.lang.Thread(new java.lang.Runnable({
         run: function() {
             try {
+                Loading.showScreen();
                 var url = new java.net.URL("https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/TradePE/version");
                 var stream = url.openConnection().getInputStream();
                 var version = new java.io.BufferedReader(new java.io.InputStreamReader(stream)).readLine();
                 if(version != Trade.getVersion())
                     Update.showScreen();
+                Loading.killScreen();
             } catch(e) {
+                Loading.killScreen();
                 //NO INTERNET CONNECTION
             }
         }
@@ -268,25 +271,31 @@ Update.check = function() {
 
 Update.update = function() {
     var ctx = Utils.getContext();
-    try {
-        if(android.os.Build.VERSION.SDK_INT > 9) {
-            var policy = new android.os.StrictMode.ThreadPolicy.Builder().permitAll().build();
-            android.os.StrictMode.setThreadPolicy(policy);
+    new java.lang.Thread(new java.lang.Runnable({
+        run: function() {
+            try {
+                Loading.showScreen();
+                if(android.os.Build.VERSION.SDK_INT > 9) {
+                    var policy = new android.os.StrictMode.ThreadPolicy.Builder().permitAll().build();
+                    android.os.StrictMode.setThreadPolicy(policy);
+                }
+                var url = new java.net.URL("https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/TradePE/main.js").openConnection().getInputStream();
+                var bis = new java.io.BufferedInputStream(url);
+                var target = new java.io.File("/data/data/"+ctx.getPackageName()+"/app_modscripts/"+Utils.getMyScriptName());
+                var bos = new java.io.BufferedOutputStream(new java.io.FileOutputStream(target));
+                var buf = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 4096);
+                var read = 0;
+                while((read = bis.read(buf)) >= 0)
+                    bos.write(buf, 0, read);
+                bis.close();
+                bos.close();
+                Update.finished();
+            } catch(e) {
+                Loading.killScreen();
+                //NO INTERNET CONNECTION
+            }
         }
-        var url = new java.net.URL("https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/TradePE/main.js").openConnection().getInputStream();
-        var bis = new java.io.BufferedInputStream(url);
-        var target = new java.io.File("/data/data/"+ctx.getPackageName()+"/app_modscripts/"+Utils.getMyScriptName());
-        var bos = new java.io.BufferedOutputStream(new java.io.FileOutputStream(target));
-        var buf = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 4096);
-        var read = 0;
-        while((read = bis.read(buf)) >= 0)
-            bos.write(buf, 0, read);
-        bis.close();
-        bos.close();
-        Update.finished();
-    } catch(e) {
-        //NO INTERNET CONNECTION
-    }
+    })).start();
 };
 
 Update.finished = function() {
@@ -333,7 +342,62 @@ SpecialThanks.showScreen = function() {
     });
 };
 
+Loading = {};
+
+Loading.MAINPW = null;
+
+Loading.init = function() {
+    var ctx = Utils.getContext();
+    var mainPw = new android.widget.PopupWindow(ctx);
+    var mainLayout = new android.widget.RelativeLayout(ctx);
+    
+    var text = ["/", "-", "\\", "|"];
+    var view = Utils.justText("", 0, (ctx.getScreenHeight()/Utils.FOUR-16)/2, ctx.getScreenWidth()/Utils.FOUR);
+    mainLayout.addView(view);
+    var n = 0;
+    new java.lang.Thread(new java.lang.Runnable({
+        run: function() {
+            while(true) {
+                Utils.createUiThread(function() {
+                    view.setText(text[n]);
+                });
+                if(n<3)
+                    n++;
+                else
+                    n = 0;
+                java.lang.Thread.sleep(200);
+            }
+        }
+    })).start();
+    
+    mainPw.setContentView(mainLayout);
+    mainPw.setWidth(ctx.getScreenWidth());
+    mainPw.setHeight(ctx.getScreenHeight());
+    mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.argb(144, 0, 0, 0)));
+    Loading.MAINPW = mainPw;
+};
+
+Loading.showScreen = function() {
+    Utils.createUiThread(function(ctx) {
+        Loading.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+    });
+};
+
+Loading.killScreen = function() {
+    Utils.createUiThread(function() {
+        if(Loading.MAINPW.isShowing())
+            Loading.MAINPW.dismiss();
+    });
+};
+
 Utils = {};
+
+Utils.reset = function() {
+    Trade.MAINPW = null;
+    Help.MAINPW = null;
+    Update.MAINPW = null;
+    SpecialThanks.MAINPW = null;
+};
 
 Utils.getContext = function() {
     return com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
@@ -688,7 +752,7 @@ Utils.warn = function(txt) {
         text.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
         txt = Lang.getData(txt);
         if(Utils.hasNonAscii(txt))
-            text.setText(Utils.getStringBuilder(txt, "#ff0000", 2, "#410000"));
+            text.setText(Utils.getStringBuilder(txt, "#ff0000", 1.5, "#410000"));
         else
             text.setText(txt);
         text.setSingleLine(true);
@@ -1005,6 +1069,10 @@ function modTick() {
     if(SpecialThanks.MAINPW == null) {
         SpecialThanks.MAINPW = 0;
         SpecialThanks.init();
+    }
+    if(Loading.MAINPW == null) {
+        Loading.MAINPW = 0;
+        Loading.init();
     }
     
     if(Entity.getEntityTypeId(Player.getPointedEntity()) == 15) {
