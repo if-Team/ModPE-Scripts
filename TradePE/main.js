@@ -11,7 +11,7 @@ Trade.TRADING = null;
 Trade.CUR_HEALTH = null;
 
 Trade.getVersion = function() {
-    return "1.0";
+    return "Indev";
 };
 
 //Trade items
@@ -184,7 +184,7 @@ Help.init = function() {
     mainLayout.addView(gogithub);
     var name = Utils.justText("TradePE", 8, 32);
     name.setTextColor(android.graphics.Color.YELLOW);
-    var version = Utils.justText("version "+Trade.getVersion(), 8, 44);
+    var version = Utils.justText("v"+Trade.getVersion(), 8, 44);
     var madeby = Utils.justText("Made by Affogatoman", 8, 56);
     mainLayout.addView(name);
     mainLayout.addView(version);
@@ -193,6 +193,10 @@ Help.init = function() {
         Update.check();
     });
     mainLayout.addView(check);
+    var thanksto = Utils.showButton(7, ctx.getScreenHeight()/Utils.FOUR-58, 110, 24, "Special Thanks to...", function() {
+        SpecialThanks.showScreen();
+    });
+    mainLayout.addView(thanksto);
     mainPw.setContentView(mainLayout);
     mainPw.setWidth(ctx.getScreenWidth());
     mainPw.setHeight(ctx.getScreenHeight());
@@ -272,7 +276,6 @@ Update.update = function() {
         var url = new java.net.URL("https://raw.githubusercontent.com/if-Team/ModPE-Scripts/master/TradePE/main.js").openConnection().getInputStream();
         var bis = new java.io.BufferedInputStream(url);
         var target = new java.io.File("/data/data/"+ctx.getPackageName()+"/app_modscripts/"+Utils.getMyScriptName());
-        target.getParentFile().mkdirs();
         var bos = new java.io.BufferedOutputStream(new java.io.FileOutputStream(target));
         var buf = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 4096);
         var read = 0;
@@ -282,7 +285,6 @@ Update.update = function() {
         bos.close();
         Update.finished();
     } catch(e) {
-        print(e);
         //NO INTERNET CONNECTION
     }
 };
@@ -297,7 +299,37 @@ Update.finished = function() {
                 i.addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 ctx.startActivity(i);
             }
-        }),500);
+        }), 500);
+    });
+};
+
+SpecialThanks = {};
+
+SpecialThanks.MAINPW = null;
+
+SpecialThanks.init = function() {
+    var ctx = Utils.getContext();
+    var mainPw = new android.widget.PopupWindow(ctx);
+    var mainLayout = new android.widget.RelativeLayout(ctx);
+    
+    var back = Utils.showBackground();
+    mainLayout.addView(back);
+    var head = Utils.showHeader("Special Thanks to");
+    mainLayout.addView(head);
+    var dismiss = Utils.showButton(4, 4, 38, 18, "Back", function() {
+        mainPw.dismiss();
+    });
+    mainLayout.addView(dismiss);
+    mainPw.setContentView(mainLayout);
+    mainPw.setWidth(ctx.getScreenWidth());
+    mainPw.setHeight(ctx.getScreenHeight());
+    mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+    SpecialThanks.MAINPW = mainPw;
+};
+
+SpecialThanks.showScreen = function() {
+    Utils.createUiThread(function(ctx) {
+        SpecialThanks.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
     });
 };
 
@@ -335,7 +367,7 @@ Utils.downloadFontFile = function() {
     if(Utils.hasFontFile())
         return;
     else {
-        var url = new java.net.URL("https://www.dropbox.com/s/dykptassixwqnl2/minecraft.ttf?dl=1").openConnection().getInputStream();
+        var url = new java.net.URL("https://www.dropbox.com/s/2th32u86n0fwhq2/minecraft.ttf?dl=1").openConnection().getInputStream();
         var bis = new java.io.BufferedInputStream(url);
         var target = new java.io.File("/sdcard/아포카토맨/minecraft.ttf");
         target.getParentFile().mkdirs();
@@ -415,6 +447,7 @@ Utils.showBackground = function() {
 };
 
 Utils.showHeader = function(text) {
+    text = Lang.getData(text);
     var ctx = Utils.getContext();
     var vert = new android.widget.LinearLayout(ctx);
     vert.setOrientation(android.widget.LinearLayout.VERTICAL);
@@ -431,6 +464,8 @@ Utils.showHeader = function(text) {
     center.setGravity(android.view.Gravity.CENTER);
     center.setTextSize(4*Utils.FOUR);
     center.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
+    if(Utils.hasNonAscii(text))
+        text = Utils.getStringBuilder(text, "#e1e1e1");
     center.setText(text);
     center.setShadowLayer(0.00001, Utils.FOUR, Utils.FOUR, android.graphics.Color.DKGRAY);
     center.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 3, 0, 8, 25), ctx.getScreenWidth()-Utils.FOUR*4, Utils.FOUR*25, false)));
@@ -542,6 +577,7 @@ Utils.showItemBackground = function(x, y) {
 };
 
 Utils.justText = function(str, x, y, width) {
+    str = Lang.getData(str);
     var text = new android.widget.TextView(Utils.getContext());
     text.setLineSpacing(Utils.FOUR, 1);
     text.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
@@ -552,7 +588,7 @@ Utils.justText = function(str, x, y, width) {
         params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
     params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
     text.setLayoutParams(params);
-    text.setText(Utils.hasNonAscii(str) ? Utils.getStringBuilder(str) : str);
+    text.setText(Utils.hasNonAscii(str) ? Utils.getStringBuilder(str, "#e1e1e1") : str);
     text.setGravity(android.view.Gravity.CENTER);
     text.setTypeface(Utils.getTypeface());
     text.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
@@ -642,7 +678,7 @@ Utils.buyThing = function() {
     } else {
         if(Utils.isWarning())
             Trade.WARNING_TOAST.cancel();
-        Utils.warn("Not Enough Emeralds!");
+        Utils.warn("Not Enough Emeralds");
     }
 };
 
@@ -650,6 +686,7 @@ Utils.warn = function(txt) {
     Utils.createUiThread(function(ctx) {
         var text = new android.widget.TextView(ctx);
         text.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
+        txt = Lang.getData(txt);
         if(Utils.hasNonAscii(txt))
             text.setText(Utils.getStringBuilder(txt, "#ff0000", 2, "#410000"));
         else
@@ -677,7 +714,7 @@ Utils.sellThing = function() {
     } else {
         if(Utils.isWarning())
             Trade.WARNING_TOAST.cancel();
-        Utils.warn("Not Enough items!");
+        Utils.warn("Not Enough Items");
     }
 };
 
@@ -745,7 +782,9 @@ Utils.getStringBuilder = function(text, color, scale, shadowc) {
             num = "0"+num;
         var font = android.graphics.BitmapFactory.decodeStream(ModPE.openInputStreamFromTexturePack("images/font/glyph_"+num+".png"));
         var bitmap = Utils.trimImage(font, x, y, 15, 16);
-        var result = android.graphics.Bitmap.createBitmap(16, 18, android.graphics.Bitmap.Config.ARGB_8888);
+        if(!/[가-힣]/.test(text.charAt(i)))
+            bitmap = Utils.cutText(bitmap);
+        var result = android.graphics.Bitmap.createBitmap(bitmap.getWidth()+2, 18, android.graphics.Bitmap.Config.ARGB_8888);
         var canvas = new android.graphics.Canvas(result);
         var p = new android.graphics.Paint();
         var p2 = new android.graphics.Paint();
@@ -753,11 +792,41 @@ Utils.getStringBuilder = function(text, color, scale, shadowc) {
         canvas.drawBitmap(bitmap, 2, 2, p);
         p2.setColorFilter(new android.graphics.PorterDuffColorFilter(color, android.graphics.PorterDuff.Mode.MULTIPLY));
         canvas.drawBitmap(bitmap, 0, 0, p2);
-        builder.setSpan(new android.text.style.ImageSpan(Utils.getContext(), android.graphics.Bitmap.createScaledBitmap(result, scale*8*Utils.FOUR, scale*9*Utils.FOUR, false)), i, i+1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        builder.setSpan(new android.text.style.ImageSpan(Utils.getContext(), android.graphics.Bitmap.createScaledBitmap(result, scale*((bitmap.getWidth()+2)/2)*Utils.FOUR, scale*9*Utils.FOUR, false)), i, i+1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
     CachedString.KEY.push(text+color);
     CachedString.DATA.push(builder);
     return builder;
+};
+
+Utils.cutText = function(bitmap) {
+    var start = -1, end = 0;
+    var arr = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+    var Color = android.graphics.Color;
+    arr.forEach(function(i) {
+        if(Color.alpha(bitmap.getPixel(i, 0))>0 ||
+           Color.alpha(bitmap.getPixel(i, 1))>0 ||
+           Color.alpha(bitmap.getPixel(i, 2))>0 ||
+           Color.alpha(bitmap.getPixel(i, 3))>0 ||
+           Color.alpha(bitmap.getPixel(i, 4))>0 ||
+           Color.alpha(bitmap.getPixel(i, 5))>0 ||
+           Color.alpha(bitmap.getPixel(i, 6))>0 ||
+           Color.alpha(bitmap.getPixel(i, 7))>0 ||
+           Color.alpha(bitmap.getPixel(i, 8))>0 ||
+           Color.alpha(bitmap.getPixel(i, 9))>0 ||
+           Color.alpha(bitmap.getPixel(i, 10))>0 ||
+           Color.alpha(bitmap.getPixel(i, 11))>0 ||
+           Color.alpha(bitmap.getPixel(i, 12))>0 ||
+           Color.alpha(bitmap.getPixel(i, 13))>0 ||
+           Color.alpha(bitmap.getPixel(i, 14))>0 ||
+           Color.alpha(bitmap.getPixel(i, 15))>0) {
+            if(start == -1)
+                start = i;
+            if(start>=0)
+                end = i;
+        }
+    });
+	return android.graphics.Bitmap.createBitmap(bitmap, start, 0, end-start+1, 16);
 };
 
 Utils.hasNonAscii = function(str) {
@@ -779,7 +848,7 @@ Utils.interactInit = function() {
         }
     }));
     var drawable = new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getGui(), 0, Utils.getGui().getHeight()*0.640625, Utils.getGui().getWidth()*0.4609375, Utils.getGui().getHeight()*0.078125), 118*0.75*Utils.FOUR, 20*Utils.FOUR, false));
-    drawable.setAlpha(200);
+    drawable.setAlpha(180);
     var pw = new android.widget.PopupWindow(Utils.getContext());
     pw.setContentView(text);
     pw.setWidth(118*0.75*Utils.FOUR);
@@ -840,6 +909,30 @@ Lang.readLang = function() {
 };
 
 Lang.getData = function(key) {
+    /*if(key == "Back")
+        return "돌아가기";
+    if(key == "Trade")
+        return "거래";
+    if(key == "Buy")
+        return "구입";
+    if(key == "Sell")
+        return "판매";
+    if(key == "About")
+        return "정보";
+    if(key == "Check\nUpdate")
+        return "신버전 확인";
+    if(key == "New version was found")
+        return "신버전 발견";
+    if(key == "New version of TradePE was found!\nWill you install it now?")
+        return "TradePE의 신버전을 발견했습니다!\n지금 설치하시겠습니까?";
+    if(key == "Yes")
+        return "확인";
+    if(key == "Later")
+        return "나중에";
+    if(key == "Not Enough Emeralds")
+        return "에메랄드가 부족합니다";
+    if(key == "Not Enough Items")
+        return "아이템이 부족합니다";*/
     var data = Lang.DATA[Lang.KEY.indexOf(key)];
     if(typeof data === "undefined")
         return key;
@@ -909,6 +1002,10 @@ function modTick() {
         Update.MAINPW = 0;
         Update.init();
     }
+    if(SpecialThanks.MAINPW == null) {
+        SpecialThanks.MAINPW = 0;
+        SpecialThanks.init();
+    }
     
     if(Entity.getEntityTypeId(Player.getPointedEntity()) == 15) {
         if(!Trade.INTERACTPW.isShowing()) {
@@ -942,12 +1039,16 @@ function newLevel() {
 
 function leaveGame() {
     Utils.createUiThread(function() {
-        if(Trade.MAINPW.isShowing())
+        if(Trade.MAINPW != 0 && Trade.MAINPW.isShowing())
             Trade.MAINPW.dismiss();
-        if(Trade.INTERACTPW.isShowing())
+        if(Trade.INTERACTPW != 0 && Trade.INTERACTPW.isShowing())
             Trade.INTERACTPW.dismiss();
-        if(Help.MAINPW.isShowing())
+        if(Help.MAINPW != 0 && Help.MAINPW.isShowing())
             Help.MAINPW.dismiss();
+        if(Update.MAINPW != 0 && Update.MAINPW.isShowing())
+            Update.MAINPW.dismiss();
+        if(SpecialThanks.MAINPW != 0 && SpecialThanks.MAINPW.isShowing())
+            SpecialThanks.MAINPW.dismiss();
     });
 }
 
