@@ -955,7 +955,7 @@ Utils.isWarning = function() {
 };
 
 Utils.getCurrentLanguage = function() {
-    return "ko";
+    return "en_US";
 };
 
 Utils.getStringFor = function(key) {
@@ -1119,55 +1119,199 @@ Utils.downloadFontFile();
 var R = {
     string: {
         trade: {
-            en: "Trade",
-            ko: "거래하기"
+            en_US: "Trade",
+            ko_KR: "거래하기",
+            ja_JP: "",
+            de_DE: "",
+            es_ES: "",
+            es_419: "",
+            fr_FR: "",
+            fr_CA: "",
+            it_IT: "",
+            pt_BR: "",
+            pt_PT: "",
+            ru_RU: "",
+            zh_CN: "",
+            zh_TW: ""
         },
         back: {
             all: "gui.back"
         },
         buy: {
-            en: "Buy",
-            ko: "구입"
+            en_US: "Buy",
+            ko_KR: "구입",
+            ja_JP: "",
+            de_DE: "",
+            es_ES: "",
+            es_419: "",
+            fr_FR: "",
+            fr_CA: "",
+            it_IT: "",
+            pt_BR: "",
+            pt_PT: "",
+            ru_RU: "",
+            zh_CN: "",
+            zh_TW: ""
         },
         sell: {
-            en: "Sell",
-            ko: "판매"
+            en_US: "Sell",
+            ko_KR: "판매",
+            ja_JP: "",
+            de_DE: "",
+            es_ES: "",
+            es_419: "",
+            fr_FR: "",
+            fr_CA: "",
+            it_IT: "",
+            pt_BR: "",
+            pt_PT: "",
+            ru_RU: "",
+            zh_CN: "",
+            zh_TW: ""
         },
         about: {
-            en: "About",
-            ko: "정보"
+            en_US: "About",
+            ko_KR: "정보",
+            ja_JP: "",
+            de_DE: "",
+            es_ES: "",
+            es_419: "",
+            fr_FR: "",
+            fr_CA: "",
+            it_IT: "",
+            pt_BR: "",
+            pt_PT: "",
+            ru_RU: "",
+            zh_CN: "",
+            zh_TW: ""
         },
         check_update: {
-            en: "Check\nUpdate",
-            ko: "신버전\n확인"
+            en_US: "Check\nUpdate",
+            ko_KR: "신버전\n확인",
+            ja_JP: "",
+            de_DE: "",
+            es_ES: "",
+            es_419: "",
+            fr_FR: "",
+            fr_CA: "",
+            it_IT: "",
+            pt_BR: "",
+            pt_PT: "",
+            ru_RU: "",
+            zh_CN: "",
+            zh_TW: ""
         },
         special_thanks: {
-            en: "Special Thanks to",
-            ko: "도와주신 분들"
+            en_US: "Special Thanks to",
+            ko_KR: "도와주신 분들",
+            ja_JP: "",
+            de_DE: "",
+            es_ES: "",
+            es_419: "",
+            fr_FR: "",
+            fr_CA: "",
+            it_IT: "",
+            pt_BR: "",
+            pt_PT: "",
+            ru_RU: "",
+            zh_CN: "",
+            zh_TW: ""
         },
         new_found_1: {
-            en: "New version was found",
-            ko: "신버전 발견됨"
+            en_US: "New version was found",
+            ko_KR: "신버전 발견됨",
+            ja_JP: "",
+            de_DE: "",
+            es_ES: "",
+            es_419: "",
+            fr_FR: "",
+            fr_CA: "",
+            it_IT: "",
+            pt_BR: "",
+            pt_PT: "",
+            ru_RU: "",
+            zh_CN: "",
+            zh_TW: ""
         },
         new_found_2: {
-            en: "New version of TradePE was found!\nWill you install it now?",
-            ko: "TradePE의 신버전이 발견되었습니다!\n지금 설치하시겠습니까?"
+            en_US: "New version of TradePE was found!\nWill you install it now?",
+            ko_KR: "TradePE의 신버전이 발견되었습니다!\n지금 설치하시겠습니까?",
+            ja_JP: "",
+            de_DE: "",
+            es_ES: "",
+            es_419: "",
+            fr_FR: "",
+            fr_CA: "",
+            it_IT: "",
+            pt_BR: "",
+            pt_PT: "",
+            ru_RU: "",
+            zh_CN: "",
+            zh_TW: ""
         },
         yes: {
-            en: "Yes",
-            ko: "확인"
+            en_US: "Yes",
+            ko_KR: "확인",
+            ja_JP: "",
+            de_DE: "",
+            es_ES: "",
+            es_419: "",
+            fr_FR: "",
+            fr_CA: "",
+            it_IT: "",
+            pt_BR: "",
+            pt_PT: "",
+            ru_RU: "",
+            zh_CN: "",
+            zh_TW: ""
         },
         later: {
-            en: "Later",
-            ko: "나중에"
+            en_US: "Later",
+            ko_KR: "나중에",
+            ja_JP: "",
+            de_DE: "",
+            es_ES: "",
+            es_419: "",
+            fr_FR: "",
+            fr_CA: "",
+            it_IT: "",
+            pt_BR: "",
+            pt_PT: "",
+            ru_RU: "",
+            zh_CN: "",
+            zh_TW: ""
         },
         not_enough_item: {
-            en: "Not Enough Items",
-            ko: "아이템이 부족합니다"
+            en_US: "Not Enough Items",
+            ko_KR: "아이템이 부족합니다",
+            ja_JP: "",
+            de_DE: "",
+            es_ES: "",
+            es_419: "",
+            fr_FR: "",
+            fr_CA: "",
+            it_IT: "",
+            pt_BR: "",
+            pt_PT: "",
+            ru_RU: "",
+            zh_CN: "",
+            zh_TW: ""
         },
         not_enough_emerald: {
-            en: "Not Enough Emeralds",
-            ko: "에메랄드가 부족합니다"
+            en_US: "Not Enough Emeralds",
+            ko_KR: "에메랄드가 부족합니다",
+            ja_JP: "",
+            de_DE: "",
+            es_ES: "",
+            es_419: "",
+            fr_FR: "",
+            fr_CA: "",
+            it_IT: "",
+            pt_BR: "",
+            pt_PT: "",
+            ru_RU: "",
+            zh_CN: "",
+            zh_TW: ""
         }
     }
 };
