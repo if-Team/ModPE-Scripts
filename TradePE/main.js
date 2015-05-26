@@ -76,7 +76,7 @@ Trade.init = function() {
 
     var back = Utils.showBackground();
     mainLayout.addView(back);
-    var header = Utils.showHeader("Trade");
+    var header = Utils.showHeader(R.string.trade);
     mainLayout.addView(header);
     var itemback = Utils.showItemBackground(59, 65);
     mainLayout.addView(itemback);
@@ -96,11 +96,11 @@ Trade.init = function() {
         Utils.updateTradeList(name, itemback2, cost, count);
     });
     mainLayout.addView(right);
-    var buy = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-133, 130, 108, 32, "Buy", function() {
+    var buy = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-133, 130, 108, 32, R.string.buy, function() {
         Utils.buyThing();
     });
     mainLayout.addView(buy);
-    var sell = Utils.showButton(25, 130, 108, 32, "Sell", function() {
+    var sell = Utils.showButton(25, 130, 108, 32, R.string.sell, function() {
         Utils.sellThing();
     });
     mainLayout.addView(sell);
@@ -108,7 +108,7 @@ Trade.init = function() {
     mainLayout.addView(itemback2);
     var count = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-95, 67);
     mainLayout.addView(count);
-    var dismiss = Utils.showButton(4, 4, 38, 18, "Back", function() {
+    var dismiss = Utils.showButton(4, 4, 38, 18, R.string.back, function() {
         mainPw.dismiss();
     });
     mainLayout.addView(dismiss);
@@ -164,9 +164,9 @@ Help.init = function() {
    
     var back = Utils.showBackground();
     mainLayout.addView(back);
-    var head = Utils.showHeader("About");
+    var head = Utils.showHeader(R.string.about);
     mainLayout.addView(head);
-    var dismiss = Utils.showButton(4, 4, 38, 18, "Back", function() {
+    var dismiss = Utils.showButton(4, 4, 38, 18, R.string.back, function() {
         mainPw.dismiss();
     });
     mainLayout.addView(dismiss);
@@ -189,11 +189,11 @@ Help.init = function() {
     mainLayout.addView(name);
     mainLayout.addView(version);
     mainLayout.addView(madeby);
-    var check = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-66, 32, 60, 36, "Check\nUpdate", function() {
+    var check = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-66, 32, 60, 36, R.string.check_update, function() {
         Update.check();
     });
     mainLayout.addView(check);
-    var thanksto = Utils.showButton(7, ctx.getScreenHeight()/Utils.FOUR-58, 110, 24, "Special Thanks to...", function() {
+    var thanksto = Utils.showButton(7, ctx.getScreenHeight()/Utils.FOUR-58, 110, 24, R.string.special_thanks, function() {
         SpecialThanks.showScreen();
     });
     mainLayout.addView(thanksto);
@@ -221,19 +221,19 @@ Update.init = function() {
     
     var back = Utils.showBackground();
     mainLayout.addView(back);
-    var head = Utils.showHeader("New version was found");
+    var head = Utils.showHeader(R.string.new_found_1);
     mainLayout.addView(head);
-    var dismiss = Utils.showButton(4, 4, 38, 18, "Back", function() {
+    var dismiss = Utils.showButton(4, 4, 38, 18, R.string.back, function() {
         mainPw.dismiss();
     });
     mainLayout.addView(dismiss);
-    var text = Utils.justText("New version of TradePE was found!\nWill you install it now?", 0, 48, ctx.getScreenWidth()/Utils.FOUR);
+    var text = Utils.justText(R.string.new_found_2, 0, 48, ctx.getScreenWidth()/Utils.FOUR);
     mainLayout.addView(text);
-    var later = Utils.showButton(7, ctx.getScreenHeight()/Utils.FOUR-30, (ctx.getScreenWidth()/Utils.FOUR-18)/2, 24, "Later", function() {
+    var later = Utils.showButton(7, ctx.getScreenHeight()/Utils.FOUR-30, (ctx.getScreenWidth()/Utils.FOUR-18)/2, 24, R.string.later, function() {
         mainPw.dismiss();
     });
     mainLayout.addView(later);
-    var yes = Utils.showButton(11+(ctx.getScreenWidth()/Utils.FOUR-18)/2, ctx.getScreenHeight()/Utils.FOUR-30, (ctx.getScreenWidth()/Utils.FOUR-18)/2, 24, "Yes", function() {
+    var yes = Utils.showButton(11+(ctx.getScreenWidth()/Utils.FOUR-18)/2, ctx.getScreenHeight()/Utils.FOUR-30, (ctx.getScreenWidth()/Utils.FOUR-18)/2, 24, R.string.yes, function() {
         Update.update();
     });
     mainLayout.addView(yes);
@@ -323,9 +323,9 @@ SpecialThanks.init = function() {
     
     var back = Utils.showBackground();
     mainLayout.addView(back);
-    var head = Utils.showHeader("Special Thanks to");
+    var head = Utils.showHeader(R.string.special_thanks);
     mainLayout.addView(head);
-    var dismiss = Utils.showButton(4, 4, 38, 18, "Back", function() {
+    var dismiss = Utils.showButton(4, 4, 38, 18, R.string.back, function() {
         mainPw.dismiss();
     });
     mainLayout.addView(dismiss);
@@ -742,7 +742,7 @@ Utils.buyThing = function() {
     } else {
         if(Utils.isWarning())
             Trade.WARNING_TOAST.cancel();
-        Utils.warn("Not Enough Emeralds");
+        Utils.warn(R.string.not_enough_emerald);
     }
 };
 
@@ -778,7 +778,7 @@ Utils.sellThing = function() {
     } else {
         if(Utils.isWarning())
             Trade.WARNING_TOAST.cancel();
-        Utils.warn("Not Enough Items");
+        Utils.warn(R.string.not_enough_item);
     }
 };
 
@@ -812,7 +812,7 @@ CachedString = {};
 CachedString.KEY = [];
 CachedString.DATA = [];
 
-Utils.getStringBuilder = function(text, color, scale, shadowc) {
+Utils.getStringBuilder = function(text, color, scale, shadowc, shadow) {
     if(text.charCodeAt(text.length-1) == 13)
         text = text.substring(0, text.length-1);
     if(CachedString.KEY.indexOf(text+color) >= 0)
@@ -852,8 +852,10 @@ Utils.getStringBuilder = function(text, color, scale, shadowc) {
         var canvas = new android.graphics.Canvas(result);
         var p = new android.graphics.Paint();
         var p2 = new android.graphics.Paint();
-        p.setColorFilter(new android.graphics.PorterDuffColorFilter(shadowc, android.graphics.PorterDuff.Mode.MULTIPLY));
-        canvas.drawBitmap(bitmap, 2, 2, p);
+        if(shadow || shadow == null) {
+            p.setColorFilter(new android.graphics.PorterDuffColorFilter(shadowc, android.graphics.PorterDuff.Mode.MULTIPLY));
+            canvas.drawBitmap(bitmap, 2, 2, p);
+        }
         p2.setColorFilter(new android.graphics.PorterDuffColorFilter(color, android.graphics.PorterDuff.Mode.MULTIPLY));
         canvas.drawBitmap(bitmap, 0, 0, p2);
         builder.setSpan(new android.text.style.ImageSpan(Utils.getContext(), android.graphics.Bitmap.createScaledBitmap(result, scale*((bitmap.getWidth()+2)/2)*Utils.FOUR, scale*9*Utils.FOUR, false)), i, i+1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -901,7 +903,10 @@ Utils.hasNonAscii = function(str) {
 
 Utils.interactInit = function() {
     var text = new android.widget.TextView(Utils.getContext());
-    text.setText("Trade");
+    var txt = Lang.getData(R.string.trade);
+    if(Utils.hasNonAscii(txt))
+        txt = Utils.getStringBuilder(txt, "#e1e1e1", null, null, false);
+    text.setText(txt);
     text.setGravity(android.view.Gravity.CENTER);
     text.setTypeface(Utils.getTypeface());
     text.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
@@ -949,6 +954,16 @@ Utils.isWarning = function() {
     return Trade.WARNING_TOAST != null && Trade.WARNING_TOAST.getView().isShown();
 };
 
+Utils.getCurrentLanguage = function() {
+    return "ko";
+};
+
+Utils.getStringFor = function(key) {
+    if(key["all"] != null)
+        return key["all"];
+    return key[Utils.getCurrentLanguage()];
+};
+
 var Lang = {};
 
 Lang.KEY = null;
@@ -973,30 +988,8 @@ Lang.readLang = function() {
 };
 
 Lang.getData = function(key) {
-    /*if(key == "Back")
-        return "돌아가기";
-    if(key == "Trade")
-        return "거래";
-    if(key == "Buy")
-        return "구입";
-    if(key == "Sell")
-        return "판매";
-    if(key == "About")
-        return "정보";
-    if(key == "Check\nUpdate")
-        return "신버전 확인";
-    if(key == "New version was found")
-        return "신버전 발견";
-    if(key == "New version of TradePE was found!\nWill you install it now?")
-        return "TradePE의 신버전을 발견했습니다!\n지금 설치하시겠습니까?";
-    if(key == "Yes")
-        return "확인";
-    if(key == "Later")
-        return "나중에";
-    if(key == "Not Enough Emeralds")
-        return "에메랄드가 부족합니다";
-    if(key == "Not Enough Items")
-        return "아이템이 부족합니다";*/
+    if(typeof key === "object")
+        key = Utils.getStringFor(key);
     var data = Lang.DATA[Lang.KEY.indexOf(key)];
     if(typeof data === "undefined")
         return key;
@@ -1122,3 +1115,59 @@ function leaveGame() {
 
 Utils.downloadFontFile();
 
+//STRING
+var R = {
+    string: {
+        trade: {
+            en: "Trade",
+            ko: "거래하기"
+        },
+        back: {
+            all: "gui.back"
+        },
+        buy: {
+            en: "Buy",
+            ko: "구입"
+        },
+        sell: {
+            en: "Sell",
+            ko: "판매"
+        },
+        about: {
+            en: "About",
+            ko: "정보"
+        },
+        check_update: {
+            en: "Check\nUpdate",
+            ko: "신버전\n확인"
+        },
+        special_thanks: {
+            en: "Special Thanks to",
+            ko: "도와주신 분들"
+        },
+        new_found_1: {
+            en: "New version was found",
+            ko: "신버전 발견됨"
+        },
+        new_found_2: {
+            en: "New version of TradePE was found!\nWill you install it now?",
+            ko: "TradePE의 신버전이 발견되었습니다!\n지금 설치하시겠습니까?"
+        },
+        yes: {
+            en: "Yes",
+            ko: "확인"
+        },
+        later: {
+            en: "Later",
+            ko: "나중에"
+        },
+        not_enough_item: {
+            en: "Not Enough Items",
+            ko: "아이템이 부족합니다"
+        },
+        not_enough_emerald: {
+            en: "Not Enough Emeralds",
+            ko: "에메랄드가 부족합니다"
+        }
+    }
+};
