@@ -1179,7 +1179,7 @@ var R = {
             ko_KR: "도와주신 분들",
             ru_RU: "Особая благодарность",
             zh_CN: "特别感谢",
-            pt_BR: "Agradecimentos Para Maluquinho"
+            pt_BR: "Agradecimentos Para"
         },
         new_found_1: {
             en_US: "Update!",
