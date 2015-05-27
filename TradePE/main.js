@@ -955,7 +955,7 @@ Utils.isWarning = function() {
 };
 
 Utils.getCurrentLanguage = function() {
-    return "en_US";
+    return "pt_BR";
 };
 
 Utils.getStringFor = function(key) {
@@ -1152,14 +1152,14 @@ var R = {
             pt_BR: "Vender"
         },
         about: {
-            en_US: "About",
-            es_ES: "Acerca de",
-            it_IT: "A riguardo",
+            en_US: "Info",
+            es_ES: "Info",
+            it_IT: "Info",
             ja_JP: "情報",
             ko_KR: "정보",
             ru_RU: "Информация",
-            zh_CN: "关于",
-            pt_BR: "Acerca de"
+            zh_CN: "信息",
+            pt_BR: "Informações"
         },
         check_update: {
             en_US: "Check for updates",
