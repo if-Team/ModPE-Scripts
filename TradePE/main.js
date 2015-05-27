@@ -1250,20 +1250,7 @@ var R = {
             zh_TW: ""
         },
         yes: {
-            en_US: "Yes",
-            ko_KR: "예",
-            ja_JP: "はい",
-            de_DE: "",
-            es_ES: "",
-            es_419: "",
-            fr_FR: "",
-            fr_CA: "",
-            it_IT: "",
-            pt_BR: "",
-            pt_PT: "",
-            ru_RU: "",
-            zh_CN: "",
-            zh_TW: ""
+            all: "gui.yes"
         },
         later: {
             en_US: "Later",
