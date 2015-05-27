@@ -1124,15 +1124,7 @@ var R = {
             ja_JP: "取引する",
             it_IT: "Scambia",
             es_ES: "Comerciar",
-            ru_RU: "Торговля",
-            de_DE: "",
-            es_419: "",
-            fr_FR: "",
-            fr_CA: "",
-            pt_BR: "",
-            pt_PT: "",
-            zh_CN: "",
-            zh_TW: ""
+            ru_RU: "Торговля"
         },
         back: {
             all: "gui.back"
@@ -1143,15 +1135,7 @@ var R = {
             ja_JP: "買取",
             it_IT: "Compra",
             es_ES: "Comprar",
-            ru_RU: "Купить",
-            de_DE: "",
-            es_419: "",
-            fr_FR: "",
-            fr_CA: "",
-            pt_BR: "",
-            pt_PT: "",
-            zh_CN: "",
-            zh_TW: ""
+            ru_RU: "Купить"
         },
         sell: {
             en_US: "Sell",
@@ -1159,15 +1143,7 @@ var R = {
             ja_JP: "販売",
             it_IT: "Vendi",
             es_ES: "Vender",
-            ru_RU: "Продать",
-            de_DE: "",
-            es_419: "",
-            fr_FR: "",
-            fr_CA: "",
-            pt_BR: "",
-            pt_PT: "",
-            zh_CN: "",
-            zh_TW: ""
+            ru_RU: "Продать"
         },
         about: {
             en_US: "About",
@@ -1175,15 +1151,7 @@ var R = {
             ja_JP: "情報",
             it_IT: "A riguardo",
             es_ES: "Acerca de",
-            ru_RU: "Информация",
-            de_DE: "",
-            es_419: "",
-            fr_FR: "",
-            fr_CA: "",
-            pt_BR: "",
-            pt_PT: "",
-            zh_CN: "",
-            zh_TW: ""
+            ru_RU: "Информация"
         },
         check_update: {
             en_US: "Check for updates",
@@ -1191,15 +1159,7 @@ var R = {
             ja_JP: "アップデートをチェック",
             it_IT: "Controlla aggiornamenti",
             es_ES: "Buscar actualización",
-            ru_RU: "Проверить обновления",
-            de_DE: "",
-            es_419: "",
-            fr_FR: "",
-            fr_CA: "",
-            pt_BR: "",
-            pt_PT: "",
-            zh_CN: "",
-            zh_TW: ""
+            ru_RU: "Проверить обновления"
         },
         special_thanks: {
             en_US: "Special thanks to",
@@ -1207,15 +1167,7 @@ var R = {
             ja_JP: "手伝ってくれた人",
             it_IT: "Ringraziamenti speciali per",
             es_ES: "Agradecimiento especial para",
-            ru_RU: "Особая благодарность",
-            de_DE: "",
-            es_419: "",
-            fr_FR: "",
-            fr_CA: "",
-            pt_BR: "",
-            pt_PT: "",
-            zh_CN: "",
-            zh_TW: ""
+            ru_RU: "Особая благодарность"
         },
         new_found_1: {
             en_US: "Update!",
@@ -1223,15 +1175,7 @@ var R = {
             ja_JP: "アップデート！",
             it_IT: "Una nuova versione è stata trovata!", //FIXME: It's too long
             es_ES: "Actualizacion!",
-            ru_RU: "Обновление!",
-            de_DE: "",
-            es_419: "",
-            fr_FR: "",
-            fr_CA: "",
-            pt_BR: "",
-            pt_PT: "",
-            zh_CN: "",
-            zh_TW: ""
+            ru_RU: "Обновление!"
         },
         new_found_2: {
             en_US: "A new version of TradePE has been found!\nWould you like to install it now?",
@@ -1239,15 +1183,7 @@ var R = {
             ja_JP: "TradePEの新しいバージョンを発見しました。\n今すぐにインストールしますか？",
             it_IT: "Una nuova versione di TradePE è stata trovata!\nVuoi installarla ora?",
             es_ES: "Una nueva versión de TradePE ha sido encontrada!\nQuieres instalar ahora?",
-            ru_RU: "Была найдена новая версия TradePE!\nУстановить сейчас?",
-            de_DE: "",
-            es_419: "",
-            fr_FR: "",
-            fr_CA: "",
-            pt_BR: "",
-            pt_PT: "",
-            zh_CN: "",
-            zh_TW: ""
+            ru_RU: "Была найдена новая версия TradePE!\nУстановить сейчас?"
         },
         yes: {
             all: "gui.yes"
@@ -1258,15 +1194,7 @@ var R = {
             ja_JP: "後で",
             it_IT: "Più avanti",
             es_ES: "Despues",
-            ru_RU: "Позже",
-            de_DE: "",
-            es_419: "",
-            fr_FR: "",
-            fr_CA: "",
-            pt_BR: "",
-            pt_PT: "",
-            zh_CN: "",
-            zh_TW: ""
+            ru_RU: "Позже"
         },
         not_enough_item: {
             en_US: "Not enough items",
@@ -1274,15 +1202,7 @@ var R = {
             ja_JP: "アイテムが十分ではありません",
             it_IT: "Non hai abbastanza oggetti",
             es_ES: "No hay items suficientes",
-            ru_RU: "Не хватает предметов",
-            de_DE: "",
-            es_419: "",
-            fr_FR: "",
-            fr_CA: "",
-            pt_BR: "",
-            pt_PT: "",
-            zh_CN: "",
-            zh_TW: ""
+            ru_RU: "Не хватает предметов"
         },
         not_enough_emerald: {
             en_US: "Not enough emeralds",
@@ -1290,15 +1210,7 @@ var R = {
             ja_JP: "エメラルドが十分ではありません",
             it_IT: "Non hai abbastanza Smeraldi",
             es_ES: "No hay esmeraldas suficientes",
-            ru_RU: "Не хватает изумрудов",
-            de_DE: "",
-            es_419: "",
-            fr_FR: "",
-            fr_CA: "",
-            pt_BR: "",
-            pt_PT: "",
-            zh_CN: "",
-            zh_TW: ""
+            ru_RU: "Не хватает изумрудов"
         }
     }
 };
