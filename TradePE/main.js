@@ -1121,7 +1121,7 @@ var R = {
         trade: {
             en_US: "Trade",
             ko_KR: "거래하기",
-            ja_JP: "",
+            ja_JP: "取引する",
             de_DE: "",
             es_ES: "",
             es_419: "",
@@ -1140,7 +1140,7 @@ var R = {
         buy: {
             en_US: "Buy",
             ko_KR: "구입",
-            ja_JP: "",
+            ja_JP: "買取",
             de_DE: "",
             es_ES: "",
             es_419: "",
@@ -1156,7 +1156,7 @@ var R = {
         sell: {
             en_US: "Sell",
             ko_KR: "판매",
-            ja_JP: "",
+            ja_JP: "販売",
             de_DE: "",
             es_ES: "",
             es_419: "",
@@ -1172,7 +1172,7 @@ var R = {
         about: {
             en_US: "About",
             ko_KR: "정보",
-            ja_JP: "",
+            ja_JP: "情報",
             de_DE: "",
             es_ES: "",
             es_419: "",
@@ -1188,7 +1188,7 @@ var R = {
         check_update: {
             en_US: "Check\nUpdate",
             ko_KR: "신버전\n확인",
-            ja_JP: "",
+            ja_JP: "アップデートをチェック",
             de_DE: "",
             es_ES: "",
             es_419: "",
@@ -1204,7 +1204,7 @@ var R = {
         special_thanks: {
             en_US: "Special Thanks to",
             ko_KR: "도와주신 분들",
-            ja_JP: "",
+            ja_JP: "手伝ってくれた人",
             de_DE: "",
             es_ES: "",
             es_419: "",
@@ -1220,7 +1220,7 @@ var R = {
         new_found_1: {
             en_US: "New version was found",
             ko_KR: "신버전 발견됨",
-            ja_JP: "",
+            ja_JP: "新しいバージョンを発見しました",
             de_DE: "",
             es_ES: "",
             es_419: "",
@@ -1236,7 +1236,7 @@ var R = {
         new_found_2: {
             en_US: "New version of TradePE was found!\nWill you install it now?",
             ko_KR: "TradePE의 신버전이 발견되었습니다!\n지금 설치하시겠습니까?",
-            ja_JP: "",
+            ja_JP: "TradePEの新しいバージョンを発見しました。\n今すぐインストールしますか？",
             de_DE: "",
             es_ES: "",
             es_419: "",
@@ -1252,7 +1252,7 @@ var R = {
         yes: {
             en_US: "Yes",
             ko_KR: "확인",
-            ja_JP: "",
+            ja_JP: "はい",
             de_DE: "",
             es_ES: "",
             es_419: "",
@@ -1268,7 +1268,7 @@ var R = {
         later: {
             en_US: "Later",
             ko_KR: "나중에",
-            ja_JP: "",
+            ja_JP: "後で",
             de_DE: "",
             es_ES: "",
             es_419: "",
@@ -1284,7 +1284,7 @@ var R = {
         not_enough_item: {
             en_US: "Not Enough Items",
             ko_KR: "아이템이 부족합니다",
-            ja_JP: "",
+            ja_JP: "アイテムが十分ではありません",
             de_DE: "",
             es_ES: "",
             es_419: "",
@@ -1300,7 +1300,7 @@ var R = {
         not_enough_emerald: {
             en_US: "Not Enough Emeralds",
             ko_KR: "에메랄드가 부족합니다",
-            ja_JP: "",
+            ja_JP: "エメラルドが十分ではありません",
             de_DE: "",
             es_ES: "",
             es_419: "",
