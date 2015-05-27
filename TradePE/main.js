@@ -1186,8 +1186,8 @@ var R = {
             zh_TW: ""
         },
         check_update: {
-            en_US: "Check\nUpdate",
-            ko_KR: "신버전\n확인",
+            en_US: "Check for updates",
+            ko_KR: "업데이트 확인",
             ja_JP: "アップデートをチェック",
             de_DE: "",
             es_ES: "",
@@ -1202,7 +1202,7 @@ var R = {
             zh_TW: ""
         },
         special_thanks: {
-            en_US: "Special Thanks to",
+            en_US: "Special thanks to",
             ko_KR: "도와주신 분들",
             ja_JP: "手伝ってくれた人",
             de_DE: "",
@@ -1218,9 +1218,9 @@ var R = {
             zh_TW: ""
         },
         new_found_1: {
-            en_US: "New version was found",
-            ko_KR: "신버전 발견됨",
-            ja_JP: "新しいバージョンを発見しました",
+            en_US: "A new version has been found",
+            ko_KR: "새 버전 발견됨",
+            ja_JP: "新しいバージョンが見つかりました",
             de_DE: "",
             es_ES: "",
             es_419: "",
@@ -1234,9 +1234,9 @@ var R = {
             zh_TW: ""
         },
         new_found_2: {
-            en_US: "New version of TradePE was found!\nWill you install it now?",
-            ko_KR: "TradePE의 신버전이 발견되었습니다!\n지금 설치하시겠습니까?",
-            ja_JP: "TradePEの新しいバージョンを発見しました。\n今すぐインストールしますか？",
+            en_US: "A new version of TradePE has been found!\nWould you like to install it now?",
+            ko_KR: "TradePE의 새 버전을 발견했습니다!\n지금 바로 설치하시겠습니까?",
+            ja_JP: "TradePEの新しいバージョンを発見しました。\n今すぐにインストールしますか？",
             de_DE: "",
             es_ES: "",
             es_419: "",
@@ -1251,7 +1251,7 @@ var R = {
         },
         yes: {
             en_US: "Yes",
-            ko_KR: "확인",
+            ko_KR: "예",
             ja_JP: "はい",
             de_DE: "",
             es_ES: "",
@@ -1282,7 +1282,7 @@ var R = {
             zh_TW: ""
         },
         not_enough_item: {
-            en_US: "Not Enough Items",
+            en_US: "Not enough items",
             ko_KR: "아이템이 부족합니다",
             ja_JP: "アイテムが十分ではありません",
             de_DE: "",
@@ -1298,7 +1298,7 @@ var R = {
             zh_TW: ""
         },
         not_enough_emerald: {
-            en_US: "Not Enough Emeralds",
+            en_US: "Not enough emeralds",
             ko_KR: "에메랄드가 부족합니다",
             ja_JP: "エメラルドが十分ではありません",
             de_DE: "",
