@@ -1154,9 +1154,9 @@ var R = {
             it_IT: "Scambia",
             ja_JP: "取引する",
             ko_KR: "거래하기",
+            pt_BR: "Comércio",
             ru_RU: "Торговля",
-            zh_CN: "交易",
-            pt_BR: "Comércio"
+            zh_CN: "交易"
         },
         back: {
             all: "gui.back"
@@ -1167,9 +1167,9 @@ var R = {
             it_IT: "Compra",
             ja_JP: "買取",
             ko_KR: "구입",
+            pt_BR: "Comprar",
             ru_RU: "Купить",
-            zh_CN: "购买",
-            pt_BR: "Comprar"
+            zh_CN: "购买"
         },
         sell: {
             en_US: "Sell",
@@ -1177,9 +1177,9 @@ var R = {
             it_IT: "Vendi",
             ja_JP: "販売",
             ko_KR: "판매",
+            pt_BR: "Vender",
             ru_RU: "Продать",
-            zh_CN: "出售",
-            pt_BR: "Vender"
+            zh_CN: "出售"
         },
         about: {
             en_US: "Info",
@@ -1187,9 +1187,9 @@ var R = {
             it_IT: "Info",
             ja_JP: "情報",
             ko_KR: "정보",
+            pt_BR: "Informações",
             ru_RU: "Информация",
-            zh_CN: "信息",
-            pt_BR: "Informações"
+            zh_CN: "信息"
         },
         check_update: {
             en_US: "Check for updates",
@@ -1197,9 +1197,9 @@ var R = {
             it_IT: "Controlla aggiornamenti",
             ja_JP: "アップデートをチェック",
             ko_KR: "업데이트 확인",
+            pt_BR: "Ver se há Atualizaçōes",
             ru_RU: "Проверить обновления",
-            zh_CN: "检查更新",
-            pt_BR: "Ver se há Atualizaçōes"
+            zh_CN: "检查更新"
         },
         special_thanks: {
             en_US: "Special thanks to",
@@ -1207,9 +1207,9 @@ var R = {
             it_IT: "Ringraziamenti speciali per",
             ja_JP: "手伝ってくれた人",
             ko_KR: "도와주신 분들",
+            pt_BR: "Agradecimentos Para",
             ru_RU: "Особая благодарность",
-            zh_CN: "特别感谢",
-            pt_BR: "Agradecimentos Para"
+            zh_CN: "特别感谢"
         },
         new_found_1: {
             en_US: "Update!",
@@ -1217,9 +1217,9 @@ var R = {
             it_IT: "Aggiornamenti!",
             ja_JP: "アップデート！",
             ko_KR: "업데이트!",
+            pt_BR: "Atualização!",
             ru_RU: "Обновление!",
-            zh_CN: "有更新！",
-            pt_BR: "Atualização!"
+            zh_CN: "有更新！"
         },
         new_found_2: {
             en_US: "A new version of TradePE has been found!\nWould you like to install it now?",
@@ -1227,9 +1227,9 @@ var R = {
             it_IT: "Una nuova versione di TradePE è stata trovata!\nVuoi installarla ora?",
             ja_JP: "TradePEの新しいバージョンを発見しました。\n今すぐにインストールしますか？",
             ko_KR: "TradePE의 새 버전을 발견했습니다!\n지금 바로 설치하시겠습니까?",
+            pt_BR: "Uma nova versão de TradePE está disponivel!\nVoce quer instalar agora?",
             ru_RU: "Была найдена новая версия TradePE!\nУстановить сейчас?",
-            zh_CN: "发现TradePE的新版本！\n立即下载？",
-            pt_BR: "Uma nova versão de TradePE está disponivel!\nVoce quer instalar agora?"
+            zh_CN: "发现TradePE的新版本！\n立即下载？"
         },
         yes: {
             all: "gui.yes"
@@ -1240,9 +1240,9 @@ var R = {
             it_IT: "Più avanti",
             ja_JP: "後で",
             ko_KR: "나중에",
+            pt_BR: "Depois",
             ru_RU: "Позже",
-            zh_CN: "稍后",
-            pt_BR: "Depois"
+            zh_CN: "稍后"
         },
         not_enough_item: {
             en_US: "Not enough items",
@@ -1250,9 +1250,9 @@ var R = {
             it_IT: "Non hai abbastanza oggetti",
             ja_JP: "アイテムが十分ではありません",
             ko_KR: "아이템이 부족합니다",
+            pt_BR: "Voce não Tem items",
             ru_RU: "Не хватает предметов",
-            zh_CN: "物品不足",
-            pt_BR: "Voce não Tem items"
+            zh_CN: "物品不足"
         },
         not_enough_emerald: {
             en_US: "Not enough emeralds",
@@ -1260,9 +1260,9 @@ var R = {
             it_IT: "Non hai abbastanza Smeraldi",
             ja_JP: "エメラルドが十分ではありません",
             ko_KR: "에메랄드가 부족합니다",
+            pt_BR: "Voce não tem esmeraldas",
             ru_RU: "Не хватает изумрудов",
-            zh_CN: "绿宝石不足",
-            pt_BR: "Voce não tem esmeraldas"
+            zh_CN: "绿宝石不足"
         }
     }
 };
