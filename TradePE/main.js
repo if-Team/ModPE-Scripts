@@ -89,20 +89,20 @@ Trade.init = function() {
     var left = Utils.showButton(25, 60, 18, 50, "<", function(view) {
         Utils.minusPage(view);
         Utils.updateTradeList(name, itemback2, cost, count);
-    });
+    }, true, false);
     mainLayout.addView(left);
     var right = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-43, 60, 18, 50, ">", function(view) {
         Utils.plusPage(view);
         Utils.updateTradeList(name, itemback2, cost, count);
-    });
+    }, true, false);
     mainLayout.addView(right);
     var buy = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-133, 130, 108, 32, R.string.buy, function() {
         Utils.buyThing();
-    });
+    }, true, false);
     mainLayout.addView(buy);
     var sell = Utils.showButton(25, 130, 108, 32, R.string.sell, function() {
         Utils.sellThing();
-    });
+    }, true, false);
     mainLayout.addView(sell);
     var itemback2 = Utils.showItemBackground(ctx.getScreenWidth()/Utils.FOUR-99, 65);
     mainLayout.addView(itemback2);
@@ -110,11 +110,11 @@ Trade.init = function() {
     mainLayout.addView(count);
     var dismiss = Utils.showButton(4, 4, 38, 18, R.string.back, function() {
         mainPw.dismiss();
-    });
+    }, false, false);
     mainLayout.addView(dismiss);
     var help = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-22, 4, 18, 18, "?", function() {
         Help.showScreen();
-    });
+    }, true, false);
     mainLayout.addView(help);
     var name = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-133, 40, 108);
     mainLayout.addView(name);
@@ -168,19 +168,19 @@ Help.init = function() {
     mainLayout.addView(head);
     var dismiss = Utils.showButton(4, 4, 38, 18, R.string.back, function() {
         mainPw.dismiss();
-    });
+    }, false, false);
     mainLayout.addView(dismiss);
     var gotwitter = Utils.showButton(7, ctx.getScreenHeight()/Utils.FOUR-30, (ctx.getScreenWidth()/Utils.FOUR-22)/3, 24, "Twitter", function() {
         Easter.goToURL("http://twitter.com/dfak0557");
-    });
+    }, true, false);
     mainLayout.addView(gotwitter);
     var gomk = Utils.showButton(11+(ctx.getScreenWidth()/Utils.FOUR-22)/3, ctx.getScreenHeight()/Utils.FOUR-30, (ctx.getScreenWidth()/Utils.FOUR-22)/3, 24, "MCPE KOREA" , function() {
         Easter.goToURL("http://mcpekorea.com");
-    });
+    }, true, false);
     mainLayout.addView(gomk);
     var gogithub = Utils.showButton(15+2*((ctx.getScreenWidth()/Utils.FOUR-22)/3), ctx.getScreenHeight()/Utils.FOUR-30, (ctx.getScreenWidth()/Utils.FOUR-22)/3, 24, "if(Team); GitHub" , function() {
         Easter.goToURL("http://github.com/if-Team");
-    });
+    }, true, false);
     mainLayout.addView(gogithub);
     var name = Utils.justText("TradePE", 8, 32);
     name.setTextColor(android.graphics.Color.YELLOW);
@@ -191,11 +191,11 @@ Help.init = function() {
     mainLayout.addView(madeby);
     var check = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-66, 32, 60, 36, R.string.check_update, function() {
         Update.check();
-    });
+    }, false, true);
     mainLayout.addView(check);
     var thanksto = Utils.showButton(7, ctx.getScreenHeight()/Utils.FOUR-58, 110, 24, R.string.special_thanks, function() {
         SpecialThanks.showScreen();
-    });
+    }, false, false);
     mainLayout.addView(thanksto);
     mainPw.setContentView(mainLayout);
     mainPw.setWidth(ctx.getScreenWidth());
@@ -225,17 +225,17 @@ Update.init = function() {
     mainLayout.addView(head);
     var dismiss = Utils.showButton(4, 4, 38, 18, R.string.back, function() {
         mainPw.dismiss();
-    });
+    }, false, false);
     mainLayout.addView(dismiss);
     var text = Utils.justText(R.string.new_found_2, 0, 48, ctx.getScreenWidth()/Utils.FOUR);
     mainLayout.addView(text);
     var later = Utils.showButton(7, ctx.getScreenHeight()/Utils.FOUR-30, (ctx.getScreenWidth()/Utils.FOUR-18)/2, 24, R.string.later, function() {
         mainPw.dismiss();
-    });
+    }, true, false);
     mainLayout.addView(later);
     var yes = Utils.showButton(11+(ctx.getScreenWidth()/Utils.FOUR-18)/2, ctx.getScreenHeight()/Utils.FOUR-30, (ctx.getScreenWidth()/Utils.FOUR-18)/2, 24, R.string.yes, function() {
         Update.update();
-    });
+    }, true, false);
     mainLayout.addView(yes);
     mainPw.setContentView(mainLayout);
     mainPw.setWidth(ctx.getScreenWidth());
@@ -327,7 +327,7 @@ SpecialThanks.init = function() {
     mainLayout.addView(head);
     var dismiss = Utils.showButton(4, 4, 38, 18, R.string.back, function() {
         mainPw.dismiss();
-    });
+    }, false, false);
     mainLayout.addView(dismiss);
     mainPw.setContentView(mainLayout);
     mainPw.setWidth(ctx.getScreenWidth());
@@ -529,7 +529,7 @@ Utils.showHeader = function(text) {
     center.setTextSize(4*Utils.FOUR);
     center.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
     if(Utils.hasNonAscii(text))
-        text = Utils.getStringBuilder(text, "#e1e1e1");
+        text = Utils.getStringBuilder(text, "#e1e1e1")[0]
     center.setText(text);
     center.setShadowLayer(0.00001, Utils.FOUR, Utils.FOUR, android.graphics.Color.DKGRAY);
     center.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 3, 0, 8, 25), ctx.getScreenWidth()-Utils.FOUR*4, Utils.FOUR*25, false)));
@@ -548,25 +548,27 @@ Utils.showHeader = function(text) {
     return vert;
 };
 
-Utils.showButton = function(x, y, width, height, text, onclick) {
+Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, isRight) {
     text = Lang.getData(text);
     var ctx = Utils.getContext();
     var button = new android.widget.Button(ctx);
     button.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
     button.setPadding(0, 0, 0, 0);
-    var params = new android.widget.RelativeLayout.LayoutParams(width*Utils.FOUR, height*Utils.FOUR);
-    params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
-    button.setLayoutParams(params);
-    var list = new android.graphics.drawable.StateListDrawable();
-    list.addState([android.R.attr.state_pressed], Utils.getStretchedImage(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 0, 32, 8, 8), 8*Utils.FOUR, 8*Utils.FOUR, false), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 4*Utils.FOUR, width*Utils.FOUR, height*Utils.FOUR));
-    list.addState([], Utils.getStretchedImage(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 8, 32, 8, 8), 8*Utils.FOUR, 8*Utils.FOUR, false), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 4*Utils.FOUR, width*Utils.FOUR, height*Utils.FOUR));
-    button.setBackgroundDrawable(list);
     if(Utils.hasNonAscii(text)) {
-        var unclicked = Utils.getStringBuilder(text, "#e1e1e1");
+        var builder = Utils.getStringBuilder(text, "#e1e1e1");
+        var unclicked = builder[0];
         button.setText(unclicked);
-        var clicked = Utils.getStringBuilder(text, "#ffffa1");
+        var clicked = Utils.getStringBuilder(text, "#ffffa1")[0];
     } else
         button.setText(text);
+    var new_width = Utils.hasNonAscii(text) ? builder[1] : Utils.getStringLength(text);
+    var params = new android.widget.RelativeLayout.LayoutParams(isWidthLocked == true ? width*Utils.FOUR : new_width, height*Utils.FOUR);
+    params.setMargins(isRight == true ? (x+width)*Utils.FOUR-new_width : x*Utils.FOUR, y*Utils.FOUR, 0, 0);
+    button.setLayoutParams(params);
+    var list = new android.graphics.drawable.StateListDrawable();
+    list.addState([android.R.attr.state_pressed], Utils.getStretchedImage(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 0, 32, 8, 8), 8*Utils.FOUR, 8*Utils.FOUR, false), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 4*Utils.FOUR, isWidthLocked ? width*Utils.FOUR : new_width, height*Utils.FOUR));
+    list.addState([], Utils.getStretchedImage(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 8, 32, 8, 8), 8*Utils.FOUR, 8*Utils.FOUR, false), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 4*Utils.FOUR, isWidthLocked ? width*Utils.FOUR : new_width, height*Utils.FOUR));
+    button.setBackgroundDrawable(list);
     button.setTypeface(Utils.getTypeface());
     button.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
     button.setTextSize(4*Utils.FOUR);
@@ -652,7 +654,7 @@ Utils.justText = function(str, x, y, width) {
         params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
     params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
     text.setLayoutParams(params);
-    text.setText(Utils.hasNonAscii(str) ? Utils.getStringBuilder(str, "#e1e1e1") : str);
+    text.setText(Utils.hasNonAscii(str) ? Utils.getStringBuilder(str, "#e1e1e1")[0] : str);
     text.setGravity(android.view.Gravity.CENTER);
     text.setTypeface(Utils.getTypeface());
     text.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
@@ -715,7 +717,7 @@ Utils.updateTradeList = function(namev, itemv, costv, countv) {
     var page = Trade.PAGE;
     var type = Utils.getVillagerType(Trade.SELLER);
     if(Utils.hasNonAscii(Lang.getData(Trade.Items[type].name[page])))
-        namev.setText(Utils.getStringBuilder(Lang.getData(Trade.Items[type].name[page]), "#e1e1e1"));
+        namev.setText(Utils.getStringBuilder(Lang.getData(Trade.Items[type].name[page]), "#e1e1e1")[0]);
     else
         namev.setText(Lang.getData(Trade.Items[type].name[page]));
     var item = Utils.getItemImage(Trade.Items[type].meta[page][0], Trade.Items[type].meta[page][1]);
@@ -752,7 +754,7 @@ Utils.warn = function(txt) {
         text.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
         txt = Lang.getData(txt);
         if(Utils.hasNonAscii(txt))
-            text.setText(Utils.getStringBuilder(txt, "#ff0000", 1.5, "#410000"));
+            text.setText(Utils.getStringBuilder(txt, "#ff0000", 1.5, "#410000")[0]);
         else
             text.setText(txt);
         text.setSingleLine(true);
@@ -834,10 +836,13 @@ Utils.getStringBuilder = function(text, color, scale, shadowc, shadow) {
             b = a;
         return [b, Math.floor(a / 256)];    
     };
+    var width = 0;
     var builder = new android.text.SpannableStringBuilder(text);
     for(var i = 0; i < text.length; i++) {
-        if(text.charAt(i) == " ")
+        if(text.charAt(i) == " ") {
+            width+=5*Utils.FOUR;
             continue;
+        }
         var d = divide(text.charCodeAt(i));
         var x = ((parseInt(d[0], 10) % 16)) * 16;
         var y = Math.floor(parseInt(d[0], 10) / 16) * 16;
@@ -858,11 +863,13 @@ Utils.getStringBuilder = function(text, color, scale, shadowc, shadow) {
         }
         p2.setColorFilter(new android.graphics.PorterDuffColorFilter(color, android.graphics.PorterDuff.Mode.MULTIPLY));
         canvas.drawBitmap(bitmap, 0, 0, p2);
-        builder.setSpan(new android.text.style.ImageSpan(Utils.getContext(), android.graphics.Bitmap.createScaledBitmap(result, scale*((bitmap.getWidth()+2)/2)*Utils.FOUR, scale*9*Utils.FOUR, false)), i, i+1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        var bitmap = android.graphics.Bitmap.createScaledBitmap(result, scale*((bitmap.getWidth()+2)/2)*Utils.FOUR, scale*9*Utils.FOUR, false);
+        builder.setSpan(new android.text.style.ImageSpan(Utils.getContext(), bitmap), i, i+1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        width+=bitmap.getWidth();
     }
     CachedString.KEY.push(text+color);
-    CachedString.DATA.push(builder);
-    return builder;
+    CachedString.DATA.push([builder, width+11*Utils.FOUR]);
+    return [builder, width+11*Utils.FOUR];
 };
 
 Utils.cutText = function(bitmap) {
@@ -905,7 +912,7 @@ Utils.interactInit = function() {
     var text = new android.widget.TextView(Utils.getContext());
     var txt = Lang.getData(R.string.trade);
     if(Utils.hasNonAscii(txt))
-        txt = Utils.getStringBuilder(txt, "#e1e1e1", null, null, false);
+        txt = Utils.getStringBuilder(txt, "#e1e1e1", null, null, false)[0];
     text.setText(txt);
     text.setGravity(android.view.Gravity.CENTER);
     text.setTypeface(Utils.getTypeface());
@@ -955,13 +962,36 @@ Utils.isWarning = function() {
 };
 
 Utils.getCurrentLanguage = function() {
-    return "pt_BR";
+    return "en_US";
 };
 
 Utils.getStringFor = function(key) {
     if(key["all"] != null)
         return key["all"];
     return key[Utils.getCurrentLanguage()];
+};
+
+Utils.getStringLength = function(text) {
+    var lengths = [0,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,
+                   8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,
+                   4,1,4,5,5,5,5,2,4,4,4,5,1,5,1,5,
+                   5,5,5,5,5,5,5,5,5,5,1,1,4,5,4,5,
+                   6,5,5,5,5,5,5,5,5,3,5,5,5,5,5,5,
+                   5,5,5,5,5,5,5,5,5,5,5,3,5,3,5,5,
+                   2,5,5,5,5,5,4,5,5,1,5,4,2,5,5,5,
+                   5,5,5,5,3,5,5,5,5,5,5,4,1,4,6,5,
+                   5,5,5,5,5,5,5,5,5,5,5,3,5,2,5,5,
+                   5,5,5,5,5,5,5,5,5,5,5,5,5,7,3,5,
+                   5,1,5,5,5,5,5,5,5,6,5,5,5,1,6,5,
+                   8,8,8,5,5,5,7,7,5,7,5,5,5,5,5,5,
+                   8,8,8,8,5,5,5,5,8,5,8,8,8,8,8,8,
+                   8,5,8,8,8,8,5,3,7,5,8,8,5,4,8,8,
+                   5,5,5,7,5,5,5,5,5,5,5,5,2,2,5,3,
+                   6,5,5,5,5,5,5,7,5,5,5,5,5,4,6,5];
+    var result = 0;
+    for(var i = 0; i < text.length; i++)
+        result+=(lengths[text.charCodeAt(i)]+1)*Utils.FOUR;
+    return result+11*Utils.FOUR;
 };
 
 var Lang = {};
