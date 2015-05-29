@@ -552,8 +552,8 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
     text = Lang.getData(text);
     var ctx = Utils.getContext();
     var button = new android.widget.Button(ctx);
-    button.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
     button.setPadding(0, 0, 0, 0);
+    button.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
     if(Utils.hasNonAscii(text)) {
         var builder = Utils.getStringBuilder(text, "#e1e1e1");
         var unclicked = builder[0];
@@ -565,10 +565,9 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
     var params = new android.widget.RelativeLayout.LayoutParams(isWidthLocked == true ? width*Utils.FOUR : new_width, height*Utils.FOUR);
     params.setMargins(isRight == true ? (x+width)*Utils.FOUR-new_width : x*Utils.FOUR, y*Utils.FOUR, 0, 0);
     button.setLayoutParams(params);
-    var list = new android.graphics.drawable.StateListDrawable();
-    list.addState([android.R.attr.state_pressed], Utils.getStretchedImage(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 0, 32, 8, 8), 8*Utils.FOUR, 8*Utils.FOUR, false), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 4*Utils.FOUR, isWidthLocked ? width*Utils.FOUR : new_width, height*Utils.FOUR));
-    list.addState([], Utils.getStretchedImage(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 8, 32, 8, 8), 8*Utils.FOUR, 8*Utils.FOUR, false), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 4*Utils.FOUR, isWidthLocked ? width*Utils.FOUR : new_width, height*Utils.FOUR));
-    button.setBackgroundDrawable(list);
+    var clicked_image = Utils.getStretchedImage(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 0, 32, 8, 8), 8*Utils.FOUR, 8*Utils.FOUR, false), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 4*Utils.FOUR, isWidthLocked ? width*Utils.FOUR : new_width, height*Utils.FOUR);
+    var unclicked_image = Utils.getStretchedImage(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 8, 32, 8, 8), 8*Utils.FOUR, 8*Utils.FOUR, false), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 4*Utils.FOUR, isWidthLocked ? width*Utils.FOUR : new_width, height*Utils.FOUR);
+    button.setBackgroundDrawable(unclicked_image);
     button.setTypeface(Utils.getTypeface());
     button.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
     button.setTextSize(4*Utils.FOUR);
@@ -587,12 +586,16 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
             switch(event.getAction()) {
                 case android.view.MotionEvent.ACTION_DOWN:
                     view.setTextColor(android.graphics.Color.parseColor("#ffffa1"));
+                    view.setPadding(0, 2*Utils.FOUR, 0, 0);
+                    view.setBackgroundDrawable(clicked_image);
                     if(Utils.hasNonAscii(text))
                         button.setText(clicked);
                     break;
                 case android.view.MotionEvent.ACTION_MOVE:
                     if(event.getX() < 0 || event.getY() <0 || event.getX() > (isWidthLocked == true ? width*Utils.FOUR : new_width) || event.getY() > height*Utils.FOUR) {
                         view.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
+                        view.setPadding(0, 0, 0, 0);
+                        view.setBackgroundDrawable(unclicked_image);
                         if(Utils.hasNonAscii(text))
                             button.setText(unclicked);
                         current = true;
@@ -600,10 +603,14 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
                         if(Utils.hasNonAscii(text))
                             button.setText(clicked);
                         view.setTextColor(android.graphics.Color.parseColor("#ffffa1"));
+                        view.setPadding(0, 2*Utils.FOUR, 0, 0);
+                        view.setBackgroundDrawable(clicked_image);
                     }
                     break;
                 case android.view.MotionEvent.ACTION_UP:
                     view.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
+                    view.setPadding(0, 0, 0, 0);
+                    view.setBackgroundDrawable(unclicked_image);
                     if(Utils.hasNonAscii(text))
                         button.setText(unclicked);
                     if(current == false && !(event.getX() < 0 || event.getY() <0 || event.getX() > (isWidthLocked == true ? width*Utils.FOUR : new_width) || event.getY() > height*Utils.FOUR)) {
@@ -779,6 +786,7 @@ Utils.warn = function(txt) {
         };
         that.show = function() {
             toast.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER | android.view.Gravity.TOP, 0, 32*Utils.FOUR);
+            text.startAnimation(fade_in);
             new android.os.Handler().postDelayed(new java.lang.Runnable({
                 run: function() {
                     that.cancel();
