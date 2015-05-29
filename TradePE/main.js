@@ -114,7 +114,7 @@ Trade.init = function() {
     mainLayout.addView(dismiss);
     var help = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-22, 4, 18, 18, "?", function() {
         Help.showScreen();
-    }, true, false);
+    }, false, true);
     mainLayout.addView(help);
     var name = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-133, 40, 108);
     mainLayout.addView(name);
@@ -849,14 +849,11 @@ Utils.addItemInventory = function(id, count, dam) {
 
 CachedString = {};
 
-CachedString.KEY = [];
-CachedString.DATA = [];
-
 Utils.getStringBuilder = function(text, color, scale, shadowc, shadow) {
-    if(text.charCodeAt(text.length-1) == 13)
-        text = text.substring(0, text.length-1);
-    if(CachedString.KEY.indexOf(text+color) >= 0)
-        return CachedString.DATA[CachedString.KEY.indexOf(text+color)];
+    if(color != null)
+        color = android.graphics.Color.parseColor(color);
+    if(CachedString[color+text] != null && shadow != false)
+        return CachedString[color+text];
         
     if(scale == null)
         scale = 1;
@@ -864,8 +861,6 @@ Utils.getStringBuilder = function(text, color, scale, shadowc, shadow) {
         shadowc = android.graphics.Color.DKGRAY;
     else
         shadowc = android.graphics.Color.parseColor(shadowc);
-    if(color != null)
-        color = android.graphics.Color.parseColor(color);
     var divide = function(a) {
         var b = 0;
         if (a > 256)
@@ -905,8 +900,7 @@ Utils.getStringBuilder = function(text, color, scale, shadowc, shadow) {
         builder.setSpan(new android.text.style.ImageSpan(Utils.getContext(), bitmap), i, i+1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         width+=bitmap.getWidth();
     }
-    CachedString.KEY.push(text+color);
-    CachedString.DATA.push([builder, width+11*Utils.FOUR]);
+    CachedString[color+text] = [builder, width+11*Utils.FOUR];
     return [builder, width+11*Utils.FOUR];
 };
 
@@ -1043,7 +1037,7 @@ Lang.getPath = function() {
 
 Lang.readLang = function() {
     var lang = new java.lang.String(ModPE.getBytesFromTexturePack(Lang.getPath()))+"";
-    var split1 = lang.split("\n");
+    var split1 = lang.split(/\r?\n/);
     var result = split1.map(function(e) {
         return e.split("=");
     });
