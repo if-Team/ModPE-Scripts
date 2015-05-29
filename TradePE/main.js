@@ -414,7 +414,7 @@ Utils.createUiThread = function(func) {
 Utils.FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, Utils.getContext().getResources().getDisplayMetrics());
 
 Utils.hasFontFile = function() {
-    return new java.io.File("/sdcard/아포카토맨/minecraft.ttf").exists();
+    return new java.io.File("/sdcard/아포카토맨/font.ttf").exists();
 };
 
 Utils.getMyScriptName = function() {
@@ -431,9 +431,9 @@ Utils.downloadFontFile = function() {
     if(Utils.hasFontFile())
         return;
     else {
-        var url = new java.net.URL("https://www.dropbox.com/s/2th32u86n0fwhq2/minecraft.ttf?dl=1").openConnection().getInputStream();
+        var url = new java.net.URL("https://www.dropbox.com/s/ky1nj2pms00vb5t/font.ttf?dl=1").openConnection().getInputStream();
         var bis = new java.io.BufferedInputStream(url);
-        var target = new java.io.File("/sdcard/아포카토맨/minecraft.ttf");
+        var target = new java.io.File("/sdcard/아포카토맨/font.ttf");
         target.getParentFile().mkdirs();
         var bos = new java.io.BufferedOutputStream(new java.io.FileOutputStream(target));
         var buf = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 4096);
@@ -446,7 +446,7 @@ Utils.downloadFontFile = function() {
 };
 
 Utils.getTypeface = function() {
-    return android.graphics.Typeface.createFromFile("/sdcard/아포카토맨/minecraft.ttf");
+    return android.graphics.Typeface.createFromFile("/sdcard/아포카토맨/font.ttf");
 };
 
 Utils.getSpritesheet = function() {
@@ -529,7 +529,7 @@ Utils.showHeader = function(text) {
     center.setTextSize(4*Utils.FOUR);
     center.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
     if(Utils.hasNonAscii(text))
-        text = Utils.getStringBuilder(text, "#e1e1e1")[0]
+        text = Utils.getStringBuilder(text, "#e1e1e1")[0];
     center.setText(text);
     center.setShadowLayer(0.00001, Utils.FOUR, Utils.FOUR, android.graphics.Color.DKGRAY);
     center.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 3, 0, 8, 25), ctx.getScreenWidth()-Utils.FOUR*4, Utils.FOUR*25, false)));
@@ -744,11 +744,13 @@ Utils.buyThing = function() {
     } else {
         if(Utils.isWarning())
             Trade.WARNING_TOAST.cancel();
-        Utils.warn(R.string.not_enough_emerald);
+        Trade.WARNING_TOAST = new Utils.warn(R.string.not_enough_emerald);
+        Trade.WARNING_TOAST.show();
     }
 };
 
 Utils.warn = function(txt) {
+    var that = this;
     Utils.createUiThread(function(ctx) {
         var text = new android.widget.TextView(ctx);
         text.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
@@ -757,17 +759,44 @@ Utils.warn = function(txt) {
             text.setText(Utils.getStringBuilder(txt, "#ff0000", 1.5, "#410000")[0]);
         else
             text.setText(txt);
+        text.setGravity(android.view.Gravity.CENTER);
         text.setSingleLine(true);
         text.setLineSpacing(Utils.FOUR*1.5, 1);
         text.setTypeface(Utils.getTypeface());
         text.setShadowLayer(0.00001, 1.5*Utils.FOUR, 1.5*Utils.FOUR, android.graphics.Color.parseColor("#410000"));
         text.setTextColor(android.graphics.Color.RED);
         text.setTextSize(6*Utils.FOUR);
-        var toast = android.widget.Toast.makeText(ctx, "", android.widget.Toast.LENGTH_SHORT);
-        toast.setGravity(android.view.Gravity.TOP, 0, 32*Utils.FOUR);
-        toast.setView(text);
-        toast.show();
-        Trade.WARNING_TOAST = toast;
+        var fade_in = new android.view.animation.AlphaAnimation(0, 1);
+        fade_in.setDuration(180);
+        
+        var toast = new android.widget.PopupWindow(ctx);
+        toast.setContentView(text);
+        toast.setWidth(ctx.getScreenWidth());
+        toast.setHeight(Utils.hasNonAscii(txt) ? 27*Utils.FOUR : 18*Utils.FOUR);
+        toast.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        that.isShowing = function() {
+            return toast.isShowing();
+        };
+        that.show = function() {
+            toast.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER | android.view.Gravity.TOP, 0, 32*Utils.FOUR);
+            new android.os.Handler().postDelayed(new java.lang.Runnable({
+                run: function() {
+                    that.cancel();
+                }
+            }), 1000);
+        };
+        that.cancel = function() {
+            Utils.createUiThread(function() {
+                var fade_out = new android.view.animation.AlphaAnimation(1, 0);
+                fade_out.setDuration(180);
+                text.startAnimation(fade_out);
+                new android.os.Handler().postDelayed(new java.lang.Runnable({
+                    run: function() {
+                        toast.dismiss();
+                    }
+                }), 180);
+            });
+        };
     });
 };
 
@@ -780,7 +809,8 @@ Utils.sellThing = function() {
     } else {
         if(Utils.isWarning())
             Trade.WARNING_TOAST.cancel();
-        Utils.warn(R.string.not_enough_item);
+        Trade.WARNING_TOAST = new Utils.warn(R.string.not_enough_item);
+        Trade.WARNING_TOAST.show();
     }
 };
 
@@ -958,7 +988,7 @@ Utils.setButtonClickable = function(view, bool) {
 };
 
 Utils.isWarning = function() {
-    return Trade.WARNING_TOAST != null && Trade.WARNING_TOAST.getView().isShown();
+    return Trade.WARNING_TOAST != null && Trade.WARNING_TOAST.isShowing();
 };
 
 Utils.getCurrentLanguage = function() {
@@ -1209,7 +1239,7 @@ var R = {
         special_thanks: {
             en_US: "Special thanks to",
             es_ES: "Agradecimiento especial para",
-            fr_FR: "merci spécial à",
+            fr_FR: "Merci spécial à",
             it_IT: "Ringraziamenti speciali per",
             ja_JP: "手伝ってくれた人",
             ko_KR: "도와주신 분들",
