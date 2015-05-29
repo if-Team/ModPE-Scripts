@@ -578,7 +578,7 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
     button.setOnTouchListener(new android.view.View.OnTouchListener({
         onTouch: function(view, event) {
             if(!view.isClickable()) {
-                if(!(event.getX() < 0 || event.getY() <0 || event.getX() > width*Utils.FOUR || event.getY() > height*Utils.FOUR)) {
+                if(!(event.getX() < 0 || event.getY() <0 || event.getX() > (isWidthLocked == true ? width*Utils.FOUR : new_width)|| event.getY() > height*Utils.FOUR)) {
                     if(event.getAction() == android.view.MotionEvent.ACTION_UP)
                         Utils.clickSound();
                 }
@@ -591,7 +591,7 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
                         button.setText(clicked);
                     break;
                 case android.view.MotionEvent.ACTION_MOVE:
-                    if(event.getX() < 0 || event.getY() <0 || event.getX() > width*Utils.FOUR || event.getY() > height*Utils.FOUR) {
+                    if(event.getX() < 0 || event.getY() <0 || event.getX() > (isWidthLocked == true ? width*Utils.FOUR : new_width) || event.getY() > height*Utils.FOUR) {
                         view.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
                         if(Utils.hasNonAscii(text))
                             button.setText(unclicked);
@@ -606,7 +606,7 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
                     view.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
                     if(Utils.hasNonAscii(text))
                         button.setText(unclicked);
-                    if(current == false && !(event.getX() < 0 || event.getY() <0 || event.getX() > width*Utils.FOUR || event.getY() > height*Utils.FOUR)) {
+                    if(current == false && !(event.getX() < 0 || event.getY() <0 || event.getX() > (isWidthLocked == true ? width*Utils.FOUR : new_width) || event.getY() > height*Utils.FOUR)) {
                         if(typeof onclick === "function")
                             onclick(button);
                             Utils.clickSound();
@@ -818,7 +818,7 @@ Utils.getStringBuilder = function(text, color, scale, shadowc, shadow) {
     if(text.charCodeAt(text.length-1) == 13)
         text = text.substring(0, text.length-1);
     if(CachedString.KEY.indexOf(text+color) >= 0)
-        return CachedString.DATA[CachedString.KEY.indexOf(text+color) ];
+        return CachedString.DATA[CachedString.KEY.indexOf(text+color)];
         
     if(scale == null)
         scale = 1;
@@ -1151,6 +1151,7 @@ var R = {
         trade: {
             en_US: "Trade",
             es_ES: "Comerciar",
+            fr_FR: "Commerce",
             it_IT: "Scambia",
             ja_JP: "取引する",
             ko_KR: "거래하기",
@@ -1164,6 +1165,7 @@ var R = {
         buy: {
             en_US: "Buy",
             es_ES: "Comprar",
+            fr_FR: "Acheter",
             it_IT: "Compra",
             ja_JP: "買取",
             ko_KR: "구입",
@@ -1174,6 +1176,7 @@ var R = {
         sell: {
             en_US: "Sell",
             es_ES: "Vender",
+            fr_FR: "Vendre",
             it_IT: "Vendi",
             ja_JP: "販売",
             ko_KR: "판매",
@@ -1184,6 +1187,7 @@ var R = {
         about: {
             en_US: "Info",
             es_ES: "Info",
+            fr_FR: "Infos",
             it_IT: "Info",
             ja_JP: "情報",
             ko_KR: "정보",
@@ -1194,6 +1198,7 @@ var R = {
         check_update: {
             en_US: "Check for updates",
             es_ES: "Buscar actualización",
+            fr_FR: "Vérifier les mises à jour",
             it_IT: "Controlla aggiornamenti",
             ja_JP: "アップデートをチェック",
             ko_KR: "업데이트 확인",
@@ -1204,6 +1209,7 @@ var R = {
         special_thanks: {
             en_US: "Special thanks to",
             es_ES: "Agradecimiento especial para",
+            fr_FR: "merci spécial à",
             it_IT: "Ringraziamenti speciali per",
             ja_JP: "手伝ってくれた人",
             ko_KR: "도와주신 분들",
@@ -1214,6 +1220,7 @@ var R = {
         new_found_1: {
             en_US: "Update!",
             es_ES: "Actualizacion!",
+            fr_FR: "Mise à jour!",
             it_IT: "Aggiornamenti!",
             ja_JP: "アップデート！",
             ko_KR: "업데이트!",
@@ -1224,6 +1231,7 @@ var R = {
         new_found_2: {
             en_US: "A new version of TradePE has been found!\nWould you like to install it now?",
             es_ES: "Una nueva versión de TradePE ha sido encontrada!\nQuieres instalar ahora?",
+            fr_FR: "Une nouvelle de TradePE a été trouvé!\nSouhaitez-vouz l'installer maintenant?",
             it_IT: "Una nuova versione di TradePE è stata trovata!\nVuoi installarla ora?",
             ja_JP: "TradePEの新しいバージョンを発見しました。\n今すぐにインストールしますか？",
             ko_KR: "TradePE의 새 버전을 발견했습니다!\n지금 바로 설치하시겠습니까?",
@@ -1237,6 +1245,7 @@ var R = {
         later: {
             en_US: "Later",
             es_ES: "Despues",
+            fr_FR: "Plus tard",
             it_IT: "Più avanti",
             ja_JP: "後で",
             ko_KR: "나중에",
@@ -1247,6 +1256,7 @@ var R = {
         not_enough_item: {
             en_US: "Not enough items",
             es_ES: "No hay items suficientes",
+            fr_FR: "Pas assez d'éléments",
             it_IT: "Non hai abbastanza oggetti",
             ja_JP: "アイテムが十分ではありません",
             ko_KR: "아이템이 부족합니다",
@@ -1257,6 +1267,7 @@ var R = {
         not_enough_emerald: {
             en_US: "Not enough emeralds",
             es_ES: "No hay esmeraldas suficientes",
+            fr_FR: "Pass assez émeraudes",
             it_IT: "Non hai abbastanza Smeraldi",
             ja_JP: "エメラルドが十分ではありません",
             ko_KR: "에메랄드가 부족합니다",
