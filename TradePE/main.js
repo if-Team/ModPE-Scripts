@@ -1,4 +1,3 @@
-//TODO: make
 Trade = {};
 
 //Variables
@@ -9,6 +8,7 @@ Trade.META_MAPPED = null;
 Trade.SELLER = null;
 Trade.TRADING = null;
 Trade.CUR_HEALTH = null;
+Trade.CUR_LANG = null;
 
 Trade.getVersion = function() {
     return "Indev";
@@ -65,8 +65,6 @@ Trade.NAME = null;
 Trade.ITEMBACK = null;
 Trade.COST = null;
 Trade.COUNT = null;
-Trade.LEFT = null;
-Trade.RIGHT = null;
 Trade.WARNING_TOAST = null;
 
 Trade.init = function() {
@@ -132,8 +130,6 @@ Trade.init = function() {
     Trade.ITEMBACK = itemback2;
     Trade.COST = cost;
     Trade.COUNT = count;
-    Trade.LEFT = left;
-    Trade.RIGHT = right;
 };
 
 Trade.showScreen = function() {
@@ -157,6 +153,7 @@ Help = {};
 Help.MAINPW = null;
 
 Help.init = function() {
+    
     var ctx = Utils.getContext();
     var mainPw = new android.widget.PopupWindow(ctx);
     var mainLayout = new android.widget.RelativeLayout(ctx);
@@ -299,8 +296,7 @@ Update.update = function() {
 };
 
 Update.finished = function() {
-    var ctx = Utils.getContext();
-    Utils.createUiThread(function() {
+    Utils.createUiThread(function(ctx) {
         android.widget.Toast.makeText(ctx, "Update finished! Rebooting blocklauncher...", 1).show();
         new android.os.Handler().postDelayed(new java.lang.Runnable({
             run: function() {
@@ -308,7 +304,7 @@ Update.finished = function() {
                 i.addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 ctx.startActivity(i);
             }
-        }), 500);
+        }), 700);
     });
 };
 
@@ -321,7 +317,7 @@ SpecialThanks.init = function() {
     var mainPw = new android.widget.PopupWindow(ctx);
     var mainLayout = new android.widget.RelativeLayout(ctx);
     
-    var back = Utils.showBackground();
+    var back = Utils.showBackground("dirt");
     mainLayout.addView(back);
     var head = Utils.showHeader(R.string.special_thanks);
     mainLayout.addView(head);
@@ -330,6 +326,10 @@ SpecialThanks.init = function() {
     }, false, false);
     mainLayout.addView(dismiss);
     mainPw.setContentView(mainLayout);
+    
+    var people = "ChalkPE - Japanese Translate\n@desno365 - Italian Translate\n@TaQultO_988 - Spanish Translate\n@enoter - Russian Translate\n@Maluquinho - Portuguese Translate\n@jnjnnzch - Chinese Translate\n@Adrian113162 - French Translate";
+    var text = Utils.justText(people, 0, 32, ctx.getScreenWidth()/Utils.FOUR);
+    mainLayout.addView(text);
     mainPw.setWidth(ctx.getScreenWidth());
     mainPw.setHeight(ctx.getScreenHeight());
     mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -502,11 +502,18 @@ Utils.getStretchedImage = function(bm, x, y, stretchWidth, stretchHeight, width,
     return new android.graphics.drawable.BitmapDrawable(blank);
 };
 
-Utils.showBackground = function() {
+Utils.showBackground = function(type) {
     var back = new android.view.View(Utils.getContext());
     back.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(Utils.getContext().getScreenWidth(), Utils.getContext().getScreenHeight()));
-    var spritesheet = android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 0, 0, 16, 16), 16*Utils.FOUR, 16*Utils.FOUR, false);
-    back.setBackgroundDrawable(Utils.getStretchedImage(spritesheet, 4*Utils.FOUR, 4*Utils.FOUR, 8*Utils.FOUR, 8*Utils.FOUR, Utils.getContext().getScreenWidth(), Utils.getContext().getScreenHeight()));
+    if(type == null) {
+        var spritesheet = android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 0, 0, 16, 16), 16*Utils.FOUR, 16*Utils.FOUR, false);
+        back.setBackgroundDrawable(Utils.getStretchedImage(spritesheet, 4*Utils.FOUR, 4*Utils.FOUR, 8*Utils.FOUR, 8*Utils.FOUR, Utils.getContext().getScreenWidth(), Utils.getContext().getScreenHeight()));
+    } else if(type == "dirt") {
+        var image = new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(android.graphics.BitmapFactory.decodeStream(ModPE.openInputStreamFromTexturePack("images/gui/background.png")), 32*Utils.FOUR, 32*Utils.FOUR, false));
+        image.setColorFilter(android.graphics.Color.rgb(70, 70, 70), android.graphics.PorterDuff.Mode.MULTIPLY);
+        image.setTileModeXY(android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT);
+        back.setBackgroundDrawable(image);
+    }
     return back;
 };
 
@@ -552,7 +559,7 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
     text = Lang.getData(text);
     var ctx = Utils.getContext();
     var button = new android.widget.Button(ctx);
-    button.setPadding(0, 0, 0, 0);
+    button.setPadding(0, 0, 0, Utils.FOUR);
     button.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
     if(Utils.hasNonAscii(text)) {
         var builder = Utils.getStringBuilder(text, "#e1e1e1");
@@ -561,7 +568,8 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
         var clicked = Utils.getStringBuilder(text, "#ffffa1")[0];
     } else
         button.setText(text);
-    var new_width = Utils.hasNonAscii(text) ? builder[1] : Utils.getStringLength(text);
+    if(isWidthLocked != true)
+        var new_width = Utils.hasNonAscii(text) ? builder[1] : Utils.getStringLength(text);
     var params = new android.widget.RelativeLayout.LayoutParams(isWidthLocked == true ? width*Utils.FOUR : new_width, height*Utils.FOUR);
     params.setMargins(isRight == true ? (x+width)*Utils.FOUR-new_width : x*Utils.FOUR, y*Utils.FOUR, 0, 0);
     button.setLayoutParams(params);
@@ -586,7 +594,7 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
             switch(event.getAction()) {
                 case android.view.MotionEvent.ACTION_DOWN:
                     view.setTextColor(android.graphics.Color.parseColor("#ffffa1"));
-                    view.setPadding(0, 2*Utils.FOUR, 0, 0);
+                    view.setPadding(0, Utils.FOUR, 0, 0);
                     view.setBackgroundDrawable(clicked_image);
                     if(Utils.hasNonAscii(text))
                         button.setText(clicked);
@@ -594,7 +602,7 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
                 case android.view.MotionEvent.ACTION_MOVE:
                     if(event.getX() < 0 || event.getY() <0 || event.getX() > (isWidthLocked == true ? width*Utils.FOUR : new_width) || event.getY() > height*Utils.FOUR) {
                         view.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
-                        view.setPadding(0, 0, 0, 0);
+                        view.setPadding(0, 0, 0, Utils.FOUR);
                         view.setBackgroundDrawable(unclicked_image);
                         if(Utils.hasNonAscii(text))
                             button.setText(unclicked);
@@ -603,13 +611,13 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
                         if(Utils.hasNonAscii(text))
                             button.setText(clicked);
                         view.setTextColor(android.graphics.Color.parseColor("#ffffa1"));
-                        view.setPadding(0, 2*Utils.FOUR, 0, 0);
+                        view.setPadding(0, Utils.FOUR, 0, 0);
                         view.setBackgroundDrawable(clicked_image);
                     }
                     break;
                 case android.view.MotionEvent.ACTION_UP:
                     view.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
-                    view.setPadding(0, 0, 0, 0);
+                    view.setPadding(0, 0, 0, Utils.FOUR);
                     view.setBackgroundDrawable(unclicked_image);
                     if(Utils.hasNonAscii(text))
                         button.setText(unclicked);
@@ -629,11 +637,11 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
 };
 
 Utils.renderItem = function(name, data, x, y, scale) {
-    var emerald = Utils.getItemImage(name, data);
-    emerald = android.graphics.Bitmap.createScaledBitmap(emerald, emerald.getWidth()*Utils.FOUR*scale, emerald.getHeight()*Utils.FOUR*scale, false);
+    var item = Utils.getItemImage(name, data);
+    item = android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*scale, item.getHeight()*Utils.FOUR*scale, false);
     var view = new android.view.View(Utils.getContext());
-    view.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(emerald));
-    var params = new android.widget.RelativeLayout.LayoutParams(emerald.getWidth(), emerald.getHeight());
+    view.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(item));
+    var params = new android.widget.RelativeLayout.LayoutParams(item.getWidth(), item.getHeight());
     params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
     view.setLayoutParams(params);
     return view;
@@ -1000,7 +1008,8 @@ Utils.getCurrentLanguage = function() {
 Utils.getStringFor = function(key) {
     if(key["all"] != null)
         return key["all"];
-    return key[Utils.getCurrentLanguage()];
+    var data = key[Utils.getCurrentLanguage()];
+    return data == null ? key["en_US"] : data;
 };
 
 Utils.getStringLength = function(text) {
@@ -1089,6 +1098,11 @@ Player.setInventorySlot = Player.setInventorySlot || function(slot, id, count, d
 
 
 function modTick() {
+    if(Trade.CUR_LANG != Utils.getCurrentLanguage()) {
+        Utils.reset();
+        Trade.CUR_LANG = Utils.getCurrentLanguage();
+    }
+    
     //Initialing
     if(Lang.KEY == null && Lang.DATA == null) {
         Lang.KEY = 0;
