@@ -260,6 +260,7 @@ Update.check = function() {
                 Loading.killScreen();
             } catch(e) {
                 Loading.killScreen();
+                NoInternet.showScreen();
                 //NO INTERNET CONNECTION
             }
         }
@@ -289,6 +290,7 @@ Update.update = function() {
                 Update.finished();
             } catch(e) {
                 Loading.killScreen();
+                NoInternet.showScreen();
                 //NO INTERNET CONNECTION
             }
         }
@@ -297,7 +299,7 @@ Update.update = function() {
 
 Update.finished = function() {
     Utils.createUiThread(function(ctx) {
-        android.widget.Toast.makeText(ctx, "Update finished! Rebooting blocklauncher...", 1).show();
+        android.widget.Toast.makeText(ctx, "Rebooting blocklauncher...", 1).show();
         new android.os.Handler().postDelayed(new java.lang.Runnable({
             run: function() {
                 var i = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName());
@@ -327,7 +329,7 @@ SpecialThanks.init = function() {
     mainLayout.addView(dismiss);
     mainPw.setContentView(mainLayout);
     
-    var people = "ChalkPE - Japanese Translate\n@desno365 - Italian Translate\n@TaQultO_988 - Spanish Translate\n@enoter - Russian Translate\n@Maluquinho - Portuguese Translate\n@jnjnnzch - Chinese Translate\n@Adrian113162 - French Translate";
+    var people = "ChalkPE - JP Translator\n@desno365 - IT Translator\n@TaQultO_988 - ES Translator\n@block_zone - RU Translator\n@eu_sozin - PT Translator\n@jnjnnjzch - CH Translator\n@Adrian113162 - FR Translator";
     var text = Utils.justText(people, 0, 32, ctx.getScreenWidth()/Utils.FOUR);
     mainLayout.addView(text);
     mainPw.setWidth(ctx.getScreenWidth());
@@ -387,6 +389,37 @@ Loading.killScreen = function() {
     Utils.createUiThread(function() {
         if(Loading.MAINPW.isShowing())
             Loading.MAINPW.dismiss();
+    });
+};
+
+NoInternet = {};
+
+NoInternet.MAINPW = null;
+
+NoInternet.init = function() {
+    var ctx = Utils.getContext();
+    var mainPw = new android.widget.PopupWindow(ctx);
+    var mainLayout = new android.widget.RelativeLayout(ctx);
+    
+    var back = Utils.showBackground("dirt");
+    mainLayout.addView(back);
+    var ok = Utils.showButton((ctx.getScreenWidth()/Utils.FOUR-100)/2, 100, 100, 24, R.string.yes, function() {
+        mainPw.dismiss();
+    }, true, false);
+    mainLayout.addView(ok);
+    var text = Utils.justText(R.string.no_internet, 0, 60, ctx.getScreenWidth()/Utils.FOUR);
+    mainLayout.addView(text);
+    
+    mainPw.setContentView(mainLayout);
+    mainPw.setWidth(ctx.getScreenWidth());
+    mainPw.setHeight(ctx.getScreenHeight());
+    mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.argb(144, 0, 0, 0)));
+    NoInternet.MAINPW = mainPw;
+};
+
+NoInternet.showScreen = function() {
+    Utils.createUiThread(function(ctx) {
+        NoInternet.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
     });
 };
 
@@ -967,7 +1000,7 @@ Utils.interactInit = function() {
     drawable.setAlpha(180);
     var pw = new android.widget.PopupWindow(Utils.getContext());
     pw.setContentView(text);
-    pw.setWidth(118*0.75*Utils.FOUR);
+    pw.setWidth(50*Utils.FOUR);
     pw.setHeight(20*Utils.FOUR);
     pw.setBackgroundDrawable(drawable);
     Trade.INTERACTPW = pw;
@@ -1002,7 +1035,7 @@ Utils.isWarning = function() {
 };
 
 Utils.getCurrentLanguage = function() {
-    return "en_US";
+    return "ko_KR";
 };
 
 Utils.getStringFor = function(key) {
@@ -1142,6 +1175,10 @@ function modTick() {
     if(Loading.MAINPW == null) {
         Loading.MAINPW = 0;
         Loading.init();
+    }
+    if(NoInternet.MAINPW == null) {
+        NoInternet.MAINPW = 0;
+        NoInternet.init();
     }
     
     if(Entity.getEntityTypeId(Player.getPointedEntity()) == 15) {
@@ -1320,6 +1357,22 @@ var R = {
             pt_BR: "Voce não tem esmeraldas",
             ru_RU: "Не хватает изумрудов",
             zh_CN: "绿宝石不足"
+        },
+        no_internet: {
+            de_DE: "Vielleicht gibt es ein Problem mit deiner Internetverbindung?",
+            en_US: "Maybe check your internet connection?",
+            es_419: "Comprueba tu conexión a Internet",
+            es_ES: "Comprueba tu conexión a Internet",
+            fr_CA: "Peut-être devriez-vous vérifier votre connexion Internet?",
+            fr_FR: "Peut-être devriez-vous vérifier votre connexion Internet?",
+            it_IT: "Verificare la connessione Internet?",
+            ja_JP: "インターネット接続を確認してください",
+            ko_KR: "인터넷 연결 상태를 확인하십시오",
+            pt_BR: "Talvez deve verificar sua conexão à Internet?",
+            pt_PT: "Talvez deve verificar sua conexão à Internet?",
+            ru_RU: "С вашим Интернетом все в порядке?",
+            zh_CN: "请检查您的网络连接？",
+            zh_TW: "可否請您確認一下目前的網際網路連線狀態呢？"
         }
     }
 };
