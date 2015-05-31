@@ -104,6 +104,12 @@ Trade.init = function() {
         Utils.sellThing();
     }, true, false);
     mainLayout.addView(sell);
+    if(Trade.debug) {
+        Utils.setButtonClickable(buy, false);
+        Utils.setButtonClickable(sell, false);
+        var debug = Utils.justText("DEBUGGING MODE", 4, 32);
+        mainLayout.addView(debug);
+    }
     var itemback2 = Utils.showItemBackground(ctx.getScreenWidth()/Utils.FOUR-99, 65);
     mainLayout.addView(itemback2);
     var count = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-95, 67);
@@ -438,6 +444,8 @@ Utils.reset = function() {
     Help.MAINPW = null;
     Update.MAINPW = null;
     SpecialThanks.MAINPW = null;
+    NoInternet.MAINPW = null;
+    Loading.MAINPW = null;
 };
 
 Utils.getContext = function() {
