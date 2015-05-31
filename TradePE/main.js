@@ -96,11 +96,11 @@ Trade.init = function() {
         Utils.updateTradeList(name, itemback2, cost, count);
     }, true, false);
     mainLayout.addView(right);
-    var buy = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-133, 130, 108, 32, R.string.buy, function() {
+    var buy = Utils.showButton(25, ctx.getScreenHeight()/Utils.FOUR-42, (ctx.getScreenWidth()/Utils.FOUR-72)/2, 32, R.string.buy, function() {
         Utils.buyThing();
     }, true, false);
     mainLayout.addView(buy);
-    var sell = Utils.showButton(25, 130, 108, 32, R.string.sell, function() {
+    var sell = Utils.showButton(47+(ctx.getScreenWidth()/Utils.FOUR-72)/2, ctx.getScreenHeight()/Utils.FOUR-42, (ctx.getScreenWidth()/Utils.FOUR-72)/2, 32, R.string.sell, function() {
         Utils.sellThing();
     }, true, false);
     mainLayout.addView(sell);
@@ -582,7 +582,7 @@ Utils.showHeader = function(text) {
     center.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
     center.setTypeface(Utils.getTypeface());
     center.setGravity(android.view.Gravity.CENTER);
-    center.setTextSize(4*Utils.FOUR);
+    center.setTextSize(16);
     center.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
     if(Utils.hasNonAscii(text))
         text = Utils.getStringBuilder(text, "#e1e1e1")[0];
@@ -627,7 +627,7 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
     button.setBackgroundDrawable(unclicked_image);
     button.setTypeface(Utils.getTypeface());
     button.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
-    button.setTextSize(4*Utils.FOUR);
+    button.setTextSize(16);
     if(text.indexOf("\n") < 0)
         button.setSingleLine(true);
     var current = false;
@@ -722,7 +722,7 @@ Utils.justText = function(str, x, y, width) {
     text.setGravity(android.view.Gravity.CENTER);
     text.setTypeface(Utils.getTypeface());
     text.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
-    text.setTextSize(4*Utils.FOUR);
+    text.setTextSize(16);
     text.setShadowLayer(0.00001, Utils.FOUR, Utils.FOUR, android.graphics.Color.DKGRAY);
     return text;
 };
@@ -829,7 +829,7 @@ Utils.warn = function(txt) {
         text.setTypeface(Utils.getTypeface());
         text.setShadowLayer(0.00001, 1.5*Utils.FOUR, 1.5*Utils.FOUR, android.graphics.Color.parseColor("#410000"));
         text.setTextColor(android.graphics.Color.RED);
-        text.setTextSize(6*Utils.FOUR);
+        text.setTextSize(6*4);
         var fade_in = new android.view.animation.AlphaAnimation(0, 1);
         fade_in.setDuration(180);
         
@@ -1006,7 +1006,7 @@ Utils.interactInit = function() {
     text.setGravity(android.view.Gravity.CENTER);
     text.setTypeface(Utils.getTypeface());
     text.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
-    text.setTextSize(4*Utils.FOUR);
+    text.setTextSize(16);
     text.setOnClickListener(new android.view.View.OnClickListener({
         onClick: function() {
             Trade.showScreen();
