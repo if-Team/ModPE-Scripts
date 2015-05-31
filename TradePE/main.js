@@ -10,6 +10,8 @@ Trade.TRADING = null;
 Trade.CUR_HEALTH = null;
 Trade.CUR_LANG = null;
 
+Trade.debug = true;
+
 Trade.getVersion = function() {
     return "Indev";
 };
@@ -134,6 +136,7 @@ Trade.init = function() {
 
 Trade.showScreen = function() {
     Trade.TRADING = true;
+    if(!Trade.debug)
     Trade.EME_COUNT = Utils.getAllItems(388, 0);
     Utils.createUiThread(function(ctx) {
         Utils.updateTradeList(Trade.NAME, Trade.ITEMBACK, Trade.COST, Trade.COUNT);
@@ -329,8 +332,9 @@ SpecialThanks.init = function() {
     mainLayout.addView(dismiss);
     mainPw.setContentView(mainLayout);
     
-    var people = "ChalkPE - JP Translator\n@desno365 - IT Translator\n@TaQultO_988 - ES Translator\n@block_zone - RU Translator\n@eu_sozin - PT Translator\n@jnjnnjzch - CH Translator\n@Adrian113162 - FR Translator";
-    var text = Utils.justText(people, 0, 32, ctx.getScreenWidth()/Utils.FOUR);
+    var people = "<p><b>ChalkPE</b> - <i>JP Translator</i><br><b>@desno365</b> - <i>IT Translator</i><br><b>@TaQultO_988</b> - <i>ES Translator</i><br><b>@block_zone</b> - <i>RU Translator</i><br><b>@eu_sozin</b> - <i>PT Translator</i><br><b>@jnjnnjzch</b> - <i>CH Translator</i><br><b>@Adrian113162</b> - <i>FR Translator</i></p>";
+    var text = Utils.justText("", 0, 32, ctx.getScreenWidth()/Utils.FOUR);
+    text.setText(android.text.Html.fromHtml(people));
     mainLayout.addView(text);
     mainPw.setWidth(ctx.getScreenWidth());
     mainPw.setHeight(ctx.getScreenHeight());
@@ -381,6 +385,7 @@ Loading.init = function() {
 
 Loading.showScreen = function() {
     Utils.createUiThread(function(ctx) {
+        while(Loading.MAINPW == 0);
         Loading.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
     });
 };
@@ -415,6 +420,7 @@ NoInternet.init = function() {
     mainPw.setHeight(ctx.getScreenHeight());
     mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.argb(144, 0, 0, 0)));
     NoInternet.MAINPW = mainPw;
+    Init.INITIALING = true;
 };
 
 NoInternet.showScreen = function() {
@@ -426,6 +432,8 @@ NoInternet.showScreen = function() {
 Utils = {};
 
 Utils.reset = function() {
+    Lang.KEY = null;
+    Lang.DATA = null;
     Trade.MAINPW = null;
     Help.MAINPW = null;
     Update.MAINPW = null;
@@ -1013,6 +1021,8 @@ Utils.showInteractPw = function() {
 };
 
 Utils.getVillagerType = function(ent) {
+    if(Trade.debug)
+        return "butcher";
     var path = Entity.getMobSkin(ent);
     return path.substring(path.lastIndexOf("/")+1, path.length-4);
 };
@@ -1035,13 +1045,23 @@ Utils.isWarning = function() {
 };
 
 Utils.getCurrentLanguage = function() {
-    return "ko_KR";
+    var file = new java.io.File("/sdcard/games/com.mojang/minecraftpe/options.txt");
+    var br = new java.io.BufferedReader(new java.io.InputStreamReader(new java.io.FileInputStream(file)));
+    var read, lang;
+    while((read = br.readLine()) != null) {
+        if(read.split(":")[0] == "game_language") {
+            lang = read.split(":")[1];
+            break;
+        }
+    }
+    br.close();
+    return lang;
 };
 
 Utils.getStringFor = function(key) {
     if(key["all"] != null)
         return key["all"];
-    var data = key[Utils.getCurrentLanguage()];
+    var data = key[Trade.CUR_LANG];
     return data == null ? key["en_US"] : data;
 };
 
@@ -1074,7 +1094,7 @@ Lang.KEY = null;
 Lang.DATA = null;
 
 Lang.getPath = function() {
-    return "lang/en_US.lang";
+    return "lang/pc-base/"+Utils.getCurrentLanguage()+".lang";
 };
 
 Lang.readLang = function() {
@@ -1122,6 +1142,10 @@ Easter.goToURL = function(url) {
     ctx.startActivity(intent);
 };
 
+Init = {};
+
+Init.INITIALING = false;
+
 Player.setInventorySlot = Player.setInventorySlot || function(slot, id, count, dam) {
     net.zhuoweizhang.mcpelauncher.ScriptManager.nativeSetInventorySlot(slot, id, count, dam);
 };
@@ -1131,16 +1155,15 @@ Player.setInventorySlot = Player.setInventorySlot || function(slot, id, count, d
 
 
 function modTick() {
-    if(Trade.CUR_LANG != Utils.getCurrentLanguage()) {
-        Utils.reset();
-        Trade.CUR_LANG = Utils.getCurrentLanguage();
-    }
-    
-    //Initialing
     if(Lang.KEY == null && Lang.DATA == null) {
         Lang.KEY = 0;
         Lang.DATA = 0;
         Lang.readLang();
+    }
+    if(Loading.MAINPW == null) {
+        Loading.MAINPW = 0;
+        Loading.init();
+        Loading.showScreen();
     }
     if(Trade.META == null)
         eval("Trade.META = "+new java.lang.String(ModPE.getBytesFromTexturePack("images/items.meta"))+";");
@@ -1172,15 +1195,14 @@ function modTick() {
         SpecialThanks.MAINPW = 0;
         SpecialThanks.init();
     }
-    if(Loading.MAINPW == null) {
-        Loading.MAINPW = 0;
-        Loading.init();
-    }
     if(NoInternet.MAINPW == null) {
         NoInternet.MAINPW = 0;
         NoInternet.init();
     }
-    
+    if(Init.INITIALING == true) {
+        Init.INITIALING = false;
+        Loading.killScreen();
+    }
     if(Entity.getEntityTypeId(Player.getPointedEntity()) == 15) {
         if(!Trade.INTERACTPW.isShowing()) {
             Trade.SELLER = Player.getPointedEntity();
@@ -1189,16 +1211,17 @@ function modTick() {
     }
     if(Entity.getEntityTypeId(Player.getPointedEntity()) != 15) {
         Utils.createUiThread(function() {
-            Trade.INTERACTPW.dismiss();
+            if(Trade.INTERACTPW != null)
+                Trade.INTERACTPW.dismiss();
         });
     }
-    if(Trade.TRADING) {
+    if(Trade.TRADING && !Trade.debug) {
         Entity.setVelX(Trade.SELLER, 0);
         Entity.setVelY(Trade.SELLER, 0);
         Entity.setVelZ(Trade.SELLER, 0);
     }
     
-    if(Entity.getHealth(Player.getEntity()) <= 0 || Entity.getHealth(Trade.SELLER) <= 0) {
+    if(!Trade.debug && (Entity.getHealth(Player.getEntity()) <= 0 || Entity.getHealth(Trade.SELLER) <= 0)) {
         leaveGame();
     }
     if(Trade.CUR_HEALTH > Entity.getHealth(Player.getEntity())) {
@@ -1207,21 +1230,32 @@ function modTick() {
     }
 }
 
+function selectLevelHook() {
+    if(Trade.CUR_LANG != Utils.getCurrentLanguage()) {
+        Utils.reset();
+        Trade.CUR_LANG = Utils.getCurrentLanguage();
+    }
+}
+
 function newLevel() {
     Trade.CUR_HEALTH = Entity.getHealth(Player.getEntity());
 }
 
+function useItem() {
+    Trade.showScreen();
+}
+
 function leaveGame() {
     Utils.createUiThread(function() {
-        if(Trade.MAINPW != 0 && Trade.MAINPW.isShowing())
+        if(Trade.MAINPW != 0 && Trade.MAINPW != null && Trade.MAINPW.isShowing())
             Trade.MAINPW.dismiss();
-        if(Trade.INTERACTPW != 0 && Trade.INTERACTPW.isShowing())
+        if(Trade.INTERACTPW != 0 && Trade.MAINPW != null && Trade.INTERACTPW.isShowing())
             Trade.INTERACTPW.dismiss();
-        if(Help.MAINPW != 0 && Help.MAINPW.isShowing())
+        if(Help.MAINPW != 0 && Help.MAINPW != null && Help.MAINPW.isShowing())
             Help.MAINPW.dismiss();
-        if(Update.MAINPW != 0 && Update.MAINPW.isShowing())
+        if(Update.MAINPW != 0 && Update.MAINPW != null && Update.MAINPW.isShowing())
             Update.MAINPW.dismiss();
-        if(SpecialThanks.MAINPW != 0 && SpecialThanks.MAINPW.isShowing())
+        if(SpecialThanks.MAINPW != 0 && SpecialThanks.MAINPW != null && SpecialThanks.MAINPW.isShowing())
             SpecialThanks.MAINPW.dismiss();
     });
 }
