@@ -338,7 +338,7 @@ SpecialThanks.init = function() {
     mainLayout.addView(dismiss);
     mainPw.setContentView(mainLayout);
     
-    var people = "<p><b>ChalkPE</b> - <i>JP Translator</i><br><b>@desno365</b> - <i>IT Translator</i><br><b>@TaQultO_988</b> - <i>ES Translator</i><br><b>@block_zone</b> - <i>RU Translator</i><br><b>@eu_sozin</b> - <i>PT Translator</i><br><b>@jnjnnjzch</b> - <i>CH Translator</i><br><b>@Adrian113162</b> - <i>FR Translator</i></p>";
+    var people = "<p><b>ChalkPE</b> - <i>JP Translator</i><br><b>@desno365</b> - <i>IT Translator</i><br><b>@TaQultO_988</b> - <i>ES Translator</i><br><b>@block_zone</b> - <i>RU Translator</i><br><b>@eu_sozin</b> - <i>PT Translator</i><br><b>@jnjnnjzch</b> - <i>CH Translator</i><br><b>@Adrian113162</b> - <i>FR Translator</i><br><b>@serhat50014</b> - <i>DE Translator</i></p>";
     var text = Utils.justText("", 0, 32, ctx.getScreenWidth()/Utils.FOUR);
     text.setText(android.text.Html.fromHtml(people));
     mainLayout.addView(text);
@@ -391,7 +391,7 @@ Loading.init = function() {
 
 Loading.showScreen = function() {
     Utils.createUiThread(function(ctx) {
-        while(Loading.MAINPW == 0);
+        while(Loading.MAINPW == 0); //WAITING FOR INIT COMPLETE
         Loading.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
     });
 };
@@ -426,7 +426,7 @@ NoInternet.init = function() {
     mainPw.setHeight(ctx.getScreenHeight());
     mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.argb(144, 0, 0, 0)));
     NoInternet.MAINPW = mainPw;
-    Init.INITIALING = true;
+    Init.INITIALIZING = true;
 };
 
 NoInternet.showScreen = function() {
@@ -438,8 +438,6 @@ NoInternet.showScreen = function() {
 Utils = {};
 
 Utils.reset = function() {
-    Lang.KEY = null;
-    Lang.DATA = null;
     Trade.MAINPW = null;
     Help.MAINPW = null;
     Update.MAINPW = null;
@@ -909,7 +907,7 @@ CachedString = {};
 Utils.getStringBuilder = function(text, color, scale, shadowc, shadow) {
     if(color != null)
         color = android.graphics.Color.parseColor(color);
-    if(CachedString[color+text] != null && shadow != false)
+    if(CachedString[color+text] != null)
         return CachedString[color+text];
         
     if(scale == null)
@@ -941,7 +939,7 @@ Utils.getStringBuilder = function(text, color, scale, shadowc, shadow) {
             num = "0"+num;
         var font = android.graphics.BitmapFactory.decodeStream(ModPE.openInputStreamFromTexturePack("images/font/glyph_"+num+".png"));
         var bitmap = Utils.trimImage(font, x, y, 15, 16);
-        if(!/[가-힣]/.test(text.charAt(i)))
+        if(!Utils.hasNonAscii(text.charAt(i)) || (Trade.CUR_LANG != "ko_KR" && Trade.CUR_LANG != "ja_JP" && Trade.CUR_LANG != "zh_CN"))
             bitmap = Utils.cutText(bitmap);
         var result = android.graphics.Bitmap.createBitmap(bitmap.getWidth()+2, 18, android.graphics.Bitmap.Config.ARGB_8888);
         var canvas = new android.graphics.Canvas(result);
@@ -963,9 +961,8 @@ Utils.getStringBuilder = function(text, color, scale, shadowc, shadow) {
 
 Utils.cutText = function(bitmap) {
     var start = -1, end = 0;
-    var arr = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14];
     var Color = android.graphics.Color;
-    arr.forEach(function(i) {
+    for(var i = 0; i < 15; i++) {
         if(Color.alpha(bitmap.getPixel(i, 0))>0 ||
            Color.alpha(bitmap.getPixel(i, 1))>0 ||
            Color.alpha(bitmap.getPixel(i, 2))>0 ||
@@ -982,12 +979,12 @@ Utils.cutText = function(bitmap) {
            Color.alpha(bitmap.getPixel(i, 13))>0 ||
            Color.alpha(bitmap.getPixel(i, 14))>0 ||
            Color.alpha(bitmap.getPixel(i, 15))>0) {
-            if(start == -1)
-                start = i;
-            if(start>=0)
-                end = i;
-        }
-    });
+               if(start == -1)
+                   start = i;
+               if(start >= 0)
+                   end = i;
+           }
+    }
 	return android.graphics.Bitmap.createBitmap(bitmap, start, 0, end-start+1, 16);
 };
 
@@ -999,7 +996,7 @@ Utils.hasNonAscii = function(str) {
 
 Utils.interactInit = function() {
     var text = new android.widget.TextView(Utils.getContext());
-    var txt = Lang.getData(R.string.trade);
+    var txt = " "+Lang.getData(R.string.trade)+" ";
     if(Utils.hasNonAscii(txt))
         txt = Utils.getStringBuilder(txt, "#e1e1e1", null, null, false)[0];
     text.setText(txt);
@@ -1098,8 +1095,7 @@ Utils.getStringLength = function(text) {
 
 var Lang = {};
 
-Lang.KEY = null;
-Lang.DATA = null;
+Lang.Strings = {};
 
 Lang.getPath = function() {
     return "lang/pc-base/"+Utils.getCurrentLanguage()+".lang";
@@ -1107,22 +1103,16 @@ Lang.getPath = function() {
 
 Lang.readLang = function() {
     var lang = new java.lang.String(ModPE.getBytesFromTexturePack(Lang.getPath()))+"";
-    var split1 = lang.split(/\r?\n/);
-    var result = split1.map(function(e) {
-        return e.split("=");
-    });
-    Lang.KEY = result.map(function(e) {
-        return e[0];
-    });
-    Lang.DATA = result.map(function(e) {
-        return e[1];
+    lang.split(/\r?\n/).forEach(function(e) {
+        var a = e.split("=");
+        Lang.Strings[Trade.CUR_LANG][a[0]] = a[1];
     });
 };
 
 Lang.getData = function(key) {
     if(typeof key === "object")
         key = Utils.getStringFor(key);
-    var data = Lang.DATA[Lang.KEY.indexOf(key)];
+    var data = Lang.Strings[Trade.CUR_LANG][key];
     if(typeof data === "undefined")
         return key;
     return data;
@@ -1152,7 +1142,7 @@ Easter.goToURL = function(url) {
 
 Init = {};
 
-Init.INITIALING = false;
+Init.INITIALIZING = false;
 
 Player.setInventorySlot = Player.setInventorySlot || function(slot, id, count, dam) {
     net.zhuoweizhang.mcpelauncher.ScriptManager.nativeSetInventorySlot(slot, id, count, dam);
@@ -1163,9 +1153,8 @@ Player.setInventorySlot = Player.setInventorySlot || function(slot, id, count, d
 
 
 function modTick() {
-    if(Lang.KEY == null && Lang.DATA == null) {
-        Lang.KEY = 0;
-        Lang.DATA = 0;
+    if(Lang.Strings[Trade.CUR_LANG] == null) {
+        Lang.Strings[Trade.CUR_LANG] = {};
         Lang.readLang();
     }
     if(Loading.MAINPW == null) {
@@ -1207,8 +1196,8 @@ function modTick() {
         NoInternet.MAINPW = 0;
         NoInternet.init();
     }
-    if(Init.INITIALING == true) {
-        Init.INITIALING = false;
+    if(Init.INITIALIZING == true) {
+        Init.INITIALIZING = false;
         Loading.killScreen();
     }
     if(Entity.getEntityTypeId(Player.getPointedEntity()) == 15) {
@@ -1274,6 +1263,7 @@ Utils.downloadFontFile();
 var R = {
     string: {
         trade: {
+            de_DE: "Tauschen",
             en_US: "Trade",
             es_ES: "Comerciar",
             fr_FR: "Commerce",
@@ -1288,6 +1278,7 @@ var R = {
             all: "gui.back"
         },
         buy: {
+            de_DE: "Kaufen",
             en_US: "Buy",
             es_ES: "Comprar",
             fr_FR: "Acheter",
@@ -1299,6 +1290,7 @@ var R = {
             zh_CN: "购买"
         },
         sell: {
+            de_DE: "Verkaufen",
             en_US: "Sell",
             es_ES: "Vender",
             fr_FR: "Vendre",
@@ -1310,6 +1302,7 @@ var R = {
             zh_CN: "出售"
         },
         about: {
+            de_DE: "Info",
             en_US: "Info",
             es_ES: "Info",
             fr_FR: "Infos",
@@ -1321,6 +1314,7 @@ var R = {
             zh_CN: "信息"
         },
         check_update: {
+            de_DE: "Suche nach Updates",
             en_US: "Check for updates",
             es_ES: "Buscar actualización",
             fr_FR: "Vérifier les mises à jour",
@@ -1332,6 +1326,7 @@ var R = {
             zh_CN: "检查更新"
         },
         special_thanks: {
+            de_DE: "Besonderen Dank an",
             en_US: "Special thanks to",
             es_ES: "Agradecimiento especial para",
             fr_FR: "Merci spécial à",
@@ -1343,6 +1338,7 @@ var R = {
             zh_CN: "特别感谢"
         },
         new_found_1: {
+            de_DE: "Aktualisierung!",
             en_US: "Update!",
             es_ES: "Actualizacion!",
             fr_FR: "Mise à jour!",
@@ -1354,6 +1350,7 @@ var R = {
             zh_CN: "有更新！"
         },
         new_found_2: {
+            de_DE: "Eine neue Version von TradePE wurde gefunden!\nWillst du es jetzt installieren?",
             en_US: "A new version of TradePE has been found!\nWould you like to install it now?",
             es_ES: "Una nueva versión de TradePE ha sido encontrada!\nQuieres instalar ahora?",
             fr_FR: "Une nouvelle de TradePE a été trouvé!\nSouhaitez-vouz l'installer maintenant?",
@@ -1368,6 +1365,7 @@ var R = {
             all: "gui.yes"
         },
         later: {
+            de_DE: "Später",
             en_US: "Later",
             es_ES: "Despues",
             fr_FR: "Plus tard",
@@ -1379,6 +1377,7 @@ var R = {
             zh_CN: "稍后"
         },
         not_enough_item: {
+            de_DE: "Nicht genug Items",
             en_US: "Not enough items",
             es_ES: "No hay items suficientes",
             fr_FR: "Pas assez d'éléments",
@@ -1390,6 +1389,7 @@ var R = {
             zh_CN: "物品不足"
         },
         not_enough_emerald: {
+            de_DE: "Nicht genug Smaragd",
             en_US: "Not enough emeralds",
             es_ES: "No hay esmeraldas suficientes",
             fr_FR: "Pass assez émeraudes",
