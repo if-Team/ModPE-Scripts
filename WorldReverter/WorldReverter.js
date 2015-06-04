@@ -20,6 +20,11 @@
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 
 /**
+* @type {android.widget.PopupWindow}
+*/
+var popupWindow = null;
+
+/**
  * @type {BlockHistory[]}
  */
 var stack = [];
@@ -141,6 +146,26 @@ function onBlockPlace(x, y, z, blockId, blockData) {
  */
 function onBlockBreak(x, y, z, blockId, blockData) {
     stack.push(new BlockHistory(BlockHistory.Type.BREAK, x, y, z, blockId, blockData));
+}
+
+/**
+* @param {boolean} hasLevel
+*/
+function newLevel(hasLevel) {
+    createButton();
+}
+
+function createButton() {
+    ctx.runOnUiThread(new java.lang.Runnable({run: function(){
+        var button = new android.widget.Button(ctx);
+        button.setText("List");
+        button.setOnClickListener(new android.view.View.OnClickListener({onClick: function(){
+            //TODO: Add AlertDialog for revert world
+        }}));
+        popupWindow = new android.widget.PopupWindow(button);
+        popupWindow.setWindowLayoutMode(-2, -2);
+        popupWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.RIGHT | android.view.Gravity.BOTTOM, 0, 0);
+    }}));
 }
 
 void(useItem); void(destroyBlock);
