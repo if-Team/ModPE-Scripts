@@ -27,7 +27,7 @@ Trade.Items = {
         count: [6, 6, 1, 1, 1, 1, 15, 15, 20, 8]
     },
     farmer: {
-        name: ["item.apple.name", "item.bread.name", "item.chickenCooked.name", "item.cookie.name", "item.melon.name", "item.arrow.name", "item.flintAndSteel.name", "item.shears.name", "item.chickenRaw.name", "item.wheat.name", "item.fishCooked.name"],
+        name: ["item.apple.name", "item.bread.name", "item.chickenCooked.name", "item.cookie.name", "item.melon.name", "item.arrow.name", "item.flintAndSteel.name", "item.shears.name", "item.chickenRaw.name", "item.wheat.name", "item.fish.cod.cooked.name"],
         meta: [["apple",0], ["bread", 0], ["chicken_cooked", 0], ["cookie", 0], ["melon", 0], ["arrow", 0], ["flint_and_steel", 0], ["shears", 0], ["chicken_raw", 0], ["wheat", 0], ["fish_cooked", 0]],
         id: [260, 297, 366, 357, 369, 262, 259, 359, 365, 296, 350],
         dam: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -696,7 +696,7 @@ Utils.showHeader = function(text, width) {
     center.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
     center.setTypeface(Utils.getTypeface());
     center.setGravity(android.view.Gravity.CENTER);
-    center.setTextSize(16);
+    center.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, 8*Utils.FOUR);
     center.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
     if(Utils.hasNonAscii(text))
         text = Utils.getStringBuilder(text, "#e1e1e1")[0];
@@ -744,7 +744,7 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
     button.setBackgroundDrawable(unclicked_image);
     button.setTypeface(Utils.getTypeface());
     button.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
-    button.setTextSize(16);
+    button.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, 8*Utils.FOUR);
     if(text.indexOf("\n") < 0)
         button.setSingleLine(true);
     var current = false;
@@ -911,7 +911,7 @@ Utils.justText = function(str, x, y, width) {
     text.setGravity(android.view.Gravity.CENTER);
     text.setTypeface(Utils.getTypeface());
     text.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
-    text.setTextSize(16);
+    text.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, 8*Utils.FOUR);
     text.setShadowLayer(0.00001, Utils.FOUR, Utils.FOUR, android.graphics.Color.DKGRAY);
     return text;
 };
@@ -1196,10 +1196,11 @@ Utils.interactInit = function() {
     if(Utils.hasNonAscii(txt))
         txt = Utils.getStringBuilder(txt, "#e1e1e1", null, null, false)[0];
     text.setText(txt);
+    text.setSingleLine(true);
     text.setGravity(android.view.Gravity.CENTER);
     text.setTypeface(Utils.getTypeface());
     text.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
-    text.setTextSize(16);
+    text.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, 8*Utils.FOUR);
     text.setOnClickListener(new android.view.View.OnClickListener({
         onClick: function() {
             Trade.showScreen();
