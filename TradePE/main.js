@@ -13,7 +13,7 @@ Trade.CUR_LANG = null;
 Trade.debug = true;
 
 Trade.getVersion = function() {
-    return "Indev";
+    return "Indev 1";
 };
 
 //Trade items
@@ -446,6 +446,40 @@ Options.Options = {
     NOINTERNET: 0
 };
 
+Options.toggleOption = function(screen, dat) {
+    Options.Options[screen] = dat;
+    if(screen == "TRADE")
+        Trade.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
+    else if(screen == "HELP")
+        Help.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
+    else if(screen == "UPDATE")
+        Update.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
+    else if(screen == "SPECIAL")
+        SpecialThanks.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
+    else if(screen == "OPTIONS")
+        Options.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
+    else if(screen == "NOINTERNET")
+        NoInternet.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
+    Options.saveOption();
+};
+
+Options.saveOption = function() {
+    var file = new java.io.File("/sdcard/아포카토맨/TradePE/options.txt");
+    file.getParentFile().mkdirs();
+    var bw = new java.io.BufferedWriter(new java.io.FileWriter(file));
+    bw.write(JSON.stringify(Options.Options));
+    bw.close();
+};
+
+Options.loadOption = function() {
+    var file = new java.io.File("/sdcard/아포카토맨/TradePE/options.txt");
+    if(!file.exists())
+        Options.saveOption();
+    var br = new java.io.BufferedReader(new java.io.InputStreamReader(new java.io.FileInputStream(file)));
+    Options.Options = JSON.parse(br.readLine());
+    br.close();
+};
+
 Options.MAINPW = {};
 Options.DIRT = {};
 
@@ -464,6 +498,7 @@ Options.init = function() {
         mainPw.dismiss();
     }, false, false);
     mainLayout.addView(dismiss);
+    
     mainPw.setContentView(mainLayout);
     mainPw.setWidth(ctx.getScreenWidth());
     mainPw.setHeight(ctx.getScreenHeight());
@@ -623,9 +658,15 @@ Utils.getStretchedImage = function(bm, x, y, stretchWidth, stretchHeight, width,
     return new android.graphics.drawable.BitmapDrawable(blank);
 };
 
-Utils.showBackground = function(type) {
+Utils.showBackground = function(type, x, y, width, height) {
     var back = new android.view.View(Utils.getContext());
-    back.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(Utils.getContext().getScreenWidth(), Utils.getContext().getScreenHeight()));
+    x = x == null ? 0 : x*Utils.FOUR;
+    y = y == null ? 0 : y*Utils.FOUR;
+    width = width == null ? Utils.getContext().getScreenWidth() : width*Utils.FOUR;
+    height = height == null ? Utils.getContext().getScreenHeight() : height*Utils.FOUR;
+    var params = new android.widget.RelativeLayout.LayoutParams(width, height);
+    params.setMargins(x, y, 0, 0);
+    back.setLayoutParams(params);
     if(type == null) {
         var spritesheet = android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 0, 0, 16, 16), 16*Utils.FOUR, 16*Utils.FOUR, false);
         back.setBackgroundDrawable(Utils.getStretchedImage(spritesheet, 4*Utils.FOUR, 4*Utils.FOUR, 8*Utils.FOUR, 8*Utils.FOUR, Utils.getContext().getScreenWidth(), Utils.getContext().getScreenHeight()));
@@ -638,9 +679,10 @@ Utils.showBackground = function(type) {
     return back;
 };
 
-Utils.showHeader = function(text) {
+Utils.showHeader = function(text, width) {
     text = Lang.getData(text);
     var ctx = Utils.getContext();
+    width = width == null ? ctx.getScreenWidth() : width*Utils.FOUR;
     var vert = new android.widget.LinearLayout(ctx);
     vert.setOrientation(android.widget.LinearLayout.VERTICAL);
     var horiz = new android.widget.LinearLayout(ctx);
@@ -660,8 +702,8 @@ Utils.showHeader = function(text) {
         text = Utils.getStringBuilder(text, "#e1e1e1")[0];
     center.setText(text);
     center.setShadowLayer(0.00001, Utils.FOUR, Utils.FOUR, android.graphics.Color.DKGRAY);
-    center.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 3, 0, 8, 25), ctx.getScreenWidth()-Utils.FOUR*4, Utils.FOUR*25, false)));
-    center.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ctx.getScreenWidth()-Utils.FOUR*4, Utils.FOUR*25));
+    center.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 3, 0, 8, 25), width-Utils.FOUR*4, Utils.FOUR*25, false)));
+    center.setLayoutParams(new android.widget.LinearLayout.LayoutParams(width-Utils.FOUR*4, Utils.FOUR*25));
     horiz.addView(center);
     var right = new android.view.View(ctx);
     right.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 12, 0, 2, 25), Utils.FOUR*2, Utils.FOUR*25, false)));
@@ -669,10 +711,10 @@ Utils.showHeader = function(text) {
     horiz.addView(right);
     vert.addView(horiz);
     var down = new android.view.View(ctx);
-    down.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 3, 26, 8, 3), ctx.getScreenWidth(), Utils.FOUR*3, false)));
-    down.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ctx.getScreenWidth(), Utils.FOUR*3));
+    down.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 3, 26, 8, 3), width, Utils.FOUR*3, false)));
+    down.setLayoutParams(new android.widget.LinearLayout.LayoutParams(width, Utils.FOUR*3));
     vert.addView(down);
-    vert.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(Utils.getContext().getScreenWidth(), 28*Utils.FOUR));
+    vert.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(width, 28*Utils.FOUR));
     return vert;
 };
 
@@ -1026,22 +1068,6 @@ Utils.sellThing = function() {
     }
 };
 
-Utils.toggleScreenBack = function(screen, dat) {
-    Options.Options[screen] = dat;
-    if(screen == "TRADE")
-        Trade.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
-    if(screen == "HELP")
-        Help.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
-    if(screen == "UPDATE")
-        Update.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
-    if(screen == "SPECIAL")
-        SpecialThanks.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
-    if(screen == "OPTIONS")
-        Options.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
-    if(screen == "NOINTERNET")
-        NoInternet.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
-};
-
 Utils.addItemInventory = function(id, count, dam) {
     if(count >= 0)
         addItemInventory(id, count, dam);
@@ -1163,7 +1189,10 @@ Utils.hasNonAscii = function(str) {
 
 Utils.interactInit = function() {
     var text = new android.widget.TextView(Utils.getContext());
-    var txt = " "+Lang.getData(R.string.trade)+" ";
+    if(Utils.hasNonAscii(Lang.getData(R.string.trade)))
+        var txt = " "+Lang.getData(R.string.trade)+" ";
+    else
+        var txt = Lang.getData(R.string.trade);
     if(Utils.hasNonAscii(txt))
         txt = Utils.getStringBuilder(txt, "#e1e1e1", null, null, false)[0];
     text.setText(txt);
@@ -1193,8 +1222,6 @@ Utils.showInteractPw = function() {
 };
 
 Utils.getVillagerType = function(ent) {
-    if(Trade.debug)
-        return "butcher";
     var path = Entity.getMobSkin(ent);
     return path.substring(path.lastIndexOf("/")+1, path.length-4);
 };
@@ -1383,13 +1410,13 @@ function modTick() {
                 Trade.INTERACTPW[Trade.CUR_LANG].dismiss();
         });
     }
-    if(Trade.TRADING && !Trade.debug) {
+    if(Trade.TRADING) {
         Entity.setVelX(Trade.SELLER, 0);
         Entity.setVelY(Trade.SELLER, 0);
         Entity.setVelZ(Trade.SELLER, 0);
     }
     
-    if(!Trade.debug && (Entity.getHealth(Player.getEntity()) <= 0 || Entity.getHealth(Trade.SELLER) <= 0)) {
+    if(Trade.SELLER != null && (Entity.getHealth(Player.getEntity()) <= 0 || Entity.getHealth(Trade.SELLER) <= 0)) {
         leaveGame();
     }
     if(Trade.CUR_HEALTH > Entity.getHealth(Player.getEntity())) {
@@ -1401,14 +1428,18 @@ function modTick() {
 function selectLevelHook() {
     if(Trade.CUR_LANG != Utils.getCurrentLanguage())
         Trade.CUR_LANG = Utils.getCurrentLanguage();
+    Options.loadOption();
 }
 
 function newLevel() {
     Trade.CUR_HEALTH = Entity.getHealth(Player.getEntity());
 }
 
-function useItem() {
-    Utils.showInteractPw();
+function attackHook(a, v) {
+    if(Entity.getEntityTypeId(v) == 15) {
+        Trade.SELLER = v;
+        Utils.showInteractPw();
+    }
 }
 
 function leaveGame() {
