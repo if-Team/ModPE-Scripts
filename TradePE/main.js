@@ -13,7 +13,7 @@ Trade.CUR_LANG = null;
 Trade.debug = true;
 
 Trade.getVersion = function() {
-    return "Indev 1";
+    return "Indev 1.1";
 };
 
 //Trade items
@@ -79,7 +79,7 @@ Trade.init = function() {
     mainLayout.addView(back);
     var dirt = Utils.showBackground("dirt");
     mainLayout.addView(dirt);
-    var header = Utils.showHeader(R.string.trade);
+    var header = Utils.showHeader(R.string.trade)[0];
     mainLayout.addView(header);
     var itemback = Utils.showItemBackground(59, 65);
     mainLayout.addView(itemback);
@@ -183,7 +183,7 @@ Help.init = function() {
     mainLayout.addView(back);
     var dirt = Utils.showBackground("dirt");
     mainLayout.addView(dirt);
-    var head = Utils.showHeader(R.string.about);
+    var head = Utils.showHeader(R.string.about)[0];
     mainLayout.addView(head);
     var dismiss = Utils.showButton(4, 4, 38, 18, R.string.back, function() {
         mainPw.dismiss();
@@ -250,7 +250,7 @@ Update.init = function() {
     mainLayout.addView(back);
     var dirt = Utils.showBackground("dirt");
     mainLayout.addView(dirt);
-    var head = Utils.showHeader(R.string.new_found_1);
+    var head = Utils.showHeader(R.string.new_found_1)[0];
     mainLayout.addView(head);
     var dismiss = Utils.showButton(4, 4, 38, 18, R.string.back, function() {
         mainPw.dismiss();
@@ -359,7 +359,7 @@ SpecialThanks.init = function() {
     mainLayout.addView(back);
     var dirt = Utils.showBackground("dirt");
     mainLayout.addView(dirt);
-    var head = Utils.showHeader(R.string.special_thanks);
+    var head = Utils.showHeader(R.string.special_thanks)[0];
     mainLayout.addView(head);
     var dismiss = Utils.showButton(4, 4, 38, 18, R.string.back, function() {
         mainPw.dismiss();
@@ -492,12 +492,14 @@ Options.init = function() {
     mainLayout.addView(back);
     var dirt = Utils.showBackground("dirt");
     mainLayout.addView(dirt);
-    var head = Utils.showHeader(R.string.options);
+    var head = Utils.showHeader(R.string.options)[0];
     mainLayout.addView(head);
     var dismiss = Utils.showButton(4, 4, 38, 18, R.string.back, function() {
         mainPw.dismiss();
     }, false, false);
     mainLayout.addView(dismiss);
+    var rect = Utils.drawRect(4, 32, ctx.getScreenWidth()/Utils.FOUR-8, ctx.getScreenHeight()/Utils.FOUR-36, "#808080");
+    mainLayout.addView(rect);
     
     mainPw.setContentView(mainLayout);
     mainPw.setWidth(ctx.getScreenWidth());
@@ -632,6 +634,15 @@ Utils.minusPage = function(view) {
         Trade.PAGE--;
 };
 
+Utils.drawRect = function(x, y, width, height, color) {
+    var view = new android.view.View(Utils.getContext());
+    var params = new android.widget.RelativeLayout.LayoutParams(width*Utils.FOUR, height*Utils.FOUR);
+    params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
+    view.setLayoutParams(params);
+    view.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor(color)));
+    return view;
+};
+
 Utils.getStretchedImage = function(bm, x, y, stretchWidth, stretchHeight, width, height) {
     var blank = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
     var Bitmap = android.graphics.Bitmap;
@@ -715,7 +726,7 @@ Utils.showHeader = function(text, width) {
     down.setLayoutParams(new android.widget.LinearLayout.LayoutParams(width, Utils.FOUR*3));
     vert.addView(down);
     vert.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(width, 28*Utils.FOUR));
-    return vert;
+    return [vert, text];
 };
 
 Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, isRight) {
@@ -1174,9 +1185,10 @@ Utils.cutText = function(bitmap) {
            Color.alpha(bitmap.getPixel(i, 15))>0) {
                if(start == -1)
                    start = i;
-               if(start >= 0)
-                   end = i;
-           }
+         } else if(start != -1) {
+             end = i;
+             break;
+         }
     }
 	return android.graphics.Bitmap.createBitmap(bitmap, start, 0, end-start+1, bitmap.getHeight());
 };
@@ -1413,7 +1425,6 @@ function modTick() {
     }
     if(Trade.TRADING) {
         Entity.setVelX(Trade.SELLER, 0);
-        Entity.setVelY(Trade.SELLER, 0);
         Entity.setVelZ(Trade.SELLER, 0);
     }
     
