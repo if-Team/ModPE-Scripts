@@ -168,4 +168,12 @@ function createButton() {
     }}));
 }
 
+function leaveGame() {
+    ctx.runOnUiThread(new java.lang.Runnable({run: function(){
+        if(!popupWindow) return;
+        popupWindow.dismiss();
+        popupWindow = null;
+    }}));
+}
+
 void(useItem); void(destroyBlock);
