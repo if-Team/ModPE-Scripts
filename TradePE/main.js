@@ -10,10 +10,10 @@ Trade.TRADING = null;
 Trade.CUR_HEALTH = null;
 Trade.CUR_LANG = null;
 
-Trade.debug = true;
+Trade.debug = false;
 
 Trade.getVersion = function() {
-    return "Indev 1.1";
+    return "Indev 1.2";
 };
 
 //Trade items
@@ -449,22 +449,22 @@ Options.Options = {
 Options.toggleOption = function(screen, dat) {
     Options.Options[screen] = dat;
     if(screen == "TRADE")
-        Trade.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
+        Trade.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.View.GONE : android.view.View.VISIBLE);
     else if(screen == "HELP")
-        Help.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
+        Help.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.View.GONE : android.view.View.VISIBLE);
     else if(screen == "UPDATE")
-        Update.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
+        Update.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.View.GONE : android.view.View.VISIBLE);
     else if(screen == "SPECIAL")
-        SpecialThanks.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
+        SpecialThanks.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.View.GONE : android.view.View.VISIBLE);
     else if(screen == "OPTIONS")
-        Options.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
+        Options.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.View.GONE : android.view.View.VISIBLE);
     else if(screen == "NOINTERNET")
-        NoInternet.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.GONE : android.view.VISIBLE);
+        NoInternet.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.View.GONE : android.view.View.VISIBLE);
     Options.saveOption();
 };
 
 Options.saveOption = function() {
-    var file = new java.io.File("/sdcard/아포카토맨/TradePE/options.txt");
+    var file = new java.io.File("/sdcard/Affogatoman/TradePE/options.txt");
     file.getParentFile().mkdirs();
     var bw = new java.io.BufferedWriter(new java.io.FileWriter(file));
     bw.write(JSON.stringify(Options.Options));
@@ -472,7 +472,7 @@ Options.saveOption = function() {
 };
 
 Options.loadOption = function() {
-    var file = new java.io.File("/sdcard/아포카토맨/TradePE/options.txt");
+    var file = new java.io.File("/sdcard/Affogatoman/TradePE/options.txt");
     if(!file.exists())
         Options.saveOption();
     var br = new java.io.BufferedReader(new java.io.InputStreamReader(new java.io.FileInputStream(file)));
@@ -488,6 +488,10 @@ Options.init = function() {
     var mainPw = new android.widget.PopupWindow(ctx);
     var mainLayout = new android.widget.RelativeLayout(ctx);
     
+    var screens = [Trade, Help, Update, SpecialThanks, Options, NoInternet];
+    var options = ["TRADE", "HELP", "UPDATE", "SPECIAL", "OPTIONS", "NONTERNET"];
+    var current = 0;
+    
     var back = Utils.showBackground();
     mainLayout.addView(back);
     var dirt = Utils.showBackground("dirt");
@@ -498,8 +502,16 @@ Options.init = function() {
         mainPw.dismiss();
     }, false, false);
     mainLayout.addView(dismiss);
-    var rect = Utils.drawRect(4, 32, ctx.getScreenWidth()/Utils.FOUR-8, ctx.getScreenHeight()/Utils.FOUR-36, "#808080");
+    var rect = Utils.drawRect(32, 32, ctx.getScreenWidth()/Utils.FOUR-64, ctx.getScreenHeight()/Utils.FOUR-36, "#808080");
     mainLayout.addView(rect);
+    var left = Utils.showButton(4, ctx.getScreenHeight()/Utils.FOUR-102, 24, 70, "<", function() {
+        Options.toggleOption("OPTIONS", (Options.Options.OPTIONS == 0 ? 1 : 0));
+    }, true, false);
+    mainLayout.addView(left);
+    var right = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-28, ctx.getScreenHeight()/Utils.FOUR-102, 24, 70, ">", function() {
+        
+    }, true, false);
+    mainLayout.addView(right);
     
     mainPw.setContentView(mainLayout);
     mainPw.setWidth(ctx.getScreenWidth());
@@ -572,7 +584,7 @@ Utils.createUiThread = function(func) {
 Utils.FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, Utils.getContext().getResources().getDisplayMetrics());
 
 Utils.hasFontFile = function() {
-    return new java.io.File("/sdcard/아포카토맨/font.ttf").exists();
+    return new java.io.File("/sdcard/Affogatoman/font.ttf").exists();
 };
 
 Utils.getMyScriptName = function() {
@@ -591,7 +603,7 @@ Utils.downloadFontFile = function() {
     else {
         var url = new java.net.URL("https://www.dropbox.com/s/ky1nj2pms00vb5t/font.ttf?dl=1").openConnection().getInputStream();
         var bis = new java.io.BufferedInputStream(url);
-        var target = new java.io.File("/sdcard/아포카토맨/font.ttf");
+        var target = new java.io.File("/sdcard/Affogatoman/font.ttf");
         target.getParentFile().mkdirs();
         var bos = new java.io.BufferedOutputStream(new java.io.FileOutputStream(target));
         var buf = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 4096);
@@ -604,7 +616,7 @@ Utils.downloadFontFile = function() {
 };
 
 Utils.getTypeface = function() {
-    return android.graphics.Typeface.createFromFile("/sdcard/아포카토맨/font.ttf");
+    return android.graphics.Typeface.createFromFile("/sdcard/Affogatoman/font.ttf");
 };
 
 Utils.getSpritesheet = function() {
@@ -1445,13 +1457,6 @@ function selectLevelHook() {
 
 function newLevel() {
     Trade.CUR_HEALTH = Entity.getHealth(Player.getEntity());
-}
-
-function attackHook(a, v) {
-    if(Entity.getEntityTypeId(v) == 15) {
-        Trade.SELLER = v;
-        Utils.showInteractPw();
-    }
 }
 
 function leaveGame() {
