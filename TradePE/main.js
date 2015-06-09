@@ -13,13 +13,12 @@ Trade.CUR_LANG = null;
 Trade.debug = false;
 
 Trade.getVersion = function() {
-    return "Indev 1.2";
+    return "Indev 1.3";
 };
 
 //Trade items
 Trade.Items = {
     butcher: {
-        name: ["item.beefCooked.name", "item.porkchopCooked.name", "item.helmetCloth.name", "item.chestplateCloth.name", "item.leggingsCloth.name", "item.bootsCloth.name", "item.beefRaw.name", "item.porkchopRaw.name", "item.coal.name", "item.ingotGold.name"],
         meta: [["beef_cooked",0], ["porkchop_cooked",0], ["helmet", 0], ["chestplate", 0], ["leggings", 0], ["boots", 0], ["beef_raw", 0], ["porkchop_raw", 0], ["coal", 0], ["gold_ingot", 0]],
         id: [364, 320, 298, 299, 300, 301, 363, 319, 263, 266],
         dam: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -27,7 +26,6 @@ Trade.Items = {
         count: [6, 6, 1, 1, 1, 1, 15, 15, 20, 8]
     },
     farmer: {
-        name: ["item.apple.name", "item.bread.name", "item.chickenCooked.name", "item.cookie.name", "item.melon.name", "item.arrow.name", "item.flintAndSteel.name", "item.shears.name", "item.chickenRaw.name", "item.wheat.name", "item.fish.cod.cooked.name"],
         meta: [["apple",0], ["bread", 0], ["chicken_cooked", 0], ["cookie", 0], ["melon", 0], ["arrow", 0], ["flint_and_steel", 0], ["shears", 0], ["chicken_raw", 0], ["wheat", 0], ["fish_cooked", 0]],
         id: [260, 297, 366, 357, 369, 262, 259, 359, 365, 296, 350],
         dam: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -35,7 +33,6 @@ Trade.Items = {
         count: [6, 3, 7, 9, 6, 5, 1, 1, 16, 19, 11]
     },
     librarian: {
-        name: ["item.compass.name", "item.clock.name", "item.paper.name", "item.book.name", "item.ingotGold.name"],
         meta: [["compass_item", 0], ["clock_item", 0], ["paper", 0], ["book_normal", 0], ["gold_ingot", 0]],
         id: [345, 347, 339, 340, 266],
         dam: [0, 0, 0, 0, 0],
@@ -43,7 +40,6 @@ Trade.Items = {
         count: [1, 1, 25, 13, 8]
     },
     priest: {
-        name: ["item.redstone.name", "item.ingotGold.name"],
         meta: [["redstone_dust", 0], ["gold_ingot", 0]],
         id: [331, 266],
         dam: [0, 0],
@@ -51,7 +47,6 @@ Trade.Items = {
         count: [3, 8]
     },
     smith: {
-        name: ["item.helmetDiamond.name", "item.chestplateDiamond.name", "item.leggingsDiamond.name", "item.bootsDiamond.name", "item.swordDiamond.name", "item.pickaxeDiamond.name", "item.hatchetDiamond.name", "item.shovelDiamond.name", "item.hoeDiamond.name", "item.helmetChain.name", "item.chestplateChain.name", "item.leggingsChain.name", "item.bootsChain.name", "item.helmetIron.name", "item.chestplateIron.name", "item.leggingsIron.name", "item.bootsIron.name", "item.swordIron.name", "item.pickaxeIron.name", "item.hatchetIron.name", "item.shovelIron.name", "item.hoeIron.name", "item.diamond.name", "item.ingotIron.name", "item.ingotGold.name", "item.coal.name"],
         meta: [["helmet", 4], ["chestplate", 4], ["leggings", 4], ["boots", 4], ["sword", 4], ["pickaxe", 4], ["axe", 4], ["shovel", 4], ["hoe", 4], ["helmet", 1], ["chestplate", 1], ["leggings", 1], ["boots", 1], ["helmet", 2], ["chestplate", 2], ["leggings", 2], ["boots", 2], ["sword", 2], ["pickaxe", 2], ["axe", 2], ["shovel", 2], ["hoe", 2], ["diamond", 0], ["iron_ingot", 0], ["gold_ingot", 0], ["coal", 0]],
         id: [310, 311, 312, 313, 276, 278, 279, 277, 293, 302, 303, 304, 305, 306, 307, 308, 309, 267, 257, 258, 256, 292, 264, 265, 266, 263],
         dam: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -637,7 +632,7 @@ Utils.trimImage = function(bitmap, x, y, width, height) {
 
 Utils.plusPage = function(view) {
     var type = Utils.getVillagerType(Trade.SELLER);
-    if(Trade.PAGE != Trade.Items[type].name.length-1)
+    if(Trade.PAGE != Trade.Items[type].id.length-1)
         Trade.PAGE++;
 };
 
@@ -992,12 +987,13 @@ Utils.getItemImage = function(text, data) {
 Utils.updateTradeList = function(namev, itemv, costv, countv) {
     var page = Trade.PAGE;
     var type = Utils.getVillagerType(Trade.SELLER);
-    if(Utils.hasNonAscii(Lang.getData(Trade.Items[type].name[page])))
-        namev.setText(Utils.getStringBuilder(Lang.getData(Trade.Items[type].name[page]), "#e1e1e1")[0]);
+    var name = Item.getName(Trade.Items[type].id[page], Trade.Items[type].id[page], false);
+    if(Utils.hasNonAscii(Lang.getData(name)))
+        namev.setText(Utils.getStringBuilder(name, "#e1e1e1")[0]);
     else
-        namev.setText(Lang.getData(Trade.Items[type].name[page]));
+        namev.setText(Lang.getData(name));
     var item = Utils.getItemImage(Trade.Items[type].meta[page][0], Trade.Items[type].meta[page][1]);
-    itemv.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*1.6, item.getHeight()*Utils.FOUR*1.6, false));
+    itemv.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, 16*Utils.FOUR*1.6, 16*Utils.FOUR*1.6, false));
     costv.setText(""+Trade.Items[type].cost[page]);
     countv.setText(""+Trade.Items[type].count[page]);
 };
