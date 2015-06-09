@@ -13,7 +13,7 @@ Trade.CUR_LANG = null;
 Trade.debug = false;
 
 Trade.getVersion = function() {
-    return "Indev 1.3.2";
+    return "Indev 1.3.3"
 };
 
 //Trade items
@@ -64,6 +64,7 @@ Trade.Items = {
 Trade.INTERACTPW = {};
 Trade.MAINPW = {};
 Trade.NAME = {};
+Trade.VILLAGER = {};
 Trade.ITEMBACK = {};
 Trade.COST = {};
 Trade.COUNT = {};
@@ -125,6 +126,8 @@ Trade.init = function() {
     mainLayout.addView(help);
     var name = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-133, 40, 108);
     mainLayout.addView(name);
+    var villager = Utils.justText("", 25, 40, 108);
+    mainLayout.addView(villager);
     mainPw.setContentView(mainLayout);
     mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
     mainPw.setWidth(ctx.getScreenWidth());
@@ -144,6 +147,7 @@ Trade.init = function() {
     Trade.DIRT[Trade.CUR_LANG] = dirt;
     Trade.MAINPW[Trade.CUR_LANG] = mainPw;
     Trade.NAME[Trade.CUR_LANG] = name;
+    Trade.VILLAGER[Trade.CUR_LANG] = villager;
     Trade.ITEMBACK[Trade.CUR_LANG] = itemback2;
     Trade.COST[Trade.CUR_LANG] = cost;
     Trade.COUNT[Trade.CUR_LANG] = count;
@@ -153,6 +157,9 @@ Trade.showScreen = function() {
     Trade.TRADING = true;
     Trade.EME_COUNT = Utils.getAllItems(388, 0);
     Utils.createUiThread(function(ctx) {
+        var name = Utils.getVillagerType(Trade.SELLER);
+        var type = Lang.getData("entity.Villager."+(name == "priest" ? "cleric" : (name == "smith" ? "tool" : name)));
+        Trade.VILLAGER[Trade.CUR_LANG].setText(Utils.hasNonAscii(type) ? Utils.getStringBuilder(type, "#e1e1e1")[0] : type);
         if(Options.Options.TRADE)
             Trade.DIRT[Trade.CUR_LANG].setVisibility(android.view.View.GONE);
         Utils.updateTradeList(Trade.NAME[Trade.CUR_LANG], Trade.ITEMBACK[Trade.CUR_LANG], Trade.COST[Trade.CUR_LANG], Trade.COUNT[Trade.CUR_LANG]);
@@ -173,7 +180,6 @@ Help.MAINPW = {};
 Help.DIRT = {};
 
 Help.init = function() {
-    
     var ctx = Utils.getContext();
     var mainPw = new android.widget.PopupWindow(ctx);
     var mainLayout = new android.widget.RelativeLayout(ctx);
@@ -1002,7 +1008,7 @@ Utils.updateTradeList = function(namev, itemv, costv, countv) {
     var type = Utils.getVillagerType(Trade.SELLER);
     var name = Trade.Items[type].name[page];
     if(Utils.hasNonAscii(Lang.getData(name)))
-        namev.setText(Utils.getStringBuilder(name, "#e1e1e1")[0]);
+        namev.setText(Utils.getStringBuilder(Lang.getData(name), "#e1e1e1")[0]);
     else
         namev.setText(Lang.getData(name));
     var item = Utils.getItemImage(Trade.Items[type].meta[page][0], Trade.Items[type].meta[page][1]);
@@ -1440,7 +1446,7 @@ function modTick() {
             Utils.showInteractPw();
         }
     }
-    if(!Trade.debug && Entity.getEntityTypeId(Player.getPointedEntity()) != 15) {
+    if(Player.getCarriedItem() == 346 || Entity.getEntityTypeId(Player.getPointedEntity()) != 15) {
         Utils.createUiThread(function() {
             if(Trade.INTERACTPW[Trade.CUR_LANG] != null && Trade.INTERACTPW[Trade.CUR_LANG].isShowing())
                 Trade.INTERACTPW[Trade.CUR_LANG].dismiss();
