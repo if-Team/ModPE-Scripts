@@ -13,7 +13,7 @@ Trade.CUR_LANG = null;
 Trade.debug = false;
 
 Trade.getVersion = function() {
-    return "Indev 1.3";
+    return "Indev 1.3.1";
 };
 
 //Trade items
@@ -79,7 +79,7 @@ Trade.init = function() {
     var itemback = Utils.showItemBackground(59, 65);
     mainLayout.addView(itemback);
     var item = Utils.getItemImage("emerald", 0);
-    itemback.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*1.6, item.getHeight()*Utils.FOUR*1.6, false));
+    itemback.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, 16*Utils.FOUR*1.6, 16*Utils.FOUR*1.6, false));
     var cost = Utils.justText("", 63, 67);
     mainLayout.addView(cost);
     var arrow = Utils.renderArrow(ctx.getScreenWidth()/Utils.FOUR/2-8, 77);
