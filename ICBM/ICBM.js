@@ -104,13 +104,13 @@ function newLevel(str) {
 	
 	nk.graph_draw.draw(nk.paper);
 	
-	nk.graph.setImageDrawable(nk.graph);
+	nk.graph.setImageDrawable(nk.graph_draw);
 	
 	nk.frame.addView(nk.graph);
 	
 	nk.window = new PopupWindow(nk.frame, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, false);
 	
-	unThread(function() {
+	uiThread(function() {
 		nk.window.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, 0, 0);
 	});
 	/*
