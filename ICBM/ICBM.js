@@ -98,9 +98,10 @@ function newLevel(str) {
 	
 	nk.graph_draw = new GradientDrawable();
 	
-	nk.graph_bitmap = Bitmap.createBitmap(PIXEL*200, PIXEL*150, android.graphics.Bitmap.Config.ARGB_8888);
+	nk.graph_bitmap = Bitmap.createBitmap(PIXEL*200, PIXEL*150, Bitmap.Config.ARGB_8888);
 	nk.paper = new Canvas(nk.graph_bitmap);
-	nk.paper.drawLines([0, 0, 1, 1, 30, 20, 60, 30], 0, 4, nk.paint1);
+	//nk.paper.drawLines([0, 0, 1, 1, 30, 20, 60, 30], nk.paint1);
+	nk.paper.drawLine(0, 0, 100, 100, nk.paint1);
 	
 	nk.graph_draw.draw(nk.paper);
 	
@@ -111,50 +112,15 @@ function newLevel(str) {
 	nk.window = new PopupWindow(nk.frame, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, false);
 	
 	uiThread(function() {
-		nk.window.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, 0, 0);
+		nk.window.showAtLocation(ctx.getWindow().getDecorView(), Gravity.LEFT|Gravity.TOP, 0, 0);
 	});
-	/*
-	ICBM.testDrawable = new android.graphics.drawable.BitmapDrawable(Assets.R1);
-	ICBM.testDrawable.setTileModeXY(android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT);
-	ICBM.testDrawable.setGravity(android.view.Gravity.CENTER);
-	
-	ICBM.testLayout = new android.widget.RelativeLayout(ctx);
-	ICBM.testLayout.setBackgroundDrawable(ICBM.testDrawable);
-	
-	ICBM.t2Paint = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
-	ICBM.t2Paint.setStrokeWidth(10);
-	ICBM.t2Paint.setARGB(255, 255, 255, 255)
-	
-	ICBM.t2Bitmap = android.graphics.Bitmap.createBitmap(PIXEL*200, PIXEL*150, android.graphics.Bitmap.Config.ARGB_8888);
-	ICBM.t2Canvas = new android.graphics.Canvas(ICBM.t2Bitmap);
-	ICBM.t2Canvas.drawARGB(0, 0, 0, 0);
-	
+	/*	
 	Path시도 부분(사용안함)
 	ICBM.t2Path = new android.graphics.Path();
 	ICBM.t2Path.setFillType(android.graphics.Path.FillType.EVEN_ODD);
 	ICBM.t2Path.moveTo(0, 0);
 	ICBM.t2Path.quadTo(100, 150, 200, 50);
 	ICBM.t2Canvas.drawPath(ICBM.t2Path, ICBM.t2Paint);
-	
-	
-	ICBM.t2Canvas.drawLines([0, 0, 1, 1, 30, 20, 60, 30], 0, 4, ICBM.t2Paint);
-	
-	ICBM.t2Drawable = new android.graphics.drawable.GradientDrawable();
-	ICBM.t2Drawable.draw(ICBM.t2Canvas);
-	
-	ICBM.t2 = new android.widget.ImageView(ctx);
-	ICBM.t2.setBackgroundDrawable(ICBM.t2Drawable);
-ICBM.t2Param = new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
-ICBM.t2.setLayoutParams(ICBM.t2Param);
-
-	ICBM.testLayout.addView(ICBM.t2);
-	
-	ICBM.testWindow = new android.widget.PopupWindow(ICBM.testLayout, android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT, false);
-	uiThread(function() {try {
-		ICBM.testWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, 0, 0);
-	}catch(e) {
-		showError(e);
-	}});
 	*/
 }
 
