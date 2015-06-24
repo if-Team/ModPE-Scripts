@@ -61,12 +61,13 @@ var Bitmap = android.graphics.Bitmap;
 var Color = android.graphics.Color;
 var Canvas = android.graphics.Canvas;
 var Paint = android.graphics.Paint;
+var Path = android.graphics.Path;
 var Shader = android.graphics.Shader;
 var ArrayList = java.util.ArrayList;
 
 var Assets = {}
 Assets.R1Raw = Bitmap.createBitmap(6, 6, Bitmap.Config.ARGB_8888);
-var w = Color.argb(100, 255, 255, 255);
+var w = Color.argb(200, 255, 255, 255);
 var b = Color.argb(100, 0, 0, 255);
 Assets.R1Pixel = [
 b,b,b,b,b,w,
@@ -90,38 +91,43 @@ function newLevel(str) {
 	nk.draw1.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
 	nk.frame.setBackgroundDrawable(nk.draw1);
 	
-	nk.paint1 = new Paint(Paint.ANTI_ALIAS_FLAG);
-	nk.paint1.setStrokeWidth(10);
-	nk.paint1.setARGB(255, 255, 255, 255);
+	nk.shellPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+	nk.shellPaint.setStrokeWidth(PIXEL*3);
+	nk.shellPaint.setARGB(200, 255, 255, 255);
+	
+	nk.gioPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+	nk.gioPaint.setStrokeWidth(PIXEL*5);
+	nk.gioPaint.setARGB(200, 255, 255, 255);
+	
+	nk.gio = new ImageView(ctx);
+	
+	nk.gioBitmap = Bitmap.createBitmap(PIXEL*200, PIXEL*150, Bitmap.Config.ARGB_8888);
+	
+	nk.gioCanvas = new Canvas(nk.gioBitmap);
+	
+	nk.gioPath = new Path();
+	nk.gioPath.setFillType(Path.FillType.WINDING);
+	nk.gioPath.moveTo(0, 200);
+	nk.gioPath.quadTo(100, 150, 200, 200);
+	nk.gioCanvas.drawPath(nk.gioPath, nk.gioPaint);
+	nk.gio.setImageBitmap(nk.gioBitmap);
 	
 	nk.graph = new ImageView(ctx);
 	
-	nk.graph_draw = new GradientDrawable();
+	nk.graphBitmap = Bitmap.createBitmap(PIXEL*200, PIXEL*150, Bitmap.Config.ARGB_8888);
+	nk.graphCanvas = new Canvas(nk.graphBitmap);
+	nk.graphCanvas.drawLines([0, 150, 40, 100, 40, 100, 80, 70, 80, 70, 120, 50, 120, 50, 160, 70, 160, 70, 200, 100], nk.shellPaint);
+
+	nk.graph.setImageBitmap(nk.graphBitmap);
 	
-	nk.graph_bitmap = Bitmap.createBitmap(PIXEL*200, PIXEL*150, Bitmap.Config.ARGB_8888);
-	nk.paper = new Canvas(nk.graph_bitmap);
-	//nk.paper.drawLines([0, 0, 1, 1, 30, 20, 60, 30], nk.paint1);
-	nk.paper.drawLine(0, 0, 100, 100, nk.paint1);
-	
-	nk.graph_draw.draw(nk.paper);
-	
-	nk.graph.setImageDrawable(nk.graph_draw);
-	
+	nk.frame.addView(nk.gio);
 	nk.frame.addView(nk.graph);
 	
-	nk.window = new PopupWindow(nk.frame, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, false);
+	nk.window = new PopupWindow(nk.frame, PIXEL*200, PIXEL*150, false);
 	
 	uiThread(function() {
 		nk.window.showAtLocation(ctx.getWindow().getDecorView(), Gravity.LEFT|Gravity.TOP, 0, 0);
 	});
-	/*	
-	Path시도 부분(사용안함)
-	ICBM.t2Path = new android.graphics.Path();
-	ICBM.t2Path.setFillType(android.graphics.Path.FillType.EVEN_ODD);
-	ICBM.t2Path.moveTo(0, 0);
-	ICBM.t2Path.quadTo(100, 150, 200, 50);
-	ICBM.t2Canvas.drawPath(ICBM.t2Path, ICBM.t2Paint);
-	*/
 }
 
 
