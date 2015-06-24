@@ -40,11 +40,34 @@ var DIP = PIXEL * loadData(_MAIN_DATA, "DIPS");
 if(DIP == null || DIP == 0){
 	DIP = PIXEL;
 }
+var Thread = java.lang.Thread;
+var Runnable = java.lang.Runnable;
+var AlertDialog = android.app.AlertDialog;
+var View = android.view.View;
+var ViewGroup = android.view.ViewGroup;
+var MotionEvent = android.view.MotionEvent;
+var Gravity = android.view.Gravity;
+var FrameLayout = android.widget.FrameLayout;
+var RelativeLayout = android.widget.RelativeLayout;
+var LinearLayout = android.widget.LinearLayout;
+var TextView = android.widget.TextView;
+var Button = android.widget.Button;
+var ImageView = android.widget.ImageView;
+var PopupWindow = android.widget.PopupWindow;
+var StateListDrawable = android.graphics.drawable.StateListDrawable;
+var GradientDrawable = android.graphics.drawable.GradientDrawable;
+var BitmapDrawable = android.graphics.drawable.BitmapDrawable;
+var Bitmap = android.graphics.Bitmap;
+var Color = android.graphics.Color;
+var Canvas = android.graphics.Canvas;
+var Paint = android.graphics.Paint;
+var Shader = android.graphics.Shader;
+var ArrayList = java.util.ArrayList;
 
 var Assets = {}
-Assets.R1Raw = android.graphics.Bitmap.createBitmap(6, 6, android.graphics.Bitmap.Config.ARGB_8888);
-var w = android.graphics.Color.argb(100, 255, 255, 255);
-var b = android.graphics.Color.argb(100, 0, 0, 255);
+Assets.R1Raw = Bitmap.createBitmap(6, 6, Bitmap.Config.ARGB_8888);
+var w = Color.argb(100, 255, 255, 255);
+var b = Color.argb(100, 0, 0, 255);
 Assets.R1Pixel = [
 b,b,b,b,b,w,
 b,b,b,b,b,w,
@@ -54,14 +77,42 @@ b,b,b,b,b,w,
 w,w,w,w,w,w
 ];
 Assets.R1Raw.setPixels(Assets.R1Pixel, 0, 6, 0, 0, 6, 6);
-Assets.R1 = android.graphics.Bitmap.createScaledBitmap(Assets.R1Raw, PIXEL*12, PIXEL*12, false);
+Assets.R1 = Bitmap.createScaledBitmap(Assets.R1Raw, PIXEL*12, PIXEL*12, false);
 
 var nk = {};
 
 function newLevel(str) {
 	//이번에도 안되면 자살각
-	nk.draw1 = new android.graphics.drawable.BitmapDrawable(Assets.R1);
-	nk.draw1.setTileModeXY(android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT);
+	nk.frame = new FrameLayout(ctx);
+	
+	//frame background
+	nk.draw1 = new BitmapDrawable(Assets.R1);
+	nk.draw1.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+	nk.frame.setBackgroundDrawable(nk.draw1);
+	
+	nk.paint1 = new Paint(Paint.ANTI_ALIAS_FLAG);
+	nk.paint1.setStrokeWidth(10);
+	nk.paint1.setARGB(255, 255, 255, 255);
+	
+	nk.graph = new ImageView(ctx);
+	
+	nk.graph_draw = new GradientDrawable();
+	
+	nk.graph_bitmap = Bitmap.createBitmap(PIXEL*200, PIXEL*150, android.graphics.Bitmap.Config.ARGB_8888);
+	nk.paper = new Canvas(nk.graph_bitmap);
+	nk.paper.drawLines([0, 0, 1, 1, 30, 20, 60, 30], 0, 4, nk.paint1);
+	
+	nk.graph_draw.draw(nk.paper);
+	
+	nk.graph.setImageDrawable(nk.graph);
+	
+	nk.frame.addView(nk.graph);
+	
+	nk.window = new PopupWindow(nk.frame, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, false);
+	
+	unThread(function() {
+		nk.window.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, 0, 0);
+	});
 	/*
 	ICBM.testDrawable = new android.graphics.drawable.BitmapDrawable(Assets.R1);
 	ICBM.testDrawable.setTileModeXY(android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT);
