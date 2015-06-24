@@ -30,13 +30,223 @@ var _MAIN_DATA = new java.io.File(_MAIN_DIR, "setting.json");
 var _TEST_DATA = new java.io.File(_MAIN_DIR, "lastLog.txt");
 function _MAP_DIR() {return new java.io.File(_SD_CARD, "games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/mods")}
 function _MAP_DATA() {return new java.io.File(_MAP_DIR(), className + ".json")}
-var DIP = PIXEL * loadData(_MAIN_DATA, "DIPS");
-if(DIP == null || DIP == 0){
-	DIP = PIXEL;
-}
 if(!(_MAIN_DIR.exists())) {
 	_MAIN_DIR.mkdirs();
 }
 if(!(_MAIN_DATA.exists())) {
 	_MAIN_DATA.createNewFile();
+}
+var DIP = PIXEL * loadData(_MAIN_DATA, "DIPS");
+if(DIP == null || DIP == 0){
+	DIP = PIXEL;
+}
+
+var Assets = {}
+Assets.R1Raw = android.graphics.Bitmap.createBitmap(6, 6, android.graphics.Bitmap.Config.ARGB_8888);
+var w = android.graphics.Color.argb(100, 255, 255, 255);
+var b = android.graphics.Color.argb(100, 0, 0, 255);
+Assets.R1Pixel = [
+b,b,b,b,b,w,
+b,b,b,b,b,w,
+b,b,b,b,b,w,
+b,b,b,b,b,w,
+b,b,b,b,b,w,
+w,w,w,w,w,w
+];
+Assets.R1Raw.setPixels(Assets.R1Pixel, 0, 6, 0, 0, 6, 6);
+Assets.R1 = android.graphics.Bitmap.createScaledBitmap(Assets.R1Raw, PIXEL*12, PIXEL*12, false);
+
+var nk = {};
+
+function newLevel(str) {
+	//이번에도 안되면 자살각
+	nk.draw1 = new android.graphics.drawable.BitmapDrawable(Assets.R1);
+	nk.draw1.setTileModeXY(android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT);
+	/*
+	ICBM.testDrawable = new android.graphics.drawable.BitmapDrawable(Assets.R1);
+	ICBM.testDrawable.setTileModeXY(android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT);
+	ICBM.testDrawable.setGravity(android.view.Gravity.CENTER);
+	
+	ICBM.testLayout = new android.widget.RelativeLayout(ctx);
+	ICBM.testLayout.setBackgroundDrawable(ICBM.testDrawable);
+	
+	ICBM.t2Paint = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+	ICBM.t2Paint.setStrokeWidth(10);
+	ICBM.t2Paint.setARGB(255, 255, 255, 255)
+	
+	ICBM.t2Bitmap = android.graphics.Bitmap.createBitmap(PIXEL*200, PIXEL*150, android.graphics.Bitmap.Config.ARGB_8888);
+	ICBM.t2Canvas = new android.graphics.Canvas(ICBM.t2Bitmap);
+	ICBM.t2Canvas.drawARGB(0, 0, 0, 0);
+	
+	Path시도 부분(사용안함)
+	ICBM.t2Path = new android.graphics.Path();
+	ICBM.t2Path.setFillType(android.graphics.Path.FillType.EVEN_ODD);
+	ICBM.t2Path.moveTo(0, 0);
+	ICBM.t2Path.quadTo(100, 150, 200, 50);
+	ICBM.t2Canvas.drawPath(ICBM.t2Path, ICBM.t2Paint);
+	
+	
+	ICBM.t2Canvas.drawLines([0, 0, 1, 1, 30, 20, 60, 30], 0, 4, ICBM.t2Paint);
+	
+	ICBM.t2Drawable = new android.graphics.drawable.GradientDrawable();
+	ICBM.t2Drawable.draw(ICBM.t2Canvas);
+	
+	ICBM.t2 = new android.widget.ImageView(ctx);
+	ICBM.t2.setBackgroundDrawable(ICBM.t2Drawable);
+ICBM.t2Param = new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT);
+ICBM.t2.setLayoutParams(ICBM.t2Param);
+
+	ICBM.testLayout.addView(ICBM.t2);
+	
+	ICBM.testWindow = new android.widget.PopupWindow(ICBM.testLayout, android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT, false);
+	uiThread(function() {try {
+		ICBM.testWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT|android.view.Gravity.TOP, 0, 0);
+	}catch(e) {
+		showError(e);
+	}});
+	*/
+}
+
+
+
+/**
+ * Error report
+ *
+ * @since 2015-04-??
+ * @author CodeInside
+ *
+ * @param {error} e
+ */
+
+function showError(e) {
+	if(Level.getWorldName() === null) {
+		ctx.runOnUiThread(new java.lang.Runnable({ run: function(){
+	android.widget.Toast.makeText(ctx, TAG + "\n" + e, android.widget.Toast.LENGTH_LONG).show();
+		}}));
+	}else {
+		var t = (e + "").split(" ");
+		var c = "";
+		var temp = "";
+		for(var l = 0; l < t.length; l++) {
+			if(temp.split("").length > 30) {
+				c += ("\n" + ChatColor.DARK_RED);
+				temp = "";
+			}
+			c += t[l] + " ";
+			temp += t[l];
+		}
+		clientMessage(ChatColor.DARK_RED + "[" + className + " ERROR LINE: " + e.lineNumber + "]\n" + ChatColor.DARK_RED + c);
+	}
+}
+
+
+
+function toast(str) {
+	ctx.runOnUiThread(new java.lang.Runnable( {
+		run: function(){
+			try{
+				android.widget.Toast.makeText(ctx, str, android.widget.Toast.LENGTH_LONG).show();
+			}catch(e) {}
+		}
+	}
+	));
+}
+
+function toasts(str) {
+	ctx.runOnUiThread(new java.lang.Runnable( {
+		run: function(){
+			try{
+				android.widget.Toast.makeText(ctx, str, android.widget.Toast.LENGTH_SHORT).show();
+			}catch(e) {}
+		}
+	}
+	));
+}
+
+function broadcast(str){
+	net.zhuoweizhang.mcpelauncher.ScriptManager.nativeSendChat(str);
+	clientMessage("<" + Player.getName(Player.getEntity()) + "> " + str);
+}
+
+function sleep(int){
+	java.lang.Thread.sleep(int);
+}
+
+function uiThread(fc) {
+	return ctx.runOnUiThread(new java.lang.Runnable({run: fc}))
+}
+
+function thread(fc) {
+	return new java.lang.Thread(new java.lang.Runnable( {run: fc}))
+}
+
+
+
+/**
+ * save/load Data
+ *
+ * @since 2015-02-11
+ * @author CodeInside
+ */
+
+function saveData(file, article, value) {
+	if(!file.exists()) {
+		file.createNewFile()
+	}
+	try{
+		var fileInputStream = new java.io.FileInputStream(file);
+	}catch(e) {
+		return false;
+	}
+	var inputStreamReader = new java.io.InputStreamReader(fileInputStream);
+	var bufferedReader = new java.io.BufferedReader(inputStreamReader);
+	var tempRead, tempReadString;
+	var tempSaved = "";
+	while((tempRead = bufferedReader.readLine()) != null){
+		tempReadString = tempRead.toString();
+		if(tempReadString.split("¶")[0] == article)
+			continue;
+		tempSaved += tempReadString + "\n";
+	}
+	fileInputStream.close();
+	inputStreamReader.close();
+	bufferedReader.close();
+	var fileOutputStream = new java.io.FileOutputStream(file);
+	var outputStreamWriter = new java.io.OutputStreamWriter(fileOutputStream);
+	outputStreamWriter.write(tempSaved + article + "¶" + value);
+	outputStreamWriter.close();
+	fileOutputStream.close();
+	return true;
+}
+
+function loadData(file, article) {
+	try{
+		var fileInputStream = new java.io.FileInputStream(file);
+	}catch(e) {
+		return false;
+	}
+	var inputStreamReader = new java.io.InputStreamReader(fileInputStream);
+	var bufferedReader = new java.io.BufferedReader(inputStreamReader);
+	var tempRead, tempReadString, str;
+	while((tempRead = bufferedReader.readLine()) != null){
+		tempString = tempRead + "";
+		if(tempString.split("¶")[0] == article){
+			str = tempString.split("¶")[1];
+			if(tempString.split("¶")[2] == "n") {
+				do {
+					tempRead = bufferedReader.readLine();
+					tempString = tempRead + "";
+					str += "\n" + tempString.split("¶")[0];
+				}while(tempString.split("¶")[1] == "n");
+			}
+			fileInputStream.close();
+			inputStreamReader.close();
+			bufferedReader.close();
+			return str;
+		}
+	}
+	fileInputStream.close();
+	inputStreamReader.close();
+	bufferedReader.close();
+	return null;
 }
