@@ -80,6 +80,8 @@ w,w,w,w,w,w
 Assets.R1Raw.setPixels(Assets.R1Pixel, 0, 6, 0, 0, 6, 6);
 Assets.R1 = Bitmap.createScaledBitmap(Assets.R1Raw, PIXEL*12, PIXEL*12, false);
 
+setTexture(new java.io.File(_SD_CARD, "Assets01.png"), "mob/nuclear.png");
+
 var nk = {};
 
 function newLevel(str) {
@@ -129,6 +131,62 @@ function newLevel(str) {
 		nk.window.showAtLocation(ctx.getWindow().getDecorView(), Gravity.LEFT|Gravity.TOP, 0, 0);
 	});
 }
+
+function procCmd(str) {
+	var cmd = str.split(" ");
+	switch(cmd[0]) {
+		case "t":
+			var ent = Level.spawnMob(Player.getX(), Player.getY(), Player.getZ(), 11, "mob/nuclear.png");
+			Entity.setRenderType(ent, render.nuclear_R.renderType);
+			break;
+	}
+}
+
+
+var render = {};
+
+render.nuclear = function(renderer) {
+	var model = renderer.getModel();
+	var head = model.getPart("head").clear();
+	var body = model.getPart("body").clear();
+	var rightArm = model.getPart("rightArm").clear();
+	var leftArm = model.getPart("leftArm").clear();
+	var rightLeg = model.getPart("rightLeg").clear();
+	var leftLeg = model.getPart("leftLeg").clear();
+	
+	head.setTextureSize(64, 64);
+	head.setTextureOffset(32, 0, false);
+	head.addBox(-4, -4, 12, 8, 8, 8, 4);
+	head.setTextureOffset(0, 0, false);
+	head.addBox(-4, -4, 4, 8, 8, 8, 4);
+	head.addBox(-4, -4, 0, 8, 8, 8, 2);
+	for(var e = 0; e < 8; e++) {
+		head.addBox(-4, -4, -4 - (e*8), 8, 8, 8);
+	}
+	head.addBox(-4, -4, -60, 8, 8, 8, 2);
+	head.addBox(-4, -4, -68, 8, 8, 8, 2);
+	head.setTextureOffset(18, 16, false);
+	for(var e = 0; e < 11; e++) {
+		head.addBox(-0.5-(e/2), -0.5-(e/2), -80.5+e, 1+e, 1+e, 1);
+	}
+	head.setTextureOffset(0, 16, false);
+	for(var e = 0; e < 8; e++) {
+		//upside
+		head.addBox(-0.5, -9-e, 8.5+(e*2), 1, 1+e, 1);
+		head.addBox(-0.5, -9-e, 7.5+(e*2), 1, 1+e, 1);
+		//downside
+		head.addBox(-0.5, 8, 8.5+(e*2), 1, 1+e, 1);
+		head.addBox(-0.5, 8, 7.5+(e*2), 1, 1+e, 1);
+		//rightside
+		head.addBox(8, -0.5, 8.5+(e*2), 1+e, 1, 1);
+		head.addBox(8, -0.5, 7.5+(e*2), 1+e, 1, 1);
+		//leftside
+		head.addBox(-9-e, -0.5, 8.5+(e*2), 1+e, 1, 1);
+		head.addBox(-9-e, -0.5, 7.5+(e*2), 1+e, 1, 1);
+	}
+}
+render.nuclear_R = Renderer.createHumanoidRenderer();
+render.nuclear(render.nuclear_R);
 
 
 
@@ -272,4 +330,55 @@ function loadData(file, article) {
 	inputStreamReader.close();
 	bufferedReader.close();
 	return null;
+}
+
+/**
+ * Set texture
+ *
+ * @since 2015-04-01
+ * @author CodeInside
+ *
+ * @param {File} prototypeFile
+ * @param {string} innerPath
+ */
+ 
+function setTexture(prototypeFile, innerPath){
+	try{
+		var bl = new java.io.File(android.os.Environment.getExternalStorageDirectory(), "Android/data/net.zhuoweizhang.mcpelauncher");
+		var blPro = new java.io.File(android.os.Environment.getExternalStorageDirectory(), "Android/data/net.zhuoweizhang.mcpelauncher.pro");
+		var ex = false;
+		if(bl.exists()) {
+			var dir = new java.io.File(bl, "files/textures/images/" + innerPath);
+			dir.getParentFile().mkdirs(); 
+			var bis = new java.io.BufferedInputStream(new java.io.FileInputStream(prototypeFile));
+			var bos = new java.io.BufferedOutputStream(new java.io.FileOutputStream(dir));
+			var buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
+			var count;
+			while((count = bis.read(buffer)) >= 0){
+				bos.write(buffer, 0, count);
+			}
+			bis.close();
+			bos.close();
+			ex = true;
+		}
+		if(blPro.exists()) {
+			var dir = new java.io.File(blPro, "files/textures/images/" + innerPath);
+			dir.getParentFile().mkdirs(); 
+			var bis = new java.io.BufferedInputStream(new java.io.FileInputStream(prototypeFile));
+			var bos = new java.io.BufferedOutputStream(new java.io.FileOutputStream(dir));
+			var buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
+			var count;
+			while((count = bis.read(buffer)) >= 0){
+				bos.write(buffer, 0, count);
+			}
+			bis.close();
+			bos.close();
+			ex = true;
+		}
+		if(!ex) {
+			toast(TAG + prototypeFile.getName() + " can't find blocklauncher dir'");
+		}
+	}catch(e){
+		toasts(prototypeFile.getName() + " is not exists");
+	}
 }
