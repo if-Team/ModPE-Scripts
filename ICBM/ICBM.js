@@ -83,9 +83,11 @@ Assets.R1 = Bitmap.createScaledBitmap(Assets.R1Raw, PIXEL*12, PIXEL*12, false);
 setTexture(new java.io.File(_SD_CARD, "Assets01.png"), "mob/nuclear.png");
 
 var nk = {};
+var rockets = [];
+//로켓 정보가 맘에 안드시면 바꾸세요
+//rockets.push({type: "NUCLEAR", ent: <object>, path: <pathArray>, currentPathIndex: <int>});
 
 function newLevel(str) {
-	//이번에도 안되면 자살각
 	nk.frame = new FrameLayout(ctx);
 	
 	//frame background
@@ -128,7 +130,7 @@ function newLevel(str) {
 	nk.window = new PopupWindow(nk.frame, PIXEL*200, PIXEL*150, false);
 	
 	uiThread(function() {
-		nk.window.showAtLocation(ctx.getWindow().getDecorView(), Gravity.LEFT|Gravity.TOP, 0, 0);
+		//nk.window.showAtLocation(ctx.getWindow().getDecorView(), Gravity.LEFT|Gravity.TOP, 0, 0);
 	});
 }
 
@@ -139,8 +141,58 @@ function procCmd(str) {
 			var ent = Level.spawnMob(Player.getX(), Player.getY(), Player.getZ(), 11, "mob/nuclear.png");
 			Entity.setRenderType(ent, render.nuclear_R.renderType);
 			break;
+		case "t2":
+			var ent = Level.spawnMob(Player.getX(), Player.getY(), Player.getZ(), 11, "mob/nuclear.png");
+			Entity.setRenderType(ent, render.nuclear_R.renderType);
+			forceRot(ent);
+			rockets.push({type: "NUCLEAR", ent: ent, power: cmd[1]});
+			break;
 	}
 }
+
+function modTick() {
+	rocketManager();
+}
+
+function rocketManager() {
+	for(var e = 0; e < rockets.length; e++) {
+		switch(rockets[e].type) {
+			case "NUCLEAR":
+				var x = Entity.getX(rockets[e].ent);
+				var y = Entity.getY(rockets[e].ent);
+				var z = Entity.getZ(rockets[e].ent);
+				if(Entity.getHealth(rockets[e].ent) <= -1) {
+					rockets.splice(e, 1);
+					continue;
+				}
+				//블럭에 닿으면 폭★발
+				if(Level.getTile(x+1, y, z) !== 0 || Level.getTile(x-1, y, z) !== 0 || Level.getTile(x, y+1, z) !== 0 || Level.getTile(x, y-1, z) !== 0 || Level.getTile(x, y, z+1) !== 0 || Level.getTile(x, y, z-1) !== 0) {
+					Level.explode(x, y, z, rockets[e].power);
+					Entity.remove(rockets[e].ent);
+					rockets.splice(e, 1);
+					continue;
+				}
+				break;
+		}
+	}
+}
+
+function forceRot(ent) {
+	thread(function() {
+		while(Entity.getHealth(ent) > 0) {
+			var x = Entity.getVelX(ent);
+			var y = Entity.getVelY(ent);
+			var z = Entity.getVelZ(ent);
+			if(x === 0 && y === 0 && z === 0) {
+				Entity.setRot(ent, 0, -90);
+			}else {
+				Entity.setRot(ent, locToYaw(x, y, z), locToPitch(x, y, z));
+			}
+			Thread.sleep(1);
+		}
+	}).start()
+}
+
 
 
 var render = {};
@@ -382,3 +434,93 @@ function setTexture(prototypeFile, innerPath){
 		toasts(prototypeFile.getName() + " is not exists");
 	}
 }
+
+/**
+ * Location(x, y, z) to Vector(yaw, pitch)
+ *
+ * @since 2015-01-??
+ * @author ToonRaOn
+ */
+
+function locToYaw(x, y, z) {
+	var apil = Math.sqrt(Math.pow(x, 2)+Math.pow(z, 2));
+	var apisinHorizontal = x/apil;
+	var apicosHorizontal = z/apil;
+	var apitanHorizontal = x/z;
+	var apiacosHorizontal = Math.acos(z/apil)*180/Math.PI;
+	var apiatanVertical = Math.atan(y/apil);
+	var alpha = 0;
+	if(apisinHorizontal > 0 && apicosHorizontal > 0 && apitanHorizontal > 0)
+		alpha = 360 - apiacosHorizontal;
+	else if(apisinHorizontal > 0 && apicosHorizontal < 0 && apitanHorizontal < 0) 
+		alpha = 360 - apiacosHorizontal;
+	else if(apisinHorizontal < 0 && apicosHorizontal < 0 && apitanHorizontal > 0) 
+		alpha = apiacosHorizontal;
+	else if(apisinHorizontal < 0 && apicosHorizontal > 0 && apitanHorizontal < 0) 
+		alpha = apiacosHorizontal;
+	else if(apicosHorizontal == 1) alpha = 0;
+	else if(apisinHorizontal == 1) alpha = 90;
+	else if(apicosHorizontal == -1) alpha = 180;
+	else if(apisinHorizontal == -1) alpha = 270;
+	else if(apisinHorizontal == 0 && apicosHorizontal == 1 && apitanHorizontal == 0) null;
+	return alpha;
+};
+
+function locToPitch(x, y, z) {
+	return -1 * Math.atan(y / Math.sqrt(Math.pow(x, 2)+Math.pow(z, 2))) * 180 / Math.PI;
+};
+
+
+
+/**
+ * Entity range
+ *
+ * @since 2015-01-??
+ * @author CodeInside
+ */
+
+function rangeEnt(a, b) {
+	return Math.sqrt(Math.pow(Entity.getX(a) - Entity.getX(b), 2) + Math.pow(Entity.getY(a) - Entity.getY(b), 2) + Math.pow(Entity.getZ(a) - Entity.getZ(b), 2));
+};
+
+
+
+/**
+ * Vector(yaw, pitch) to Location(x, y, z)
+ *
+ * @since 2015-01-??
+ * @author CodeInside
+ */
+
+function vectorToX(y, p) {
+	return (-1 * Math.sin(y / 180 * Math.PI) * Math.cos(p / 180 * Math.PI));
+};
+
+function vectorToY(y, p) {
+	return (Math.sin(-p / 180 * Math.PI));
+};
+
+function vectorToZ(y, p) {
+	return (Math.cos(y / 180 * Math.PI) * Math.cos(p / 180 * Math.PI));
+};
+
+
+
+/**
+ * Absolute range x, y, z
+ *
+ * @since 2015-01-??
+ * @author CodeInside
+ */
+
+function absX(x, y, z) {
+	return x / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+};
+
+function absY(x, y, z) {
+	return y / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+};
+
+function absZ(x, y, z) {
+	return z / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+};
