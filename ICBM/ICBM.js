@@ -22,21 +22,23 @@ var TAG = "[" + className + " " + VERSION + "] ";
 
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var PIXEL = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 1, ctx.getResources().getDisplayMetrics());
-var _SD_CARD = android.os.Environment.getExternalStorageDirectory();
-var _MOD_DIR = new java.io.File(_SD_CARD, "games/com.mojang/minecraftpe/mods");
-var _MAIN_DIR = new java.io.File(_MOD_DIR, className);
-var _FONT = new java.io.File(_MOD_DIR, "minecraft.ttf");
-var _MAIN_DATA = new java.io.File(_MAIN_DIR, "setting.json");
-var _TEST_DATA = new java.io.File(_MAIN_DIR, "lastLog.txt");
-function _MAP_DIR() {return new java.io.File(_SD_CARD, "games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/mods")}
-function _MAP_DATA() {return new java.io.File(_MAP_DIR(), className + ".json")}
-if(!(_MAIN_DIR.exists())) {
-	_MAIN_DIR.mkdirs();
+var FILE_SD_CARD = android.os.Environment.getExternalStorageDirectory();
+var FILE_MOD_DIR = new java.io.File(FILE_SD_CARD, "games/com.mojang/minecraftpe/mods");
+var FILE_MAIN_DIR = new java.io.File(FILE_MOD_DIR, className);
+var FILE_FONT = new java.io.File(FILE_MOD_DIR, "minecraft.ttf");
+var FILE_MAIN_DATA = new java.io.File(FILE_MAIN_DIR, "setting.json");
+var FILE_TEST_DATA = new java.io.File(FILE_MAIN_DIR, "lastLog.txt");
+var FILE_NO_MEDIA = new java.io.File(FILE_MAIN_DIR, ".nomedia");
+function FILE_MAP_DIR() {return new java.io.File(FILE_SD_CARD, "games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/mods")}
+function FILE_MAP_DATA() {return new java.io.File(FILE_MAP_DIR(), className + ".json")}
+if(!(FILE_MAIN_DIR.exists())) {
+	FILE_MAIN_DIR.mkdirs();
+	FILE_NO_MEDIA.createNewFile();
 }
-if(!(_MAIN_DATA.exists())) {
-	_MAIN_DATA.createNewFile();
+if(!(FILE_MAIN_DATA.exists())) {
+	FILE_MAIN_DATA.createNewFile();
 }
-var DIP = PIXEL * loadData(_MAIN_DATA, "DIPS");
+var DIP = PIXEL * loadData(FILE_MAIN_DATA, "DIPS");
 if(DIP == null || DIP == 0){
 	DIP = PIXEL;
 }
@@ -53,11 +55,15 @@ var LinearLayout = android.widget.LinearLayout;
 var TextView = android.widget.TextView;
 var Button = android.widget.Button;
 var ImageView = android.widget.ImageView;
+var ProgressBar = android.widget.ProgressBar;
 var PopupWindow = android.widget.PopupWindow;
 var StateListDrawable = android.graphics.drawable.StateListDrawable;
 var GradientDrawable = android.graphics.drawable.GradientDrawable;
 var BitmapDrawable = android.graphics.drawable.BitmapDrawable;
+var ColorDrawable = android.graphics.drawable.ColorDrawable;
+var ClipDrawable = android.graphics.drawable.ClipDrawable;
 var Bitmap = android.graphics.Bitmap;
+var BitmapFactory = android.graphics.BitmapFactory;
 var Color = android.graphics.Color;
 var Canvas = android.graphics.Canvas;
 var Paint = android.graphics.Paint;
@@ -79,13 +85,167 @@ w,w,w,w,w,w
 ];
 Assets.R1Raw.setPixels(Assets.R1Pixel, 0, 6, 0, 0, 6, 6);
 Assets.R1 = Bitmap.createScaledBitmap(Assets.R1Raw, PIXEL*12, PIXEL*12, false);
-
-setTexture(new java.io.File(_SD_CARD, "Assets01.png"), "mob/nuclear.png");
+Assets.bg = Bitmap.createScaledBitmap(BitmapFactory.decodeStream(ModPE.openInputStreamFromTexturePack("images/gui/bg32.png")), PIXEL*64, PIXEL*64, false);
+Assets.font_url = "https://www.dropbox.com/s/y1o46b2jkbxwl3o/minecraft.ttf?dl=1";
+Assets.sound_launch = new java.io.File(FILE_MAIN_DIR, "assets01.res");
+Assets.sound_launch_url = "https://raw.githubusercontent.com/CI-CodeInside/ModPE-Script/master/content/ICBM/assets01.res";
+Assets.sound_onAir = new java.io.File(FILE_MAIN_DIR, "assets03.res");
+Assets.sound_onAir_url = "https://raw.githubusercontent.com/CI-CodeInside/ModPE-Script/master/content/ICBM/assets03.res";
+Assets.sound_explode = new java.io.File(FILE_MAIN_DIR, "assets04.res");
+Assets.sound_explode_url = "https://raw.githubusercontent.com/CI-CodeInside/ModPE-Script/master/content/ICBM/assets04.res";
+Assets.sound_explode2 = new java.io.File(FILE_MAIN_DIR, "assets05.res");
+Assets.sound_explode2_url = "https://raw.githubusercontent.com/CI-CodeInside/ModPE-Script/master/content/ICBM/assets05.res";
+Assets.image_rocket = new java.io.File(FILE_MAIN_DIR, "assets06.res");
+Assets.image_rocket_url = "https://raw.githubusercontent.com/CI-CodeInside/ModPE-Script/master/content/ICBM/assets06.res";
 
 var nk = {};
 var rockets = [];
 //로켓 정보가 맘에 안드시면 바꾸세요
 //rockets.push({type: "NUCLEAR", ent: <object>, path: <pathArray>, currentPathIndex: <int>});
+
+function preload() {
+	new Thread(new Runnable({run: function() {try {
+		if(Assets.sound_launch.exists() && Assets.sound_onAir.exists() && Assets.sound_explode.exists() && Assets.sound_explode2.exists() && Assets.image_rocket.exists()) {
+			setTexture(Assets.image_rocket, "mob/nuclear.png");
+		}else {
+			loadScreen(true);
+			uiThread(function() {try {
+				nk.lProgress2.setMax(6);
+				nk.lProgress2.setProgress(0);
+			}catch(e) {
+				showError(e);
+			}});
+			if(!downloadFile(FILE_FONT, Assets.font_url, nk.lProgress)) {
+				toast(TAG + "can't download resources\nPlease check your Internet connection");
+				return;
+			}
+			uiThread(function() {try {
+				nk.lProgress2.setProgress(1);
+				if(FILE_FONT.exists()) {
+					nk.lText.setTypeface(android.graphics.Typeface.createFromFile(FILE_FONT));
+				}
+			}catch(e) {
+				showError(e);
+			}});
+			if(!downloadFile(Assets.sound_launch, Assets.sound_launch_url, nk.lProgress)) {
+				toast(TAG + "can't download resources\nPlease check your Internet connection");
+				return;
+			}
+			uiThread(function() {try {
+				nk.lProgress2.setProgress(2);
+			}catch(e) {
+				showError(e);
+			}});
+			if(!downloadFile(Assets.sound_onAir, Assets.sound_onAir_url, nk.lProgress)) {
+				toast(TAG + "can't download resources\nPlease check your Internet connection");
+				return;
+			}
+			uiThread(function() {try {
+				nk.lProgress2.setProgress(3);
+			}catch(e) {
+				showError(e);
+			}});
+			if(!downloadFile(Assets.sound_explode, Assets.sound_explode_url, nk.lProgress)) {
+				toast(TAG + "can't download resources\nPlease check your Internet connection");
+				return;
+			}
+			uiThread(function() {try {
+				nk.lProgress2.setProgress(4);
+			}catch(e) {
+				showError(e);
+			}});
+			if(!downloadFile(Assets.sound_explode2, Assets.sound_explode2_url, nk.lProgress)) {
+				toast(TAG + "can't download resources\nPlease check your Internet connection");
+				return;
+			}
+			uiThread(function() {try {
+				nk.lProgress2.setProgress(5);
+			}catch(e) {
+				showError(e);
+			}});
+			if(!downloadFile(Assets.image_rocket, Assets.image_rocket_url, nk.lProgress)) {
+				toast(TAG + "can't download resources\nPlease check your Internet connection");
+				return;
+			}
+			uiThread(function() {try {
+				nk.lProgress2.setProgress(6);
+				nk.lText.setText(" " + TAG + "\n Download Complete");
+			}catch(e) {
+				showError(e);
+			}});
+			setTexture(Assets.image_rocket, "mob/nuclear.png");
+			Thread.sleep(3000);
+			loadScreen(false);
+		}
+	}catch(e) {
+		showError(e);
+	}}})).start();
+}
+
+function loadScreen(visible) {
+	if(visible) {
+		nk.lLayout = LinearLayout(ctx);
+		nk.lLayout.setOrientation(1);
+		nk.lLayout.setGravity(Gravity.CENTER);
+		
+		nk.ldraw = new BitmapDrawable(Assets.bg);
+		nk.ldraw.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+		nk.lLayout.setBackgroundDrawable(nk.ldraw);
+		nk.lText = new TextView(ctx);
+		nk.lText.setGravity(Gravity.CENTER);
+		nk.lText.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, PIXEL*16);
+		if(FILE_FONT.exists()) {
+			nk.lText.setTypeface(android.graphics.Typeface.createFromFile(FILE_FONT));
+		}
+		nk.lText.setTextColor(Color.WHITE);
+		nk.lText.setShadowLayer(0.5, PIXEL, PIXEL, Color.DKGRAY);
+		nk.lText.setText(" " + TAG + "\nDownloading resources files...");
+		nk.lLayout.addView(nk.lText);
+		
+		nk.lProgress_for = new ClipDrawable(new ColorDrawable(Color.parseColor("#80ff80")), Gravity.LEFT, ClipDrawable.HORIZONTAL);
+		nk.lProgress_back = new ColorDrawable(Color.parseColor("#808080"));
+		
+		nk.lProgress_for2 = new ClipDrawable(new ColorDrawable(Color.parseColor("#80ff80")), Gravity.LEFT, ClipDrawable.HORIZONTAL);
+		nk.lProgress_back2 = new ColorDrawable(Color.parseColor("#808080"));
+		
+		nk.lProgress = new ProgressBar(ctx, null, android.R.attr.progressBarStyleHorizontal);
+		nk.lProgress.setProgress(0);
+		nk.lProgress_draw = nk.lProgress.getProgressDrawable();
+		nk.lProgress_draw.setDrawableByLayerId(android.R.id.progress, nk.lProgress_for);
+		nk.lProgress_draw.setDrawableByLayerId(android.R.id.background, nk.lProgress_back);
+		nk.lProgress_param = new LinearLayout.LayoutParams(PIXEL*200, PIXEL*5);
+		nk.lProgress_param.setMargins(0, PIXEL*20, 0, 0);
+		nk.lProgress.setLayoutParams(nk.lProgress_param);
+		nk.lLayout.addView(nk.lProgress);
+		
+		nk.lProgress2 = new ProgressBar(ctx, null, android.R.attr.progressBarStyleHorizontal);
+		nk.lProgress2.setProgress(0);
+		nk.lProgress2_draw = nk.lProgress2.getProgressDrawable();
+		nk.lProgress2_draw.setDrawableByLayerId(android.R.id.progress, nk.lProgress_for2);
+		nk.lProgress2_draw.setDrawableByLayerId(android.R.id.background, nk.lProgress_back2);
+		nk.lProgress2_param = new LinearLayout.LayoutParams(PIXEL*200, PIXEL*5);
+		nk.lProgress2_param.setMargins(0, PIXEL*10, 0, 0);
+		nk.lProgress2.setLayoutParams(nk.lProgress2_param);
+		nk.lLayout.addView(nk.lProgress2);
+		
+		nk.lWindow = new PopupWindow(nk.lLayout, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, false);
+		uiThread(function() {try {
+			nk.lWindow.showAtLocation(ctx.getWindow().getDecorView(), Gravity.LEFT|Gravity.TOP, 0, 0);
+		}catch(e) {
+			showError(e);
+		}});
+	}else {
+		uiThread(function() {try {
+			nk.lWindow.dismiss();
+		}catch(e) {
+			showError(e);
+		}});
+	}
+}
+
+preload();
+
+
 
 function newLevel(str) {
 	nk.frame = new FrameLayout(ctx);
@@ -269,6 +429,168 @@ function showError(e) {
 			temp += t[l];
 		}
 		clientMessage(ChatColor.DARK_RED + "[" + className + " ERROR LINE: " + e.lineNumber + "]\n" + ChatColor.DARK_RED + c);
+	}
+}
+
+
+
+/**
+ * Stereo BGS
+ *
+ * @since 2015-06
+ * @author CodeInside
+ *
+ * @param (Int|Null) x
+ * @param (Int|Null) y
+ * @param (Int|Null) z
+ * @param (Object|Null) ent
+ * @param (File) file <music>
+ * @param (Int) range <0~>
+ * @param (Float) airResistanse <0~1>
+ * @param (Float) vol <0~1>
+ * @param (Boolean) loop
+ * @param (Function|Null) stopFunc
+ */
+//IT IS VERY UNSTABLR, IT NEED A TEST
+
+var bgsData = [];
+
+function bgs(x, y, z, ent, file, range, airResistance, vol, loop, stopFunc) {try {
+	var controler = android.media.MediaPlayer();
+	controler.setDataSource(file.getAbsolutePath());
+	controler.setLooping(loop);
+	if(ent !== null) {
+		x = Entity.getX(ent);
+		y = Entity.getY(ent);
+		z = Entity.getZ(ent);
+	}
+	var v = bgsMeasure(x, y, z, range, airResistance);
+	controler.setVolume(v[0]*vol, v[1]*vol);
+	controler.prepare();
+	controler.start();
+	bgsData.push({x: x, y: y, z: z, ent: ent, ct: controler, file: file, session: controler.getAudioSessionId(), vol: vol, range: range, airResistance: airResistance, loop: loop, stopFunc: stopFunc});
+}catch(e) {
+	showError(e);
+}}
+
+function bgsManager() {try {
+	for(var e = 0; e < bgsData.length; e++) {
+		if(!bgsData[e].ct.isPlaying()) {
+			bgsData[e].ct.release();
+			bgsData.splice(e, 1);
+			continue;
+		}
+		if(bgsData[e].stopFunc !== null && bgsData[e].stopFunc(e)) {
+			bgsData[e].ct.stop();
+			bgsData[e].ct.release();
+			bgsData.splice(e, 1);
+			continue;
+		}
+		if(Entity.getHealth(bgsData[e].ent) <= 0) {
+			 bgsData[e].ent = null;
+		}
+		if(bgsData[e].ent !== null) {
+			bgsData[e].x = Entity.getX(bgsData[e].ent);
+			bgsData[e].y = Entity.getY(bgsData[e].ent);
+			bgsData[e].z = Entity.getZ(bgsData[e].ent);
+		}
+		var v = bgsMeasure(bgsData[e].x, bgsData[e].y, bgsData[e].z, bgsData[e].range, bgsData[e].airResistance);
+		bgsData[e].ct.setVolume(v[0]*bgsData[e].vol, v[1]*bgsData[e].vol);
+	}
+}catch(e) {
+	showError(e);
+}}
+
+function stereoL(x, y, z, power) {
+	var e = locToYaw(Player.getX() - x, Player.getY() - y, Player.getZ() - z);
+	var t = e - Entity.getYaw(Player.getEntity()) + 180 - 10;
+	if(t > 0) {
+		t %= 360;
+	}else {
+		while(t < 0) {
+			t += 360;
+		}
+	}
+	if(t >= 0 && t <= 180) {
+		return 1 - (Math.sin(t*Math.PI/180)/power);
+	}else {
+		return 1;
+	}
+}
+
+function stereoR(x, y, z, power) {
+	var e = locToYaw(Player.getX() - x, Player.getY() - y, Player.getZ() - z);
+	var t = e - Entity.getYaw(Player.getEntity()) + 180 - 170;
+	if(t > 0) {
+		t %= 360;
+	}else {
+		while(t < 0) {
+			t += 360;
+		}
+	}
+	if(t >= 0 && t <= 180) {
+		return 1 - (Math.sin(t*Math.PI/180)/power);
+	}else {
+		return 1;
+	}
+}
+
+function bgsMeasure(x, y, z, range, airResistance) {
+	var distance = Math.sqrt(Math.pow(Player.getY() - y, 2) + Math.pow(Player.getX() - x, 2) + Math.pow(Player.getZ() - z, 2));
+	if(distance < range) {
+		return [stereoL(x, y, z, 3 * (range/distance)), stereoR(x, y, z, 3 * (range/distance))];
+	}else {
+		if(Math.sqrt(distance - range) * airResistance > 1) {
+			return [0, 0];
+		}
+		var l = stereoL(x, y, z, 3) - (Math.sqrt(distance - range) * airResistance);
+		var r = stereoR(x, y, z, 3) - (Math.sqrt(distance - range) * airResistance);
+		if(l < 0) {
+			l = 0;
+		}
+		if(r < 0) {
+			r = 0;
+		}
+		return [l, r];
+	}
+}
+
+
+
+function downloadFile(path, url, progressBar) {
+	try{
+		var tempApiUrl = new java.net.URL(url);
+		var tempApiUrlConn = tempApiUrl.openConnection();
+		tempApiUrlConn.connect();
+		var tempBis = new java.io.BufferedInputStream(tempApiUrl.openStream());
+		if(progressBar !== null) {
+			var max = tempApiUrlConn.getContentLength();
+			uiThread(function() {try {
+				progressBar.setMax(max);
+			}catch(e) {
+				showError(e);
+			}});
+		}
+		var tempFos = new java.io.FileOutputStream(path);
+		var tempData = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
+		var tempTotal = 0, tempCount;
+		while ((tempCount = tempBis.read(tempData)) != -1) {
+			tempFos.write(tempData, 0, tempCount);
+			tempTotal += tempCount;
+			if(progressBar !== null) {
+				uiThread(function() {try {
+					progressBar.setProgress(tempTotal);
+				}catch(e) {
+					showError(e);
+				}});
+			}
+		}
+		tempFos.flush();
+		tempFos.close();
+		tempBis.close();
+		return true;
+	}catch(e){
+		return false;
 	}
 }
 
