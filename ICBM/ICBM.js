@@ -248,6 +248,72 @@ preload();
 
 
 function newLevel(str) {
+
+}
+
+function procCmd(str) {
+	var cmd = str.split(" ");
+	switch(cmd[0]) {
+		case "t":
+			var ent = Level.spawnMob(Player.getX(), Player.getY(), Player.getZ(), 11, "mob/nuclear.png");
+			Entity.setRenderType(ent, render.nuclear_R.renderType);
+			break;
+		case "t2":
+			var ent = Level.spawnMob(Player.getX(), Player.getY(), Player.getZ(), 11, "mob/nuclear.png");
+			Entity.setRenderType(ent, render.nuclear_R.renderType);
+			forceRot(ent);
+			rockets.push({type: "NUCLEAR", ent: ent, power: cmd[1]});
+			bgs(null, null, null, ent, Assets.sound_launch, 30, 0.1, 1, false, function(e) {return bgsData[e].ent === null});
+			bgs(null, null, null, ent, Assets.sound_onAir, 50, 0.5, 0.5, true, function(e) {if(bgsData[e].ent === null) {if(Math.sqrt(Math.pow(bgsData[e].x - Player.getX(), 2) + Math.pow(bgsData[e].y - Player.getY(), 2) + Math.pow(bgsData[e].z - Player.getZ(), 2)) < 40) {bgs(bgsData[e].x, bgsData[e].y, bgsData[e].z, null, Assets.sound_explode, 50, 0.05, 1, false, null)}else {bgs(bgsData[e].x, bgsData[e].y, bgsData[e].z, null, Assets.sound_explode2, 50, 0.02, 1, false, null)}return true}return false});
+			break;
+	}
+}
+
+function modTick() {
+	rocketManager();
+	bgsManager();
+}
+
+function rocketManager() {
+	for(var e = 0; e < rockets.length; e++) {
+		switch(rockets[e].type) {
+			case "NUCLEAR":
+				var x = Entity.getX(rockets[e].ent);
+				var y = Entity.getY(rockets[e].ent);
+				var z = Entity.getZ(rockets[e].ent);
+				if(Entity.getHealth(rockets[e].ent) <= -1) {
+					rockets.splice(e, 1);
+					continue;
+				}
+				//블럭에 닿으면 폭★발
+				if(Level.getTile(x+1, y, z) !== 0 || Level.getTile(x-1, y, z) !== 0 || Level.getTile(x, y+1, z) !== 0 || Level.getTile(x, y-1, z) !== 0 || Level.getTile(x, y, z+1) !== 0 || Level.getTile(x, y, z-1) !== 0) {
+					Level.explode(x, y, z, rockets[e].power);
+					Entity.remove(rockets[e].ent);
+					rockets.splice(e, 1);
+					continue;
+				}
+				break;
+		}
+	}
+}
+
+function forceRot(ent) {
+	thread(function() {
+		while(Entity.getHealth(ent) > 0) {
+			var x = Entity.getVelX(ent);
+			var y = Entity.getVelY(ent);
+			var z = Entity.getVelZ(ent);
+			if(x === 0 && y === 0 && z === 0) {
+				Entity.setRot(ent, 0, -90);
+			}else {
+				Entity.setRot(ent, locToYaw(x, y, z), locToPitch(x, y, z));
+			}
+			Thread.sleep(1);
+		}
+	}).start()
+}
+
+function showGui() {
 	nk.frame = new FrameLayout(ctx);
 	
 	//frame background
@@ -290,67 +356,8 @@ function newLevel(str) {
 	nk.window = new PopupWindow(nk.frame, PIXEL*200, PIXEL*150, false);
 	
 	uiThread(function() {
-		//nk.window.showAtLocation(ctx.getWindow().getDecorView(), Gravity.LEFT|Gravity.TOP, 0, 0);
+		nk.window.showAtLocation(ctx.getWindow().getDecorView(), Gravity.LEFT|Gravity.TOP, 0, 0);
 	});
-}
-
-function procCmd(str) {
-	var cmd = str.split(" ");
-	switch(cmd[0]) {
-		case "t":
-			var ent = Level.spawnMob(Player.getX(), Player.getY(), Player.getZ(), 11, "mob/nuclear.png");
-			Entity.setRenderType(ent, render.nuclear_R.renderType);
-			break;
-		case "t2":
-			var ent = Level.spawnMob(Player.getX(), Player.getY(), Player.getZ(), 11, "mob/nuclear.png");
-			Entity.setRenderType(ent, render.nuclear_R.renderType);
-			forceRot(ent);
-			rockets.push({type: "NUCLEAR", ent: ent, power: cmd[1]});
-			break;
-	}
-}
-
-function modTick() {
-	rocketManager();
-}
-
-function rocketManager() {
-	for(var e = 0; e < rockets.length; e++) {
-		switch(rockets[e].type) {
-			case "NUCLEAR":
-				var x = Entity.getX(rockets[e].ent);
-				var y = Entity.getY(rockets[e].ent);
-				var z = Entity.getZ(rockets[e].ent);
-				if(Entity.getHealth(rockets[e].ent) <= -1) {
-					rockets.splice(e, 1);
-					continue;
-				}
-				//블럭에 닿으면 폭★발
-				if(Level.getTile(x+1, y, z) !== 0 || Level.getTile(x-1, y, z) !== 0 || Level.getTile(x, y+1, z) !== 0 || Level.getTile(x, y-1, z) !== 0 || Level.getTile(x, y, z+1) !== 0 || Level.getTile(x, y, z-1) !== 0) {
-					Level.explode(x, y, z, rockets[e].power);
-					Entity.remove(rockets[e].ent);
-					rockets.splice(e, 1);
-					continue;
-				}
-				break;
-		}
-	}
-}
-
-function forceRot(ent) {
-	thread(function() {
-		while(Entity.getHealth(ent) > 0) {
-			var x = Entity.getVelX(ent);
-			var y = Entity.getVelY(ent);
-			var z = Entity.getVelZ(ent);
-			if(x === 0 && y === 0 && z === 0) {
-				Entity.setRot(ent, 0, -90);
-			}else {
-				Entity.setRot(ent, locToYaw(x, y, z), locToPitch(x, y, z));
-			}
-			Thread.sleep(1);
-		}
-	}).start()
 }
 
 
@@ -486,7 +493,7 @@ function bgsManager() {try {
 			bgsData.splice(e, 1);
 			continue;
 		}
-		if(Entity.getHealth(bgsData[e].ent) <= 0) {
+		if(bgsData[e].ent !== null && Entity.getHealth(bgsData[e].ent) <= 0) {
 			 bgsData[e].ent = null;
 		}
 		if(bgsData[e].ent !== null) {
