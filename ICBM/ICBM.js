@@ -62,6 +62,7 @@ var GradientDrawable = android.graphics.drawable.GradientDrawable;
 var BitmapDrawable = android.graphics.drawable.BitmapDrawable;
 var ColorDrawable = android.graphics.drawable.ColorDrawable;
 var ClipDrawable = android.graphics.drawable.ClipDrawable;
+var LayerDrawable = android.graphics.drawable.LayerDrawable;
 var Bitmap = android.graphics.Bitmap;
 var BitmapFactory = android.graphics.BitmapFactory;
 var Color = android.graphics.Color;
@@ -72,10 +73,10 @@ var Shader = android.graphics.Shader;
 var ArrayList = java.util.ArrayList;
 
 var Assets = {}
-Assets.R1Raw = Bitmap.createBitmap(6, 6, Bitmap.Config.ARGB_8888);
+Assets.R1_raw = Bitmap.createBitmap(6, 6, Bitmap.Config.ARGB_8888);
 var w = Color.argb(200, 255, 255, 255);
 var b = Color.argb(100, 0, 0, 255);
-Assets.R1Pixel = [
+Assets.R1_pixel = [
 b,b,b,b,b,w,
 b,b,b,b,b,w,
 b,b,b,b,b,w,
@@ -83,9 +84,36 @@ b,b,b,b,b,w,
 b,b,b,b,b,w,
 w,w,w,w,w,w
 ];
-Assets.R1Raw.setPixels(Assets.R1Pixel, 0, 6, 0, 0, 6, 6);
-Assets.R1 = Bitmap.createScaledBitmap(Assets.R1Raw, PIXEL*12, PIXEL*12, false);
+Assets.R1_raw.setPixels(Assets.R1_pixel, 0, 6, 0, 0, 6, 6);
+Assets.R1 = Bitmap.createScaledBitmap(Assets.R1_raw, PIXEL*12, PIXEL*12, false);
+Assets.button_raw = Bitmap.createBitmap(3, 3, Bitmap.Config.ARGB_8888);
+var w = Color.parseColor("#ffffff");
+var b = Color.parseColor("#0000ff");
+Assets.button_pixel = [
+w,w,w,
+w,b,w,
+w,w,w
+];
+Assets.button_raw.setPixels(Assets.button_pixel, 0, 3, 0, 0, 3, 3);
+Assets.button = Bitmap.createScaledBitmap(Assets.button_raw, PIXEL*6, PIXEL*6, false);
+Assets.button_9 = function() {
+	return ninePatch1(Assets.button, PIXEL*3, PIXEL*3, PIXEL*4, PIXEL*4);
+}
+Assets.buttonR_raw = Bitmap.createBitmap(3, 3, Bitmap.Config.ARGB_8888);
+var w = Color.parseColor("#ffffff");
+var b = Color.parseColor("#ff0000");
+Assets.buttonR_pixel = [
+w,w,w,
+w,b,w,
+w,w,w
+];
+Assets.buttonR_raw.setPixels(Assets.buttonR_pixel, 0, 3, 0, 0, 3, 3);
+Assets.buttonR = Bitmap.createScaledBitmap(Assets.buttonR_raw, PIXEL*6, PIXEL*6, false);
+Assets.buttonR_9 = function() {
+	return ninePatch1(Assets.buttonR, PIXEL*3, PIXEL*3, PIXEL*4, PIXEL*4);
+}
 Assets.bg = Bitmap.createScaledBitmap(BitmapFactory.decodeStream(ModPE.openInputStreamFromTexturePack("images/gui/bg32.png")), PIXEL*64, PIXEL*64, false);
+
 Assets.font_url = "https://www.dropbox.com/s/y1o46b2jkbxwl3o/minecraft.ttf?dl=1";
 Assets.sound_launch = new java.io.File(FILE_MAIN_DIR, "assets01.res");
 Assets.sound_launch_url = "https://raw.githubusercontent.com/CI-CodeInside/ModPE-Script/master/content/ICBM/assets01.res";
@@ -99,6 +127,10 @@ Assets.image_rocket = new java.io.File(FILE_MAIN_DIR, "assets06.res");
 Assets.image_rocket_url = "https://raw.githubusercontent.com/CI-CodeInside/ModPE-Script/master/content/ICBM/assets06.res";
 
 var nk = {};
+nk.activeIsShow = false;
+nk.activeWindow = null;
+var pointEntData = [];
+//pointEntData.push({ent: <object>, f: <function>, bn: <string>, b: <function>});
 var rockets = [];
 //로켓 정보가 맘에 안드시면 바꾸세요
 //rockets.push({type: "NUCLEAR", ent: <object>, path: <pathArray>, currentPathIndex: <int>});
@@ -248,7 +280,6 @@ preload();
 
 
 function newLevel(str) {
-
 }
 
 function procCmd(str) {
@@ -257,6 +288,7 @@ function procCmd(str) {
 		case "t":
 			var ent = Level.spawnMob(Player.getX(), Player.getY(), Player.getZ(), 11, "mob/nuclear.png");
 			Entity.setRenderType(ent, render.nuclear_R.renderType);
+			pointEntData.push({ent: ent, f: function(e) {}, bn: "Setting", b: function() {showGui()}});
 			break;
 		case "t2":
 			var ent = Level.spawnMob(Player.getX(), Player.getY(), Player.getZ(), 11, "mob/nuclear.png");
@@ -264,7 +296,7 @@ function procCmd(str) {
 			forceRot(ent);
 			rockets.push({type: "NUCLEAR", ent: ent, power: cmd[1]});
 			bgs(null, null, null, ent, Assets.sound_launch, 30, 0.1, 1, false, function(e) {return bgsData[e].ent === null});
-			bgs(null, null, null, ent, Assets.sound_onAir, 50, 0.5, 0.5, true, function(e) {if(bgsData[e].ent === null) {if(Math.sqrt(Math.pow(bgsData[e].x - Player.getX(), 2) + Math.pow(bgsData[e].y - Player.getY(), 2) + Math.pow(bgsData[e].z - Player.getZ(), 2)) < 40) {bgs(bgsData[e].x, bgsData[e].y, bgsData[e].z, null, Assets.sound_explode, 50, 0.05, 1, false, null)}else {bgs(bgsData[e].x, bgsData[e].y, bgsData[e].z, null, Assets.sound_explode2, 50, 0.02, 1, false, null)}return true}return false});
+			bgs(null, null, null, ent, Assets.sound_onAir, 50, 0.5, 0.5, true, function(e) {if(bgsData[e].ent === null) {if(Math.sqrt(Math.pow(bgsData[e].x - Player.getX(), 2) + Math.pow(bgsData[e].y - Player.getY(), 2) + Math.pow(bgsData[e].z - Player.getZ(), 2)) < 50) {bgs(bgsData[e].x, bgsData[e].y, bgsData[e].z, null, Assets.sound_explode, 50, 0.05, 1, false, null)}else {bgs(bgsData[e].x, bgsData[e].y, bgsData[e].z, null, Assets.sound_explode2, 50, 0.02, 1, false, null)}return true}return false});
 			break;
 	}
 }
@@ -272,6 +304,7 @@ function procCmd(str) {
 function modTick() {
 	rocketManager();
 	bgsManager();
+	userPointedEntData();
 }
 
 function rocketManager() {
@@ -313,8 +346,188 @@ function forceRot(ent) {
 	}).start()
 }
 
+
+
+function userPointedEntData() {try {
+	var ent = Player.getPointedEntity();
+	if(nk.lastPointEnt == null || !EntityFix.isEqual(nk.lastPointEnt, ent)) {
+		nk.lastPointEnt = ent;
+		activeButtonDismiss();
+		for(var e = 0; e < pointEntData.length; e++) {
+			if(Entity.getHealth(pointEntData[e].ent) <= 0) {
+				pointEntData.splice(e, 1);
+				continue;
+			}
+			if(EntityFix.isEqual(pointEntData[e].ent, ent)) {
+				pointEntData[e].f(e);
+				activeButton(pointEntData[e].bn, pointEntData[e].b);
+			}
+		}
+	}
+}catch(e) {
+	showError(e);
+}}
+
+
+
+function activeButtonLoad() {try {
+	if(nk.activeWindow == null) {
+		nk.activeButton = new android.widget.Button(ctx);
+		nk.activeButton.setText("Active");
+		nk.activeButton.setTextColor(android.graphics.Color.WHITE);
+		nk.activeButton.setTextSize(DIP*16);
+		
+		nk.activeWindow = new android.widget.PopupWindow(nk.activeButton, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, false);
+	}
+}catch(e) {
+	showError(e);
+}}
+activeButtonLoad();
+
+function activeButton(text, func) {
+	activeButtonDismiss();
+	uiThread(function() {try {
+		nk.activeButton.setText(text);
+		nk.activeButton.setOnClickListener(android.view.View.OnClickListener({
+			onClick: func
+		}));
+		nk.activeWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER|android.view.Gravity.BOTTOM, 0, PIXEL*100);
+		nk.activeIsShow = true;
+	}catch(e) {
+		showError(e);
+	}});
+}
+
+function activeButtonDismiss() {
+	if(nk.activeIsShow) {
+		uiThread(function() {try {
+			nk.activeWindow.dismiss();
+		}catch(e) {
+			showError(e);
+		}})
+		nk.activeIsShow = false;
+	}
+}
+
+
 function showGui() {
+	nk.mGui = RelativeLayout(ctx);
+	nk.mGui.setId(Math.floor(Math.random()*0xffff));
+	nk.mGui.setPadding(0, 0, 0, 0);
+	//nk.mGui.setGravity(Gravity.CENTER);
+	
+	nk.grid = new BitmapDrawable(Assets.R1);
+	nk.grid.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+	
+	nk.side = new GradientDrawable();
+	nk.side.mutate().setColor(Color.argb(0, 0, 0, 0));
+	nk.side.mutate().setStroke(PIXEL*5, Color.WHITE);
+	//nk.side.mutate().setCornerRadius(PIXEL*30);
+	
+	nk.layer = new LayerDrawable([nk.grid, nk.side]);
+	
+	nk.mGui.setBackgroundDrawable(nk.layer);
+	
+	nk.mBtn1 = new Button(ctx);
+	nk.mBtn1.setId(Math.floor(Math.random()*0xffff));
+	nk.mBtn1.setGravity(Gravity.CENTER);
+	nk.mBtn1.setBackgroundDrawable(Assets.button_9());
+	nk.mBtn1.setPadding(0, 0, 0, 0);
+	nk.mBtn1.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, PIXEL*32);
+	if(FILE_FONT.exists()) {
+		nk.mBtn1.setTypeface(android.graphics.Typeface.createFromFile(FILE_FONT));
+	}
+	nk.mBtn1.setTextColor(Color.WHITE);
+	nk.mBtn1.setText("▽");
+	nk.mBtn1_param = new RelativeLayout.LayoutParams(PIXEL*32, PIXEL*32);
+	nk.mBtn1_param.setMargins(PIXEL*32, 0, 0, PIXEL*32);
+	nk.mBtn1_param.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, nk.mGui.getId());
+	nk.mBtn1_param.addRule(RelativeLayout.ALIGN_PARENT_LEFT, nk.mGui.getId());
+	nk.mBtn1.setLayoutParams(nk.mBtn1_param);
+	nk.mGui.addView(nk.mBtn1);
+	
+	nk.mBtn2 = new Button(ctx);
+	nk.mBtn2.setId(Math.floor(Math.random()*0xffff));
+	nk.mBtn2.setGravity(Gravity.CENTER);
+	nk.mBtn2.setBackgroundDrawable(Assets.button_9());
+	nk.mBtn2.setPadding(0, 0, 0, 0);
+	nk.mBtn2.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, PIXEL*32);
+	if(FILE_FONT.exists()) {
+		nk.mBtn2.setTypeface(android.graphics.Typeface.createFromFile(FILE_FONT));
+	}
+	nk.mBtn2.setTextColor(Color.WHITE);
+	nk.mBtn2.setText("△");
+	nk.mBtn2_param = new RelativeLayout.LayoutParams(PIXEL*32, PIXEL*32);
+	nk.mBtn2_param.setMargins(PIXEL*32, 0, 0, PIXEL*16);
+	nk.mBtn2_param.addRule(RelativeLayout.ABOVE, nk.mBtn1.getId());
+	nk.mBtn2_param.addRule(RelativeLayout.ALIGN_PARENT_LEFT, nk.mGui.getId());
+	nk.mBtn2.setLayoutParams(nk.mBtn2_param);
+	nk.mGui.addView(nk.mBtn2);
+	
+	nk.mBtn3 = new Button(ctx);
+	nk.mBtn3.setId(Math.floor(Math.random()*0xffff));
+	nk.mBtn3.setGravity(Gravity.CENTER);
+	nk.mBtn3.setBackgroundDrawable(Assets.button_9());
+	nk.mBtn3.setPadding(0, 0, 0, 0);
+	nk.mBtn3.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, PIXEL*32);
+	if(FILE_FONT.exists()) {
+		nk.mBtn3.setTypeface(android.graphics.Typeface.createFromFile(FILE_FONT));
+	}
+	nk.mBtn3.setTextColor(Color.WHITE);
+	nk.mBtn3.setText("▷");
+	nk.mBtn3_param = new RelativeLayout.LayoutParams(PIXEL*32, PIXEL*32);
+	nk.mBtn3_param.setMargins(PIXEL*16, 0, 0, PIXEL*32);
+	nk.mBtn3_param.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, nk.mGui.getId());
+	nk.mBtn3_param.addRule(RelativeLayout.RIGHT_OF, nk.mBtn1.getId());
+	nk.mBtn3.setLayoutParams(nk.mBtn3_param);
+	nk.mGui.addView(nk.mBtn3);
+	
+	nk.mBtn4 = new Button(ctx);
+	nk.mBtn4.setId(Math.floor(Math.random()*0xffff));
+	nk.mBtn4.setGravity(Gravity.CENTER);
+	nk.mBtn4.setBackgroundDrawable(Assets.button_9());
+	nk.mBtn4.setPadding(0, 0, 0, 0);
+	nk.mBtn4.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, PIXEL*32);
+	if(FILE_FONT.exists()) {
+		nk.mBtn4.setTypeface(android.graphics.Typeface.createFromFile(FILE_FONT));
+	}
+	nk.mBtn4.setTextColor(Color.WHITE);
+	nk.mBtn4.setText("◁");
+	nk.mBtn4_param = new RelativeLayout.LayoutParams(PIXEL*32, PIXEL*32);
+	nk.mBtn4_param.setMargins(PIXEL*16, 0, 0, PIXEL*16);
+	nk.mBtn4_param.addRule(RelativeLayout.ABOVE, nk.mBtn3.getId());
+	nk.mBtn4_param.addRule(RelativeLayout.RIGHT_OF, nk.mBtn2.getId());
+	nk.mBtn4.setLayoutParams(nk.mBtn4_param);
+	nk.mGui.addView(nk.mBtn4);
+	
+	nk.mBtn5 = new Button(ctx);
+	nk.mBtn5.setId(Math.floor(Math.random()*0xffff));
+	nk.mBtn5.setGravity(Gravity.CENTER);
+	nk.mBtn5.setBackgroundDrawable(Assets.buttonR_9());
+	nk.mBtn5.setPadding(0, 0, 0, 0);
+	nk.mBtn5.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, PIXEL*32);
+	if(FILE_FONT.exists()) {
+		nk.mBtn5.setTypeface(android.graphics.Typeface.createFromFile(FILE_FONT));
+	}
+	nk.mBtn5.setTextColor(Color.WHITE);
+	nk.mBtn5.setText("");
+	nk.mBtn5_param = new RelativeLayout.LayoutParams(PIXEL*60, PIXEL*80);
+	nk.mBtn5_param.setMargins(0, 0, PIXEL*32, PIXEL*32);
+	nk.mBtn5_param.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, nk.mGui.getId());
+	nk.mBtn5_param.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, nk.mGui.getId());
+	nk.mBtn5.setLayoutParams(nk.mBtn5_param);
+	nk.mGui.addView(nk.mBtn5);
+	
+	nk.mWindow = new PopupWindow(nk.mGui, PIXEL*220, PIXEL*250, false);
+	
+	uiThread(function() { try{
+		nk.mWindow.showAtLocation(ctx.getWindow().getDecorView(), Gravity.RIGHT|Gravity.BOTTOM, 0, 0);
+	}catch(e) {
+		showError(e);
+	}});
+	/*
 	nk.frame = new FrameLayout(ctx);
+	nk.frame.setPadding(0, 0, 0, 0);
 	
 	//frame background
 	nk.draw1 = new BitmapDrawable(Assets.R1);
@@ -330,6 +543,7 @@ function showGui() {
 	nk.gioPaint.setARGB(200, 255, 255, 255);
 	
 	nk.gio = new ImageView(ctx);
+	nk.gio.setPadding(0, 0, 0, 0);
 	
 	nk.gioBitmap = Bitmap.createBitmap(PIXEL*200, PIXEL*150, Bitmap.Config.ARGB_8888);
 	
@@ -353,13 +567,17 @@ function showGui() {
 	nk.frame.addView(nk.gio);
 	nk.frame.addView(nk.graph);
 	
+	nk.side = new GradientDrawable();
+	nk.side.mutate().setColor(Color.argb(0, 0, 0, 0));
+	nk.side.mutate().mutate().setStroke(PIXEL*5, Color.RED);
+	nk.frame.setForeground(nk.side);
+	
 	nk.window = new PopupWindow(nk.frame, PIXEL*200, PIXEL*150, false);
 	
 	uiThread(function() {
 		nk.window.showAtLocation(ctx.getWindow().getDecorView(), Gravity.LEFT|Gravity.TOP, 0, 0);
-	});
+	});*/
 }
-
 
 
 var render = {};
@@ -560,6 +778,88 @@ function bgsMeasure(x, y, z, range, airResistance) {
 		}
 		return [l, r];
 	}
+}
+
+
+
+//==============================
+//-NinePatch JS
+//Copyright® 2015 affogatoman(colombia2)
+//==============================
+/**
+ * Nine Patch
+ *
+ * @since 2015
+ * @author affogatoman
+ */
+
+function ninePatch1(bitmap, top, left, bottom, right, width, height) {
+	var getByteBuffer = function(top, left, bottom, right) {
+		var NO_COLOR = 0x00000001;
+		var buffer = java.nio.ByteBuffer.allocate(84).order(java.nio.ByteOrder.nativeOrder());
+		buffer.put(0x01);
+		buffer.put(0x02);
+		buffer.put(0x02);
+		buffer.put(0x09);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(left);
+		buffer.putInt(right);
+		buffer.putInt(top);
+		buffer.putInt(bottom);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		return buffer;
+	};
+	var buffer = getByteBuffer(top, left, bottom, right);
+    return new android.graphics.drawable.NinePatchDrawable(ctx.getResources(), bitmap, buffer.array(), new android.graphics.Rect(), "");
+}
+function ninePatch2(bitmap, top, left, bottom, right, width, height) {
+	var getByteBuffer = function(top, left, bottom, right) {
+		var NO_COLOR = 0x00000001;
+		var buffer = java.nio.ByteBuffer.allocate(84).order(java.nio.ByteOrder.nativeOrder());
+		buffer.put(0x01);
+		buffer.put(0x02);
+		buffer.put(0x02);
+		buffer.put(0x09);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(left);
+		buffer.putInt(right);
+		buffer.putInt(top);
+		buffer.putInt(bottom);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		return buffer;
+	};
+	var buffer = getByteBuffer(top, left, bottom, right);
+	var patch = new android.graphics.drawable.NinePatchDrawable(ctx.getResources(), bitmap, buffer.array(), new android.graphics.Rect(), "");
+	//var bm = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
+	return patch;
 }
 
 
@@ -853,3 +1153,19 @@ function absY(x, y, z) {
 function absZ(x, y, z) {
 	return z / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
 };
+
+EntityFix = {};
+
+EntityFix.isEqual = function(obj1, obj2) {
+	return Entity.getUniqueId(obj1) === Entity.getUniqueId(obj2);
+}
+
+EntityFix.findEnt = function(uniqId) {
+	var list = Entity.getAll();
+	var max = list.length;
+	for(var e = 0; e < max; e++) {
+		if(uniqId === Entity.getUniqueId(list[e])) {
+			return list[e];
+		}
+	}
+}
