@@ -132,8 +132,18 @@ nk.activeWindow = null;
 var pointEntData = [];
 //pointEntData.push({ent: <object>, f: <function>, bn: <string>, b: <function>});
 var rockets = [];
-//로켓 정보가 맘에 안드시면 바꾸세요
-//rockets.push({type: "NUCLEAR", ent: <object>, path: <pathArray>, currentPathIndex: <int>});
+
+
+function Rocket (type, ent, isFlied, time, pitch, yaw, distance, power) {
+    this.type = type;
+    this.ent = ent;
+    this.isFlied = isFlied;
+    this.time = time;
+    this.pitch = pitch;
+    this.yaw = yaw;
+    this.distance = distance;
+    this.power = power;
+}
 
 function preload() {
 	new Thread(new Runnable({run: function() {try {
@@ -294,7 +304,7 @@ function procCmd(str) {
 			var ent = Level.spawnMob(Player.getX(), Player.getY(), Player.getZ(), 11, "mob/nuclear.png");
 			Entity.setRenderType(ent, render.nuclear_R.renderType);
 			forceRot(ent);
-			rockets.push({type: "NUCLEAR", ent: ent, power: cmd[1]});
+			rockets.push(new Rocket ("NUCLEAR", ent, false, 0, 0, 0, 0));
 			bgs(null, null, null, ent, Assets.sound_launch, 30, 0.1, 1, false, function(e) {return bgsData[e].ent === null});
 			bgs(null, null, null, ent, Assets.sound_onAir, 50, 0.5, 0.5, true, function(e) {if(bgsData[e].ent === null) {if(Math.sqrt(Math.pow(bgsData[e].x - Player.getX(), 2) + Math.pow(bgsData[e].y - Player.getY(), 2) + Math.pow(bgsData[e].z - Player.getZ(), 2)) < 50) {bgs(bgsData[e].x, bgsData[e].y, bgsData[e].z, null, Assets.sound_explode, 50, 0.05, 1, false, null)}else {bgs(bgsData[e].x, bgsData[e].y, bgsData[e].z, null, Assets.sound_explode2, 50, 0.02, 1, false, null)}return true}return false});
 			break;
@@ -305,6 +315,36 @@ function modTick() {
 	rocketManager();
 	bgsManager();
 	userPointedEntData();
+
+	for (var i in rockets) {
+		if (rockets [i].isFlied) {
+			if (rockets [i].time == rockets [i].distance * 20) {
+				setVelX (rockets [i].ent, 0);
+				setVelY (rockets [i].ent, -1);
+				setVelZ (rockets [i].ent, 0);
+				continue;
+			}
+			var yaw = rockets [i].yaw;
+
+			var sin = -Math.sin (yaw / 180 * Math.PI);
+			var cos = Math.cos (yaw / 180 * Math.PI);
+
+			var x = -Math.cos (rockets [i].pitch / 180 * Math.PI);
+			x = x - x * (rockets [i].time / (rockets [i].distance * 20));
+			var y = Math.sin (rockets [i].pitch / 180 * Math.PI);
+			y -= rockets [i].time / (rockets [i].distance * 20);
+
+			setVelX (rockets [i].ent, x * sin);
+			setVelY (rockets [i].ent, y);
+			setVelZ (rockets [i].ent, x * cos);
+			rockets [i].time++;
+		}
+		else {
+			setVelX (rockets [i].ent, 0);
+			setVelY (rockets [i].ent, 0);
+			setVelZ (rockets [i].ent, 0);
+		}
+	}
 }
 
 function rocketManager() {
@@ -319,7 +359,7 @@ function rocketManager() {
 					continue;
 				}
 				//블럭에 닿으면 폭★발
-				if(Level.getTile(x+1, y, z) !== 0 || Level.getTile(x-1, y, z) !== 0 || Level.getTile(x, y+1, z) !== 0 || Level.getTile(x, y-1, z) !== 0 || Level.getTile(x, y, z+1) !== 0 || Level.getTile(x, y, z-1) !== 0) {
+				if(rockets [e].isFlied && (Level.getTile(x+1, y, z) !== 0 || Level.getTile(x-1, y, z) !== 0 || Level.getTile(x, y+1, z) !== 0 || Level.getTile(x, y-1, z) !== 0 || Level.getTile(x, y, z+1) !== 0 || Level.getTile(x, y, z-1) !== 0)) {
 					Level.explode(x, y, z, rockets[e].power);
 					Entity.remove(rockets[e].ent);
 					rockets.splice(e, 1);
