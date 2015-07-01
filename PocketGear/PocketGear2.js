@@ -61,7 +61,7 @@ var Gravity = android.view.Gravity;
 var FrameLayout = android.widget.FrameLayout;
 var RelativeLayout = android.widget.RelativeLayout;
 var LinearLayout = android.widget.LinearLayout;
-var ScrollView = android.widget.ScrollView!
+var ScrollView = android.widget.ScrollView;
 var TextView = android.widget.TextView;
 var Button = android.widget.Button;
 var ImageView = android.widget.ImageView;
@@ -395,7 +395,47 @@ Gear.mainGuiLoad = function() {try {
 	Gear.info.setLayoutParams(Gear.info_p);
 	Gear.title.addView(Gear.info);
 	
+	Gear.titleCover = new Button(ctx);
+	Gear.titleCover.setBackgroundColor(Color.argb(0, 0, 0, 0));
+	Gear.titleCover_p = new c.r.LayoutParams(c.m, c.m);
+	Gear.titleCover_p.setMargins(0, 0, 0, 0);
+	Gear.titleCover.setLayoutParams(Gear.titleCover_p);
+	Gear.titleCover.setOnTouchListener(View.OnTouchListener({ onTouch:
+		function(view, event) {
+			switch(event) {
+				ConstantsintACTION_CANCELConstant forgetActionMasked(): The current gesture has been aborted.intACTION_DOWNConstant forgetActionMasked(): A pressed gesture has started, the motion contains the initial starting location.intACTION_HOVER_ENTERConstant forgetActionMasked(): The pointer is not down but has entered the boundaries of a window or view.intACTION_HOVER_EXITConstant forgetActionMasked(): The pointer is not down but has exited the boundaries of a window or view.intACTION_HOVER_MOVEConstant forgetActionMasked(): A change happened but the pointer is not down (unlike ACTION_MOVE).intACTION_MASKBit mask of the parts of the action code that are the action itself.intACTION_MOVEConstant forgetActionMasked(): A change has happened during a press gesture (between ACTION_DOWNand ACTION_UP).intACTION_OUTSIDEConstant forgetActionMasked(): A movement has happened outside of the normal bounds of the UI element.intACTION_POINTER_1_DOWNThis constant was deprecated in API level 8. UseACTION_POINTER_INDEX_MASKto retrieve the data index associated withACTION_POINTER_DOWN.intACTION_POINTER_1_UPThis constant was deprecated in API level 8. UseACTION_POINTER_INDEX_MASKto retrieve the data index associated withACTION_POINTER_UP.intACTION_POINTER_2_DOWNThis constant was deprecated in API level 8. UseACTION_POINTER_INDEX_MASKto retrieve the data index associated withACTION_POINTER_DOWN.intACTION_POINTER_2_UPThis constant was deprecated in API level 8. UseACTION_POINTER_INDEX_MASKto retrieve the data index associated withACTION_POINTER_UP.intACTION_POINTER_3_DOWNThis constant was deprecated in API level 8. UseACTION_POINTER_INDEX_MASKto retrieve the data index associated withACTION_POINTER_DOWN.intACTION_POINTER_3_UPThis constant was deprecated in API level 8. UseACTION_POINTER_INDEX_MASKto retrieve the data index associated withACTION_POINTER_UP.intACTION_POINTER_DOWNConstant forgetActionMasked(): A non-primary pointer has gone down.intACTION_POINTER_ID_MASKThis constant was deprecated in API level 8. Renamed toACTION_POINTER_INDEX_MASKto match the actual data contained in these bits.intACTION_POINTER_ID_SHIFTThis constant was deprecated in API level 8. Renamed toACTION_POINTER_INDEX_SHIFTto match the actual data contained in these bits.intACTION_POINTER_INDEX_MASKBits in the action code that represent a pointer index, used with ACTION_POINTER_DOWNand ACTION_POINTER_UP.intACTION_POINTER_INDEX_SHIFT
+				ACTION_SCROLL
+				ACTION_UP
+			}
+		}
+	});
+	Gear.title.addView(Gear.titleCover);
+	
 	Gear.frame = new ScrollView(ctx);
+	Gear.frame.setPadding(0, 0, 0, 0);
+	Gear.frame.setId(randomId());
+	Gear.frame_p = new c.r.LayoutParams(c.m, c.m);
+	Gear.frame_p.setMargins(0, 0, 0, 0);
+	Gear.frame_p.addRule(c.r.BELOW, Gear.title.getId());
+	Gear.frame.setLayoutParams(Gear.frame_p);
+	Gear.content.addView(Gear.frame);
+	
+	Gear.hello = new c.l(ctx);
+	Gear.hello.setOrientation(c.l.VERTICAL);
+	Gear.hello.setGravity(Gravity.CENTER);
+	Gear.hello1 = mcpeText(16, "Pocket");
+	Gear.hello1.setGravity(Gravity.CENTER);
+	Gear.hello1.setPadding(0, DIP*2, 0, DIP);
+	Gear.hello.addView(Gear.hello1);
+	Gear.hello2 = mcpeText(16, "Gear");
+	Gear.hello2.setGravity(Gravity.CENTER);
+	Gear.hello.addView(Gear.hello2);
+	Gear.hello3 = mcpeText(10, "loading...");
+	Gear.hello3.setGravity(Gravity.CENTER);
+	Gear.hello3.setPadding(0, DIP*3, 0, 0);
+	Gear.hello3.setTextColor(Color.GRAY);
+	Gear.hello.addView(Gear.hello3);
+	Gear.frame.addView(Gear.hello);
 	
 	Gear.layout.addView(Gear.content);
 	
