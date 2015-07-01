@@ -61,6 +61,7 @@ var Gravity = android.view.Gravity;
 var FrameLayout = android.widget.FrameLayout;
 var RelativeLayout = android.widget.RelativeLayout;
 var LinearLayout = android.widget.LinearLayout;
+var ScrollView = android.widget.ScrollView!
 var TextView = android.widget.TextView;
 var Button = android.widget.Button;
 var ImageView = android.widget.ImageView;
@@ -85,6 +86,9 @@ var c = {};
 c.m = ViewGroup.LayoutParams.MATCH_PARENT;
 c.w = ViewGroup.LayoutParams.WRAP_CONTENT;
 c.a = java.lang.reflect.Array.newInstance;
+c.r = RelativeLayout;
+c.l = LinearLayout;
+c.p = android.util.TypedValue.COMPLEX_UNIT_PX;
 
 
 
@@ -178,11 +182,13 @@ Assets.textView_raw.setPixels(Assets.textView_pixel, 0, 6, 0, 0, 6, 6);
 Assets.textView = Bitmap.createScaledBitmap(Assets.textView_raw, PIXEL*6, PIXEL*6, false);
 Assets.textView_9 = function() {return ninePatch1(Assets.textView, PIXEL*3, PIXEL*3, PIXEL*4, PIXEL*4)}
 
-function mcpeText(size, text) {
+function mcpeText(size, text, shadow) {
 	var tv = new TextView(ctx);
 	tv.setTransformationMethod(null);
 	tv.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
-	tv.setShadowLayer(1/0xffffffff, DIP*1.3, DIP*1.3, Color.DKGRAY);
+	if(shadow) {
+		tv.setShadowLayer(1/0xffffffff, DIP*1.3, DIP*1.3, Color.DKGRAY);
+	}
 	tv.setTextColor(Color.WHITE);
 	tv.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*size);
 	if(FILE_FONT.exists()) {
@@ -200,7 +206,8 @@ Gear.onMap = false;
 Gear.isRemote = false;
 Gear.guiVis = false;
 
-Gear.mainGuiLoad = function() {
+Gear.mainGuiLoad = function() {try {
+/** Layout1
 	Gear.layout = new RelativeLayout(ctx);
 	Gear.layout.setBackgroundDrawable(Assets.background_9());
 	
@@ -299,7 +306,103 @@ Gear.mainGuiLoad = function() {
 	Gear.layout.addView(Gear.content);
 	
 	Gear.window = new PopupWindow(Gear.layout, DIP*160, DIP*100, false);
-}
+*/
+	Gear.layout = new RelativeLayout(ctx);
+	Gear.layout.setBackgroundDrawable(Assets.background_9());
+	
+	Gear.content = new RelativeLayout(ctx);
+	Gear.content.setId(randomId());
+	Gear.content.setPadding(DIP*2, DIP*2, DIP*2, DIP*2);
+	Gear.content.setBackgroundDrawable(Assets.textView_9());
+	
+	Gear.content_param = new RelativeLayout.LayoutParams(c.m, c.m);
+	Gear.content_param.setMargins(DIP*8, DIP*8, DIP*8, DIP*8);
+	Gear.content.setLayoutParams(Gear.content_param);
+	
+	Gear.led = new LinearLayout(ctx);
+	Gear.led.setOrientation(LinearLayout.HORIZONTAL);
+	Gear.led.setGravity(Gravity.TOP|Gravity.LEFT);
+	Gear.led_param = new RelativeLayout.LayoutParams(DIP*64, DIP*16);
+	Gear.led_param.setMargins(0, 0, 0, 0);
+	Gear.led_param.addRule(RelativeLayout.ALIGN_PARENT_LEFT, Gear.layout.getId());
+	Gear.led_param.addRule(RelativeLayout.ALIGN_PARENT_TOP, Gear.layout.getId());
+	Gear.led.setLayoutParams(Gear.led_param);
+	
+	Gear.power = new ImageView(ctx);
+	Gear.power_draw = new GradientDrawable();
+	Gear.power_draw.setCornerRadius(DIP);
+	Gear.power_draw.setColor(Color.parseColor("#00ff00"));
+	Gear.power.setImageDrawable(Gear.power_draw);
+	Gear.power_param = new LinearLayout.LayoutParams(DIP*4, DIP*8);
+	Gear.power_param.setMargins(DIP*8, 0, 0, 0);
+	Gear.power.setLayoutParams(Gear.power_param);
+	Gear.led.addView(Gear.power);
+	Gear.layout.addView(Gear.led);
+	
+	Gear.title = new RelativeLayout(ctx);
+	Gear.title.setId(randomId());
+	Gear.title.setPadding(0, 0, 0, DIP*2);
+	
+	Gear.title.setBackgroundColor(Color.BLACK);
+	
+	Gear.title_param = new RelativeLayout.LayoutParams(c.m, DIP*16);
+	Gear.title_param.setMargins(0, 0, 0, 0);
+	Gear.title.setLayoutParams(Gear.title_param);
+	
+	Gear.title_text = new TextView(ctx);
+	Gear.title_text.setTransformationMethod(null);
+	Gear.title_text.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
+	Gear.title_text.setTextColor(Color.WHITE);
+	Gear.title_text.setTextSize(c.p, DIP*8);
+	if(FILE_FONT.exists()) {
+		Gear.title_text.setTypeface(android.graphics.Typeface.createFromFile(FILE_FONT));
+	};
+	Gear.title_text.setPadding(0, 0, 0, 0);
+	Gear.title_text.setGravity(Gravity.CENTER);
+	Gear.title_text.setText("Gear");
+	
+	Gear.title_text_p = new c.r.LayoutParams(c.m, c.m);
+	Gear.title_text_p.addRule(c.r.CENTER_IN_PARENT, Gear.title.getId());
+	Gear.title_text.setLayoutParams(Gear.title_text_p);
+	Gear.title.addView(Gear.title_text);
+	Gear.content.addView(Gear.title);
+	
+	Gear.clock = new c.l(ctx);
+	Gear.clock.setOrientation(c.l.HORIZONTAL);
+	Gear.clock.setPadding(0, 0, 0, 0);
+	Gear.clock.setGravity(Gravity.LEFT|Gravity.BOTTOM);
+	
+	Gear.clock_p = new c.r.LayoutParams(c.w, c.w);
+	Gear.clock_p.setMargins(0, 0, 0, 0);
+	Gear.clock_p.addRule(c.r.CENTER_VERTICAL, Gear.title.getId());
+	Gear.clock_p.addRule(c.r.ALIGN_PARENT_LEFT, Gear.title.getId());
+	Gear.clock.setLayoutParams(Gear.clock_p);
+	
+	Gear.clock1 = mcpeText(6, "오전");
+	Gear.clock1.setPadding(DIP*2, 0, DIP, 0);
+	Gear.clock.addView(Gear.clock1);
+	
+	Gear.clock2 = mcpeText(8, "1:55");
+	Gear.clock.addView(Gear.clock2);
+	
+	Gear.title.addView(Gear.clock);
+	
+	Gear.info = mcpeText(8, "59%");
+	Gear.info.setPadding(0, 0, DIP*2, 0);
+	Gear.info_p = new c.r.LayoutParams(c.w, c.w);
+	Gear.info_p.addRule(c.r.CENTER_VERTICAL, Gear.title.getId());
+	Gear.info_p.addRule(c.r.ALIGN_PARENT_RIGHT, Gear.title.getId());
+	Gear.info.setLayoutParams(Gear.info_p);
+	Gear.title.addView(Gear.info);
+	
+	Gear.frame = new ScrollView(ctx);
+	
+	Gear.layout.addView(Gear.content);
+	
+	Gear.window = new PopupWindow(Gear.layout, DIP*160, DIP*100, false);
+}catch(e) {
+	showError(e);
+}}
 
 ctx.runOnUiThread(new Runnable({run: function() { try{
 	Gear.mainGuiLoad();
@@ -336,7 +439,7 @@ function randomId() {
 function showError(e) {
 	if(Level.getWorldName() === null) {
 		ctx.runOnUiThread(new java.lang.Runnable({ run: function(){
-	android.widget.Toast.makeText(ctx, TAG + "\n" + e, android.widget.Toast.LENGTH_LONG).show();
+	android.widget.Toast.makeText(ctx, "[" + className + " ERROR LINE: " + e.lineNumber + "]" + "\n" + e, android.widget.Toast.LENGTH_LONG).show();
 		}}));
 	}else {
 		var t = (e + "").split(" ");
