@@ -1,4 +1,3 @@
-//TODO: make
 Trade = {};
 
 //Variables
@@ -9,9 +8,12 @@ Trade.META_MAPPED = null;
 Trade.SELLER = null;
 Trade.TRADING = null;
 Trade.CUR_HEALTH = null;
+Trade.CUR_LANG = null;
+
+Trade.debug = false;
 
 Trade.getVersion = function() {
-    return "Indev";
+    return "Indev 1.3.3"
 };
 
 //Trade items
@@ -25,7 +27,7 @@ Trade.Items = {
         count: [6, 6, 1, 1, 1, 1, 15, 15, 20, 8]
     },
     farmer: {
-        name: ["item.apple.name", "item.bread.name", "item.chickenCooked.name", "item.cookie.name", "item.melon.name", "item.arrow.name", "item.flintAndSteel.name", "item.shears.name", "item.chickenRaw.name", "item.wheat.name", "item.fishCooked.name"],
+        name: ["item.apple.name", "item.bread.name", "item.chickenCooked.name", "item.cookie.name", "item.melon.name", "item.arrow.name", "item.flintAndSteel.name", "item.shears.name", "item.chickenRaw.name", "item.wheat.name", "item.fish.cod.cooked.name"],
         meta: [["apple",0], ["bread", 0], ["chicken_cooked", 0], ["cookie", 0], ["melon", 0], ["arrow", 0], ["flint_and_steel", 0], ["shears", 0], ["chicken_raw", 0], ["wheat", 0], ["fish_cooked", 0]],
         id: [260, 297, 366, 357, 369, 262, 259, 359, 365, 296, 350],
         dam: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -59,14 +61,14 @@ Trade.Items = {
 };
 
 //Gui
-Trade.INTERACTPW = null;
-Trade.MAINPW = null;
-Trade.NAME = null;
-Trade.ITEMBACK = null;
-Trade.COST = null;
-Trade.COUNT = null;
-Trade.LEFT = null;
-Trade.RIGHT = null;
+Trade.INTERACTPW = {};
+Trade.MAINPW = {};
+Trade.NAME = {};
+Trade.VILLAGER = {};
+Trade.ITEMBACK = {};
+Trade.COST = {};
+Trade.COUNT = {};
+Trade.DIRT = {};
 Trade.WARNING_TOAST = null;
 
 Trade.init = function() {
@@ -76,12 +78,14 @@ Trade.init = function() {
 
     var back = Utils.showBackground();
     mainLayout.addView(back);
-    var header = Utils.showHeader(R.string.trade);
+    var dirt = Utils.showBackground("dirt");
+    mainLayout.addView(dirt);
+    var header = Utils.showHeader(R.string.trade)[0];
     mainLayout.addView(header);
     var itemback = Utils.showItemBackground(59, 65);
     mainLayout.addView(itemback);
     var item = Utils.getItemImage("emerald", 0);
-    itemback.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*1.6, item.getHeight()*Utils.FOUR*1.6, false));
+    itemback.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, 16*Utils.FOUR*1.6, 16*Utils.FOUR*1.6, false));
     var cost = Utils.justText("", 63, 67);
     mainLayout.addView(cost);
     var arrow = Utils.renderArrow(ctx.getScreenWidth()/Utils.FOUR/2-8, 77);
@@ -96,14 +100,18 @@ Trade.init = function() {
         Utils.updateTradeList(name, itemback2, cost, count);
     }, true, false);
     mainLayout.addView(right);
-    var buy = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-133, 130, 108, 32, R.string.buy, function() {
+    var buy = Utils.showButton(25, ctx.getScreenHeight()/Utils.FOUR-42, (ctx.getScreenWidth()/Utils.FOUR-72)/2, 32, R.string.buy, function() {
         Utils.buyThing();
     }, true, false);
     mainLayout.addView(buy);
-    var sell = Utils.showButton(25, 130, 108, 32, R.string.sell, function() {
+    var sell = Utils.showButton(47+(ctx.getScreenWidth()/Utils.FOUR-72)/2, ctx.getScreenHeight()/Utils.FOUR-42, (ctx.getScreenWidth()/Utils.FOUR-72)/2, 32, R.string.sell, function() {
         Utils.sellThing();
     }, true, false);
     mainLayout.addView(sell);
+    if(Trade.debug) {
+        var debug = Utils.justText("DEBUGGING MODE", 4, 32);
+        mainLayout.addView(debug);
+    }
     var itemback2 = Utils.showItemBackground(ctx.getScreenWidth()/Utils.FOUR-99, 65);
     mainLayout.addView(itemback2);
     var count = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-95, 67);
@@ -118,6 +126,8 @@ Trade.init = function() {
     mainLayout.addView(help);
     var name = Utils.justText("", ctx.getScreenWidth()/Utils.FOUR-133, 40, 108);
     mainLayout.addView(name);
+    var villager = Utils.justText("", 25, 40, 108);
+    mainLayout.addView(villager);
     mainPw.setContentView(mainLayout);
     mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
     mainPw.setWidth(ctx.getScreenWidth());
@@ -127,21 +137,33 @@ Trade.init = function() {
             Trade.onScreenEnd();
         }
     }));
-    Trade.MAINPW = mainPw;
-    Trade.NAME = name;
-    Trade.ITEMBACK = itemback2;
-    Trade.COST = cost;
-    Trade.COUNT = count;
-    Trade.LEFT = left;
-    Trade.RIGHT = right;
+    var txt = Lang.getData(R.string.not_enough_emerald);
+    if(Utils.hasNonAscii(txt))
+        Utils.getStringBuilder(txt, "#ff0000", 1.5, "#410000");
+    
+    txt = Lang.getData(R.string.not_enough_item);
+    if(Utils.hasNonAscii(txt))
+        Utils.getStringBuilder(txt, "#ff0000", 1.5, "#410000");
+    Trade.DIRT[Trade.CUR_LANG] = dirt;
+    Trade.MAINPW[Trade.CUR_LANG] = mainPw;
+    Trade.NAME[Trade.CUR_LANG] = name;
+    Trade.VILLAGER[Trade.CUR_LANG] = villager;
+    Trade.ITEMBACK[Trade.CUR_LANG] = itemback2;
+    Trade.COST[Trade.CUR_LANG] = cost;
+    Trade.COUNT[Trade.CUR_LANG] = count;
 };
 
 Trade.showScreen = function() {
     Trade.TRADING = true;
     Trade.EME_COUNT = Utils.getAllItems(388, 0);
     Utils.createUiThread(function(ctx) {
-        Utils.updateTradeList(Trade.NAME, Trade.ITEMBACK, Trade.COST, Trade.COUNT);
-        Trade.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+        var name = Utils.getVillagerType(Trade.SELLER);
+        var type = Lang.getData("entity.Villager."+(name == "priest" ? "cleric" : (name == "smith" ? "tool" : name)));
+        Trade.VILLAGER[Trade.CUR_LANG].setText(Utils.hasNonAscii(type) ? Utils.getStringBuilder(type, "#e1e1e1")[0] : type);
+        if(Options.Options.TRADE)
+            Trade.DIRT[Trade.CUR_LANG].setVisibility(android.view.View.GONE);
+        Utils.updateTradeList(Trade.NAME[Trade.CUR_LANG], Trade.ITEMBACK[Trade.CUR_LANG], Trade.COST[Trade.CUR_LANG], Trade.COUNT[Trade.CUR_LANG]);
+        Trade.MAINPW[Trade.CUR_LANG].showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
     });
 };
 
@@ -154,7 +176,8 @@ Trade.onScreenEnd = function() {
 
 Help = {};
 
-Help.MAINPW = null;
+Help.MAINPW = {};
+Help.DIRT = {};
 
 Help.init = function() {
     var ctx = Utils.getContext();
@@ -164,7 +187,9 @@ Help.init = function() {
    
     var back = Utils.showBackground();
     mainLayout.addView(back);
-    var head = Utils.showHeader(R.string.about);
+    var dirt = Utils.showBackground("dirt");
+    mainLayout.addView(dirt);
+    var head = Utils.showHeader(R.string.about)[0];
     mainLayout.addView(head);
     var dismiss = Utils.showButton(4, 4, 38, 18, R.string.back, function() {
         mainPw.dismiss();
@@ -197,22 +222,31 @@ Help.init = function() {
         SpecialThanks.showScreen();
     }, false, false);
     mainLayout.addView(thanksto);
+    var edit = Utils.showImageButton(ctx.getScreenWidth()/Utils.FOUR-35, ctx.getScreenHeight()/Utils.FOUR-63, 28, 28, "image.edit", function() {
+        Options.showScreen();
+    });
+    mainLayout.addView(edit);
     mainPw.setContentView(mainLayout);
     mainPw.setWidth(ctx.getScreenWidth());
     mainPw.setHeight(ctx.getScreenHeight());
     mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-    Help.MAINPW = mainPw;
+    Help.MAINPW[Trade.CUR_LANG] = mainPw;
+    Help.DIRT[Trade.CUR_LANG] = dirt;
 };
 
 Help.showScreen = function() {
     Utils.createUiThread(function(ctx) {
-        Help.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+        if(Options.Options.HELP)
+            Help.DIRT[Trade.CUR_LANG].setVisibility(android.view.View.GONE);
+        Help.MAINPW[Trade.CUR_LANG].showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
     });
 };
 
 Update = {};
 
-Update.MAINPW = null;
+Update.MAINPW = {};
+Update.DIRT = {};
+Update.NEWVER = {};
 
 Update.init = function() {
     var ctx = Utils.getContext();
@@ -221,7 +255,9 @@ Update.init = function() {
     
     var back = Utils.showBackground();
     mainLayout.addView(back);
-    var head = Utils.showHeader(R.string.new_found_1);
+    var dirt = Utils.showBackground("dirt");
+    mainLayout.addView(dirt);
+    var head = Utils.showHeader(R.string.new_found_1)[0];
     mainLayout.addView(head);
     var dismiss = Utils.showButton(4, 4, 38, 18, R.string.back, function() {
         mainPw.dismiss();
@@ -229,6 +265,10 @@ Update.init = function() {
     mainLayout.addView(dismiss);
     var text = Utils.justText(R.string.new_found_2, 0, 48, ctx.getScreenWidth()/Utils.FOUR);
     mainLayout.addView(text);
+    var text2 = Utils.justText("", 0, 75, ctx.getScreenWidth()/Utils.FOUR);
+    text2.setTextColor(android.graphics.Color.YELLOW);
+    text2.setShadowLayer(0.0001, Utils.FOUR, Utils.FOUR, android.graphics.Color.rgb(65, 65, 0));
+    mainLayout.addView(text2);
     var later = Utils.showButton(7, ctx.getScreenHeight()/Utils.FOUR-30, (ctx.getScreenWidth()/Utils.FOUR-18)/2, 24, R.string.later, function() {
         mainPw.dismiss();
     }, true, false);
@@ -241,12 +281,18 @@ Update.init = function() {
     mainPw.setWidth(ctx.getScreenWidth());
     mainPw.setHeight(ctx.getScreenHeight());
     mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-    Update.MAINPW = mainPw;
+    Update.MAINPW[Trade.CUR_LANG] = mainPw;
+    Update.DIRT[Trade.CUR_LANG] = dirt;
+    Update.NEWVER[Trade.CUR_LANG] = text2;
 };
 
-Update.showScreen = function() {
+Update.showScreen = function(version) {
     Utils.createUiThread(function(ctx) {
-        Update.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+        var text = "v"+Trade.getVersion()+" -> v"+version;
+        Update.NEWVER[Trade.CUR_LANG].setText(text);
+        if(Options.Options.UPDATE)
+            Update.DIRT[Trade.CUR_LANG].setVisibility(android.view.View.GONE);
+        Update.MAINPW[Trade.CUR_LANG].showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
     });
 };
 
@@ -259,10 +305,11 @@ Update.check = function() {
                 var stream = url.openConnection().getInputStream();
                 var version = new java.io.BufferedReader(new java.io.InputStreamReader(stream)).readLine();
                 if(version != Trade.getVersion())
-                    Update.showScreen();
+                    Update.showScreen(version);
                 Loading.killScreen();
             } catch(e) {
                 Loading.killScreen();
+                NoInternet.showScreen();
                 //NO INTERNET CONNECTION
             }
         }
@@ -292,6 +339,7 @@ Update.update = function() {
                 Update.finished();
             } catch(e) {
                 Loading.killScreen();
+                NoInternet.showScreen();
                 //NO INTERNET CONNECTION
             }
         }
@@ -299,22 +347,22 @@ Update.update = function() {
 };
 
 Update.finished = function() {
-    var ctx = Utils.getContext();
-    Utils.createUiThread(function() {
-        android.widget.Toast.makeText(ctx, "Update finished! Rebooting blocklauncher...", 1).show();
+    Utils.createUiThread(function(ctx) {
+        android.widget.Toast.makeText(ctx, "Rebooting blocklauncher...", 1).show();
         new android.os.Handler().postDelayed(new java.lang.Runnable({
             run: function() {
                 var i = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName());
                 i.addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 ctx.startActivity(i);
             }
-        }), 500);
+        }), 700);
     });
 };
 
 SpecialThanks = {};
 
-SpecialThanks.MAINPW = null;
+SpecialThanks.MAINPW = {};
+SpecialThanks.DIRT = {};
 
 SpecialThanks.init = function() {
     var ctx = Utils.getContext();
@@ -323,28 +371,38 @@ SpecialThanks.init = function() {
     
     var back = Utils.showBackground();
     mainLayout.addView(back);
-    var head = Utils.showHeader(R.string.special_thanks);
+    var dirt = Utils.showBackground("dirt");
+    mainLayout.addView(dirt);
+    var head = Utils.showHeader(R.string.special_thanks)[0];
     mainLayout.addView(head);
     var dismiss = Utils.showButton(4, 4, 38, 18, R.string.back, function() {
         mainPw.dismiss();
     }, false, false);
     mainLayout.addView(dismiss);
     mainPw.setContentView(mainLayout);
+    
+    var people = "<p><b>ChalkPE</b> - <i>JP Translator</i><br><b>@desno365</b> - <i>IT Translator</i><br><b>@TaQultO_988</b> - <i>ES Translator</i><br><b>@block_zone</b> - <i>RU Translator</i><br><b>@eu_sozin</b> - <i>PT Translator</i><br><b>@jnjnnjzch</b> - <i>CH Translator</i><br><b>@Adrian113162</b> - <i>FR Translator</i><br><b>@serhat50014</b> - <i>DE Translator</i></p>";
+    var text = Utils.justText("", 0, 32, ctx.getScreenWidth()/Utils.FOUR);
+    text.setText(android.text.Html.fromHtml(people));
+    mainLayout.addView(text);
     mainPw.setWidth(ctx.getScreenWidth());
     mainPw.setHeight(ctx.getScreenHeight());
     mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-    SpecialThanks.MAINPW = mainPw;
+    SpecialThanks.MAINPW[Trade.CUR_LANG] = mainPw;
+    SpecialThanks.DIRT[Trade.CUR_LANG] = dirt;
 };
 
 SpecialThanks.showScreen = function() {
     Utils.createUiThread(function(ctx) {
-        SpecialThanks.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+        if(Options.Options.SPECIAL)
+            SpecialThanks.DIRT[Trade.CUR_LANG].setVisibility(android.view.View.GONE);
+        SpecialThanks.MAINPW[Trade.CUR_LANG].showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
     });
 };
 
 Loading = {};
 
-Loading.MAINPW = null;
+Loading.MAINPW = {};
 
 Loading.init = function() {
     var ctx = Utils.getContext();
@@ -374,30 +432,156 @@ Loading.init = function() {
     mainPw.setWidth(ctx.getScreenWidth());
     mainPw.setHeight(ctx.getScreenHeight());
     mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.argb(144, 0, 0, 0)));
-    Loading.MAINPW = mainPw;
+    Loading.MAINPW[Trade.CUR_LANG] = mainPw;
 };
 
 Loading.showScreen = function() {
     Utils.createUiThread(function(ctx) {
-        Loading.MAINPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+        while(Loading.MAINPW[Trade.CUR_LANG] == 0); //WAITING FOR INIT COMPLETE
+        Loading.MAINPW[Trade.CUR_LANG].showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
     });
 };
 
 Loading.killScreen = function() {
     Utils.createUiThread(function() {
-        if(Loading.MAINPW.isShowing())
-            Loading.MAINPW.dismiss();
+        if(Loading.MAINPW[Trade.CUR_LANG].isShowing())
+            Loading.MAINPW[Trade.CUR_LANG].dismiss();
+    });
+};
+
+Options = {};
+
+Options.Options = {
+    TRADE: 1,
+    HELP: 1,
+    UPDATE: 1,
+    SPECIAL: 0,
+    OPTIONS: 0,
+    NOINTERNET: 0
+};
+
+Options.toggleOption = function(screen, dat) {
+    Options.Options[screen] = dat;
+    if(screen == "TRADE")
+        Trade.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.View.GONE : android.view.View.VISIBLE);
+    else if(screen == "HELP")
+        Help.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.View.GONE : android.view.View.VISIBLE);
+    else if(screen == "UPDATE")
+        Update.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.View.GONE : android.view.View.VISIBLE);
+    else if(screen == "SPECIAL")
+        SpecialThanks.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.View.GONE : android.view.View.VISIBLE);
+    else if(screen == "OPTIONS")
+        Options.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.View.GONE : android.view.View.VISIBLE);
+    else if(screen == "NOINTERNET")
+        NoInternet.DIRT[Trade.CUR_LANG].setVisibility(dat == 1 ? android.view.View.GONE : android.view.View.VISIBLE);
+    Options.saveOption();
+};
+
+Options.saveOption = function() {
+    var file = new java.io.File("/sdcard/Affogatoman/TradePE/options.txt");
+    file.getParentFile().mkdirs();
+    var bw = new java.io.BufferedWriter(new java.io.FileWriter(file));
+    bw.write(JSON.stringify(Options.Options));
+    bw.close();
+};
+
+Options.loadOption = function() {
+    var file = new java.io.File("/sdcard/Affogatoman/TradePE/options.txt");
+    if(!file.exists())
+        Options.saveOption();
+    var br = new java.io.BufferedReader(new java.io.InputStreamReader(new java.io.FileInputStream(file)));
+    Options.Options = JSON.parse(br.readLine());
+    br.close();
+};
+
+Options.MAINPW = {};
+Options.DIRT = {};
+
+Options.init = function() {
+    var ctx = Utils.getContext();
+    var mainPw = new android.widget.PopupWindow(ctx);
+    var mainLayout = new android.widget.RelativeLayout(ctx);
+    
+    var screens = [Trade, Help, Update, SpecialThanks, Options, NoInternet];
+    var options = ["TRADE", "HELP", "UPDATE", "SPECIAL", "OPTIONS", "NONTERNET"];
+    var current = 0;
+    
+    var back = Utils.showBackground();
+    mainLayout.addView(back);
+    var dirt = Utils.showBackground("dirt");
+    mainLayout.addView(dirt);
+    var head = Utils.showHeader(R.string.options)[0];
+    mainLayout.addView(head);
+    var dismiss = Utils.showButton(4, 4, 38, 18, R.string.back, function() {
+        mainPw.dismiss();
+    }, false, false);
+    mainLayout.addView(dismiss);
+    var rect = Utils.drawRect(32, 32, ctx.getScreenWidth()/Utils.FOUR-64, ctx.getScreenHeight()/Utils.FOUR-36, "#808080");
+    mainLayout.addView(rect);
+    var left = Utils.showButton(4, ctx.getScreenHeight()/Utils.FOUR-102, 24, 70, "<", function() {
+        Options.toggleOption("OPTIONS", (Options.Options.OPTIONS == 0 ? 1 : 0));
+    }, true, false);
+    mainLayout.addView(left);
+    var right = Utils.showButton(ctx.getScreenWidth()/Utils.FOUR-28, ctx.getScreenHeight()/Utils.FOUR-102, 24, 70, ">", function() {
+        
+    }, true, false);
+    mainLayout.addView(right);
+    
+    mainPw.setContentView(mainLayout);
+    mainPw.setWidth(ctx.getScreenWidth());
+    mainPw.setHeight(ctx.getScreenHeight());
+    mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+    Options.MAINPW[Trade.CUR_LANG] = mainPw;
+    Options.DIRT[Trade.CUR_LANG] = dirt;
+};
+
+Options.showScreen = function() {
+    Utils.createUiThread(function(ctx) {
+        if(Options.Options.OPTIONS)
+            Options.DIRT[Trade.CUR_LANG].setVisibility(android.view.View.GONE);
+        Options.MAINPW[Trade.CUR_LANG].showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+    });
+};
+
+NoInternet = {};
+
+NoInternet.MAINPW = {};
+NoInternet.DIRT = {};
+
+NoInternet.init = function() {
+    var ctx = Utils.getContext();
+    var mainPw = new android.widget.PopupWindow(ctx);
+    var mainLayout = new android.widget.RelativeLayout(ctx);
+    
+    var back = Utils.showBackground();
+    mainLayout.addView(back);
+    var dirt = Utils.showBackground("dirt");
+    mainLayout.addView(dirt);
+    var ok = Utils.showButton((ctx.getScreenWidth()/Utils.FOUR-100)/2, 100, 100, 24, R.string.yes, function() {
+        mainPw.dismiss();
+    }, true, false);
+    mainLayout.addView(ok);
+    var text = Utils.justText(R.string.no_internet, 0, 60, ctx.getScreenWidth()/Utils.FOUR);
+    mainLayout.addView(text);
+    
+    mainPw.setContentView(mainLayout);
+    mainPw.setWidth(ctx.getScreenWidth());
+    mainPw.setHeight(ctx.getScreenHeight());
+    mainPw.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.argb(144, 0, 0, 0)));
+    NoInternet.MAINPW[Trade.CUR_LANG] = mainPw;
+    NoInternet.DIRT[Trade.CUR_LANG] = dirt;
+    Init.INITIALIZING = true;
+};
+
+NoInternet.showScreen = function() {
+    Utils.createUiThread(function(ctx) {
+        if(Options.Options.NOINTERNET)
+            NoInternet.DIRT[Trade.CUR_LANG].setVisibility(android.view.View.GONE);
+        NoInternet.MAINPW[Trade.CUR_LANG].showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
     });
 };
 
 Utils = {};
-
-Utils.reset = function() {
-    Trade.MAINPW = null;
-    Help.MAINPW = null;
-    Update.MAINPW = null;
-    SpecialThanks.MAINPW = null;
-};
 
 Utils.getContext = function() {
     return com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
@@ -414,7 +598,7 @@ Utils.createUiThread = function(func) {
 Utils.FOUR = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 2, Utils.getContext().getResources().getDisplayMetrics());
 
 Utils.hasFontFile = function() {
-    return new java.io.File("/sdcard/아포카토맨/font.ttf").exists();
+    return new java.io.File("/sdcard/Affogatoman/font.ttf").exists();
 };
 
 Utils.getMyScriptName = function() {
@@ -433,7 +617,7 @@ Utils.downloadFontFile = function() {
     else {
         var url = new java.net.URL("https://www.dropbox.com/s/ky1nj2pms00vb5t/font.ttf?dl=1").openConnection().getInputStream();
         var bis = new java.io.BufferedInputStream(url);
-        var target = new java.io.File("/sdcard/아포카토맨/font.ttf");
+        var target = new java.io.File("/sdcard/Affogatoman/font.ttf");
         target.getParentFile().mkdirs();
         var bos = new java.io.BufferedOutputStream(new java.io.FileOutputStream(target));
         var buf = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 4096);
@@ -446,7 +630,7 @@ Utils.downloadFontFile = function() {
 };
 
 Utils.getTypeface = function() {
-    return android.graphics.Typeface.createFromFile("/sdcard/아포카토맨/font.ttf");
+    return android.graphics.Typeface.createFromFile("/sdcard/Affogatoman/font.ttf");
 };
 
 Utils.getSpritesheet = function() {
@@ -467,13 +651,22 @@ Utils.trimImage = function(bitmap, x, y, width, height) {
 
 Utils.plusPage = function(view) {
     var type = Utils.getVillagerType(Trade.SELLER);
-    if(Trade.PAGE != Trade.Items[type].name.length-1)
+    if(Trade.PAGE != Trade.Items[type].id.length-1)
         Trade.PAGE++;
 };
 
 Utils.minusPage = function(view) {
     if(Trade.PAGE != 0)
         Trade.PAGE--;
+};
+
+Utils.drawRect = function(x, y, width, height, color) {
+    var view = new android.view.View(Utils.getContext());
+    var params = new android.widget.RelativeLayout.LayoutParams(width*Utils.FOUR, height*Utils.FOUR);
+    params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
+    view.setLayoutParams(params);
+    view.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.parseColor(color)));
+    return view;
 };
 
 Utils.getStretchedImage = function(bm, x, y, stretchWidth, stretchHeight, width, height) {
@@ -502,17 +695,31 @@ Utils.getStretchedImage = function(bm, x, y, stretchWidth, stretchHeight, width,
     return new android.graphics.drawable.BitmapDrawable(blank);
 };
 
-Utils.showBackground = function() {
+Utils.showBackground = function(type, x, y, width, height) {
     var back = new android.view.View(Utils.getContext());
-    back.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(Utils.getContext().getScreenWidth(), Utils.getContext().getScreenHeight()));
-    var spritesheet = android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 0, 0, 16, 16), 16*Utils.FOUR, 16*Utils.FOUR, false);
-    back.setBackgroundDrawable(Utils.getStretchedImage(spritesheet, 4*Utils.FOUR, 4*Utils.FOUR, 8*Utils.FOUR, 8*Utils.FOUR, Utils.getContext().getScreenWidth(), Utils.getContext().getScreenHeight()));
+    x = x == null ? 0 : x*Utils.FOUR;
+    y = y == null ? 0 : y*Utils.FOUR;
+    width = width == null ? Utils.getContext().getScreenWidth() : width*Utils.FOUR;
+    height = height == null ? Utils.getContext().getScreenHeight() : height*Utils.FOUR;
+    var params = new android.widget.RelativeLayout.LayoutParams(width, height);
+    params.setMargins(x, y, 0, 0);
+    back.setLayoutParams(params);
+    if(type == null) {
+        var spritesheet = android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 0, 0, 16, 16), 16*Utils.FOUR, 16*Utils.FOUR, false);
+        back.setBackgroundDrawable(Utils.getStretchedImage(spritesheet, 4*Utils.FOUR, 4*Utils.FOUR, 8*Utils.FOUR, 8*Utils.FOUR, Utils.getContext().getScreenWidth(), Utils.getContext().getScreenHeight()));
+    } else if(type == "dirt") {
+        var image = new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(android.graphics.BitmapFactory.decodeStream(ModPE.openInputStreamFromTexturePack("images/gui/background.png")), 32*Utils.FOUR, 32*Utils.FOUR, false));
+        image.setColorFilter(android.graphics.Color.rgb(70, 70, 70), android.graphics.PorterDuff.Mode.MULTIPLY);
+        image.setTileModeXY(android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT);
+        back.setBackgroundDrawable(image);
+    }
     return back;
 };
 
-Utils.showHeader = function(text) {
+Utils.showHeader = function(text, width) {
     text = Lang.getData(text);
     var ctx = Utils.getContext();
+    width = width == null ? ctx.getScreenWidth() : width*Utils.FOUR;
     var vert = new android.widget.LinearLayout(ctx);
     vert.setOrientation(android.widget.LinearLayout.VERTICAL);
     var horiz = new android.widget.LinearLayout(ctx);
@@ -526,14 +733,14 @@ Utils.showHeader = function(text) {
     center.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
     center.setTypeface(Utils.getTypeface());
     center.setGravity(android.view.Gravity.CENTER);
-    center.setTextSize(4*Utils.FOUR);
+    center.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, 8*Utils.FOUR);
     center.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
     if(Utils.hasNonAscii(text))
         text = Utils.getStringBuilder(text, "#e1e1e1")[0];
     center.setText(text);
     center.setShadowLayer(0.00001, Utils.FOUR, Utils.FOUR, android.graphics.Color.DKGRAY);
-    center.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 3, 0, 8, 25), ctx.getScreenWidth()-Utils.FOUR*4, Utils.FOUR*25, false)));
-    center.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ctx.getScreenWidth()-Utils.FOUR*4, Utils.FOUR*25));
+    center.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 3, 0, 8, 25), width-Utils.FOUR*4, Utils.FOUR*25, false)));
+    center.setLayoutParams(new android.widget.LinearLayout.LayoutParams(width-Utils.FOUR*4, Utils.FOUR*25));
     horiz.addView(center);
     var right = new android.view.View(ctx);
     right.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 12, 0, 2, 25), Utils.FOUR*2, Utils.FOUR*25, false)));
@@ -541,18 +748,21 @@ Utils.showHeader = function(text) {
     horiz.addView(right);
     vert.addView(horiz);
     var down = new android.view.View(ctx);
-    down.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 3, 26, 8, 3), ctx.getScreenWidth(), Utils.FOUR*3, false)));
-    down.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ctx.getScreenWidth(), Utils.FOUR*3));
+    down.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(header, 3, 26, 8, 3), width, Utils.FOUR*3, false)));
+    down.setLayoutParams(new android.widget.LinearLayout.LayoutParams(width, Utils.FOUR*3));
     vert.addView(down);
-    vert.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(Utils.getContext().getScreenWidth(), 28*Utils.FOUR));
-    return vert;
+    vert.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(width, 28*Utils.FOUR));
+    return [vert, text];
 };
 
 Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, isRight) {
     text = Lang.getData(text);
     var ctx = Utils.getContext();
     var button = new android.widget.Button(ctx);
-    button.setPadding(0, 0, 0, 0);
+    if(Utils.hasNonAscii(text))
+        button.setPadding(0, 0, 0, 0);
+    else
+        button.setPadding(0, 0, 0, Utils.FOUR);
     button.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
     if(Utils.hasNonAscii(text)) {
         var builder = Utils.getStringBuilder(text, "#e1e1e1");
@@ -561,7 +771,8 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
         var clicked = Utils.getStringBuilder(text, "#ffffa1")[0];
     } else
         button.setText(text);
-    var new_width = Utils.hasNonAscii(text) ? builder[1] : Utils.getStringLength(text);
+    if(isWidthLocked != true)
+        var new_width = Utils.hasNonAscii(text) ? builder[1] : Utils.getStringLength(text);
     var params = new android.widget.RelativeLayout.LayoutParams(isWidthLocked == true ? width*Utils.FOUR : new_width, height*Utils.FOUR);
     params.setMargins(isRight == true ? (x+width)*Utils.FOUR-new_width : x*Utils.FOUR, y*Utils.FOUR, 0, 0);
     button.setLayoutParams(params);
@@ -570,7 +781,7 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
     button.setBackgroundDrawable(unclicked_image);
     button.setTypeface(Utils.getTypeface());
     button.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
-    button.setTextSize(4*Utils.FOUR);
+    button.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, 8*Utils.FOUR);
     if(text.indexOf("\n") < 0)
         button.setSingleLine(true);
     var current = false;
@@ -586,7 +797,10 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
             switch(event.getAction()) {
                 case android.view.MotionEvent.ACTION_DOWN:
                     view.setTextColor(android.graphics.Color.parseColor("#ffffa1"));
-                    view.setPadding(0, 2*Utils.FOUR, 0, 0);
+                    if(Utils.hasNonAscii(text))
+                        view.setPadding(0, 2*Utils.FOUR, 0, 0);
+                    else
+                        view.setPadding(0, Utils.FOUR, 0, 0);
                     view.setBackgroundDrawable(clicked_image);
                     if(Utils.hasNonAscii(text))
                         button.setText(clicked);
@@ -594,7 +808,10 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
                 case android.view.MotionEvent.ACTION_MOVE:
                     if(event.getX() < 0 || event.getY() <0 || event.getX() > (isWidthLocked == true ? width*Utils.FOUR : new_width) || event.getY() > height*Utils.FOUR) {
                         view.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
-                        view.setPadding(0, 0, 0, 0);
+                        if(Utils.hasNonAscii(text))
+                            view.setPadding(0, 0, 0, 0);
+                        else
+                            view.setPadding(0, 0, 0, Utils.FOUR);
                         view.setBackgroundDrawable(unclicked_image);
                         if(Utils.hasNonAscii(text))
                             button.setText(unclicked);
@@ -603,16 +820,22 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
                         if(Utils.hasNonAscii(text))
                             button.setText(clicked);
                         view.setTextColor(android.graphics.Color.parseColor("#ffffa1"));
-                        view.setPadding(0, 2*Utils.FOUR, 0, 0);
+                        if(Utils.hasNonAscii(text))
+                            view.setPadding(0, 2*Utils.FOUR, 0, 0);
+                        else
+                            view.setPadding(0, Utils.FOUR, 0, 0);
                         view.setBackgroundDrawable(clicked_image);
                     }
                     break;
                 case android.view.MotionEvent.ACTION_UP:
                     view.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
-                    view.setPadding(0, 0, 0, 0);
+                    if(Utils.hasNonAscii(text))
+                        view.setPadding(0, 0, 0, 0);
+                    else
+                        view.setPadding(0, 0, 0, Utils.FOUR);
                     view.setBackgroundDrawable(unclicked_image);
                     if(Utils.hasNonAscii(text))
-                        button.setText(unclicked);
+                        view.setText(unclicked);
                     if(current == false && !(event.getX() < 0 || event.getY() <0 || event.getX() > (isWidthLocked == true ? width*Utils.FOUR : new_width) || event.getY() > height*Utils.FOUR)) {
                         if(typeof onclick === "function")
                             onclick(button);
@@ -628,12 +851,72 @@ Utils.showButton = function(x, y, width, height, text, onclick, isWidthLocked, i
     return button;
 };
 
+Utils.showImageButton = function(x, y, width, height, image, onclick) {
+    var ctx = Utils.getContext();
+    var layout = new android.widget.RelativeLayout(ctx);
+    var params = new android.widget.RelativeLayout.LayoutParams(width*Utils.FOUR, height*Utils.FOUR);
+    params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
+    layout.setLayoutParams(params);
+    
+    var clicked_back = Utils.getStretchedImage(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 120, 0, 8, 67), 8*Utils.FOUR, 67*Utils.FOUR, false), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 63*Utils.FOUR, width*Utils.FOUR, height*Utils.FOUR);
+    var unclicked_back = Utils.getStretchedImage(android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getSpritesheet(), 112, 0, 8, 67), 8*Utils.FOUR, 67*Utils.FOUR, false), 2*Utils.FOUR, 2*Utils.FOUR, 4*Utils.FOUR, 63*Utils.FOUR, width*Utils.FOUR, height*Utils.FOUR);
+    var button = new android.widget.Button(ctx);
+    button.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(width*Utils.FOUR, height*Utils.FOUR));
+    button.setBackgroundDrawable(unclicked_back);
+    layout.addView(button);
+    
+    if(image == "image.edit") {
+        var clicked_image = android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getGui(), 182, 21, 11, 11), 10.5*Utils.FOUR, 10.5*Utils.FOUR, false);
+        var unclicked_image = android.graphics.Bitmap.createScaledBitmap(Utils.trimImage(Utils.getGui(), 182, 21, 11, 11), 11*Utils.FOUR, 11*Utils.FOUR, false);
+    }
+    var imagev = new android.widget.ImageView(ctx);
+    imagev.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(width*Utils.FOUR, height*Utils.FOUR));
+    layout.addView(imagev);
+    imagev.setScaleType(android.widget.ImageView.ScaleType.CENTER);
+    imagev.setImageBitmap(unclicked_image);
+    imagev.setClickable(true);
+    var current = false;
+    imagev.setOnTouchListener(new android.view.View.OnTouchListener({
+        onTouch: function(view, event) {
+            switch(event.getAction()) {
+                case android.view.MotionEvent.ACTION_DOWN:
+                    button.setBackgroundDrawable(clicked_back);
+                    imagev.setImageBitmap(clicked_image);
+                    break;
+                case android.view.MotionEvent.ACTION_MOVE:
+                    if(event.getX() < 0 || event.getY() <0 || event.getX() > width*Utils.FOUR || event.getY() > height*Utils.FOUR) {
+                        button.setBackgroundDrawable(unclicked_back);
+                        imagev.setImageBitmap(unclicked_image);
+                        current = true;
+                    } else if(!current) {
+                        button.setBackgroundDrawable(clicked_back);
+                        imagev.setImageBitmap(clicked_image);
+                    }
+                    break;
+                case android.view.MotionEvent.ACTION_UP:
+                    button.setBackgroundDrawable(unclicked_back);
+                    imagev.setImageBitmap(unclicked_image);
+                    if(current == false && !(event.getX() < 0 || event.getY() <0 || event.getX() > width*Utils.FOUR || event.getY() > height*Utils.FOUR)) {
+                        if(typeof onclick === "function")
+                            onclick(button);
+                            Utils.clickSound();
+                    }
+                    current = false;
+                    break;
+            }
+            return false;
+        }
+    }));
+    
+    return layout;
+};
+
 Utils.renderItem = function(name, data, x, y, scale) {
-    var emerald = Utils.getItemImage(name, data);
-    emerald = android.graphics.Bitmap.createScaledBitmap(emerald, emerald.getWidth()*Utils.FOUR*scale, emerald.getHeight()*Utils.FOUR*scale, false);
+    var item = Utils.getItemImage(name, data);
+    item = android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*scale, item.getHeight()*Utils.FOUR*scale, false);
     var view = new android.view.View(Utils.getContext());
-    view.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(emerald));
-    var params = new android.widget.RelativeLayout.LayoutParams(emerald.getWidth(), emerald.getHeight());
+    view.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(item));
+    var params = new android.widget.RelativeLayout.LayoutParams(item.getWidth(), item.getHeight());
     params.setMargins(x*Utils.FOUR, y*Utils.FOUR, 0, 0);
     view.setLayoutParams(params);
     return view;
@@ -665,7 +948,7 @@ Utils.justText = function(str, x, y, width) {
     text.setGravity(android.view.Gravity.CENTER);
     text.setTypeface(Utils.getTypeface());
     text.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
-    text.setTextSize(4*Utils.FOUR);
+    text.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, 8*Utils.FOUR);
     text.setShadowLayer(0.00001, Utils.FOUR, Utils.FOUR, android.graphics.Color.DKGRAY);
     return text;
 };
@@ -723,12 +1006,13 @@ Utils.getItemImage = function(text, data) {
 Utils.updateTradeList = function(namev, itemv, costv, countv) {
     var page = Trade.PAGE;
     var type = Utils.getVillagerType(Trade.SELLER);
-    if(Utils.hasNonAscii(Lang.getData(Trade.Items[type].name[page])))
-        namev.setText(Utils.getStringBuilder(Lang.getData(Trade.Items[type].name[page]), "#e1e1e1")[0]);
+    var name = Trade.Items[type].name[page];
+    if(Utils.hasNonAscii(Lang.getData(name)))
+        namev.setText(Utils.getStringBuilder(Lang.getData(name), "#e1e1e1")[0]);
     else
-        namev.setText(Lang.getData(Trade.Items[type].name[page]));
+        namev.setText(Lang.getData(name));
     var item = Utils.getItemImage(Trade.Items[type].meta[page][0], Trade.Items[type].meta[page][1]);
-    itemv.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, item.getWidth()*Utils.FOUR*1.6, item.getHeight()*Utils.FOUR*1.6, false));
+    itemv.setImageBitmap(android.graphics.Bitmap.createScaledBitmap(item, 16*Utils.FOUR*1.6, 16*Utils.FOUR*1.6, false));
     costv.setText(""+Trade.Items[type].cost[page]);
     countv.setText(""+Trade.Items[type].count[page]);
 };
@@ -772,7 +1056,7 @@ Utils.warn = function(txt) {
         text.setTypeface(Utils.getTypeface());
         text.setShadowLayer(0.00001, 1.5*Utils.FOUR, 1.5*Utils.FOUR, android.graphics.Color.parseColor("#410000"));
         text.setTextColor(android.graphics.Color.RED);
-        text.setTextSize(6*Utils.FOUR);
+        text.setTextSize(6*4);
         var fade_in = new android.view.animation.AlphaAnimation(0, 1);
         fade_in.setDuration(180);
         
@@ -852,7 +1136,7 @@ CachedString = {};
 Utils.getStringBuilder = function(text, color, scale, shadowc, shadow) {
     if(color != null)
         color = android.graphics.Color.parseColor(color);
-    if(CachedString[color+text] != null && shadow != false)
+    if(CachedString[color+text] != null)
         return CachedString[color+text];
         
     if(scale == null)
@@ -873,6 +1157,8 @@ Utils.getStringBuilder = function(text, color, scale, shadowc, shadow) {
     var builder = new android.text.SpannableStringBuilder(text);
     for(var i = 0; i < text.length; i++) {
         if(text.charAt(i) == " ") {
+            var bitmap = android.graphics.Bitmap.createBitmap(5*Utils.FOUR, scale*9*Utils.FOUR, android.graphics.Bitmap.Config.ARGB_8888);
+            builder.setSpan(new android.text.style.ImageSpan(Utils.getContext(), bitmap), i, i+1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             width+=5*Utils.FOUR;
             continue;
         }
@@ -884,7 +1170,7 @@ Utils.getStringBuilder = function(text, color, scale, shadowc, shadow) {
             num = "0"+num;
         var font = android.graphics.BitmapFactory.decodeStream(ModPE.openInputStreamFromTexturePack("images/font/glyph_"+num+".png"));
         var bitmap = Utils.trimImage(font, x, y, 15, 16);
-        if(!/[가-힣]/.test(text.charAt(i)))
+        if(!Utils.hasNonAscii(text.charAt(i)) || (Trade.CUR_LANG != "ko_KR" && Trade.CUR_LANG != "ja_JP" && Trade.CUR_LANG != "zh_CN"))
             bitmap = Utils.cutText(bitmap);
         var result = android.graphics.Bitmap.createBitmap(bitmap.getWidth()+2, 18, android.graphics.Bitmap.Config.ARGB_8888);
         var canvas = new android.graphics.Canvas(result);
@@ -906,9 +1192,8 @@ Utils.getStringBuilder = function(text, color, scale, shadowc, shadow) {
 
 Utils.cutText = function(bitmap) {
     var start = -1, end = 0;
-    var arr = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14];
     var Color = android.graphics.Color;
-    arr.forEach(function(i) {
+    for(var i = 0; i < bitmap.getWidth(); i++) {
         if(Color.alpha(bitmap.getPixel(i, 0))>0 ||
            Color.alpha(bitmap.getPixel(i, 1))>0 ||
            Color.alpha(bitmap.getPixel(i, 2))>0 ||
@@ -925,13 +1210,14 @@ Utils.cutText = function(bitmap) {
            Color.alpha(bitmap.getPixel(i, 13))>0 ||
            Color.alpha(bitmap.getPixel(i, 14))>0 ||
            Color.alpha(bitmap.getPixel(i, 15))>0) {
-            if(start == -1)
-                start = i;
-            if(start>=0)
-                end = i;
-        }
-    });
-	return android.graphics.Bitmap.createBitmap(bitmap, start, 0, end-start+1, 16);
+               if(start == -1)
+                   start = i;
+         } else if(start != -1) {
+             end = i;
+             break;
+         }
+    }
+	return android.graphics.Bitmap.createBitmap(bitmap, start, 0, end-start+1, bitmap.getHeight());
 };
 
 Utils.hasNonAscii = function(str) {
@@ -942,14 +1228,18 @@ Utils.hasNonAscii = function(str) {
 
 Utils.interactInit = function() {
     var text = new android.widget.TextView(Utils.getContext());
-    var txt = Lang.getData(R.string.trade);
+    if(Utils.hasNonAscii(Lang.getData(R.string.trade)))
+        var txt = " "+Lang.getData(R.string.trade)+" ";
+    else
+        var txt = Lang.getData(R.string.trade);
     if(Utils.hasNonAscii(txt))
         txt = Utils.getStringBuilder(txt, "#e1e1e1", null, null, false)[0];
     text.setText(txt);
+    text.setSingleLine(true);
     text.setGravity(android.view.Gravity.CENTER);
     text.setTypeface(Utils.getTypeface());
     text.setTextColor(android.graphics.Color.parseColor("#e1e1e1"));
-    text.setTextSize(4*Utils.FOUR);
+    text.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, 8*Utils.FOUR);
     text.setOnClickListener(new android.view.View.OnClickListener({
         onClick: function() {
             Trade.showScreen();
@@ -959,15 +1249,17 @@ Utils.interactInit = function() {
     drawable.setAlpha(180);
     var pw = new android.widget.PopupWindow(Utils.getContext());
     pw.setContentView(text);
-    pw.setWidth(118*0.75*Utils.FOUR);
+    pw.setWidth(50*Utils.FOUR);
     pw.setHeight(20*Utils.FOUR);
     pw.setBackgroundDrawable(drawable);
-    Trade.INTERACTPW = pw;
+    Trade.INTERACTPW[Trade.CUR_LANG] = pw;
 };
 
 Utils.showInteractPw = function() {
+    if(Trade.MAINPW[Trade.CUR_LANG].isShowing())
+        return;
     Utils.createUiThread(function(ctx) {
-        Trade.INTERACTPW.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER | android.view.Gravity.BOTTOM, 0, 24*Utils.FOUR);
+        Trade.INTERACTPW[Trade.CUR_LANG].showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER | android.view.Gravity.BOTTOM, 0, 24*Utils.FOUR);
     });
 };
 
@@ -994,13 +1286,24 @@ Utils.isWarning = function() {
 };
 
 Utils.getCurrentLanguage = function() {
-    return "en_US";
+    var file = new java.io.File("/sdcard/games/com.mojang/minecraftpe/options.txt");
+    var br = new java.io.BufferedReader(new java.io.InputStreamReader(new java.io.FileInputStream(file)));
+    var read, lang;
+    while((read = br.readLine()) != null) {
+        if(read.split(":")[0] == "game_language") {
+            lang = read.split(":")[1];
+            break;
+        }
+    }
+    br.close();
+    return lang;
 };
 
 Utils.getStringFor = function(key) {
     if(key["all"] != null)
         return key["all"];
-    return key[Utils.getCurrentLanguage()];
+    var data = key[Trade.CUR_LANG];
+    return data == null ? key["en_US"] : data;
 };
 
 Utils.getStringLength = function(text) {
@@ -1028,31 +1331,24 @@ Utils.getStringLength = function(text) {
 
 var Lang = {};
 
-Lang.KEY = null;
-Lang.DATA = null;
+Lang.Strings = {};
 
 Lang.getPath = function() {
-    return "lang/en_US.lang";
+    return "lang/pc-base/"+Utils.getCurrentLanguage()+".lang";
 };
 
 Lang.readLang = function() {
     var lang = new java.lang.String(ModPE.getBytesFromTexturePack(Lang.getPath()))+"";
-    var split1 = lang.split(/\r?\n/);
-    var result = split1.map(function(e) {
-        return e.split("=");
-    });
-    Lang.KEY = result.map(function(e) {
-        return e[0];
-    });
-    Lang.DATA = result.map(function(e) {
-        return e[1];
+    lang.split(/\r?\n/).forEach(function(e) {
+        var a = e.split("=");
+        Lang.Strings[Trade.CUR_LANG][a[0]] = a[1];
     });
 };
 
 Lang.getData = function(key) {
     if(typeof key === "object")
         key = Utils.getStringFor(key);
-    var data = Lang.DATA[Lang.KEY.indexOf(key)];
+    var data = Lang.Strings[Trade.CUR_LANG][key];
     if(typeof data === "undefined")
         return key;
     return data;
@@ -1080,6 +1376,10 @@ Easter.goToURL = function(url) {
     ctx.startActivity(intent);
 };
 
+Init = {};
+
+Init.INITIALIZING = false;
+
 Player.setInventorySlot = Player.setInventorySlot || function(slot, id, count, dam) {
     net.zhuoweizhang.mcpelauncher.ScriptManager.nativeSetInventorySlot(slot, id, count, dam);
 };
@@ -1089,11 +1389,14 @@ Player.setInventorySlot = Player.setInventorySlot || function(slot, id, count, d
 
 
 function modTick() {
-    //Initialing
-    if(Lang.KEY == null && Lang.DATA == null) {
-        Lang.KEY = 0;
-        Lang.DATA = 0;
+    if(Lang.Strings[Trade.CUR_LANG] == null) {
+        Lang.Strings[Trade.CUR_LANG] = {};
         Lang.readLang();
+    }
+    if(Loading.MAINPW[Trade.CUR_LANG] == null) {
+        Loading.MAINPW[Trade.CUR_LANG] = 0;
+        Loading.init();
+        Loading.showScreen();
     }
     if(Trade.META == null)
         eval("Trade.META = "+new java.lang.String(ModPE.getBytesFromTexturePack("images/items.meta"))+";");
@@ -1105,49 +1408,56 @@ function modTick() {
         Easter.DRAWABLE = 0;
         Easter.init();
     }
-    if(Trade.MAINPW == null) {
-        Trade.MAINPW = 0;
+    if(Trade.MAINPW[Trade.CUR_LANG] == null) {
+        Trade.MAINPW[Trade.CUR_LANG] = 0;
         Trade.init();
     }
-    if(Trade.INTERACTPW == null) {
-        Trade.INTERACTPW = 0;
+    if(Trade.INTERACTPW[Trade.CUR_LANG] == null) {
+        Trade.INTERACTPW[Trade.CUR_LANG] = 0;
         Utils.interactInit();
     }
-    if(Help.MAINPW == null) {
-        Help.MAINPW = 0;
+    if(Help.MAINPW [Trade.CUR_LANG] == null) {
+        Help.MAINPW[Trade.CUR_LANG] = 0;
         Help.init();
     }
-    if(Update.MAINPW == null) {
-        Update.MAINPW = 0;
+    if(Update.MAINPW[Trade.CUR_LANG] == null) {
+        Update.MAINPW[Trade.CUR_LANG] = 0;
         Update.init();
     }
-    if(SpecialThanks.MAINPW == null) {
-        SpecialThanks.MAINPW = 0;
+    if(SpecialThanks.MAINPW[Trade.CUR_LANG] == null) {
+        SpecialThanks.MAINPW[Trade.CUR_LANG] = 0;
         SpecialThanks.init();
     }
-    if(Loading.MAINPW == null) {
-        Loading.MAINPW = 0;
-        Loading.init();
+    if(Options.MAINPW[Trade.CUR_LANG] == null) {
+        Options.MAINPW[Trade.CUR_LANG] = 0;
+        Options.init();
     }
-    
+    if(NoInternet.MAINPW[Trade.CUR_LANG] == null) {
+        NoInternet.MAINPW[Trade.CUR_LANG] = 0;
+        NoInternet.init();
+    }
+    if(Init.INITIALIZING == true) {
+        Init.INITIALIZING = false;
+        Loading.killScreen();
+    }
     if(Entity.getEntityTypeId(Player.getPointedEntity()) == 15) {
-        if(!Trade.INTERACTPW.isShowing()) {
+        if(!Trade.INTERACTPW[Trade.CUR_LANG].isShowing()) {
             Trade.SELLER = Player.getPointedEntity();
             Utils.showInteractPw();
         }
     }
-    if(Entity.getEntityTypeId(Player.getPointedEntity()) != 15) {
+    if(Player.getCarriedItem() == 346 || Entity.getEntityTypeId(Player.getPointedEntity()) != 15) {
         Utils.createUiThread(function() {
-            Trade.INTERACTPW.dismiss();
+            if(Trade.INTERACTPW[Trade.CUR_LANG] != null && Trade.INTERACTPW[Trade.CUR_LANG].isShowing())
+                Trade.INTERACTPW[Trade.CUR_LANG].dismiss();
         });
     }
     if(Trade.TRADING) {
         Entity.setVelX(Trade.SELLER, 0);
-        Entity.setVelY(Trade.SELLER, 0);
         Entity.setVelZ(Trade.SELLER, 0);
     }
     
-    if(Entity.getHealth(Player.getEntity()) <= 0 || Entity.getHealth(Trade.SELLER) <= 0) {
+    if(Trade.SELLER != null && (Entity.getHealth(Player.getEntity()) <= 0 || Entity.getHealth(Trade.SELLER) <= 0)) {
         leaveGame();
     }
     if(Trade.CUR_HEALTH > Entity.getHealth(Player.getEntity())) {
@@ -1156,22 +1466,29 @@ function modTick() {
     }
 }
 
+function selectLevelHook() {
+    if(Trade.CUR_LANG != Utils.getCurrentLanguage())
+        Trade.CUR_LANG = Utils.getCurrentLanguage();
+    Options.loadOption();
+}
+
 function newLevel() {
     Trade.CUR_HEALTH = Entity.getHealth(Player.getEntity());
 }
 
 function leaveGame() {
     Utils.createUiThread(function() {
-        if(Trade.MAINPW != 0 && Trade.MAINPW.isShowing())
-            Trade.MAINPW.dismiss();
-        if(Trade.INTERACTPW != 0 && Trade.INTERACTPW.isShowing())
-            Trade.INTERACTPW.dismiss();
-        if(Help.MAINPW != 0 && Help.MAINPW.isShowing())
+        var lang = Trade.CUR_LANG;
+        if(Trade.MAINPW[lang] != 0 && Trade.MAINPW[lang] != null && Trade.MAINPW[lang].isShowing())
+            Trade.MAINPW[lang].dismiss();
+        if(Trade.INTERACTPW[lang] != 0 && Trade.MAINPW[lang] != null && Trade.INTERACTPW[lang].isShowing())
+            Trade.INTERACTPW[lang].dismiss();
+        if(Help.MAINPW[lang] != 0 && Help.MAINPW[lang] != null && Help.MAINPW[lang].isShowing())
             Help.MAINPW.dismiss();
-        if(Update.MAINPW != 0 && Update.MAINPW.isShowing())
-            Update.MAINPW.dismiss();
-        if(SpecialThanks.MAINPW != 0 && SpecialThanks.MAINPW.isShowing())
-            SpecialThanks.MAINPW.dismiss();
+        if(Update.MAINPW[lang] != 0 && Update.MAINPW[lang] != null && Update.MAINPW[lang].isShowing())
+            Update.MAINPW[lang].dismiss();
+        if(SpecialThanks.MAINPW[lang] != 0 && SpecialThanks.MAINPW[lang] != null && SpecialThanks.MAINPW[lang].isShowing())
+            SpecialThanks.MAINPW[lang].dismiss();
     });
 }
 
@@ -1181,6 +1498,7 @@ Utils.downloadFontFile();
 var R = {
     string: {
         trade: {
+            de_DE: "Tauschen",
             en_US: "Trade",
             es_ES: "Comerciar",
             fr_FR: "Commerce",
@@ -1195,6 +1513,7 @@ var R = {
             all: "gui.back"
         },
         buy: {
+            de_DE: "Kaufen",
             en_US: "Buy",
             es_ES: "Comprar",
             fr_FR: "Acheter",
@@ -1206,6 +1525,7 @@ var R = {
             zh_CN: "购买"
         },
         sell: {
+            de_DE: "Verkaufen",
             en_US: "Sell",
             es_ES: "Vender",
             fr_FR: "Vendre",
@@ -1217,6 +1537,7 @@ var R = {
             zh_CN: "出售"
         },
         about: {
+            de_DE: "Info",
             en_US: "Info",
             es_ES: "Info",
             fr_FR: "Infos",
@@ -1228,6 +1549,7 @@ var R = {
             zh_CN: "信息"
         },
         check_update: {
+            de_DE: "Suche nach Updates",
             en_US: "Check for updates",
             es_ES: "Buscar actualización",
             fr_FR: "Vérifier les mises à jour",
@@ -1239,6 +1561,7 @@ var R = {
             zh_CN: "检查更新"
         },
         special_thanks: {
+            de_DE: "Besonderen Dank an",
             en_US: "Special thanks to",
             es_ES: "Agradecimiento especial para",
             fr_FR: "Merci spécial à",
@@ -1250,6 +1573,7 @@ var R = {
             zh_CN: "特别感谢"
         },
         new_found_1: {
+            de_DE: "Aktualisierung!",
             en_US: "Update!",
             es_ES: "Actualizacion!",
             fr_FR: "Mise à jour!",
@@ -1261,6 +1585,7 @@ var R = {
             zh_CN: "有更新！"
         },
         new_found_2: {
+            de_DE: "Eine neue Version von TradePE wurde gefunden!\nWillst du es jetzt installieren?",
             en_US: "A new version of TradePE has been found!\nWould you like to install it now?",
             es_ES: "Una nueva versión de TradePE ha sido encontrada!\nQuieres instalar ahora?",
             fr_FR: "Une nouvelle de TradePE a été trouvé!\nSouhaitez-vouz l'installer maintenant?",
@@ -1275,6 +1600,7 @@ var R = {
             all: "gui.yes"
         },
         later: {
+            de_DE: "Später",
             en_US: "Later",
             es_ES: "Despues",
             fr_FR: "Plus tard",
@@ -1286,6 +1612,7 @@ var R = {
             zh_CN: "稍后"
         },
         not_enough_item: {
+            de_DE: "Nicht genug Items",
             en_US: "Not enough items",
             es_ES: "No hay items suficientes",
             fr_FR: "Pas assez d'éléments",
@@ -1297,6 +1624,7 @@ var R = {
             zh_CN: "物品不足"
         },
         not_enough_emerald: {
+            de_DE: "Nicht genug Smaragd",
             en_US: "Not enough emeralds",
             es_ES: "No hay esmeraldas suficientes",
             fr_FR: "Pass assez émeraudes",
@@ -1306,6 +1634,25 @@ var R = {
             pt_BR: "Voce não tem esmeraldas",
             ru_RU: "Не хватает изумрудов",
             zh_CN: "绿宝石不足"
+        },
+        no_internet: {
+            de_DE: "Vielleicht gibt es ein Problem mit deiner Internetverbindung?",
+            en_US: "Maybe check your internet connection?",
+            es_419: "Comprueba tu conexión a Internet",
+            es_ES: "Comprueba tu conexión a Internet",
+            fr_CA: "Peut-être devriez-vous vérifier votre connexion Internet?",
+            fr_FR: "Peut-être devriez-vous vérifier votre connexion Internet?",
+            it_IT: "Verificare la connessione Internet?",
+            ja_JP: "インターネット接続を確認してください",
+            ko_KR: "인터넷 연결 상태를 확인하십시오",
+            pt_BR: "Talvez deve verificar sua conexão à Internet?",
+            pt_PT: "Talvez deve verificar sua conexão à Internet?",
+            ru_RU: "С вашим Интернетом все в порядке?",
+            zh_CN: "请检查您的网络连接？",
+            zh_TW: "可否請您確認一下目前的網際網路連線狀態呢？"
+        },
+        options: {
+            all: "selectServer.edit"
         }
     }
 };
