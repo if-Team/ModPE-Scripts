@@ -29,6 +29,10 @@ var FILE_FONT = new java.io.File(FILE_MOD_DIR, "minecraft.ttf");
 var FILE_MAIN_DATA = new java.io.File(FILE_MAIN_DIR, "setting.json");
 var FILE_TEST_DATA = new java.io.File(FILE_MAIN_DIR, "lastLog.txt");
 var FILE_NO_MEDIA = new java.io.File(FILE_MAIN_DIR, ".nomedia");
+var DIP = PIXEL * loadData(FILE_MAIN_DATA, "DIPS");
+if(DIP == null || DIP == 0){
+	DIP = PIXEL;
+}
 function FILE_MAP_DIR() {return new java.io.File(FILE_SD_CARD, "games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/mods")}
 function FILE_MAP_DATA() {return new java.io.File(FILE_MAP_DIR(), className + ".json")}
 if(!(FILE_MAIN_DIR.exists())) {
@@ -37,10 +41,11 @@ if(!(FILE_MAIN_DIR.exists())) {
 }
 if(!(FILE_MAIN_DATA.exists())) {
 	FILE_MAIN_DATA.createNewFile();
-}
-var DIP = PIXEL * loadData(FILE_MAIN_DATA, "DIPS");
-if(DIP == null || DIP == 0){
-	DIP = PIXEL;
+	saveData(FILE_MAIN_DATA, "DIPS", 1);
+	saveData(FILE_MAIN_DATA, "WINDOW_X", ctx.getWindowManager().getDefaultDisplay().getWidth() - DIP*200);
+	saveData(FILE_MAIN_DATA, "WINDOW_Y", 0);
+	saveData(FILE_MAIN_DATA, "WINDOW_W", DIP*160);
+	saveData(FILE_MAIN_DATA, "WINDOW_H", DIP*100);
 }
 
 var Byte = java.lang.Byte;
@@ -209,13 +214,15 @@ Gear.exit_q = false;
 Gear.uiDelay = 0;
 
 function AsynchronousModTick() {
-	new Thread(new Runnable({run: function() {while { try{
+	Gear.thread = new Thread(new Runnable({run: function() {try {while(true) {
 		if(Gear.uiDelay > 0) {
-			Gear.uiDely--;
+			Gear.uiDelay--;
 		}
-	}catch(e) {
+		sleep(50);
+	}}catch(e) {
 		showError(e);
-	}}}})).start();
+	}}}));
+	Gear.thread.start();
 }
 AsynchronousModTick();
 
@@ -406,20 +413,46 @@ Gear.mainGuiLoad = function() {try {
 			Gear.ry = event.getRawY();
 			Gear.ex = event.getX();
 			Gear.ey = event.getY();
-			Gear.wx = Gear.layout.getX();
-			Gear.wy = Gear.layout.getY();
+			Gear.wx = loadData(FILE_MAIN_DATA, "WINDOW_X");
+			Gear.wy = loadData(FILE_MAIN_DATA, "WINDOW_Y");
 			Gear.ww = Gear.window.getWidth();
 			Gear.wh = Gear.window.getHeight();
+			Gear.cx = event.getRawX() - Gear.rx;
+			Gear.cy = event.getRawY() - Gear.ry;
 			break;
 			case MotionEvent.ACTION_MOVE:
-			Gear.cy = Gear.ry - event.getRawY();
-			if(Gear.uiDelay <= 0) {
-				Gear.window.update(Gear.ex, Gear.ey - Gear.cy, Gear.ww, Gear.wh + Gear.cy);
-				Gear.uiDelay = 5;
+			Gear.cx = event.getRawX() - Gear.rx;
+			Gear.cy = event.getRawY() - Gear.ry;
+			var x = Gear.rx - Gear.ex + Gear.cx;
+			var y = Gear.ry - Gear.ey + Gear.cy;
+			var w = Gear.ww;
+			var h = Gear.wh;
+			if(w < DIP*120) {
+				w = DIP*120;
 			}
-			clientMessage(Math.floor(Gear.wx) + " " + Math.floor(Gear.wy - Gear.cy) + " " + Math.floor(Gear.ww) + " " + Math.floor(Gear.wh + Gear.cy));
+			if(h < DIP*32) {
+				h = DIP*32;
+			}
+			/*if(Gear.uiDelay <= 0) {
+				Gear.window.update(Gear.rx - Gear.ex, Gear.ry - Gear.ey - Gear.cy, Gear.ww, Gear.wh + Gear.cy);
+				Gear.uiDelay = 4;
+			}*/
+			Gear.window.update(x, y, w, h);
 			break;
 			case MotionEvent.ACTION_UP:
+			var x = Gear.rx - Gear.ex + Gear.cx;
+			var y = Gear.ry - Gear.ey + Gear.cy;
+			var w = Gear.ww;
+			var h = Gear.wh;
+			if(w < DIP*120) {
+				w = DIP*120;
+			}
+			if(h < DIP*32) {
+				h = DIP*32;
+			}
+			Gear.window.update(x, y, w, h);
+			saveData(FILE_MAIN_DATA, "WINDOW_X", x);
+			saveData(FILE_MAIN_DATA, "WINDOW_Y", y);
 			break;
 		}
 		return false;
@@ -428,6 +461,193 @@ Gear.mainGuiLoad = function() {try {
 		return false;
 	}}}));
 	Gear.layout.addView(Gear.lt);
+	
+	Gear.ll = new Button(ctx);
+	Gear.ll.setBackgroundColor(Color.argb(255,0,255,0));
+	
+	Gear.ll_p = new c.r.LayoutParams(DIP*8, c.m);
+	Gear.ll_p.setMargins(0, 0, 0, 0);
+	Gear.ll_p.addRule(c.r.ALIGN_PARENT_LEFT, Gear.layout.getId());
+	Gear.ll.setLayoutParams(Gear.ll_p);
+	
+	Gear.ll.setOnTouchListener(View.OnTouchListener({onTouch: function(view, event) {try {
+		switch(event.action) {
+			case MotionEvent.ACTION_DOWN:
+			Gear.rx = event.getRawX();
+			Gear.ry = event.getRawY();
+			Gear.ex = event.getX();
+			Gear.ey = event.getY();
+			Gear.wx = loadData(FILE_MAIN_DATA, "WINDOW_X");
+			Gear.wy = loadData(FILE_MAIN_DATA, "WINDOW_Y");
+			Gear.ww = Gear.window.getWidth();
+			Gear.wh = Gear.window.getHeight();
+			Gear.cx = event.getRawX() - Gear.rx;
+			Gear.cy = event.getRawY() - Gear.ry;
+			break;
+			case MotionEvent.ACTION_MOVE:
+			Gear.cx = event.getRawX() - Gear.rx;
+			Gear.cy = event.getRawY() - Gear.ry;
+			var x = Gear.rx - Gear.ex + Gear.cx;
+			var y = Gear.wy;
+			var w = Gear.ww - Gear.cx;
+			var h = Gear.wh;
+			if(w < DIP*120) {
+				w = DIP*120;
+			}
+			if(h < DIP*32) {
+				h = DIP*32;
+			}
+			if(Gear.uiDelay <= 0) {
+				Gear.window.update(x, y, w, h);
+				Gear.uiDelay = 4;
+			}
+			break;
+			case MotionEvent.ACTION_UP:
+			var x = Gear.rx - Gear.ex + Gear.cx;
+			var y = Gear.wy;
+			var w = Gear.ww - Gear.cx;
+			var h = Gear.wh;
+			if(w < DIP*120) {
+				w = DIP*120;
+			}
+			if(h < DIP*32) {
+				h = DIP*32;
+			}
+			Gear.window.update(x, y, w, h);
+			saveData(FILE_MAIN_DATA, "WINDOW_X", x);
+			saveData(FILE_MAIN_DATA, "WINDOW_W", w);
+			break;
+		}
+		return false;
+	}catch(e) {
+		showError(e);
+		return false;
+	}}}));
+	Gear.layout.addView(Gear.ll);
+	
+	Gear.lr = new Button(ctx);
+	Gear.lr.setBackgroundColor(Color.argb(255,0,0,255));
+	
+	Gear.lr_p = new c.r.LayoutParams(DIP*8, c.m);
+	Gear.lr_p.setMargins(0, 0, 0, 0);
+	Gear.lr_p.addRule(c.r.ALIGN_PARENT_RIGHT, Gear.layout.getId());
+	Gear.lr.setLayoutParams(Gear.lr_p);
+	
+	Gear.lr.setOnTouchListener(View.OnTouchListener({onTouch: function(view, event) {try {
+		switch(event.action) {
+			case MotionEvent.ACTION_DOWN:
+			Gear.rx = event.getRawX();
+			Gear.ry = event.getRawY();
+			Gear.ex = event.getX();
+			Gear.ey = event.getY();
+			Gear.wx = loadData(FILE_MAIN_DATA, "WINDOW_X");
+			Gear.wy = loadData(FILE_MAIN_DATA, "WINDOW_Y");
+			Gear.ww = Gear.window.getWidth();
+			Gear.wh = Gear.window.getHeight();
+			Gear.cx = event.getRawX() - Gear.rx;
+			Gear.cy = event.getRawY() - Gear.ry;
+			break;
+			case MotionEvent.ACTION_MOVE:
+			Gear.cx = event.getRawX() - Gear.rx;
+			Gear.cy = event.getRawY() - Gear.ry;
+			var x = Gear.wx;
+			var y = Gear.wy;
+			var w = Gear.ww + Gear.cx;
+			var h = Gear.wh;
+			if(w < DIP*120) {
+				w = DIP*120;
+			}
+			if(h < DIP*32) {
+				h = DIP*32;
+			}
+			if(Gear.uiDelay <= 0) {
+				Gear.window.update(x, y, w, h);
+				Gear.uiDelay = 4;
+			}
+			break;
+			case MotionEvent.ACTION_UP:
+			var x = Gear.wx;
+			var y = Gear.wy;
+			var w = Gear.ww + Gear.cx;
+			var h = Gear.wh;
+			if(w < DIP*120) {
+				w = DIP*120;
+			}
+			if(h < DIP*32) {
+				h = DIP*32;
+			}
+			Gear.window.update(x, y, w, h);
+			saveData(FILE_MAIN_DATA, "WINDOW_W", w);
+			break;
+		}
+		return false;
+	}catch(e) {
+		showError(e);
+		return false;
+	}}}));
+	Gear.layout.addView(Gear.lr);
+	
+	Gear.lb = new Button(ctx);
+	Gear.lb.setBackgroundColor(Color.argb(255,255,255,0));
+	
+	Gear.lb_p = new c.r.LayoutParams(c.m, DIP*8);
+	Gear.lb_p.setMargins(0, 0, 0, 0);
+	Gear.lb_p.addRule(c.r.ALIGN_PARENT_BOTTOM, Gear.layout.getId());
+	Gear.lb.setLayoutParams(Gear.lb_p);
+	
+	Gear.lb.setOnTouchListener(View.OnTouchListener({onTouch: function(view, event) {try {
+		switch(event.action) {
+			case MotionEvent.ACTION_DOWN:
+			Gear.rx = event.getRawX();
+			Gear.ry = event.getRawY();
+			Gear.ex = event.getX();
+			Gear.ey = event.getY();
+			Gear.wx = loadData(FILE_MAIN_DATA, "WINDOW_X");
+			Gear.wy = loadData(FILE_MAIN_DATA, "WINDOW_Y");
+			Gear.ww = Gear.window.getWidth();
+			Gear.wh = Gear.window.getHeight();
+			Gear.cx = event.getRawX() - Gear.rx;
+			Gear.cy = event.getRawY() - Gear.ry;
+			break;
+			case MotionEvent.ACTION_MOVE:
+			Gear.cx = event.getRawX() - Gear.rx;
+			Gear.cy = event.getRawY() - Gear.ry;
+			var x = Gear.wx;
+			var y = Gear.wy;
+			var w = Gear.ww;
+			var h = Gear.wh + Gear.cy;
+			if(w < DIP*120) {
+				w = DIP*120;
+			}
+			if(h < DIP*32) {
+				h = DIP*32;
+			}
+			if(Gear.uiDelay <= 0) {
+				Gear.window.update(x, y, w, h);
+				Gear.uiDelay = 4;
+			}
+			break;
+			case MotionEvent.ACTION_UP:
+			var x = Gear.wx
+			var y = Gear.wy
+			var w = Gear.ww
+			var h = Gear.wh + Gear.cy;
+			if(w < DIP*120) {
+				w = DIP*120;
+			}
+			if(h < DIP*32) {
+				h = DIP*32;
+			}
+			Gear.window.update(x, y, w, h);
+			saveData(FILE_MAIN_DATA, "WINDOW_H", h);
+			break;
+		}
+		return false;
+	}catch(e) {
+		showError(e);
+		return false;
+	}}}));
+	Gear.layout.addView(Gear.lb);
 	
 	Gear.content = new RelativeLayout(ctx);
 	Gear.content.setId(randomId());
@@ -582,7 +802,7 @@ Gear.mainGuiLoad = function() {try {
 						Gear.exit_q = true;
 					}else {
 						showGear(false);
-						msg(ChatColor.YELLOW + "포켓기어를 종료합니다 다시 켜실려면 '/gear' 를 입력하세요");
+						msg("포켓기어를 종료합니다\n다시 켜실려면 '/gear' 를 입력하세요");
 						Gear.exit_q = false;
 					}
 					break;
@@ -626,7 +846,15 @@ Gear.mainGuiLoad = function() {try {
 	
 	Gear.layout.addView(Gear.content);
 	
-	Gear.window = new PopupWindow(Gear.layout, DIP*160, DIP*100, false);
+	var w = loadData(FILE_MAIN_DATA, "WINDOW_W");
+	if(w == null) {
+		w = DIP*160;
+	}
+	var h = loadData(FILE_MAIN_DATA, "WINDOW_H");
+	if(h == null) {
+		h = DIP*100;
+	}
+	Gear.window = new PopupWindow(Gear.layout, w, h, false);
 }catch(e) {
 	showError(e);
 }}
@@ -636,7 +864,19 @@ Gear.mainGuiLoad();
 function showGear(vis) {
 ctx.runOnUiThread(new Runnable({run: function() { try{
 	if(vis && !Gear.windowAlive) {
-		Gear.window.showAtLocation(ctx.getWindow().getDecorView(), Gravity.LEFT|Gravity.TOP, 200, 200);
+		var x = loadData(FILE_MAIN_DATA, "WINDOW_X");
+		if(x == null || isNaN(x)) {
+			x = 0;
+			saveData(FILE_MAIN_DATA, "WINDOW_X", 0);
+			msg("세이브 데이터 손상 감지: WINDOW_X\n복구 시도중...");
+		}
+		var y = loadData(FILE_MAIN_DATA, "WINDOW_Y");
+		if(y == null || isNaN(y)) {
+			y = 0;
+			saveData(FILE_MAIN_DATA, "WINDOW_Y", 0);
+			msg("세이브 데이터 손상 감지: WINDOW_Y\n복구 시도중...");
+		}
+		Gear.window.showAtLocation(ctx.getWindow().getDecorView(), Gravity.LEFT|Gravity.TOP, x, y);
 		Gear.windowAlive = true;
 	}else if(!vis && Gear.windowAlive) {
 		Gear.window.dismiss();
