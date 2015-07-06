@@ -204,7 +204,87 @@ function mcpeText(size, text, shadow) {
 var Gear = {};
 Gear.onMap = false;
 Gear.isRemote = false;
-Gear.guiVis = false;
+Gear.windowAlive = false;
+Gear.exit_q = false;
+Gear.uiDelay = 0;
+
+function AsynchronousModTick() {
+	new Thread(new Runnable({run: function() {while { try{
+		if(Gear.uiDelay > 0) {
+			Gear.uiDely--;
+		}
+	}catch(e) {
+		showError(e);
+	}}}})).start();
+}
+AsynchronousModTick();
+
+function GearGroup(name) {
+	this.name = name;
+	//{name: <string>, layoutLoad: <function>, child: <layout> header: <function>, tick: <function>, finish: <function>}
+	this.manus = [];
+	this.currentIndex = 0;
+}
+
+GearGroup.prototype = {
+	getManus: function() {
+		return this.manus;
+	},
+	
+	getCurrentIndex: function() {
+		return this.currentIndex;
+	},
+	
+	getManuByIndex: function(index) {
+		if(this.manus.length <= index) {
+			throw new ReferenceError(index + "is undefined index of " + this.name + " gear");
+		}
+		return this.manus[index];
+	},
+	
+	getManuByName: function(name) {
+		for(var e = 0; e < this.manus.length; e++) {
+			if(this.manus[e].name === name) {
+				return this.manus[e];
+			}
+		}
+		throw new ReferenceError("The name '" + name + "' is not in " + this.name + " gear");
+	}
+}
+
+function GearManu(name, layout, header, tick, finish) {
+	this.name = name;
+	this.header = header;
+	this.tick = tick;
+	this.finish = finish;
+	this.layout = layout;
+}
+
+GearManu.prototype = {
+	getName: function() {
+		return this.name;
+	},
+	
+	getLayout: function() {
+		return this.layout();
+	},
+	
+	isEqual: function(manu) {
+		return this.name === manu.name;
+	},
+	
+	header: function() {
+		this.header();
+	},
+	
+	tick: function() {
+		this.tick();
+	},
+	
+	finish: function() {
+		this.finish();
+	}
+}
 
 Gear.mainGuiLoad = function() {try {
 /** Layout1
@@ -308,11 +388,49 @@ Gear.mainGuiLoad = function() {try {
 	Gear.window = new PopupWindow(Gear.layout, DIP*160, DIP*100, false);
 */
 	Gear.layout = new RelativeLayout(ctx);
+	Gear.layout.setId(randomId());
 	Gear.layout.setBackgroundDrawable(Assets.background_9());
+	
+	Gear.lt = new Button(ctx);
+	Gear.lt.setBackgroundColor(Color.argb(255,255,0,0));
+	
+	Gear.lt_p = new c.r.LayoutParams(c.m, DIP*8);
+	Gear.lt_p.setMargins(0, 0, 0, 0);
+	Gear.lt_p.addRule(c.r.ALIGN_PARENT_TOP, Gear.layout.getId());
+	Gear.lt.setLayoutParams(Gear.lt_p);
+	
+	Gear.lt.setOnTouchListener(View.OnTouchListener({onTouch: function(view, event) {try {
+		switch(event.action) {
+			case MotionEvent.ACTION_DOWN:
+			Gear.rx = event.getRawX();
+			Gear.ry = event.getRawY();
+			Gear.ex = event.getX();
+			Gear.ey = event.getY();
+			Gear.wx = Gear.layout.getX();
+			Gear.wy = Gear.layout.getY();
+			Gear.ww = Gear.window.getWidth();
+			Gear.wh = Gear.window.getHeight();
+			break;
+			case MotionEvent.ACTION_MOVE:
+			Gear.cy = Gear.ry - event.getRawY();
+			if(Gear.uiDelay <= 0) {
+				Gear.window.update(Gear.ex, Gear.ey - Gear.cy, Gear.ww, Gear.wh + Gear.cy);
+				Gear.uiDelay = 5;
+			}
+			clientMessage(Math.floor(Gear.wx) + " " + Math.floor(Gear.wy - Gear.cy) + " " + Math.floor(Gear.ww) + " " + Math.floor(Gear.wh + Gear.cy));
+			break;
+			case MotionEvent.ACTION_UP:
+			break;
+		}
+		return false;
+	}catch(e) {
+		showError(e);
+		return false;
+	}}}));
+	Gear.layout.addView(Gear.lt);
 	
 	Gear.content = new RelativeLayout(ctx);
 	Gear.content.setId(randomId());
-	Gear.content.setPadding(DIP*2, DIP*2, DIP*2, DIP*2);
 	Gear.content.setBackgroundDrawable(Assets.textView_9());
 	
 	Gear.content_param = new RelativeLayout.LayoutParams(c.m, c.m);
@@ -346,7 +464,7 @@ Gear.mainGuiLoad = function() {try {
 	Gear.title.setBackgroundColor(Color.BLACK);
 	
 	Gear.title_param = new RelativeLayout.LayoutParams(c.m, DIP*16);
-	Gear.title_param.setMargins(0, 0, 0, 0);
+	Gear.title_param.setMargins(DIP*2, DIP*2, DIP*2, 0);
 	Gear.title.setLayoutParams(Gear.title_param);
 	
 	Gear.title_text = new TextView(ctx);
@@ -362,6 +480,7 @@ Gear.mainGuiLoad = function() {try {
 	Gear.title_text.setText("Gear");
 	
 	Gear.title_text_p = new c.r.LayoutParams(c.m, c.m);
+	Gear.title_text_p.setMargins(0, 0, 0, 0);
 	Gear.title_text_p.addRule(c.r.CENTER_IN_PARENT, Gear.title.getId());
 	Gear.title_text.setLayoutParams(Gear.title_text_p);
 	Gear.title.addView(Gear.title_text);
@@ -401,14 +520,82 @@ Gear.mainGuiLoad = function() {try {
 	Gear.titleCover_p.setMargins(0, 0, 0, 0);
 	Gear.titleCover.setLayoutParams(Gear.titleCover_p);
 	Gear.titleCover.setOnTouchListener(View.OnTouchListener({ onTouch:
-		function(view, event) {
-			switch(event) {
-				ConstantsintACTION_CANCELConstant forgetActionMasked(): The current gesture has been aborted.intACTION_DOWNConstant forgetActionMasked(): A pressed gesture has started, the motion contains the initial starting location.intACTION_HOVER_ENTERConstant forgetActionMasked(): The pointer is not down but has entered the boundaries of a window or view.intACTION_HOVER_EXITConstant forgetActionMasked(): The pointer is not down but has exited the boundaries of a window or view.intACTION_HOVER_MOVEConstant forgetActionMasked(): A change happened but the pointer is not down (unlike ACTION_MOVE).intACTION_MASKBit mask of the parts of the action code that are the action itself.intACTION_MOVEConstant forgetActionMasked(): A change has happened during a press gesture (between ACTION_DOWNand ACTION_UP).intACTION_OUTSIDEConstant forgetActionMasked(): A movement has happened outside of the normal bounds of the UI element.intACTION_POINTER_1_DOWNThis constant was deprecated in API level 8. UseACTION_POINTER_INDEX_MASKto retrieve the data index associated withACTION_POINTER_DOWN.intACTION_POINTER_1_UPThis constant was deprecated in API level 8. UseACTION_POINTER_INDEX_MASKto retrieve the data index associated withACTION_POINTER_UP.intACTION_POINTER_2_DOWNThis constant was deprecated in API level 8. UseACTION_POINTER_INDEX_MASKto retrieve the data index associated withACTION_POINTER_DOWN.intACTION_POINTER_2_UPThis constant was deprecated in API level 8. UseACTION_POINTER_INDEX_MASKto retrieve the data index associated withACTION_POINTER_UP.intACTION_POINTER_3_DOWNThis constant was deprecated in API level 8. UseACTION_POINTER_INDEX_MASKto retrieve the data index associated withACTION_POINTER_DOWN.intACTION_POINTER_3_UPThis constant was deprecated in API level 8. UseACTION_POINTER_INDEX_MASKto retrieve the data index associated withACTION_POINTER_UP.intACTION_POINTER_DOWNConstant forgetActionMasked(): A non-primary pointer has gone down.intACTION_POINTER_ID_MASKThis constant was deprecated in API level 8. Renamed toACTION_POINTER_INDEX_MASKto match the actual data contained in these bits.intACTION_POINTER_ID_SHIFTThis constant was deprecated in API level 8. Renamed toACTION_POINTER_INDEX_SHIFTto match the actual data contained in these bits.intACTION_POINTER_INDEX_MASKBits in the action code that represent a pointer index, used with ACTION_POINTER_DOWNand ACTION_POINTER_UP.intACTION_POINTER_INDEX_SHIFT
-				ACTION_SCROLL
-				ACTION_UP
+		function(view, event) {try {
+			switch(event.action) {
+				case MotionEvent.ACTION_DOWN:
+				Gear.eventX = event.getX();
+				Gear.eventY = event.getY();
+				Gear.eventType = null;
+				break;
+				case MotionEvent.ACTION_MOVE:
+				var x = event.getX();
+				var y = event.getY();
+				var rx = x - Gear.eventX;
+				var ry = y - Gear.eventY;
+				switch(Gear.eventType) {
+					case 0:
+					if(ry > 0) {
+						Gear.title_text.setText("당겨서 메뉴");
+					}else {
+						Gear.title_text.setText("당겨서 종료");
+					}
+					break;
+					case 1:
+					var size = view.getWidth() - DIP*20;
+					var power = (parseInt(x*100 / size)+1);
+					if(power < 1) {
+						power = 1;
+					}else if(power > 100) {
+						power = 100;
+					}
+					try {
+						var p = ctx.getWindow().getAttributes();
+						if(typeof p.screenBrightness === "number") {
+							p.screenBrightness = power/100;
+							ctx.getWindow().setAttributes(p);
+							Gear.title_text.setText("화면 밝기 " + power + "%");
+						}else {
+							Gear.title_text.setText("지원하지 않습니다");
+						}
+					}catch(e) {
+						showError(e);
+					}
+					break;
+					default:
+					if(Math.abs(ry) > 10*DIP) {
+						Gear.eventType = 0;
+					}else if(Math.abs(rx) > 10*DIP) {
+						Gear.eventType = 1;
+					}
+				}
+				break;
+				case MotionEvent.ACTION_UP:
+				var x = event.getX();
+				var y = event.getY();
+				var rx = x - Gear.eventX;
+				var ry = y - Gear.eventY;
+				if(Gear.eventType === 0 && ry > 10) {
+					toast("TODO");
+				}else if(Gear.eventType === 0 && ry < -10 ) {
+					if(Gear.exit_q == false) {
+						Gear.title_text.setText("종료?");
+						Gear.exit_q = true;
+					}else {
+						showGear(false);
+						msg(ChatColor.YELLOW + "포켓기어를 종료합니다 다시 켜실려면 '/gear' 를 입력하세요");
+						Gear.exit_q = false;
+					}
+					break;
+				}
+				Gear.title_text.setText("Gear");
+				Gear.exit_q = false;
+				break;
 			}
-		}
-	});
+		}catch(e) {
+			showError(e);
+		}return false}
+		
+	}));
 	Gear.title.addView(Gear.titleCover);
 	
 	Gear.frame = new ScrollView(ctx);
@@ -444,12 +631,23 @@ Gear.mainGuiLoad = function() {try {
 	showError(e);
 }}
 
+Gear.mainGuiLoad();
+
+function showGear(vis) {
 ctx.runOnUiThread(new Runnable({run: function() { try{
-	Gear.mainGuiLoad();
-	Gear.window.showAtLocation(ctx.getWindow().getDecorView(), Gravity.CENTER, 0, 0);
+	if(vis && !Gear.windowAlive) {
+		Gear.window.showAtLocation(ctx.getWindow().getDecorView(), Gravity.LEFT|Gravity.TOP, 200, 200);
+		Gear.windowAlive = true;
+	}else if(!vis && Gear.windowAlive) {
+		Gear.window.dismiss();
+		Gear.windowAlive = false;
+	}
 }catch(e) {
 	showError(e);
 }}}));
+}
+
+showGear(true);
 
 function newLevel(str) {
 	Gear.onMap = true;
@@ -457,6 +655,29 @@ function newLevel(str) {
 
 function leaveGame() {
 	Gear.onMap = false;
+}
+
+function procCmd(str) {
+	var cmd = str.split(" ");
+	switch(cmd[0]) {
+		case "gear":
+		showGear(true);
+		break;
+	}
+}
+
+
+
+function msg(str) {
+	if(Gear.onMap) {
+		clientMessage(TAG + str);
+	}else {
+		if(str.length < 20) {
+			toasts(TAG + str);
+		}else {
+			toast(TAG + str);
+		}
+	}
 }
 
 
