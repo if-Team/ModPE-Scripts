@@ -46,6 +46,7 @@ if(!(FILE_MAIN_DATA.exists())) {
 	saveData(FILE_MAIN_DATA, "WINDOW_Y", 0);
 	saveData(FILE_MAIN_DATA, "WINDOW_W", DIP*160);
 	saveData(FILE_MAIN_DATA, "WINDOW_H", DIP*100);
+	saveData(FILE_MAIN_DATA, "BOOT&PLAY", true);
 }
 
 var Byte = java.lang.Byte;
@@ -85,7 +86,10 @@ var Canvas = android.graphics.Canvas;
 var Paint = android.graphics.Paint;
 var Path = android.graphics.Path;
 var Shader = android.graphics.Shader;
+var Typeface = android.graphics.Typeface;
 var ArrayList = java.util.ArrayList;
+var Calendar = java.util.Calendar;
+var GregorianCalendar = java.util.GregorianCalendar
 
 var c = {};
 c.m = ViewGroup.LayoutParams.MATCH_PARENT;
@@ -187,11 +191,40 @@ Assets.textView_raw.setPixels(Assets.textView_pixel, 0, 6, 0, 0, 6, 6);
 Assets.textView = Bitmap.createScaledBitmap(Assets.textView_raw, PIXEL*6, PIXEL*6, false);
 Assets.textView_9 = function() {return ninePatch1(Assets.textView, PIXEL*3, PIXEL*3, PIXEL*4, PIXEL*4)}
 
+var w = Color.WHITE;
+Assets.gearBtn_pixel = [
+w,w,w,w,0,0,w,w,w,w,
+w,w,w,w,0,0,w,w,w,w,
+w,w,0,0,0,0,0,0,w,w,
+w,w,0,0,0,0,0,0,w,w,
+w,w,w,w,0,0,w,w,w,w,
+w,w,w,w,0,0,w,w,w,w
+];
+Assets.gearBtn_raw = Bitmap.createBitmap(10, 6, Bitmap.Config.ARGB_8888);
+Assets.gearBtn_raw.setPixels(Assets.gearBtn_pixel, 0, 10, 0, 0, 10, 6);
+Assets.gearBtn = Bitmap.createScaledBitmap(Assets.gearBtn_raw, PIXEL*10, PIXEL*6, false);
+Assets.gearBtn_9 = function() {return ninePatch1(Assets.gearBtn, PIXEL*3, PIXEL*5, PIXEL*4, PIXEL*6)}
+
+var w = Color.YELLOW;
+Assets.gearBtnC_pixel = [
+w,w,w,w,0,0,w,w,w,w,
+w,w,w,w,0,0,w,w,w,w,
+w,w,0,0,0,0,0,0,w,w,
+w,w,0,0,0,0,0,0,w,w,
+w,w,w,w,0,0,w,w,w,w,
+w,w,w,w,0,0,w,w,w,w
+];
+Assets.gearBtnC_raw = Bitmap.createBitmap(10, 6, Bitmap.Config.ARGB_8888);
+Assets.gearBtnC_raw.setPixels(Assets.gearBtnC_pixel, 0, 10, 0, 0, 10, 6);
+Assets.gearBtnC = Bitmap.createScaledBitmap(Assets.gearBtnC_raw, PIXEL*10, PIXEL*6, false);
+Assets.gearBtnC_9 = function() {return ninePatch1(Assets.gearBtnC, PIXEL*3, PIXEL*5, PIXEL*4, PIXEL*6)}
+
 function mcpeText(size, text, shadow) {
 	var tv = new TextView(ctx);
 	tv.setTransformationMethod(null);
 	tv.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
-	if(shadow) {
+	if(!shadow) {
+	}else {
 		tv.setShadowLayer(1/0xffffffff, DIP*1.3, DIP*1.3, Color.DKGRAY);
 	}
 	tv.setTextColor(Color.WHITE);
@@ -200,9 +233,106 @@ function mcpeText(size, text, shadow) {
 		tv.setTypeface(android.graphics.Typeface.createFromFile(FILE_FONT));
 	};
 	tv.setPadding(0, 0, 0, 0);
+	tv.setLayoutParams(new c.l.LayoutParams(c.w, c.w));
 	tv.setText(text);
 	return tv;
 }
+
+function mcpeBtn() {
+	
+}
+
+/**
+ * Battery Checker
+ *
+ * @since 2015-04
+ * @author CodeInside
+ */
+
+var ifilter = new android.content.IntentFilter(android.content.Intent.ACTION_BATTERY_CHANGED);
+
+Battery = {};
+
+Battery.isCharging = function() {
+	var batteryStatus = ctx.registerReceiver(null, ifilter);
+	var status = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_STATUS, -1);
+	return status == android.os.BatteryManager.BATTERY_STATUS_CHARGING;
+};
+
+Battery.isFullCharging = function() {
+	var batteryStatus = ctx.registerReceiver(null, ifilter);
+	var status = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_STATUS, -1);
+	return status == android.os.BatteryManager.BATTERY_STATUS_FULL;
+};
+	
+Battery.plugType = function() {
+	var batteryStatus = ctx.registerReceiver(null, ifilter);
+	var chargePlug = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_PLUGGED, -1);
+	if(chargePlug == android.os.BatteryManager.BATTERY_PLUGGED_USB) {
+		return "USB"
+	}else if(chargePlug == android.os.BatteryManager.BATTERY_PLUGGED_AC) {
+		return "AC"
+	}else if(chargePlug == android.os.BatteryManager.BATTERY_PLUGGED_WIRELESS) {
+		return "WIRELESS"
+	}else {
+		return "UNKNOWN"
+	}
+};
+
+Battery.level = function() {
+	var batteryStatus = ctx.registerReceiver(null, ifilter);
+	var level = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1);
+	var scale = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, -1);
+	return Math.round(level / scale * 100);
+};
+
+Battery.temp = function() {
+	var batteryStatus = ctx.registerReceiver(null, ifilter);
+	var temp = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_TEMPERATURE, -1);
+	return Math.round(temp) / 10;
+};
+
+Battery.volt = function() {
+	var batteryStatus = ctx.registerReceiver(null, ifilter);
+	var volt = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_VOLTAGE, -1);
+	return volt / 1000;
+};
+
+Battery.tec = function() {
+	var batteryStatus = ctx.registerReceiver(null, ifilter);
+	var tec = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_TECHNOLOGY, -1);
+	return tec;
+};
+
+Battery.health = function() {
+	var batteryStatus = ctx.registerReceiver(null, ifilter);
+	var health = batteryStatus.getIntExtra(android.os.BatteryManager. EXTRA_HEALTH, -1);
+	switch(health) {
+		case android.os.BatteryManager.BATTERY_HEALTH_GOOD:
+			return 0;//normal
+			break;
+		case android.os.BatteryManager.BATTERY_HEALTH_DEAD:
+			return 1;//battery life span is nearly end
+			break;
+		case android.os.BatteryManager.BATTERY_HEALTH_COLD:
+			return 2;//battery is too cold for work
+			break;
+		case android.os.BatteryManager.BATTERY_HEALTH_OVERHEAT:
+			return 3;//battery buning XD
+			break;
+		case android.os.BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE:
+			return 4;//battery voltage is too high
+			break;
+		case android.os.BatteryManager.BATTERY_HEALTH_UNKNOWNLURE:
+			return 5;//unKnow!
+			break;
+		case android.os.BatteryManager.BATTERY_HEALTH_UNSPECIFIED_FAILURE:
+			return 6;//I don't know why fail but someting wrong.
+			break;
+		default:
+			return -1;//i can't read it maybe your phone API version is higher
+	}
+};
 
 
 
@@ -212,12 +342,67 @@ Gear.isRemote = false;
 Gear.windowAlive = false;
 Gear.exit_q = false;
 Gear.uiDelay = 0;
+Gear.lastMill = java.lang.System.currentTimeMillis();
+Gear.lastMillBuffer = 0;
+Gear.currentGear = null;
+Gear.thread = {isAlive: false};
+Gear.loading = false;
+Gear.onChargeMill = null;
+Gear.onChargeLevel = null;
 
 function AsynchronousModTick() {
 	Gear.thread = new Thread(new Runnable({run: function() {try {while(true) {
 		if(Gear.uiDelay > 0) {
 			Gear.uiDelay--;
 		}
+		/*
+		var m = java.lang.System.currentTimeMillis();
+		Gear.lastMillBuffer += (m - Gear.lastMill) - 50;
+		Gear.lastMill = m;
+		if(--Gear.lastMillBuffer < 0) {
+			Gear.lastMillBuffer = 0;
+		}
+		if(Gear.lastMillBuffer > 1) {
+			Gear.lastMillBuffer -= Math.ceil(Gear.lastMillBuffer/5);
+			uiThread(function() {try {
+				Gear.hdd_draw.mutate().setColor(Color.parseColor("#ffaf30"));
+			}catch(e) {
+			}});
+		}else {
+			uiThread(function() {try {
+				Gear.hdd_draw.mutate().setColor(Color.parseColor("#000000"));
+			}catch(e) {
+			}});
+		}
+		*/
+		
+		if(Gear.currentGear !== null && Gear.loading) {try {
+			Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].getTick();
+			var level = Battery.level();
+			var c = new GregorianCalendar();
+			var am_pm = c.get(Calendar.AM_PM) === Calendar.AM ? "오전" : "오후";
+			var hour = c.get(Calendar.HOUR);
+			var min = c.get(Calendar.MINUTE);
+			min = min < 10 ? "0" + min : min;
+			uiThread(function() {try {
+				Gear.info.setText(level + "%");
+				Gear.clock1.setText(am_pm);
+				Gear.clock2.setText(hour + ":" + min);
+				if(level <= 5) {
+					Gear.info.setTextColor(Color.RED);
+				}else if(level <= 15) {
+					Gear.info.setTextColor(Color.YELLOW);
+				}else {
+					Gear.info.setTextColor(Color.WHITE);
+				}
+			}catch(e) {
+				showError(e);
+			}});
+		}catch(e) {
+			toast("[ERROR] " + Gear.currentGear.toString() + "-" + Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].toString());
+			showError(e);
+		}}
+		
 		sleep(50);
 	}}catch(e) {
 		showError(e);
@@ -229,69 +414,439 @@ AsynchronousModTick();
 function GearGroup(name) {
 	this.name = name;
 	//{name: <string>, layoutLoad: <function>, child: <layout> header: <function>, tick: <function>, finish: <function>}
-	this.manus = [];
+	this.menus = [];
 	this.currentIndex = 0;
 }
 
 GearGroup.prototype = {
-	getManus: function() {
-		return this.manus;
+	toString: function() {
+		return "[" + this.name + " group]";
 	},
+	
+	getName: function() {
+		return this.name;
+	},
+	
+	getMenus: function() {
+		return this.menus;
+	},
+	
+	addMenu: function(menu) {
+		if(!(menu instanceof GearMenu)){
+			throw new TypeError("The parameter 'menu' must be instance of GearMenu.");
+		}
+
+		if(this.getIndexByMenu(menu) >= 0){
+			throw new ReferenceError("The menu '" + menu.toString() + "' is already in Gear.");
+		}
+
+		this.getMenus().push(menu);
+	},
+	
+	changeMenu: function(index) {try {
+		Gear.loading = false;
+		Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].getFinish();
+		Gear.frame.removeAllViews();
+		Gear.currentGear.currentIndex = index;
+		var e = Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].getLayout();
+		if(e === false) {
+			msg("[ERROR] " + Gear.toString() + "-" + Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].toString() + " layout load fail");
+			return;
+		}
+		Gear.frame.addView(e);
+		Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].getHeader();
+		Gear.loading = true;
+	}catch(e) {
+		showError(e);
+		toast("[ERROR] " + Gear.currentGear.toString() + "-" + Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].toString());
+	}},
 	
 	getCurrentIndex: function() {
 		return this.currentIndex;
 	},
 	
-	getManuByIndex: function(index) {
-		if(this.manus.length <= index) {
-			throw new ReferenceError(index + "is undefined index of " + this.name + " gear");
-		}
-		return this.manus[index];
+	getCurrentMenu: function() {
+		return this.getMenus()[this.getCurrentIndex()];
 	},
 	
-	getManuByName: function(name) {
-		for(var e = 0; e < this.manus.length; e++) {
-			if(this.manus[e].name === name) {
-				return this.manus[e];
+	getMenuByIndex: function(index) {
+		if(this.menus.length <= index) {
+			throw new ReferenceError(index + "is undefined index of " + this.name + " gear");
+		}
+		return this.menus[index];
+	},
+	
+	getMenuByName: function(name) {
+		for(var e = 0; e < this.menus.length; e++) {
+			if(this.menus[e].name === name) {
+				return this.menus[e];
 			}
 		}
 		throw new ReferenceError("The name '" + name + "' is not in " + this.name + " gear");
+	},
+	
+	getIndexByMenu: function(menu) {
+		for(var e = 0; e < this.getMenus().length; e++) {
+			if(menu == this.getMenus()[e]) {
+				return e;
+			}
+		}
+		return -1;
+	},
+	
+	getIndexByName: function(name) {
+		for(var e = 0; e < this.getMenus().length; e++) {
+			if(name == this.getMenus()[e].name) {
+				return e;
+			}
+		}
+		return -1;
 	}
 }
 
-function GearManu(name, layout, header, tick, finish) {
+function GearMenu(name) {
 	this.name = name;
-	this.header = header;
-	this.tick = tick;
-	this.finish = finish;
-	this.layout = layout;
+	this.header = function() {}
+	this.tick = function() {}
+	this.finish = function() {}
+	this.layout = null;
 }
 
-GearManu.prototype = {
+GearMenu.prototype = {
+	toString: function() {
+		return "[" + this.name + " menu]";
+	},
+	
 	getName: function() {
 		return this.name;
+	},
+	
+	isEqual: function(menu) {
+		return (menu instanceof GearMenu) && (this.name === menu.name);
 	},
 	
 	getLayout: function() {
 		return this.layout();
 	},
 	
-	isEqual: function(manu) {
-		return this.name === manu.name;
-	},
-	
-	header: function() {
+	getHeader: function() {
 		this.header();
 	},
 	
-	tick: function() {
+	getTick: function() {
 		this.tick();
 	},
 	
-	finish: function() {
+	getFinish: function() {
 		this.finish();
+	},
+	
+	setLayout: function(func) {
+		this.layout = func;
+	},
+	
+	setHeader: function(func) {
+		this.header = func;
+	},
+	
+	setTick: function(func) {
+		this.tick = func;
+	},
+	
+	setFinish: function(func) {
+		this.finish = func;
 	}
 }
+
+Gear.menu_main = new GearMenu("Main");
+Gear.menu_main.setLayout(function() {try {
+	var l = new c.l(ctx);
+	l.setOrientation(c.l.VERTICAL);
+	l.setGravity(Gravity.CENTER);
+	
+	Gear.menu_ctn0 = new Button(ctx);
+	Gear.menu_ctn0.setTransformationMethod(null);
+	Gear.menu_ctn0.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+	Gear.menu_ctn0.setPadding(0,0,0,0);
+	Gear.menu_ctn0.setText(Gear.currentGear.getName());
+	Gear.menu_ctn0.setTextSize(c.p, DIP*10);
+	Gear.menu_ctn0.setTextColor(Color.BLACK);
+	if(FILE_FONT.exists()) {
+		Gear.menu_ctn0.setTypeface(Typeface.createFromFile(FILE_FONT));
+	}
+	Gear.menu_ctn0.setBackgroundColor(Color.WHITE);
+	Gear.menu_ctn0_p = new c.l.LayoutParams(DIP*100, DIP*16);
+	Gear.menu_ctn0_p.setMargins(0, DIP*2, 0, 0);
+	Gear.menu_ctn0.setLayoutParams(Gear.menu_ctn0_p);
+	l.addView(Gear.menu_ctn0);
+	
+	for(var e = 1; e < Gear.currentGear.getMenus().length; e++) {
+		var b = new Button(ctx);
+		b.setTransformationMethod(null);
+		b.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+		b.setPadding(0,0,0,0);
+		b.setText(Gear.currentGear.getMenus()[e].getName());
+		b.setTextSize(c.p, DIP*10);
+		b.setTextColor(Color.WHITE);
+		if(FILE_FONT.exists()) {
+			b.setTypeface(Typeface.createFromFile(FILE_FONT));
+		}
+		b.setBackgroundDrawable(Assets.gearBtn_9());
+		b_p = new c.l.LayoutParams(DIP*100, DIP*16);
+		b_p.setMargins(0, DIP*2, 0, 0);
+		b.setLayoutParams(b_p);
+		b.setOnTouchListener(View.OnTouchListener({onTouch: function(view, event) {try {
+			switch(event.action) {
+				case MotionEvent.ACTION_DOWN:
+				view.setBackgroundDrawable(Assets.gearBtnC_9());
+				break;
+				case MotionEvent.ACTION_UP:
+				view.setBackgroundDrawable(Assets.gearBtn_9());
+				break;
+			}
+			return false;
+		}catch(e) {
+			showError(e);
+			return false;
+		}}}));
+		b.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+			Gear.currentGear.changeMenu(Gear.currentGear.getIndexByName(view.getText()));
+		}catch(e) {
+			showError(e);
+		}}}));
+		l.addView(b);
+	}
+	
+	return l;
+}catch(e) {
+	showError(e);
+	return false;
+}});
+
+Gear.menu_clock = new GearMenu("Clock");
+Gear.menu_clock.setLayout(function() {try {
+	var l = new c.l(ctx);
+	l.setOrientation(c.l.VERTICAL);
+	l.setGravity(Gravity.CENTER);
+	
+	Gear.menu_ctn1 = new Button(ctx);
+	Gear.menu_ctn1.setTransformationMethod(null);
+	Gear.menu_ctn1.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
+	Gear.menu_ctn1.setShadowLayer(1/0xffffffff, DIP*1.3, DIP*1.3, Color.DKGRAY);
+	Gear.menu_ctn1.setTextColor(Color.WHITE);
+	Gear.menu_ctn1.setTextSize(c.p, DIP*10);
+	if(FILE_FONT.exists()) {
+		Gear.menu_ctn1.setTypeface(Typeface.createFromFile(FILE_FONT));
+	};
+	Gear.menu_ctn1.setPadding(0, 0, 0, 0);
+	Gear.menu_ctn1.setText("loading...");
+	Gear.menu_ctn1.setBackgroundDrawable(Assets.gearBtn_9());
+	Gear.menu_ctn1_p = new c.l.LayoutParams(DIP*100, DIP*16);
+	Gear.menu_ctn1_p.setMargins(0, DIP*2, 0, DIP*2);
+	Gear.menu_ctn1.setLayoutParams(Gear.menu_ctn1_p);
+	l.addView(Gear.menu_ctn1);
+	
+	var l2 = c.l(ctx);
+	l2.setOrientation(c.l.HORIZONTAL);
+	l2.setGravity(Gravity.BOTTOM|Gravity.CENTER);
+	
+	Gear.menu_ctn2 = mcpeText(10, "--");
+	Gear.menu_ctn2_p = c.l.LayoutParams(c.w, c.w);
+	Gear.menu_ctn2_p.setMargins(0, 0, DIP*2, 0);
+	Gear.menu_ctn2.setLayoutParams(Gear.menu_ctn2_p);
+	l2.addView(Gear.menu_ctn2);
+	
+	Gear.menu_ctn3 = mcpeText(16, "--:--:--");
+	l2.addView(Gear.menu_ctn3);
+	l.addView(l2);
+	
+	Gear.menu_ctn4 = mcpeText(10, "---- -- -- -");
+	Gear.menu_ctn4_p = new c.l.LayoutParams(c.w, c.w);
+	Gear.menu_ctn4_p.setMargins(0, DIP*2, 0, 0);
+	Gear.menu_ctn4.setLayoutParams(Gear.menu_ctn4_p);
+	l.addView(Gear.menu_ctn4);
+	
+	return l;
+}catch(e) {
+	showError(e);
+	return false;
+}});
+
+Gear.menu_clock.setTick(function() {
+	var c = new GregorianCalendar();
+	var am_pm = c.get(Calendar.AM_PM) === Calendar.AM ? "오전" : "오후";
+	var hour = c.get(Calendar.HOUR);
+	hour = hour < 10 ? "0" + hour : hour;
+	var min = c.get(Calendar.MINUTE);
+	min = min < 10 ? "0" + min : min;
+	var sec = c.get(Calendar.SECOND);
+	sec = sec < 10 ? "0" + sec : sec;
+	var date = c.get(Calendar.DATE);
+	var month = c.get(Calendar.MONTH) + 1;
+	var year = c.get(Calendar.YEAR);
+	var day;
+	switch(c.get(Calendar.DAY_OF_WEEK)) {
+		case Calendar.SUNDAY:
+		day = "일";
+		break;
+		case Calendar.MONDAY:
+		day = "월";
+		break;
+		case Calendar.TUESDAY:
+		day = "화";
+		break;
+		case Calendar.WEDNESDAY:
+		day = "수";
+		break;
+		case Calendar.THURSDAY:
+		day = "목";
+		break;
+		case Calendar.FRIDAY:
+		day = "금";
+		break;
+		case Calendar.SATURDAY:
+		day = "토";
+		break;
+		default:
+		day = "unKnown";
+	}
+	uiThread(function() {try {
+		Gear.menu_ctn1.setText("loading...");
+		Gear.menu_ctn2.setText(am_pm);
+		Gear.menu_ctn3.setText(hour + ":" + min + ":" + sec);
+		Gear.menu_ctn4.setText(year + "-" + month + "-" + date + " " + day);
+	}catch(e) {
+		showError(e);
+	}});
+});
+
+Gear.menu_battery = new GearMenu("Battery");
+Gear.menu_battery.setLayout(function() {try {
+	var l = c.l(ctx);
+	l.setOrientation(c.l.VERTICAL);
+	l.setGravity(Gravity.CENTER);
+	
+	var l2 = c.l(ctx);
+	l2.setOrientation(c.l.HORIZONTAL);
+	l2.setGravity(Gravity.BOTTOM|Gravity.CENTER);
+	
+	l2_p = new c.l.LayoutParams(c.w, c.w);
+	l2_p.setMargins(0, DIP*2, 0, DIP*2);
+	l2.setLayoutParams(l2_p);
+	
+	var l3 = c.l(ctx);
+	l3.setOrientation(c.l.HORIZONTAL);
+	l3.setGravity(Gravity.BOTTOM|Gravity.CENTER);
+	
+	l3_p = new c.l.LayoutParams(c.w, c.w);
+	l3_p.setMargins(0, 0, DIP*4, 0);
+	l3.setLayoutParams(l3_p);
+	
+	Gear.ctn1 = mcpeText(24, "--");
+	l3.addView(Gear.ctn1);
+	Gear.ctn2 = mcpeText(12, "%");
+	l3.addView(Gear.ctn2);
+	
+	l2.addView(l3);
+	
+	var l4 = c.l(ctx);
+	l4.setOrientation(c.l.VERTICAL);
+	
+	Gear.ctn3 = mcpeText(10, "--.-°C");
+	l4.addView(Gear.ctn3);
+	Gear.ctn4 = mcpeText(10, "--.- V");
+	l4.addView(Gear.ctn4);
+	
+	l2.addView(l4);
+	
+	l.addView(l2);
+	
+	Gear.ctn5 = mcpeText(10, "loading...");
+	l.addView(Gear.ctn5);
+	
+	Gear.ctn6 = mcpeText(10, "loading...");
+	Gear.ctn6.setTextColor(Color.YELLOW);
+	l.addView(Gear.ctn6);
+	
+	return l;
+}catch(e) {
+	showError(e);
+	return false;
+}});
+
+Gear.menu_battery.setTick(function() {
+	var level = Battery.level() + "";
+	var temp = Battery.temp() + "°C";
+	var volt = Battery.volt() + "V";
+	var TAG = "<" + Battery.plugType() + "> ";
+	var charge = "";
+	if(Battery.isCharging()) {
+		if(Gear.onChargeMill === null) {
+			Gear.onChargeMill = Date.now();
+			Gear.onChargeLevel = Battery.level();
+		}
+		if(Battery.isFullCharging()) {
+			charge = TAG + "충전 완료";
+		}else if(Battery.level == 100) {
+			charge = TAG + "충전중...\n(잠시후 완료)";
+		}else if(Gear.onChargeLevel < Battery.level()) {
+			var sec = Math.ceil((100 - Battery.level()) * (((Date.now() - Gear.onChargeMill) / 1000) / (Battery.level() - Gear.onChargeLevel)));
+			var min = Math.floor(sec/60);
+			var hour = Math.floor(min/60);
+			min %= 60;
+			hour %= 60;
+			charge = TAG + "충전중...\n(" + hour + "시간 " + min + "분 남음)";
+		}else if(Gear.onChargeLevel > Battery.level()) {
+			charge = TAG + "역충전 경고";
+			Gear.onChargeMill = null;
+		}else {
+			charge = TAG + "충전중...";
+		}
+	}else {
+		Gear.onChargeMill = null;
+		Gear.onChargeLevel = null;
+	}
+	uiThread(function() {try {
+		Gear.ctn1.setText(level);
+		Gear.ctn3.setText(temp);
+		Gear.ctn4.setText(volt);
+		switch(Battery.health()) {
+			case 0:
+			Gear.ctn5.setText("배터리 정상");
+			Gear.ctn5.setTextColor(Color.WHITE);
+			break;
+			case 1:
+			Gear.ctn5.setText("배터리 수명이 끝남");
+			Gear.ctn5.setTextColor(Color.GRAY);
+			break;
+			case 2:
+			Gear.ctn5.setText("배터리 온도 매우낮음");
+			Gear.ctn5.setTextColor(Color.parseColor("#2050ff"));
+			break;
+			case 3:
+			Gear.ctn5.setText("배터리 과열 경고");
+			Gear.ctn5.setTextColor(Color.parseColor("#ff8020"));
+			break;
+			case 4:
+			Gear.ctn5.setText("배터리 과전압 경고");
+			Gear.ctn5.setTextColor(Color.parseColor("#ff7900"));
+			break;
+			default:
+			Gear.ctn5.setText("알수 없는 오류");
+			Gear.ctn5.setTextColor(Color.GRAY);
+		}
+		Gear.ctn6.setText(charge);
+	}catch(e) {
+		showError(e);
+	}});
+});
+
+Gear.group_onTitle = new GearGroup("Title Screen");
+Gear.group_onTitle.addMenu(Gear.menu_main);
+Gear.group_onTitle.addMenu(Gear.menu_clock);
+Gear.group_onTitle.addMenu(Gear.menu_battery);
+
+
 
 Gear.mainGuiLoad = function() {try {
 /** Layout1
@@ -399,7 +954,7 @@ Gear.mainGuiLoad = function() {try {
 	Gear.layout.setBackgroundDrawable(Assets.background_9());
 	
 	Gear.lt = new Button(ctx);
-	Gear.lt.setBackgroundColor(Color.argb(255,255,0,0));
+	Gear.lt.setBackgroundColor(Color.argb(0, 0,0,0));
 	
 	Gear.lt_p = new c.r.LayoutParams(c.m, DIP*8);
 	Gear.lt_p.setMargins(0, 0, 0, 0);
@@ -463,7 +1018,7 @@ Gear.mainGuiLoad = function() {try {
 	Gear.layout.addView(Gear.lt);
 	
 	Gear.ll = new Button(ctx);
-	Gear.ll.setBackgroundColor(Color.argb(255,0,255,0));
+	Gear.ll.setBackgroundColor(Color.argb(0, 0, 0, 0));
 	
 	Gear.ll_p = new c.r.LayoutParams(DIP*8, c.m);
 	Gear.ll_p.setMargins(0, 0, 0, 0);
@@ -526,7 +1081,7 @@ Gear.mainGuiLoad = function() {try {
 	Gear.layout.addView(Gear.ll);
 	
 	Gear.lr = new Button(ctx);
-	Gear.lr.setBackgroundColor(Color.argb(255,0,0,255));
+	Gear.lr.setBackgroundColor(Color.argb(0, 0, 0, 0));
 	
 	Gear.lr_p = new c.r.LayoutParams(DIP*8, c.m);
 	Gear.lr_p.setMargins(0, 0, 0, 0);
@@ -588,7 +1143,7 @@ Gear.mainGuiLoad = function() {try {
 	Gear.layout.addView(Gear.lr);
 	
 	Gear.lb = new Button(ctx);
-	Gear.lb.setBackgroundColor(Color.argb(255,255,255,0));
+	Gear.lb.setBackgroundColor(Color.argb(0, 0, 0, 0));
 	
 	Gear.lb_p = new c.r.LayoutParams(c.m, DIP*8);
 	Gear.lb_p.setMargins(0, 0, 0, 0);
@@ -675,11 +1230,22 @@ Gear.mainGuiLoad = function() {try {
 	Gear.power_param.setMargins(DIP*8, 0, 0, 0);
 	Gear.power.setLayoutParams(Gear.power_param);
 	Gear.led.addView(Gear.power);
+	
+	Gear.hdd = new ImageView(ctx);
+	Gear.hdd_draw = new GradientDrawable();
+	Gear.hdd_draw.setCornerRadius(DIP);
+	Gear.hdd_draw.setColor(Color.parseColor("#000000"));
+	Gear.hdd.setImageDrawable(Gear.hdd_draw);
+	Gear.hdd_param = new LinearLayout.LayoutParams(DIP*4, DIP*8);
+	Gear.hdd_param.setMargins(DIP*4, 0, 0, 0);
+	Gear.hdd.setLayoutParams(Gear.hdd_param);
+	Gear.led.addView(Gear.hdd);
+	
 	Gear.layout.addView(Gear.led);
 	
 	Gear.title = new RelativeLayout(ctx);
 	Gear.title.setId(randomId());
-	Gear.title.setPadding(0, 0, 0, DIP*2);
+	Gear.title.setPadding(0, 0, 0, 0);
 	
 	Gear.title.setBackgroundColor(Color.BLACK);
 	
@@ -717,16 +1283,16 @@ Gear.mainGuiLoad = function() {try {
 	Gear.clock_p.addRule(c.r.ALIGN_PARENT_LEFT, Gear.title.getId());
 	Gear.clock.setLayoutParams(Gear.clock_p);
 	
-	Gear.clock1 = mcpeText(6, "오전");
+	Gear.clock1 = mcpeText(6, "--");
 	Gear.clock1.setPadding(DIP*2, 0, DIP, 0);
 	Gear.clock.addView(Gear.clock1);
 	
-	Gear.clock2 = mcpeText(8, "1:55");
+	Gear.clock2 = mcpeText(8, "--:--");
 	Gear.clock.addView(Gear.clock2);
 	
 	Gear.title.addView(Gear.clock);
 	
-	Gear.info = mcpeText(8, "59%");
+	Gear.info = mcpeText(8, "--%");
 	Gear.info.setPadding(0, 0, DIP*2, 0);
 	Gear.info_p = new c.r.LayoutParams(c.w, c.w);
 	Gear.info_p.addRule(c.r.CENTER_VERTICAL, Gear.title.getId());
@@ -743,6 +1309,7 @@ Gear.mainGuiLoad = function() {try {
 		function(view, event) {try {
 			switch(event.action) {
 				case MotionEvent.ACTION_DOWN:
+				gearChecker();
 				Gear.eventX = event.getX();
 				Gear.eventY = event.getY();
 				Gear.eventType = null;
@@ -754,10 +1321,12 @@ Gear.mainGuiLoad = function() {try {
 				var ry = y - Gear.eventY;
 				switch(Gear.eventType) {
 					case 0:
-					if(ry > 0) {
+					if(ry > DIP*20) {
 						Gear.title_text.setText("당겨서 메뉴");
-					}else {
+					}else if(ry < -DIP*20) {
 						Gear.title_text.setText("당겨서 종료");
+					}else {
+						Gear.title_text.setText("Gear");
 					}
 					break;
 					case 1:
@@ -773,18 +1342,18 @@ Gear.mainGuiLoad = function() {try {
 						if(typeof p.screenBrightness === "number") {
 							p.screenBrightness = power/100;
 							ctx.getWindow().setAttributes(p);
-							Gear.title_text.setText("화면 밝기 " + power + "%");
+							Gear.title_text.setText("밝기 " + power + "%");
 						}else {
-							Gear.title_text.setText("지원하지 않습니다");
+							Gear.title_text.setText("지원안함");
 						}
 					}catch(e) {
 						showError(e);
 					}
 					break;
 					default:
-					if(Math.abs(ry) > 10*DIP) {
+					if(Math.abs(ry) > 20*DIP) {
 						Gear.eventType = 0;
-					}else if(Math.abs(rx) > 10*DIP) {
+					}else if(Math.abs(rx) > 20*DIP) {
 						Gear.eventType = 1;
 					}
 				}
@@ -794,16 +1363,18 @@ Gear.mainGuiLoad = function() {try {
 				var y = event.getY();
 				var rx = x - Gear.eventX;
 				var ry = y - Gear.eventY;
-				if(Gear.eventType === 0 && ry > 10) {
-					toast("TODO");
+				if(Gear.eventType === 0 && ry > 20) {
+					Gear.currentGear.changeMenu(Gear.currentGear.getIndexByName("Main"));
 				}else if(Gear.eventType === 0 && ry < -10 ) {
 					if(Gear.exit_q == false) {
 						Gear.title_text.setText("종료?");
 						Gear.exit_q = true;
 					}else {
 						showGear(false);
-						msg("포켓기어를 종료합니다\n다시 켜실려면 '/gear' 를 입력하세요");
+						msg("포켓기어를 종료합니다");
+						msg("다시 켜실려면 '/gear' 를 입력하세요");
 						Gear.exit_q = false;
+						Gear.title_text.setText("Gear");
 					}
 					break;
 				}
@@ -847,12 +1418,16 @@ Gear.mainGuiLoad = function() {try {
 	Gear.layout.addView(Gear.content);
 	
 	var w = loadData(FILE_MAIN_DATA, "WINDOW_W");
-	if(w == null) {
+	if(w == null || isNaN(w)) {
 		w = DIP*160;
+		saveData(FILE_MAIN_DATA, "WINDOW_W", DIP*160);
+		msg("데이터 손상 감지: 'WINDOW_W'\n복구를 시도중...");
 	}
 	var h = loadData(FILE_MAIN_DATA, "WINDOW_H");
-	if(h == null) {
+	if(h == null || isNaN(h)) {
 		h = DIP*100;
+		saveData(FILE_MAIN_DATA, "WINDOW_H", DIP*100);
+		msg("데이터 손상 감지: 'WINDOW_H'\n복구를 시도중...");
 	}
 	Gear.window = new PopupWindow(Gear.layout, w, h, false);
 }catch(e) {
@@ -868,13 +1443,13 @@ ctx.runOnUiThread(new Runnable({run: function() { try{
 		if(x == null || isNaN(x)) {
 			x = 0;
 			saveData(FILE_MAIN_DATA, "WINDOW_X", 0);
-			msg("세이브 데이터 손상 감지: WINDOW_X\n복구 시도중...");
+			msg("데이터 손상 감지: 'WINDOW_X'\n복구 시도중...");
 		}
 		var y = loadData(FILE_MAIN_DATA, "WINDOW_Y");
 		if(y == null || isNaN(y)) {
 			y = 0;
 			saveData(FILE_MAIN_DATA, "WINDOW_Y", 0);
-			msg("세이브 데이터 손상 감지: WINDOW_Y\n복구 시도중...");
+			msg("데이터 손상 감지: 'WINDOW_Y'\n복구 시도중...");
 		}
 		Gear.window.showAtLocation(ctx.getWindow().getDecorView(), Gravity.LEFT|Gravity.TOP, x, y);
 		Gear.windowAlive = true;
@@ -887,7 +1462,38 @@ ctx.runOnUiThread(new Runnable({run: function() { try{
 }}}));
 }
 
-showGear(true);
+function gearFirstLoad() {try {
+	Gear.currentGear = Gear.group_onTitle;
+	Gear.frame.removeAllViews();
+	Gear.currentGear.currentIndex = 0;
+	var e = Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].getLayout();
+	if(e === false) {
+		msg("[ERROR] " + Gear.toString() + "-" + Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].toString() + " layout load fail");
+	}
+	Gear.frame.addView(e);
+	Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].getHeader();
+	Gear.loading = true;
+}catch(e) {
+	showError(e);
+}}
+		
+if(parseBoolean(loadData(FILE_MAIN_DATA, "BOOT&PLAY"))) {
+	showGear(true);
+}
+
+gearFirstLoad();
+
+function gearChecker() {
+	if(net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote && !Gear.isRemote && Gear.allowRemote) {
+		net.zhuoweizhang.mcpelauncher.ScriptManager.handleMessagePacketCallback("", "BlockLauncher, enable scripts, please and thank you");
+		Gear.isRemote = true;
+		newLevel("multi");
+	}
+	if(!Gear.thread.isAlive) {
+		AsynchronousModTick();
+		msg("Gear rebooted");
+	}
+}
 
 function newLevel(str) {
 	Gear.onMap = true;
@@ -895,6 +1501,10 @@ function newLevel(str) {
 
 function leaveGame() {
 	Gear.onMap = false;
+	Gear.isRemote = true;
+	uiThread(function() {try {
+		Gear.hdd_draw.mutate().setColor(Color.parseColor("#000000"));
+	}catch(e) {}});
 }
 
 function procCmd(str) {
@@ -906,11 +1516,46 @@ function procCmd(str) {
 	}
 }
 
+function modTick() {
+	try {
+		var m = java.lang.System.currentTimeMillis();
+		Gear.lastMillBuffer += (m - Gear.lastMill) - 50;
+		Gear.lastMill = m;
+		if(--Gear.lastMillBuffer < 0) {
+			Gear.lastMillBuffer = 0;
+		}
+		if(Gear.lastMillBuffer > 20) {
+			Gear.lastMillBuffer -= Math.ceil(Gear.lastMillBuffer/5);
+			uiThread(function() {try {
+				Gear.hdd_draw.mutate().setColor(Color.parseColor("#ffaf30"));
+			}catch(e) {
+			}});
+		}else {
+			uiThread(function() {try {
+				Gear.hdd_draw.mutate().setColor(Color.parseColor("#000000"));
+			}catch(e) {
+			}});
+		}
+	}catch(e) {
+		showError(e);
+	}
+}
+
+
+
+function parseBoolean(b) {
+	if(b == "true" || b == 1 || b == "yes") {
+		return true;
+	}else {
+		
+	}return false;
+}1
+
 
 
 function msg(str) {
 	if(Gear.onMap) {
-		clientMessage(TAG + str);
+		clientMessage(ChatColor.YELLOW + TAG + str);
 	}else {
 		if(str.length < 20) {
 			toasts(TAG + str);
