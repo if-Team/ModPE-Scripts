@@ -399,6 +399,7 @@ Battery.health = function() {
 var Gear = {};
 Gear.onMap = false;
 Gear.isRemote = false;
+Gear.allowRemote = true;
 Gear.windowAlive = false;
 Gear.exit_q = false;
 Gear.uiDelay = 0;
@@ -409,6 +410,9 @@ Gear.thread = {isAlive: false};
 Gear.loading = false;
 Gear.onChargeMill = null;
 Gear.onChargeLevel = null;
+Gear.step = 0;
+Gear.stepLock = 0;
+Gear.autoSaveTick = 0;
 
 //modTick과는 별도로 움직이는 "비동기 Thread" 생성
 function AsynchronousModTick() {
@@ -506,8 +510,13 @@ GearGroup.prototype = {
 	},
 	
 	changeMenu: function(index) {try {
+		if(isNaN(index) || index === null) {
+			index = 0;
+		}
 		Gear.loading = false;
-		Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].getFinish();
+		try {
+			Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].getFinish();
+		}catch(e) {};
 		Gear.currentGear.currentIndex = index;
 		var e = Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].getLayout();
 		if(e === false) {
@@ -673,6 +682,7 @@ Gear.menu_main.setLayout(function() {try {
 				break;
 				//클릭하고 나서 버튼의 이미지를 원래대로
 				case MotionEvent.ACTION_UP:
+				case MotionEvent.ACTION_CANCEL:
 				view.setBackgroundDrawable(Assets.gearBtn_9());
 				break;
 			}
@@ -684,6 +694,7 @@ Gear.menu_main.setLayout(function() {try {
 		b.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 			//클릭시 메뉴전환
 			Gear.currentGear.changeMenu(Gear.currentGear.getIndexByName(view.getText()));
+			saveData(FILE_MAIN_DATA, Gear.currentGear.getName(), Gear.currentGear.getCurrentIndex());
 		}catch(e) {
 			showError(e);
 		}}}));
@@ -931,6 +942,9 @@ Gear.menu_clockM.setLayout(function() {try {
 	var l2 = c.l(ctx);
 	l2.setOrientation(c.l.HORIZONTAL);
 	l2.setGravity(Gravity.BOTTOM|Gravity.CENTER);
+	var l2_p = new c.l.LayoutParams(c.w, c.w);
+	l2_p.setMargins(0, DIP*2, 0, 0);
+	l2.setLayoutParams(l2_p);
 	
 	Gear.menu_ctn2 = mcpeText(10, "--");
 	Gear.menu_ctn2_p = c.l.LayoutParams(c.w, c.w);
@@ -938,11 +952,12 @@ Gear.menu_clockM.setLayout(function() {try {
 	Gear.menu_ctn2.setLayoutParams(Gear.menu_ctn2_p);
 	l2.addView(Gear.menu_ctn2);
 	
-	Gear.menu_ctn3 = mcpeText(16, "--:--:--");
+	Gear.menu_ctn3 = mcpeText(16, "--:--");
 	l2.addView(Gear.menu_ctn3);
 	l.addView(l2);
 	
 	Gear.menu_ctn4 = mcpeText(10, "");
+	Gear.menu_ctn4.setPadding(DIP*2, DIP*2, DIP*2, DIP*2);
 	Gear.menu_ctn4.setBackgroundColor(Color.WHITE);
 	Gear.menu_ctn4.setTextColor(Color.BLACK);
 	Gear.menu_ctn4_p = new c.l.LayoutParams(c.w, c.w);
@@ -961,17 +976,221 @@ Gear.menu_clockM.setTick(function() {
 	var time = Level.getTime() + 4800;
 	var convert = Math.floor((time % 19200) * 1440 / 19200);
 	var hour = Math.floor(convert / 60);
-	min = convert % 60;
-	var minc = min < 10 ? "0" + min : min;
+	var am_pm = hour < 12 ? "오전" : "오후";
+	hour %= 12;
+	var min = convert % 60;
+	min = min < 10 ? "0" + min : min;
+	var day = Math.floor(time / 19200);
 	
 	uiThread(function() {try {
 		Gear.menu_ctn2.setText(am_pm);
-		Gear.menu_ctn3.setText(hour + ":" + min + ":" + sec);
-		Gear.menu_ctn4.setText(year + "-" + month + "-" + date + " " + day);
+		Gear.menu_ctn3.setText(hour + ":" + min);
+		Gear.menu_ctn4.setText(day + "일");
 	}catch(e) {
 		showError(e);
 	}});
 });
+
+//플레이어 위치 기어메뉴
+Gear.menu_loc = new GearMenu("Location");
+//기어메뉴의 레이아웃
+Gear.menu_loc.setLayout(function() {try {
+	var l = new c.l(ctx);
+	l.setOrientation(c.l.VERTICAL);
+	l.setGravity(Gravity.LEFT);
+	
+	Gear.menu_ctn1 = mcpeText(10, "X: --");
+	Gear.menu_ctn1_p = new c.l.LayoutParams(c.w, c.w);
+	Gear.menu_ctn1_p.setMargins(DIP*2, DIP*2, 0, 0);
+	Gear.menu_ctn1.setLayoutParams(Gear.menu_ctn1_p);
+	
+	Gear.menu_ctn2 = mcpeText(10, "Y: --");
+	Gear.menu_ctn2_p = new c.l.LayoutParams(c.w, c.w);
+	Gear.menu_ctn2_p.setMargins(DIP*2, DIP*2, 0, 0);
+	Gear.menu_ctn2.setLayoutParams(Gear.menu_ctn2_p);
+	
+	Gear.menu_ctn3 = mcpeText(10, "Z: --");
+	Gear.menu_ctn3_p = new c.l.LayoutParams(c.w, c.w);
+	Gear.menu_ctn3_p.setMargins(DIP*2, DIP*2, 0, 0);
+	Gear.menu_ctn3.setLayoutParams(Gear.menu_ctn3_p);
+	
+	Gear.menu_ctn2_2 = mcpeText(10, "eyePos: --");
+	Gear.menu_ctn2_2_p = new c.l.LayoutParams(c.w, c.w);
+	Gear.menu_ctn2_2_p.setMargins(DIP*2, DIP*2, 0, 0);
+	Gear.menu_ctn2_2.setLayoutParams(Gear.menu_ctn2_2_p);
+	
+	Gear.menu_ctn4 = mcpeText(6, "Biome: --");
+	Gear.menu_ctn4_p = new c.l.LayoutParams(c.w, c.w);
+	Gear.menu_ctn4_p.setMargins(DIP*2, DIP*2, 0, 0);
+	Gear.menu_ctn4.setLayoutParams(Gear.menu_ctn4_p);
+	
+	Gear.menu_ctn5 = mcpeText(10, "LightLevel: --");
+	Gear.menu_ctn5_p = new c.l.LayoutParams(c.w, c.w);
+	Gear.menu_ctn5_p.setMargins(DIP*2, DIP*2, 0, 0);
+	Gear.menu_ctn5.setLayoutParams(Gear.menu_ctn5_p);
+	
+	Gear.menu_ctn6 = mcpeText(10, "chunkX: --");
+	Gear.menu_ctn6_p = new c.l.LayoutParams(c.w, c.w);
+	Gear.menu_ctn6_p.setMargins(DIP*2, DIP*2, 0, 0);
+	Gear.menu_ctn6.setLayoutParams(Gear.menu_ctn6_p);
+	
+	Gear.menu_ctn8 = mcpeText(10, "chunkZ: --");
+	Gear.menu_ctn8_p = new c.l.LayoutParams(c.w, c.w);
+	Gear.menu_ctn8_p.setMargins(DIP*2, DIP*2, 0, 0);
+	Gear.menu_ctn8.setLayoutParams(Gear.menu_ctn8_p);
+	
+	l.addView(Gear.menu_ctn1);
+	l.addView(Gear.menu_ctn2);
+	l.addView(Gear.menu_ctn3);
+	l.addView(Gear.menu_ctn2_2);
+	l.addView(Gear.menu_ctn4);
+	l.addView(Gear.menu_ctn5);
+	l.addView(Gear.menu_ctn6);
+	l.addView(Gear.menu_ctn8);
+	
+	return l;
+}catch(e) {
+	showError(e);
+	return false;
+}});
+
+//기어메뉴가 틱마다 할 행동 지정
+Gear.menu_loc.setTick(function() {try {
+	var x = Player.getX();
+	var y = Player.getY();
+	var z = Player.getZ();
+	var cx = Math.floor(x/16);
+	var cz = Math.floor(z/16);
+	var px = parseInt(Math.floor(x*100))/100;
+	var py = parseInt(Math.floor(y*100))/100;
+	var pz = parseInt(Math.floor(z*100))/100;
+	var biome = Level.getBiomeName(x, z);
+	var b = Level.getBrightness(x, y, z);
+	var ep = Math.floor(y+1);
+	var cex = x;
+	var cez = z;
+	while(cex < 0) {
+		cex += 16;
+	}
+	while(cez < 0) {
+		cez += 16;
+	}
+	cex %= 16;
+	cez %= 16;
+	
+	uiThread(function() {try {
+		Gear.menu_ctn1.setText("X: " + px);
+		Gear.menu_ctn2.setText("Y: " + py);
+		Gear.menu_ctn3.setText("Z: " + pz);
+		Gear.menu_ctn2_2.setText("EyePos: " + ep);
+		Gear.menu_ctn4.setText("Biome: " + biome);
+		Gear.menu_ctn5.setText("LightLevel: " + b);
+		Gear.menu_ctn6.setText("chunkX: " + cx + "(" + Math.floor(cex) + ")");
+		Gear.menu_ctn8.setText("chunkZ: " + cz + "(" + Math.floor(cez) + ")");
+	}catch(e) {
+		showError(e);
+	}});
+}catch(e) {
+	showError(e);
+}});
+
+Gear.menu_pedometer = new GearMenu("Pedometer");
+Gear.menu_pedometer.setLayout(function() {try {
+	var l = new c.l(ctx);
+	l.setOrientation(c.l.VERTICAL);
+	l.setGravity(Gravity.CENTER);
+	
+	var l2 = new c.l(ctx);
+	l2.setOrientation(c.l.HORIZONTAL);
+	l2.setGravity(Gravity.BOTTOM|Gravity.RIGHT);
+	l2_p = new c.l.LayoutParams(c.m, c.w);
+	l2_p.setMargins(DIP*2, DIP*2, DIP*2, DIP*2);
+	l2.setLayoutParams(l2_p);
+	
+	Gear.menu_ctn1 = mcpeText(10, "---,---,---");
+	l2.addView(Gear.menu_ctn1);
+	
+	Gear.menu_ctn2 = new Button(ctx);
+	Gear.menu_ctn2.setTransformationMethod(null);
+	Gear.menu_ctn2.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+	Gear.menu_ctn2.setTextSize(c.p, DIP*10);
+	Gear.menu_ctn2.setTextColor(Color.WHITE);
+	if(FILE_FONT.exists()) {
+		Gear.menu_ctn2.setTypeface(Typeface.createFromFile(FILE_FONT));
+	}
+	Gear.menu_ctn2.setPadding(0, 0, 0, 0);
+	Gear.menu_ctn2.setText("R");
+	Gear.menu_ctn2.setBackgroundDrawable(Assets.gearBtn_9());
+	Gear.menu_ctn2_p = new c.l.LayoutParams(DIP*16, DIP*16);
+	Gear.menu_ctn2_p.setMargins(DIP*2, DIP*0, DIP*2, DIP*0);
+	Gear.menu_ctn2.setLayoutParams(Gear.menu_ctn2_p);
+	Gear.menu_ctn2.setOnTouchListener(View.OnTouchListener({onTouch: function(view, event) {try {
+			switch(event.action) {
+				//클릭할때 버튼의 이미지를 변경
+				case MotionEvent.ACTION_DOWN:
+				view.setBackgroundDrawable(Assets.gearBtnC_9());
+				break;
+				//클릭하고 나서 버튼의 이미지를 원래대로
+				case MotionEvent.ACTION_UP:
+				case MotionEvent.ACTION_CANCEL:
+				view.setBackgroundDrawable(Assets.gearBtn_9());
+				break;
+			}
+			return false;
+		}catch(e) {
+			showError(e);
+			return false;
+		}}}));
+		Gear.menu_ctn2.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+				Gear.stepLock = Math.floor(Gear.step);
+				saveData(FILE_MAP_DATA(), "STEP_LOCK", Gear.stepLock);
+				saveData(FILE_MAP_DATA(), "STEP", Math.floor(Gear.step) + "");
+		}catch(e) {
+			showError(e);
+		}}}));
+	l2.addView(Gear.menu_ctn2);
+	l.addView(l2);
+	
+	Gear.menu_ctn3 = mcpeText(8, "Total: ---,---,---");
+	Gear.menu_ctn3.setTextColor(Color.YELLOW);
+	l.addView(Gear.menu_ctn3);
+	
+	
+	
+	return l;
+}catch(e) {
+	showError(e);
+}});
+
+Gear.menu_pedometer.setTick(function() {try {
+	var s = Math.floor(Gear.step - Gear.stepLock) + "";
+	var ss = s.split("");
+	var str = "";
+	for(var e = 0; e < ss.length; e++) {
+		str += ss[e];
+		if(((ss.length - e) % 3) == 1 && (ss.length -e) != 1) {
+			str += ",";
+		}
+	}
+	
+	var s2 = Math.floor(Gear.step) + "";
+	var ss2 = s2.split("");
+	var str2 = "";
+	for(var e = 0; e < ss2.length; e++) {
+		str2 += ss2[e];
+		if(((ss2.length - e) % 3) == 1 && (ss2.length -e) != 1) {
+			str2 += ",";
+		}
+	}
+	uiThread(function() {try {
+		Gear.menu_ctn1.setText(str);
+		Gear.menu_ctn3.setText("Total: " + str2);
+	}catch(e) {
+		showError(e);
+	}});
+}catch(e) {
+	showError(e);
+}});
 
 //타이틀 화면에서의 기어그룹 생성
 Gear.group_onTitle = new GearGroup("Title Screen");
@@ -982,7 +1201,9 @@ Gear.group_onTitle.addMenu(Gear.menu_battery);
 //싱글플레이에서 기어그룹 생성
 Gear.group_inGame = new GearGroup("Single Play");
 Gear.group_inGame.addMenu(Gear.menu_main);
-Gear.group_onTitle.addMenu(Gear.menu_clockM);
+Gear.group_inGame.addMenu(Gear.menu_clockM);
+Gear.group_inGame.addMenu(Gear.menu_loc);
+Gear.group_inGame.addMenu(Gear.menu_pedometer);
 Gear.group_inGame.addMenu(Gear.menu_clock);
 Gear.group_inGame.addMenu(Gear.menu_battery);
 
@@ -1127,8 +1348,8 @@ Gear.mainGuiLoad = function() {try {
 			var y = Gear.ry - Gear.ey + Gear.cy;
 			var w = Gear.ww;
 			var h = Gear.wh;
-			if(w < DIP*120) {
-				w = DIP*120;
+			if(w < DIP*122) {
+				w = DIP*122;
 			}
 			if(h < DIP*36) {
 				h = DIP*36;
@@ -1144,8 +1365,8 @@ Gear.mainGuiLoad = function() {try {
 			var y = Gear.ry - Gear.ey + Gear.cy;
 			var w = Gear.ww;
 			var h = Gear.wh;
-			if(w < DIP*120) {
-				w = DIP*120;
+			if(w < DIP*122) {
+				w = DIP*122;
 			}
 			if(h < DIP*36) {
 				h = DIP*36;
@@ -1193,8 +1414,8 @@ Gear.mainGuiLoad = function() {try {
 			var y = Gear.wy;
 			var w = Gear.ww - Gear.cx;
 			var h = Gear.wh;
-			if(w < DIP*120) {
-				w = DIP*120;
+			if(w < DIP*122) {
+				w = DIP*122;
 			}
 			if(h < DIP*36) {
 				h = DIP*36;
@@ -1209,8 +1430,8 @@ Gear.mainGuiLoad = function() {try {
 			var y = Gear.wy;
 			var w = Gear.ww - Gear.cx;
 			var h = Gear.wh;
-			if(w < DIP*120) {
-				w = DIP*120;
+			if(w < DIP*122) {
+				w = DIP*122;
 			}
 			if(h < DIP*36) {
 				h = DIP*36;
@@ -1256,8 +1477,8 @@ Gear.mainGuiLoad = function() {try {
 			var y = Gear.wy;
 			var w = Gear.ww + Gear.cx;
 			var h = Gear.wh;
-			if(w < DIP*120) {
-				w = DIP*120;
+			if(w < DIP*122) {
+				w = DIP*122;
 			}
 			if(h < DIP*36) {
 				h = DIP*36;
@@ -1272,8 +1493,8 @@ Gear.mainGuiLoad = function() {try {
 			var y = Gear.wy;
 			var w = Gear.ww + Gear.cx;
 			var h = Gear.wh;
-			if(w < DIP*120) {
-				w = DIP*120;
+			if(w < DIP*122) {
+				w = DIP*122;
 			}
 			if(h < DIP*36) {
 				h = DIP*36;
@@ -1318,8 +1539,8 @@ Gear.mainGuiLoad = function() {try {
 			var y = Gear.wy;
 			var w = Gear.ww;
 			var h = Gear.wh + Gear.cy;
-			if(w < DIP*120) {
-				w = DIP*120;
+			if(w < DIP*122) {
+				w = DIP*122;
 			}
 			if(h < DIP*36) {
 				h = DIP*36;
@@ -1334,8 +1555,8 @@ Gear.mainGuiLoad = function() {try {
 			var y = Gear.wy
 			var w = Gear.ww
 			var h = Gear.wh + Gear.cy;
-			if(w < DIP*120) {
-				w = DIP*120;
+			if(w < DIP*122) {
+				w = DIP*122;
 			}
 			if(h < DIP*36) {
 				h = DIP*36;
@@ -1512,6 +1733,7 @@ Gear.mainGuiLoad = function() {try {
 				var ry = y - Gear.eventY;
 				if(Gear.eventType === 0 && ry > 20) {
 					Gear.currentGear.changeMenu(Gear.currentGear.getIndexByName("Main"));
+					saveData(FILE_MAIN_DATA, Gear.currentGear.getName(), 0);
 				}else if(Gear.eventType === 0 && ry < -10 ) {
 					if(Gear.exit_q == false) {
 						Gear.title_text.setText("종료?");
@@ -1540,7 +1762,7 @@ Gear.mainGuiLoad = function() {try {
 	Gear.frame.setPadding(0, 0, 0, 0);
 	Gear.frame.setId(randomId());
 	Gear.frame_p = new c.r.LayoutParams(c.m, c.m);
-	Gear.frame_p.setMargins(0, 0, 0, 0);
+	Gear.frame_p.setMargins(DIP*2, 0, DIP*2, DIP*2);
 	Gear.frame_p.addRule(c.r.BELOW, Gear.title.getId());
 	Gear.frame.setLayoutParams(Gear.frame_p);
 	Gear.content.addView(Gear.frame);
@@ -1612,7 +1834,7 @@ ctx.runOnUiThread(new Runnable({run: function() { try{
 function gearFirstLoad() {try {
 	Gear.currentGear = Gear.group_onTitle;
 	Gear.frame.removeAllViews();
-	Gear.currentGear.currentIndex = 0;
+	Gear.currentGear.currentIndex = parseInt(loadData(FILE_MAIN_DATA, Gear.group_onTitle.getName()));
 	var e = Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].getLayout();
 	if(e === false) {
 		msg("[ERROR] " + Gear.toString() + "-" + Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].toString() + " layout load fail");
@@ -1645,20 +1867,42 @@ function gearChecker() {
 function newLevel(str) {
 	Gear.onMap = true;
 	if(net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote) {
-		
+		gearChecker();
 	}else {
 		Gear.currentGear.changeMenu(0);
 		Gear.currentGear = Gear.group_inGame;
-		Gear.currentGear.changeMenu(0);
+		Gear.currentGear.changeMenu(parseInt(loadData(FILE_MAIN_DATA, Gear.group_inGame.getName())));
+		if(FILE_MAP_DATA().exists()) {
+			Gear.step = parseInt(loadData(FILE_MAP_DATA(), "STEP"));
+			Gear.stepLock = parseInt(loadData(FILE_MAP_DATA(), "STEP_LOCK"));
+			if(isNaN(Gear.step)) {
+				Gear.step = 0;
+				saveData(FILE_MAP_DATA(), "STEP", 0);
+			}
+			if(isNaN(Gear.stepLock)) {
+				Gear.stepLock = 0;
+				saveData(FILE_MAP_DATA(), "STEP_LOCK", 0);
+			}
+		}else {
+			FILE_MAP_DIR().mkdirs();
+			FILE_MAP_DATA().createNewFile();
+			saveData(FILE_MAP_DATA(), "STEP", 0);
+			saveData(FILE_MAP_DATA(), "STEP_LOCK", 0);
+			Gear.step = 0;
+			Gear.stepLock = 0;
+		}
 	}
 }
 
 function leaveGame() {
+	if(!Gear.isRemote) {
+		saveData(FILE_MAP_DATA(), "STEP", Math.floor(Gear.step));
+	}
 	Gear.onMap = false;
 	Gear.isRemote = true;
 	Gear.currentGear.changeMenu(0);
 	Gear.currentGear = Gear.group_onTitle;
-	Gear.currentGear.changeMenu(0);
+	Gear.currentGear.changeMenu(parseInt(loadData(FILE_MAIN_DATA, Gear.group_onTitle.getName())));
 	uiThread(function() {try {
 		Gear.hdd_draw.mutate().setColor(Color.parseColor("#000000"));
 	}catch(e) {}});
@@ -1675,6 +1919,17 @@ function procCmd(str) {
 
 function modTick() {
 	try {
+		if(!net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote) {
+			var x = Entity.getVelX(Player.getEntity());
+			var z = Entity.getVelZ(Player.getEntity());
+			if(x !== 0 || z !== 0) {
+				Gear.step += Math.sqrt(Math.pow(x, 2) + Math.pow(z, 2));
+			}
+			if(++Gear.autoSaveTick > 200) {
+				Gear.autoSaveTick = 0;
+				saveData(FILE_MAP_DATA(), "STEP", Math.floor(Gear.step) + "");
+			}
+		}
 		var m = java.lang.System.currentTimeMillis();
 		Gear.lastMillBuffer += (m - Gear.lastMill) - 50;
 		Gear.lastMill = m;
