@@ -86,7 +86,7 @@ BlockImageLoader.create = function(left, right, top, hasNoShadow) {
  * @returns {Bitmap}
  */
 BlockImageLoader.createLeft = function(src) {
-	sr BlockImageLoader.createLeft c = android.graphics.Bitmap.createScaledBitmap(src, 25, 32, false);
+	src = android.graphics.Bitmap.createScaledBitmap(src, 25, 32, false);
 	var mSrc = [0, 0, 25, 0, 25, 32, 0, 32];
 	var mDst = [0, 0, 25, 12, 25, 44, 0, 32];
 	var mtrx = new android.graphics.Matrix();
