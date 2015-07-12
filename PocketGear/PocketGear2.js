@@ -140,12 +140,12 @@ Assets.fullBackground_raw = Bitmap.createBitmap(Assets.mcpeSS_BF, 0, 0, 16, 16);
 Assets.fullBackground = Bitmap.createScaledBitmap(Assets.fullBackground_raw, PIXEL*32, PIXEL*32, false);
 //알맞게 조절된 이미지를 자유자재로 늘릴 수 있게 나인패치하기(위쪽 PIXEL*12 왼쪽 PIXEL*12 아래쪽 PIXEL*24 오른쪽 PIXEL*24 사이에 있는 부분만 늘이고 나머지 부분 유지)
 //(function으로 만드는 이유는 적용할때마다 새로 나인패치 안하면 나인패치가 같은 레이아웃끼리 꼬입니다)
-Assets.fullBackground_9 = function() {return ninePatch1(Assets.fullBackground, PIXEL*12, PIXEL*12, PIXEL*24, PIXEL*24)}
+Assets.fullBackground_9 = function() {return ninePatch1(Assets.fullBackground, PIXEL*12, PIXEL*12, PIXEL*24, PIXEL*24)};
 
 //일반 배경 이미지 (위와 같음)
 Assets.background_raw = Bitmap.createBitmap(Assets.mcpeSS_BF, 34, 43, 14, 14);
 Assets.background = Bitmap.createScaledBitmap(Assets.background_raw, PIXEL*28, PIXEL*28, false);
-Assets.background_9 = function() {return ninePatch1(Assets.background, PIXEL*12, PIXEL*12, PIXEL*22, PIXEL*22)}
+Assets.background_9 = function() {return ninePatch1(Assets.background, PIXEL*12, PIXEL*12, PIXEL*22, PIXEL*22)};
 
 //타이틀 바 이미지 (특수한 경우)
 //(이미지를 보면 알겠지만 이미지가 조각으로 이루어져 있음. 이 이미지들을 합치는 작업이 필요함)
@@ -193,32 +193,32 @@ Assets.title_9 = function() {
 //종료 버튼 이미지
 Assets.exit_raw = Bitmap.createBitmap(Assets.mcpeSS_BF, 60, 0, 18, 18);
 Assets.exit = Bitmap.createScaledBitmap(Assets.exit_raw, 18*PIXEL, 18*PIXEL, false);
-Assets.exit_9 = function() {return ninePatch1(Assets.exit, PIXEL*6, PIXEL*6, PIXEL*30, PIXEL*30)}
+Assets.exit_9 = function() {return ninePatch1(Assets.exit, PIXEL*6, PIXEL*6, PIXEL*30, PIXEL*30)};
 
 //종료 버튼(클릭시) 이미지
 Assets.exitClick_raw = Bitmap.createBitmap(Assets.mcpeSS_BF, 78, 0, 18, 18);
 Assets.exitClick = Bitmap.createScaledBitmap(Assets.exitClick_raw, PIXEL*36, PIXEL*36, false);
-Assets.exitClick_9 = function() {return ninePatch1(Assets.exitClick, PIXEL*6, PIXEL*6, PIXEL*32, PIXEL*32)}
+Assets.exitClick_9 = function() {return ninePatch1(Assets.exitClick, PIXEL*6, PIXEL*6, PIXEL*32, PIXEL*32)};
 
 //버튼 이미지
 Assets.button_raw = Bitmap.createBitmap(Assets.mcpeSS_BF,8,32,8,8);
 Assets.button = Bitmap.createScaledBitmap(Assets.button_raw, PIXEL*16, PIXEL*16, false);
-Assets.button_9 = function() {return ninePatch1(Assets.button, PIXEL*6, PIXEL*4, PIXEL*14, PIXEL*14)}
+Assets.button_9 = function() {return ninePatch1(Assets.button, PIXEL*6, PIXEL*4, PIXEL*14, PIXEL*14)};
 
 //버튼(클릭시) 이미지
 Assets.buttonClick_raw = Bitmap.createBitmap(Assets.mcpeSS_BF,0,32,8,8);
 Assets.buttonClick = Bitmap.createScaledBitmap(Assets.buttonClick_raw, PIXEL*16, PIXEL*16, false);
-Assets.buttonClick_9 = function() {return ninePatch1(Assets.buttonClick, PIXEL*4, PIXEL*4, PIXEL*12, PIXEL*14)}
+Assets.buttonClick_9 = function() {return ninePatch1(Assets.buttonClick, PIXEL*4, PIXEL*4, PIXEL*12, PIXEL*14)};
 
 //사용금지. 이미지 맞지 않음
 Assets.miniButton_raw = Bitmap.createBitmap(Assets.mcpeSS_BF,8,33,8,7);
 Assets.miniButton = Bitmap.createScaledBitmap(Assets.miniButton_raw, PIXEL*16, PIXEL*14, false);
-Assets.miniButton_9 = function() {return ninePatch1(Assets.miniButton, PIXEL*2, PIXEL*2, PIXEL*12, PIXEL*14)}
+Assets.miniButton_9 = function() {return ninePatch1(Assets.miniButton, PIXEL*2, PIXEL*2, PIXEL*12, PIXEL*14)};
 
 //사용금지
 Assets.miniButtonClick_raw = Bitmap.createBitmap(Assets.mcpeSS_BF,0,32,8,7);
 Assets.miniButtonClick = Bitmap.createScaledBitmap(Assets.miniButtonClick_raw, PIXEL*16, PIXEL*14, false);
-Assets.miniButtonClick_9 = function() {return ninePatch1(Assets.miniButtonClick, PIXEL*4, PIXEL*4, PIXEL*12, PIXEL*12)}
+Assets.miniButtonClick_9 = function() {return ninePatch1(Assets.miniButtonClick, PIXEL*4, PIXEL*4, PIXEL*12, PIXEL*12)};
 
 //텍스트뷰 배경 이미지
 //마인크래프트에서 불러오는 파일에는 해당이미지가 없으므로 직접 이미지를 만듭니다
@@ -241,7 +241,7 @@ Assets.textView_raw.setPixels(Assets.textView_pixel, 0, 6, 0, 0, 6, 6);
 //알맞게 크기 조절
 Assets.textView = Bitmap.createScaledBitmap(Assets.textView_raw, PIXEL*6, PIXEL*6, false);
 //나인패치
-Assets.textView_9 = function() {return ninePatch1(Assets.textView, PIXEL*3, PIXEL*3, PIXEL*4, PIXEL*4)}
+Assets.textView_9 = function() {return ninePatch1(Assets.textView, PIXEL*3, PIXEL*3, PIXEL*4, PIXEL*4)};
 
 //포켓기어용 버튼 이미지(위와 같음)
 //(0은 빈(투명한)부분)
@@ -257,7 +257,7 @@ w,w,w,w,0,0,w,w,w,w
 Assets.gearBtn_raw = Bitmap.createBitmap(10, 6, Bitmap.Config.ARGB_8888);
 Assets.gearBtn_raw.setPixels(Assets.gearBtn_pixel, 0, 10, 0, 0, 10, 6);
 Assets.gearBtn = Bitmap.createScaledBitmap(Assets.gearBtn_raw, PIXEL*10, PIXEL*6, false);
-Assets.gearBtn_9 = function() {return ninePatch1(Assets.gearBtn, PIXEL*3, PIXEL*5, PIXEL*4, PIXEL*6)}
+Assets.gearBtn_9 = function() {return ninePatch1(Assets.gearBtn, PIXEL*3, PIXEL*5, PIXEL*4, PIXEL*6)};
 
 //포켓기어용 버튼(클릭시) 이미지(위와 같음)
 var w = Color.YELLOW;
@@ -272,7 +272,7 @@ w,w,w,w,0,0,w,w,w,w
 Assets.gearBtnC_raw = Bitmap.createBitmap(10, 6, Bitmap.Config.ARGB_8888);
 Assets.gearBtnC_raw.setPixels(Assets.gearBtnC_pixel, 0, 10, 0, 0, 10, 6);
 Assets.gearBtnC = Bitmap.createScaledBitmap(Assets.gearBtnC_raw, PIXEL*10, PIXEL*6, false);
-Assets.gearBtnC_9 = function() {return ninePatch1(Assets.gearBtnC, PIXEL*3, PIXEL*5, PIXEL*4, PIXEL*6)}
+Assets.gearBtnC_9 = function() {return ninePatch1(Assets.gearBtnC, PIXEL*3, PIXEL*5, PIXEL*4, PIXEL*6)};
 
 //마인크래프트 글씨체의 텍스트뷰 생성
 function mcpeText(size, text, shadow) {
@@ -376,7 +376,7 @@ Battery.health = function() {
 			return 2;//battery is too cold for work
 			break;
 		case android.os.BatteryManager.BATTERY_HEALTH_OVERHEAT:
-			return 3;//battery buning XD
+			return 3;//battery burning XD
 			break;
 		case android.os.BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE:
 			return 4;//battery voltage is too high
@@ -385,7 +385,7 @@ Battery.health = function() {
 			return 5;//unKnow!
 			break;
 		case android.os.BatteryManager.BATTERY_HEALTH_UNSPECIFIED_FAILURE:
-			return 6;//I don't know why fail but someting wrong.
+			return 6;//I don't know why fail but something wrong.
 			break;
 		default:
 			return -1;//i can't read it maybe your phone API version is higher
@@ -415,7 +415,8 @@ Gear.autoSaveTick = 0;
 
 //modTick과는 별도로 움직이는 "비동기 Thread" 생성
 function AsynchronousModTick() {
-	Gear.thread = new Thread(new Runnable({run: function() {try {while(true) {
+	Gear.thread = new Thread(new Runnable({run: function() {try { //noinspection InfiniteLoopJS
+		while(true) {
 		if(Gear.uiDelay > 0) {
 			Gear.uiDelay--;
 		}
@@ -1121,7 +1122,7 @@ Gear.menu_pedometer.setLayout(function() {try {
 	Gear.menu_ctn2.setText("R");
 	Gear.menu_ctn2.setBackgroundDrawable(Assets.gearBtn_9());
 	Gear.menu_ctn2_p = new c.l.LayoutParams(DIP*16, DIP*16);
-	Gear.menu_ctn2_p.setMargins(DIP*2, DIP*0, DIP*2, DIP*0);
+	Gear.menu_ctn2_p.setMargins(DIP*2, 0, DIP*2, 0);
 	Gear.menu_ctn2.setLayoutParams(Gear.menu_ctn2_p);
 	Gear.menu_ctn2.setOnTouchListener(View.OnTouchListener({onTouch: function(view, event) {try {
 			switch(event.action) {
@@ -1962,11 +1963,7 @@ function modTick() {
 
 
 function parseBoolean(b) {
-	if(b == "true" || b == 1 || b == "yes") {
-		return true;
-	}else {
-		
-	}return false;
+	return (b == "true" || b == 1 || b == "yes");
 }
 
 
@@ -2229,7 +2226,7 @@ function ninePatch2(bitmap, top, left, bottom, right, width, height) {
 		return buffer;
 	};
 	var buffer = getByteBuffer(top, left, bottom, right);
-	return new android.graphics.drawable.NinePatchDrawable(ctx.getResources(), bitmap, buffer.array(), new android.graphics.Rect(), "");;
+	return new android.graphics.drawable.NinePatchDrawable(ctx.getResources(), bitmap, buffer.array(), new android.graphics.Rect(), "");
 }
 
 /**
@@ -2241,10 +2238,10 @@ function ninePatch2(bitmap, top, left, bottom, right, width, height) {
  * @param {Array} arr1
  * @param {Array} arr2
  * @param {String} margeType <HORIZONTAL, VERTICAL>
- * @param {Int} width1
- * @param {Int} height1
- * @param {Int} width2
- * @param {Int} height2
+ * @param {Number} width1
+ * @param {Number} height1
+ * @param {Number} width2
+ * @param {Number} height2
  * @param {...} fillBlank
  * @return {Array} 
  */
