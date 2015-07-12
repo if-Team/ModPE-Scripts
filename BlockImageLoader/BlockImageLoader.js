@@ -1,4 +1,9 @@
 /**
+ * @author affogatoman
+ * @since 2015-7-12
+ */
+
+/**
  * @namespace
  */
 var BlockImageLoader = {};
