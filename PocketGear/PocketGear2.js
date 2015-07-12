@@ -94,10 +94,11 @@ var Canvas = android.graphics.Canvas;
 var Paint = android.graphics.Paint;
 var Path = android.graphics.Path;
 var Shader = android.graphics.Shader;
+var Matrix = android.graphics.Matrix;
 var Typeface = android.graphics.Typeface;
 var ArrayList = java.util.ArrayList;
 var Calendar = java.util.Calendar;
-var GregorianCalendar = java.util.GregorianCalendar
+var GregorianCalendar = java.util.GregorianCalendar;
 
 //길거나 자주써서 적기 귀찮은것을 커스텀 함수로 선언
 var c = {};
@@ -273,6 +274,23 @@ Assets.gearBtnC_raw = Bitmap.createBitmap(10, 6, Bitmap.Config.ARGB_8888);
 Assets.gearBtnC_raw.setPixels(Assets.gearBtnC_pixel, 0, 10, 0, 0, 10, 6);
 Assets.gearBtnC = Bitmap.createScaledBitmap(Assets.gearBtnC_raw, PIXEL*10, PIXEL*6, false);
 Assets.gearBtnC_9 = function() {return ninePatch1(Assets.gearBtnC, PIXEL*3, PIXEL*5, PIXEL*4, PIXEL*6)}
+
+var w = Color.WHITE;
+var g = Color.parseColor("#797979");
+Assets.compass_pixel = [
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,w,0,0,0,0,
+0,0,0,g,w,g,0,0,0,
+0,0,0,g,g,g,0,0,0,
+0,0,0,g,g,g,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+];
+Assets.compass_raw = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
+Assets.compass_raw.setPixels(Assets.compass_pixel, 0, 9, 0, 0, 9, 9);
+Assets.compass = Bitmap.createScaledBitmap(Assets.compass_raw, PIXEL*36, PIXEL*36, false);
 
 //마인크래프트 글씨체의 텍스트뷰 생성
 function mcpeText(size, text, shadow) {
@@ -634,8 +652,11 @@ GearMenu.prototype = {
 	}
 }
 
+
+
 //기어메뉴로 부터 "Main"이라는 메뉴를 생성
 Gear.menu_main = new GearMenu("Main");
+
 //레이아웃 설정
 Gear.menu_main.setLayout(function() {try {
 	var l = new c.l(ctx);
@@ -707,8 +728,11 @@ Gear.menu_main.setLayout(function() {try {
 	return false;
 }});
 
+
+
 //시계 기어메뉴 생성
 Gear.menu_clock = new GearMenu("Clock");
+
 //레이아웃 지정
 Gear.menu_clock.setLayout(function() {try {
 	var l = new c.l(ctx);
@@ -931,8 +955,11 @@ Gear.menu_battery.setTick(function() {
 	}});
 });
 
+
+
 //마인크래프트 시계 기어메뉴
 Gear.menu_clockM = new GearMenu("Mine Clock");
+
 //기어메뉴의 레이아웃
 Gear.menu_clockM.setLayout(function() {try {
 	var l = new c.l(ctx);
@@ -991,8 +1018,10 @@ Gear.menu_clockM.setTick(function() {
 	}});
 });
 
+
 //플레이어 위치 기어메뉴
 Gear.menu_loc = new GearMenu("Location");
+
 //기어메뉴의 레이아웃
 Gear.menu_loc.setLayout(function() {try {
 	var l = new c.l(ctx);
@@ -1094,6 +1123,8 @@ Gear.menu_loc.setTick(function() {try {
 	showError(e);
 }});
 
+
+
 Gear.menu_pedometer = new GearMenu("Pedometer");
 Gear.menu_pedometer.setLayout(function() {try {
 	var l = new c.l(ctx);
@@ -1155,8 +1186,6 @@ Gear.menu_pedometer.setLayout(function() {try {
 	Gear.menu_ctn3.setTextColor(Color.YELLOW);
 	l.addView(Gear.menu_ctn3);
 	
-	
-	
 	return l;
 }catch(e) {
 	showError(e);
@@ -1192,6 +1221,91 @@ Gear.menu_pedometer.setTick(function() {try {
 	showError(e);
 }});
 
+
+
+Gear.menu_nearPlayer = new GearMenu("Near Player");
+
+Gear.menu_nearPlayer.setLayout(function() {try {
+	var l = new c.l(ctx);
+	l.setOrientation(c.l.VERTICAL);
+	l.setGravity(Gravity.CENTER);
+	
+	Gear.menu_ctn1 = mcpeText(10, "--m --hp");
+	l.addView(Gear.menu_ctn1);
+	
+	var l2 = new c.l(ctx);
+	l2.setOrientation(c.l.HORIZONTAL);
+	l2.setGravity(Gravity.CENTER);
+	
+	Gear.menu_ctn2 = new ImageView(ctx);
+	Gear.menu_ctn2.setImageBitmap(Assets.compass);
+	
+	Gear.menu_set1 = new Matrix();
+	Gear.menu_set1.setRotate(123);
+	//Gear.menu_ctn2.setImageMatrix(Gear.menu_set1);
+	
+	l.addView(Gear.menu_ctn2);
+	
+	return l;
+}catch(e) {
+	showError(e);
+}});
+
+Gear.menu_nearPlayer.setTick(function() {try {
+	var l = EntityExtra.getNearPlayers();
+	if(l.length <= 0) {
+		l = null;
+	}else {
+		l = l[0];
+		var range = EntityExtra.getRange(l, Player.getEntity());
+		var health = Entity.getHealth(l);
+		
+		var relativeX = Entity.getX(l) - Entity.getX(Player.getEntity());
+		var relativeY = Entity.getY(l) - Entity.getY(Player.getEntity());
+		var relativeZ = Entity.getZ(l) - Entity.getZ(Player.getEntity());
+		
+		var protoYaw = locToYaw(relativeX, relativeY, relativeZ);
+		var protoPitch = locToPitch(relativeX, relativeY, relativeZ);
+		
+		var relativeYaw = protoYaw - Entity.getYaw(Player.getEntity());
+		var relativePitch = protoPitch - Entity.getPitch(Player.getEntity());
+		
+		if(relativeYaw < 0) {
+			relativeYaw += 360;
+		}
+		relativeYaw %= 360;
+		
+		var reverseRelativeYaw = (relativeYaw + 180) % 360;
+		var reverseRelativePitch = -relativePitch;
+		
+		var enemyRelativeViewYaw = Entity.getYaw(l) - reverseRelativeYaw;
+		var enemyRelativeViewPitch = Entity.getPitch(l) - reverseRelativePitch;
+		
+		uiThread(function() {try {
+			Gear.menu_ctn1.setText(Math.floor(range) + "m " + health + "hp");
+			Gear.menu_ctn2.setRotation(parseInt(relativeYaw));
+		}catch(e) {
+			showError(e);
+		}});
+	}
+}catch(e) {
+	showError(e);
+}});
+
+Gear.menu_blank = new GearMenu("blank");
+
+Gear.menu_blank.setLayout(function() {try {
+	
+}catch(e) {
+	showError(e);
+}});
+
+Gear.menu_blank.setTick(function() {try {
+	
+}catch(e) {
+	showError(e);
+}});
+
 //타이틀 화면에서의 기어그룹 생성
 Gear.group_onTitle = new GearGroup("Title Screen");
 Gear.group_onTitle.addMenu(Gear.menu_main);
@@ -1206,6 +1320,7 @@ Gear.group_inGame.addMenu(Gear.menu_loc);
 Gear.group_inGame.addMenu(Gear.menu_pedometer);
 Gear.group_inGame.addMenu(Gear.menu_clock);
 Gear.group_inGame.addMenu(Gear.menu_battery);
+Gear.group_inGame.addMenu(Gear.menu_nearPlayer);
 
 
 //메인창 불러오기
@@ -1865,6 +1980,7 @@ function gearChecker() {
 }
 
 function newLevel(str) {
+net.zhuoweizhang.mcpelauncher.ScriptManager.nativeCloseScreen();
 	Gear.onMap = true;
 	if(net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote) {
 		gearChecker();
@@ -2311,3 +2427,139 @@ function margeArray(arr1, arr2, margeType, width1, height1, width2, height2, fil
 	}
 	return arr;
 }
+
+EntityFix = {};
+
+EntityFix.isEqual = function(obj1, obj2) {
+	return Entity.getUniqueId(obj1) === Entity.getUniqueId(obj2);
+}
+
+EntityFix.findEnt = function(uniqId) {
+	var list = Entity.getAll();
+	var max = list.length;
+	for(var e = 0; e < max; e++) {
+		if(uniqId === Entity.getUniqueId(list[e])) {
+			return list[e];
+		}
+	}
+}
+
+
+
+var EntityExtra = {};
+
+EntityExtra.getRange = function(obj1, obj2) {try {
+	return Math.sqrt(Math.pow(Entity.getX(obj1) - Entity.getX(obj2), 2) + Math.pow(Entity.getY(obj1) - Entity.getY(obj2), 2) + Math.pow(Entity.getZ(obj1) - Entity.getZ(obj2), 2));
+}catch(e) {
+	return null;
+}};
+
+EntityExtra.getNearPlayers = function() {
+	var a = Entity.getAll();
+	var f = [];
+	var r = [];
+	var n = [];
+	for(var e = 0; e < a.length; e++) {
+		if(Player.isPlayer(a[e]) && !EntityFix.isEqual(a[e], Player.getEntity())) {
+			f.push(a[e]);
+			r.push(EntityExtra.getRange(a[e], Player.getEntity()));
+		}
+	}
+	while(r.length > 0) {
+		var i = r.indexOf(Math.min.apply(null, r));
+		n.push(f[i]);
+		f.splice(i, 1);
+		r.splice(i, 1);
+	}
+	return n;
+}
+
+/**
+ * Location(x, y, z) to Vector(yaw, pitch)
+ *
+ * @since 2015-01
+ * @author ToonRaOn
+ */
+
+function locToYaw(x, y, z) {
+	var apil = Math.sqrt(Math.pow(x, 2)+Math.pow(z, 2));
+	var apisinHorizontal = x/apil;
+	var apicosHorizontal = z/apil;
+	var apitanHorizontal = x/z;
+	var apiacosHorizontal = Math.acos(z/apil)*180/Math.PI;
+	var apiatanVertical = Math.atan(y/apil);
+	var alpha = 0;
+	if(apisinHorizontal > 0 && apicosHorizontal > 0 && apitanHorizontal > 0)
+		alpha = 360 - apiacosHorizontal;
+	else if(apisinHorizontal > 0 && apicosHorizontal < 0 && apitanHorizontal < 0) 
+		alpha = 360 - apiacosHorizontal;
+	else if(apisinHorizontal < 0 && apicosHorizontal < 0 && apitanHorizontal > 0) 
+		alpha = apiacosHorizontal;
+	else if(apisinHorizontal < 0 && apicosHorizontal > 0 && apitanHorizontal < 0) 
+		alpha = apiacosHorizontal;
+	else if(apicosHorizontal == 1) alpha = 0;
+	else if(apisinHorizontal == 1) alpha = 90;
+	else if(apicosHorizontal == -1) alpha = 180;
+	else if(apisinHorizontal == -1) alpha = 270;
+	else if(apisinHorizontal == 0 && apicosHorizontal == 1 && apitanHorizontal == 0) null;
+	return alpha;
+};
+
+function locToPitch(x, y, z) {
+	return -1 * Math.atan(y / Math.sqrt(Math.pow(x, 2)+Math.pow(z, 2))) * 180 / Math.PI;
+};
+
+
+
+/**
+ * Entity range
+ *
+ * @since 2015-01
+ * @author CodeInside
+ */
+
+function rangeEnt(a, b) {
+	return Math.sqrt(Math.pow(Entity.getX(a) - Entity.getX(b), 2) + Math.pow(Entity.getY(a) - Entity.getY(b), 2) + Math.pow(Entity.getZ(a) - Entity.getZ(b), 2));
+};
+
+
+
+/**
+ * Vector(yaw, pitch) to Location(x, y, z)
+ *
+ * @since 2015-01
+ * @author CodeInside
+ */
+
+function vectorToX(y, p) {
+	return (-1 * Math.sin(y / 180 * Math.PI) * Math.cos(p / 180 * Math.PI));
+};
+
+function vectorToY(y, p) {
+	return (Math.sin(-p / 180 * Math.PI));
+};
+
+function vectorToZ(y, p) {
+	return (Math.cos(y / 180 * Math.PI) * Math.cos(p / 180 * Math.PI));
+};
+
+
+
+/**
+ * Absolute range x, y, z
+ *
+ * @since 2015-01
+ * @author CodeInside
+ */
+
+function absX(x, y, z) {
+	return x / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+};
+
+function absY(x, y, z) {
+	return y / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+};
+
+function absZ(x, y, z) {
+	return z / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+};
