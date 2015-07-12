@@ -141,12 +141,12 @@ Assets.fullBackground_raw = Bitmap.createBitmap(Assets.mcpeSS_BF, 0, 0, 16, 16);
 Assets.fullBackground = Bitmap.createScaledBitmap(Assets.fullBackground_raw, PIXEL*32, PIXEL*32, false);
 //알맞게 조절된 이미지를 자유자재로 늘릴 수 있게 나인패치하기(위쪽 PIXEL*12 왼쪽 PIXEL*12 아래쪽 PIXEL*24 오른쪽 PIXEL*24 사이에 있는 부분만 늘이고 나머지 부분 유지)
 //(function으로 만드는 이유는 적용할때마다 새로 나인패치 안하면 나인패치가 같은 레이아웃끼리 꼬입니다)
-Assets.fullBackground_9 = function() {return ninePatch1(Assets.fullBackground, PIXEL*12, PIXEL*12, PIXEL*24, PIXEL*24)}
+Assets.fullBackground_9 = function() {return ninePatch1(Assets.fullBackground, PIXEL*12, PIXEL*12, PIXEL*24, PIXEL*24)};
 
 //일반 배경 이미지 (위와 같음)
 Assets.background_raw = Bitmap.createBitmap(Assets.mcpeSS_BF, 34, 43, 14, 14);
 Assets.background = Bitmap.createScaledBitmap(Assets.background_raw, PIXEL*28, PIXEL*28, false);
-Assets.background_9 = function() {return ninePatch1(Assets.background, PIXEL*12, PIXEL*12, PIXEL*22, PIXEL*22)}
+Assets.background_9 = function() {return ninePatch1(Assets.background, PIXEL*12, PIXEL*12, PIXEL*22, PIXEL*22)};
 
 //타이틀 바 이미지 (특수한 경우)
 //(이미지를 보면 알겠지만 이미지가 조각으로 이루어져 있음. 이 이미지들을 합치는 작업이 필요함)
@@ -189,37 +189,37 @@ Assets.title = Bitmap.createScaledBitmap(Assets.title_raw, PIXEL*24, PIXEL*56, f
 //원하는 만큼 늘릴 수 있게 나인패치
 Assets.title_9 = function() {
 	return ninePatch1(Assets.title, PIXEL*5, PIXEL*5, PIXEL*46, PIXEL*20);
-}
+};
 
 //종료 버튼 이미지
 Assets.exit_raw = Bitmap.createBitmap(Assets.mcpeSS_BF, 60, 0, 18, 18);
 Assets.exit = Bitmap.createScaledBitmap(Assets.exit_raw, 18*PIXEL, 18*PIXEL, false);
-Assets.exit_9 = function() {return ninePatch1(Assets.exit, PIXEL*6, PIXEL*6, PIXEL*30, PIXEL*30)}
+Assets.exit_9 = function() {return ninePatch1(Assets.exit, PIXEL*6, PIXEL*6, PIXEL*30, PIXEL*30)};
 
 //종료 버튼(클릭시) 이미지
 Assets.exitClick_raw = Bitmap.createBitmap(Assets.mcpeSS_BF, 78, 0, 18, 18);
 Assets.exitClick = Bitmap.createScaledBitmap(Assets.exitClick_raw, PIXEL*36, PIXEL*36, false);
-Assets.exitClick_9 = function() {return ninePatch1(Assets.exitClick, PIXEL*6, PIXEL*6, PIXEL*32, PIXEL*32)}
+Assets.exitClick_9 = function() {return ninePatch1(Assets.exitClick, PIXEL*6, PIXEL*6, PIXEL*32, PIXEL*32)};
 
 //버튼 이미지
 Assets.button_raw = Bitmap.createBitmap(Assets.mcpeSS_BF,8,32,8,8);
 Assets.button = Bitmap.createScaledBitmap(Assets.button_raw, PIXEL*16, PIXEL*16, false);
-Assets.button_9 = function() {return ninePatch1(Assets.button, PIXEL*6, PIXEL*4, PIXEL*14, PIXEL*14)}
+Assets.button_9 = function() {return ninePatch1(Assets.button, PIXEL*6, PIXEL*4, PIXEL*14, PIXEL*14)};
 
 //버튼(클릭시) 이미지
 Assets.buttonClick_raw = Bitmap.createBitmap(Assets.mcpeSS_BF,0,32,8,8);
 Assets.buttonClick = Bitmap.createScaledBitmap(Assets.buttonClick_raw, PIXEL*16, PIXEL*16, false);
-Assets.buttonClick_9 = function() {return ninePatch1(Assets.buttonClick, PIXEL*4, PIXEL*4, PIXEL*12, PIXEL*14)}
+Assets.buttonClick_9 = function() {return ninePatch1(Assets.buttonClick, PIXEL*4, PIXEL*4, PIXEL*12, PIXEL*14)};
 
 //사용금지. 이미지 맞지 않음
 Assets.miniButton_raw = Bitmap.createBitmap(Assets.mcpeSS_BF,8,33,8,7);
 Assets.miniButton = Bitmap.createScaledBitmap(Assets.miniButton_raw, PIXEL*16, PIXEL*14, false);
-Assets.miniButton_9 = function() {return ninePatch1(Assets.miniButton, PIXEL*2, PIXEL*2, PIXEL*12, PIXEL*14)}
+Assets.miniButton_9 = function() {return ninePatch1(Assets.miniButton, PIXEL*2, PIXEL*2, PIXEL*12, PIXEL*14)};
 
 //사용금지
 Assets.miniButtonClick_raw = Bitmap.createBitmap(Assets.mcpeSS_BF,0,32,8,7);
 Assets.miniButtonClick = Bitmap.createScaledBitmap(Assets.miniButtonClick_raw, PIXEL*16, PIXEL*14, false);
-Assets.miniButtonClick_9 = function() {return ninePatch1(Assets.miniButtonClick, PIXEL*4, PIXEL*4, PIXEL*12, PIXEL*12)}
+Assets.miniButtonClick_9 = function() {return ninePatch1(Assets.miniButtonClick, PIXEL*4, PIXEL*4, PIXEL*12, PIXEL*12)};
 
 //텍스트뷰 배경 이미지
 //마인크래프트에서 불러오는 파일에는 해당이미지가 없으므로 직접 이미지를 만듭니다
@@ -242,7 +242,7 @@ Assets.textView_raw.setPixels(Assets.textView_pixel, 0, 6, 0, 0, 6, 6);
 //알맞게 크기 조절
 Assets.textView = Bitmap.createScaledBitmap(Assets.textView_raw, PIXEL*6, PIXEL*6, false);
 //나인패치
-Assets.textView_9 = function() {return ninePatch1(Assets.textView, PIXEL*3, PIXEL*3, PIXEL*4, PIXEL*4)}
+Assets.textView_9 = function() {return ninePatch1(Assets.textView, PIXEL*3, PIXEL*3, PIXEL*4, PIXEL*4)};
 
 //포켓기어용 버튼 이미지(위와 같음)
 //(0은 빈(투명한)부분)
@@ -258,7 +258,7 @@ w,w,w,w,0,0,w,w,w,w
 Assets.gearBtn_raw = Bitmap.createBitmap(10, 6, Bitmap.Config.ARGB_8888);
 Assets.gearBtn_raw.setPixels(Assets.gearBtn_pixel, 0, 10, 0, 0, 10, 6);
 Assets.gearBtn = Bitmap.createScaledBitmap(Assets.gearBtn_raw, PIXEL*10, PIXEL*6, false);
-Assets.gearBtn_9 = function() {return ninePatch1(Assets.gearBtn, PIXEL*3, PIXEL*5, PIXEL*4, PIXEL*6)}
+Assets.gearBtn_9 = function() {return ninePatch1(Assets.gearBtn, PIXEL*3, PIXEL*5, PIXEL*4, PIXEL*6)};
 
 //포켓기어용 버튼(클릭시) 이미지(위와 같음)
 var w = Color.YELLOW;
@@ -273,7 +273,7 @@ w,w,w,w,0,0,w,w,w,w
 Assets.gearBtnC_raw = Bitmap.createBitmap(10, 6, Bitmap.Config.ARGB_8888);
 Assets.gearBtnC_raw.setPixels(Assets.gearBtnC_pixel, 0, 10, 0, 0, 10, 6);
 Assets.gearBtnC = Bitmap.createScaledBitmap(Assets.gearBtnC_raw, PIXEL*10, PIXEL*6, false);
-Assets.gearBtnC_9 = function() {return ninePatch1(Assets.gearBtnC, PIXEL*3, PIXEL*5, PIXEL*4, PIXEL*6)}
+Assets.gearBtnC_9 = function() {return ninePatch1(Assets.gearBtnC, PIXEL*3, PIXEL*5, PIXEL*4, PIXEL*6)};
 
 var w = Color.WHITE;
 var g = Color.parseColor("#797979");
@@ -307,7 +307,7 @@ function mcpeText(size, text, shadow) {
 	//폰트 파일이 있을때만 설정
 	if(FILE_FONT.exists()) {
 		tv.setTypeface(android.graphics.Typeface.createFromFile(FILE_FONT));
-	};
+	}
 	tv.setPadding(0, 0, 0, 0);
 	tv.setLayoutParams(new c.l.LayoutParams(c.w, c.w));
 	tv.setText(text);
@@ -377,8 +377,7 @@ Battery.volt = function() {
 
 Battery.tec = function() {
 	var batteryStatus = ctx.registerReceiver(null, ifilter);
-	var tec = batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_TECHNOLOGY, -1);
-	return tec;
+	return batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_TECHNOLOGY, -1);
 };
 
 Battery.health = function() {
@@ -395,7 +394,7 @@ Battery.health = function() {
 			return 2;//battery is too cold for work
 			break;
 		case android.os.BatteryManager.BATTERY_HEALTH_OVERHEAT:
-			return 3;//battery buning XD
+			return 3;//battery burning XD
 			break;
 		case android.os.BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE:
 			return 4;//battery voltage is too high
@@ -404,7 +403,7 @@ Battery.health = function() {
 			return 5;//unKnow!
 			break;
 		case android.os.BatteryManager.BATTERY_HEALTH_UNSPECIFIED_FAILURE:
-			return 6;//I don't know why fail but someting wrong.
+			return 6;//I don't know why fail but something wrong.
 			break;
 		default:
 			return -1;//i can't read it maybe your phone API version is higher
@@ -434,7 +433,8 @@ Gear.autoSaveTick = 0;
 
 //modTick과는 별도로 움직이는 "비동기 Thread" 생성
 function AsynchronousModTick() {
-	Gear.thread = new Thread(new Runnable({run: function() {try {while(true) {
+	Gear.thread = new Thread(new Runnable({run: function() {try { //noinspection InfiniteLoopJS
+		while(true) {
 		if(Gear.uiDelay > 0) {
 			Gear.uiDelay--;
 		}
@@ -534,7 +534,7 @@ GearGroup.prototype = {
 		Gear.loading = false;
 		try {
 			Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].getFinish();
-		}catch(e) {};
+		}catch(e) {}
 		Gear.currentGear.currentIndex = index;
 		var e = Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].getLayout();
 		if(e === false) {
@@ -595,14 +595,14 @@ GearGroup.prototype = {
 		}
 		return -1;
 	}
-}
+};
 
 //기어그룹에 들어가는 각각의 기능이 담긴 기어메뉴
 function GearMenu(name) {
 	this.name = name;
-	this.header = function() {}
-	this.tick = function() {}
-	this.finish = function() {}
+	this.header = function() {};
+	this.tick = function() {};
+	this.finish = function() {};
 	this.layout = null;
 }
 
@@ -650,7 +650,7 @@ GearMenu.prototype = {
 	setFinish: function(func) {
 		this.finish = func;
 	}
-}
+};
 
 
 
@@ -747,7 +747,7 @@ Gear.menu_clock.setLayout(function() {try {
 	Gear.menu_ctn1.setTextSize(c.p, DIP*10);
 	if(FILE_FONT.exists()) {
 		Gear.menu_ctn1.setTypeface(Typeface.createFromFile(FILE_FONT));
-	};
+	}
 	Gear.menu_ctn1.setPadding(0, 0, 0, 0);
 	Gear.menu_ctn1.setText("loading...");
 	Gear.menu_ctn1.setBackgroundDrawable(Assets.gearBtn_9());
@@ -1153,7 +1153,7 @@ Gear.menu_pedometer.setLayout(function() {try {
 	Gear.menu_ctn2.setText("R");
 	Gear.menu_ctn2.setBackgroundDrawable(Assets.gearBtn_9());
 	Gear.menu_ctn2_p = new c.l.LayoutParams(DIP*16, DIP*16);
-	Gear.menu_ctn2_p.setMargins(DIP*2, DIP*0, DIP*2, DIP*0);
+	Gear.menu_ctn2_p.setMargins(DIP*2, 0, DIP*2, 0);
 	Gear.menu_ctn2.setLayoutParams(Gear.menu_ctn2_p);
 	Gear.menu_ctn2.setOnTouchListener(View.OnTouchListener({onTouch: function(view, event) {try {
 			switch(event.action) {
@@ -1195,7 +1195,9 @@ Gear.menu_pedometer.setTick(function() {try {
 	var s = Math.floor(Gear.step - Gear.stepLock) + "";
 	var ss = s.split("");
 	var str = "";
-	for(var e = 0; e < ss.length; e++) {
+
+    var e;
+	for(e = 0; e < ss.length; e++) {
 		str += ss[e];
 		if(((ss.length - e) % 3) == 1 && (ss.length -e) != 1) {
 			str += ",";
@@ -1205,7 +1207,7 @@ Gear.menu_pedometer.setTick(function() {try {
 	var s2 = Math.floor(Gear.step) + "";
 	var ss2 = s2.split("");
 	var str2 = "";
-	for(var e = 0; e < ss2.length; e++) {
+	for(e = 0; e < ss2.length; e++) {
 		str2 += ss2[e];
 		if(((ss2.length - e) % 3) == 1 && (ss2.length -e) != 1) {
 			str2 += ",";
@@ -1443,53 +1445,54 @@ Gear.mainGuiLoad = function() {try {
 	
 	//창의 위쪽에 있는 이 버튼을 누르고 드래드시 창을 이동시킴
 	Gear.lt.setOnTouchListener(View.OnTouchListener({onTouch: function(view, event) {try {
+        var x, y, w, h;
 		switch(event.action) {
 			case MotionEvent.ACTION_DOWN:
-			Gear.rx = event.getRawX();
-			Gear.ry = event.getRawY();
-			Gear.ex = event.getX();
-			Gear.ey = event.getY();
-			Gear.wx = loadData(FILE_MAIN_DATA, "WINDOW_X");
-			Gear.wy = loadData(FILE_MAIN_DATA, "WINDOW_Y");
-			Gear.ww = Gear.window.getWidth();
-			Gear.wh = Gear.window.getHeight();
-			Gear.cx = event.getRawX() - Gear.rx;
-			Gear.cy = event.getRawY() - Gear.ry;
-			break;
+                Gear.rx = event.getRawX();
+                Gear.ry = event.getRawY();
+                Gear.ex = event.getX();
+                Gear.ey = event.getY();
+                Gear.wx = loadData(FILE_MAIN_DATA, "WINDOW_X");
+                Gear.wy = loadData(FILE_MAIN_DATA, "WINDOW_Y");
+                Gear.ww = Gear.window.getWidth();
+                Gear.wh = Gear.window.getHeight();
+                Gear.cx = event.getRawX() - Gear.rx;
+                Gear.cy = event.getRawY() - Gear.ry;
+                break;
 			case MotionEvent.ACTION_MOVE:
-			Gear.cx = event.getRawX() - Gear.rx;
-			Gear.cy = event.getRawY() - Gear.ry;
-			var x = Gear.rx - Gear.ex + Gear.cx;
-			var y = Gear.ry - Gear.ey + Gear.cy;
-			var w = Gear.ww;
-			var h = Gear.wh;
-			if(w < DIP*122) {
-				w = DIP*122;
-			}
-			if(h < DIP*36) {
-				h = DIP*36;
-			}
-			/*if(Gear.uiDelay <= 0) {
-				Gear.window.update(Gear.rx - Gear.ex, Gear.ry - Gear.ey - Gear.cy, Gear.ww, Gear.wh + Gear.cy);
-				Gear.uiDelay = 4;
-			}*/
-			Gear.window.update(x, y, w, h);
-			break;
+                Gear.cx = event.getRawX() - Gear.rx;
+                Gear.cy = event.getRawY() - Gear.ry;
+                x = Gear.rx - Gear.ex + Gear.cx;
+                y = Gear.ry - Gear.ey + Gear.cy;
+                w = Gear.ww;
+                h = Gear.wh;
+                if(w < DIP*122) {
+                    w = DIP*122;
+                }
+                if(h < DIP*36) {
+                    h = DIP*36;
+                }
+                /*if(Gear.uiDelay <= 0) {
+                    Gear.window.update(Gear.rx - Gear.ex, Gear.ry - Gear.ey - Gear.cy, Gear.ww, Gear.wh + Gear.cy);
+                    Gear.uiDelay = 4;
+                }*/
+                Gear.window.update(x, y, w, h);
+                break;
 			case MotionEvent.ACTION_UP:
-			var x = Gear.rx - Gear.ex + Gear.cx;
-			var y = Gear.ry - Gear.ey + Gear.cy;
-			var w = Gear.ww;
-			var h = Gear.wh;
-			if(w < DIP*122) {
-				w = DIP*122;
-			}
-			if(h < DIP*36) {
-				h = DIP*36;
-			}
-			Gear.window.update(x, y, w, h);
-			saveData(FILE_MAIN_DATA, "WINDOW_X", x);
-			saveData(FILE_MAIN_DATA, "WINDOW_Y", y);
-			break;
+                x = Gear.rx - Gear.ex + Gear.cx;
+                y = Gear.ry - Gear.ey + Gear.cy;
+                w = Gear.ww;
+                h = Gear.wh;
+                if(w < DIP*122) {
+                    w = DIP*122;
+                }
+                if(h < DIP*36) {
+                    h = DIP*36;
+                }
+                Gear.window.update(x, y, w, h);
+                saveData(FILE_MAIN_DATA, "WINDOW_X", x);
+                saveData(FILE_MAIN_DATA, "WINDOW_Y", y);
+                break;
 		}
 		return false;
 	}catch(e) {
@@ -1509,52 +1512,53 @@ Gear.mainGuiLoad = function() {try {
 	
 	//창의 왼쪽에 있는 이 버튼을 누르고 드래드시 창을 왼쪽으로 확장/축소 시킴
 	Gear.ll.setOnTouchListener(View.OnTouchListener({onTouch: function(view, event) {try {
+        var x, y, w, h;
 		switch(event.action) {
 			case MotionEvent.ACTION_DOWN:
-			Gear.rx = event.getRawX();
-			Gear.ry = event.getRawY();
-			Gear.ex = event.getX();
-			Gear.ey = event.getY();
-			Gear.wx = loadData(FILE_MAIN_DATA, "WINDOW_X");
-			Gear.wy = loadData(FILE_MAIN_DATA, "WINDOW_Y");
-			Gear.ww = Gear.window.getWidth();
-			Gear.wh = Gear.window.getHeight();
-			Gear.cx = event.getRawX() - Gear.rx;
-			Gear.cy = event.getRawY() - Gear.ry;
-			break;
+                Gear.rx = event.getRawX();
+                Gear.ry = event.getRawY();
+                Gear.ex = event.getX();
+                Gear.ey = event.getY();
+                Gear.wx = loadData(FILE_MAIN_DATA, "WINDOW_X");
+                Gear.wy = loadData(FILE_MAIN_DATA, "WINDOW_Y");
+                Gear.ww = Gear.window.getWidth();
+                Gear.wh = Gear.window.getHeight();
+                Gear.cx = event.getRawX() - Gear.rx;
+                Gear.cy = event.getRawY() - Gear.ry;
+                break;
 			case MotionEvent.ACTION_MOVE:
-			Gear.cx = event.getRawX() - Gear.rx;
-			Gear.cy = event.getRawY() - Gear.ry;
-			var x = Gear.rx - Gear.ex + Gear.cx;
-			var y = Gear.wy;
-			var w = Gear.ww - Gear.cx;
-			var h = Gear.wh;
-			if(w < DIP*122) {
-				w = DIP*122;
-			}
-			if(h < DIP*36) {
-				h = DIP*36;
-			}
-			if(Gear.uiDelay <= 0) {
-				Gear.window.update(x, y, w, h);
-				Gear.uiDelay = 4;
-			}
-			break;
+                Gear.cx = event.getRawX() - Gear.rx;
+                Gear.cy = event.getRawY() - Gear.ry;
+                x = Gear.rx - Gear.ex + Gear.cx;
+                y = Gear.wy;
+                w = Gear.ww - Gear.cx;
+                h = Gear.wh;
+                if(w < DIP*122) {
+                    w = DIP*122;
+                }
+                if(h < DIP*36) {
+                    h = DIP*36;
+                }
+                if(Gear.uiDelay <= 0) {
+                    Gear.window.update(x, y, w, h);
+                    Gear.uiDelay = 4;
+                }
+                break;
 			case MotionEvent.ACTION_UP:
-			var x = Gear.rx - Gear.ex + Gear.cx;
-			var y = Gear.wy;
-			var w = Gear.ww - Gear.cx;
-			var h = Gear.wh;
-			if(w < DIP*122) {
-				w = DIP*122;
-			}
-			if(h < DIP*36) {
-				h = DIP*36;
-			}
-			Gear.window.update(x, y, w, h);
-			saveData(FILE_MAIN_DATA, "WINDOW_X", x);
-			saveData(FILE_MAIN_DATA, "WINDOW_W", w);
-			break;
+                x = Gear.rx - Gear.ex + Gear.cx;
+                y = Gear.wy;
+                w = Gear.ww - Gear.cx;
+                h = Gear.wh;
+                if(w < DIP*122) {
+                    w = DIP*122;
+                }
+                if(h < DIP*36) {
+                    h = DIP*36;
+                }
+                Gear.window.update(x, y, w, h);
+                saveData(FILE_MAIN_DATA, "WINDOW_X", x);
+                saveData(FILE_MAIN_DATA, "WINDOW_W", w);
+                break;
 		}
 		return false;
 	}catch(e) {
@@ -1572,51 +1576,52 @@ Gear.mainGuiLoad = function() {try {
 	Gear.lr.setLayoutParams(Gear.lr_p);
 	
 	Gear.lr.setOnTouchListener(View.OnTouchListener({onTouch: function(view, event) {try {
+        var x, y, w, h;
 		switch(event.action) {
 			case MotionEvent.ACTION_DOWN:
-			Gear.rx = event.getRawX();
-			Gear.ry = event.getRawY();
-			Gear.ex = event.getX();
-			Gear.ey = event.getY();
-			Gear.wx = loadData(FILE_MAIN_DATA, "WINDOW_X");
-			Gear.wy = loadData(FILE_MAIN_DATA, "WINDOW_Y");
-			Gear.ww = Gear.window.getWidth();
-			Gear.wh = Gear.window.getHeight();
-			Gear.cx = event.getRawX() - Gear.rx;
-			Gear.cy = event.getRawY() - Gear.ry;
-			break;
+                Gear.rx = event.getRawX();
+                Gear.ry = event.getRawY();
+                Gear.ex = event.getX();
+                Gear.ey = event.getY();
+                Gear.wx = loadData(FILE_MAIN_DATA, "WINDOW_X");
+                Gear.wy = loadData(FILE_MAIN_DATA, "WINDOW_Y");
+                Gear.ww = Gear.window.getWidth();
+                Gear.wh = Gear.window.getHeight();
+                Gear.cx = event.getRawX() - Gear.rx;
+                Gear.cy = event.getRawY() - Gear.ry;
+                break;
 			case MotionEvent.ACTION_MOVE:
-			Gear.cx = event.getRawX() - Gear.rx;
-			Gear.cy = event.getRawY() - Gear.ry;
-			var x = Gear.wx;
-			var y = Gear.wy;
-			var w = Gear.ww + Gear.cx;
-			var h = Gear.wh;
-			if(w < DIP*122) {
-				w = DIP*122;
-			}
-			if(h < DIP*36) {
-				h = DIP*36;
-			}
-			if(Gear.uiDelay <= 0) {
-				Gear.window.update(x, y, w, h);
-				Gear.uiDelay = 4;
-			}
-			break;
+                Gear.cx = event.getRawX() - Gear.rx;
+                Gear.cy = event.getRawY() - Gear.ry;
+                x = Gear.wx;
+                y = Gear.wy;
+                w = Gear.ww + Gear.cx;
+                h = Gear.wh;
+                if(w < DIP*122) {
+                    w = DIP*122;
+                }
+                if(h < DIP*36) {
+                    h = DIP*36;
+                }
+                if(Gear.uiDelay <= 0) {
+                    Gear.window.update(x, y, w, h);
+                    Gear.uiDelay = 4;
+                }
+                break;
 			case MotionEvent.ACTION_UP:
-			var x = Gear.wx;
-			var y = Gear.wy;
-			var w = Gear.ww + Gear.cx;
-			var h = Gear.wh;
-			if(w < DIP*122) {
-				w = DIP*122;
-			}
-			if(h < DIP*36) {
-				h = DIP*36;
-			}
-			Gear.window.update(x, y, w, h);
-			saveData(FILE_MAIN_DATA, "WINDOW_W", w);
-			break;
+                x = Gear.wx;
+                y = Gear.wy;
+                w = Gear.ww + Gear.cx;
+                h = Gear.wh;
+                if(w < DIP*122) {
+                    w = DIP*122;
+                }
+                if(h < DIP*36) {
+                    h = DIP*36;
+                }
+                Gear.window.update(x, y, w, h);
+                saveData(FILE_MAIN_DATA, "WINDOW_W", w);
+                break;
 		}
 		return false;
 	}catch(e) {
@@ -1634,51 +1639,52 @@ Gear.mainGuiLoad = function() {try {
 	Gear.lb.setLayoutParams(Gear.lb_p);
 	
 	Gear.lb.setOnTouchListener(View.OnTouchListener({onTouch: function(view, event) {try {
+        var x, y, w, h;
 		switch(event.action) {
 			case MotionEvent.ACTION_DOWN:
-			Gear.rx = event.getRawX();
-			Gear.ry = event.getRawY();
-			Gear.ex = event.getX();
-			Gear.ey = event.getY();
-			Gear.wx = loadData(FILE_MAIN_DATA, "WINDOW_X");
-			Gear.wy = loadData(FILE_MAIN_DATA, "WINDOW_Y");
-			Gear.ww = Gear.window.getWidth();
-			Gear.wh = Gear.window.getHeight();
-			Gear.cx = event.getRawX() - Gear.rx;
-			Gear.cy = event.getRawY() - Gear.ry;
-			break;
+                Gear.rx = event.getRawX();
+                Gear.ry = event.getRawY();
+                Gear.ex = event.getX();
+                Gear.ey = event.getY();
+                Gear.wx = loadData(FILE_MAIN_DATA, "WINDOW_X");
+                Gear.wy = loadData(FILE_MAIN_DATA, "WINDOW_Y");
+                Gear.ww = Gear.window.getWidth();
+                Gear.wh = Gear.window.getHeight();
+                Gear.cx = event.getRawX() - Gear.rx;
+                Gear.cy = event.getRawY() - Gear.ry;
+                break;
 			case MotionEvent.ACTION_MOVE:
-			Gear.cx = event.getRawX() - Gear.rx;
-			Gear.cy = event.getRawY() - Gear.ry;
-			var x = Gear.wx;
-			var y = Gear.wy;
-			var w = Gear.ww;
-			var h = Gear.wh + Gear.cy;
-			if(w < DIP*122) {
-				w = DIP*122;
-			}
-			if(h < DIP*36) {
-				h = DIP*36;
-			}
-			if(Gear.uiDelay <= 0) {
-				Gear.window.update(x, y, w, h);
-				Gear.uiDelay = 4;
-			}
-			break;
+                Gear.cx = event.getRawX() - Gear.rx;
+                Gear.cy = event.getRawY() - Gear.ry;
+                x = Gear.wx;
+                y = Gear.wy;
+                w = Gear.ww;
+                h = Gear.wh + Gear.cy;
+                if(w < DIP*122) {
+                    w = DIP*122;
+                }
+                if(h < DIP*36) {
+                    h = DIP*36;
+                }
+                if(Gear.uiDelay <= 0) {
+                    Gear.window.update(x, y, w, h);
+                    Gear.uiDelay = 4;
+                }
+                break;
 			case MotionEvent.ACTION_UP:
-			var x = Gear.wx
-			var y = Gear.wy
-			var w = Gear.ww
-			var h = Gear.wh + Gear.cy;
-			if(w < DIP*122) {
-				w = DIP*122;
-			}
-			if(h < DIP*36) {
-				h = DIP*36;
-			}
-			Gear.window.update(x, y, w, h);
-			saveData(FILE_MAIN_DATA, "WINDOW_H", h);
-			break;
+                x = Gear.wx;
+                y = Gear.wy;
+                w = Gear.ww;
+                h = Gear.wh + Gear.cy;
+                if(w < DIP*122) {
+                    w = DIP*122;
+                }
+                if(h < DIP*36) {
+                    h = DIP*36;
+                }
+                Gear.window.update(x, y, w, h);
+                saveData(FILE_MAIN_DATA, "WINDOW_H", h);
+                break;
 		}
 		return false;
 	}catch(e) {
@@ -1743,7 +1749,7 @@ Gear.mainGuiLoad = function() {try {
 	Gear.title_text.setTextSize(c.p, DIP*8);
 	if(FILE_FONT.exists()) {
 		Gear.title_text.setTypeface(android.graphics.Typeface.createFromFile(FILE_FONT));
-	};
+	}
 	Gear.title_text.setPadding(0, 0, 0, 0);
 	Gear.title_text.setGravity(Gravity.CENTER);
 	Gear.title_text.setText("Gear");
@@ -1790,81 +1796,82 @@ Gear.mainGuiLoad = function() {try {
 	Gear.titleCover.setLayoutParams(Gear.titleCover_p);
 	Gear.titleCover.setOnTouchListener(View.OnTouchListener({ onTouch:
 		function(view, event) {try {
+            var x, y, rx, ry;
 			switch(event.action) {
 				case MotionEvent.ACTION_DOWN:
-				gearChecker();
-				Gear.eventX = event.getX();
-				Gear.eventY = event.getY();
-				Gear.eventType = null;
-				break;
+                    gearChecker();
+                    Gear.eventX = event.getX();
+                    Gear.eventY = event.getY();
+                    Gear.eventType = null;
+                    break;
 				case MotionEvent.ACTION_MOVE:
-				var x = event.getX();
-				var y = event.getY();
-				var rx = x - Gear.eventX;
-				var ry = y - Gear.eventY;
-				switch(Gear.eventType) {
-					case 0:
-					if(ry > DIP*20) {
-						Gear.title_text.setText("당겨서 메뉴");
-					}else if(ry < -DIP*20) {
-						Gear.title_text.setText("당겨서 종료");
-					}else {
-						Gear.title_text.setText("Gear");
-					}
-					break;
-					case 1:
-					var size = view.getWidth() - DIP*20;
-					var power = (parseInt(x*100 / size)+1);
-					if(power < 1) {
-						power = 1;
-					}else if(power > 100) {
-						power = 100;
-					}
-					try {
-						var p = ctx.getWindow().getAttributes();
-						if(typeof p.screenBrightness === "number") {
-							p.screenBrightness = power/100;
-							ctx.getWindow().setAttributes(p);
-							Gear.title_text.setText("밝기 " + power + "%");
-						}else {
-							Gear.title_text.setText("지원안함");
-						}
-					}catch(e) {
-						showError(e);
-					}
-					break;
-					default:
-					if(Math.abs(ry) > 20*DIP) {
-						Gear.eventType = 0;
-					}else if(Math.abs(rx) > 20*DIP) {
-						Gear.eventType = 1;
-					}
-				}
-				break;
+                    x = event.getX();
+                    y = event.getY();
+                    rx = x - Gear.eventX;
+                    ry = y - Gear.eventY;
+                    switch(Gear.eventType) {
+                        case 0:
+                            if(ry > DIP*20) {
+                                Gear.title_text.setText("당겨서 메뉴");
+                            }else if(ry < -DIP*20) {
+                                Gear.title_text.setText("당겨서 종료");
+                            }else {
+                                Gear.title_text.setText("Gear");
+                            }
+                            break;
+                        case 1:
+                            var size = view.getWidth() - DIP*20;
+                            var power = (parseInt(x*100 / size)+1);
+                            if(power < 1) {
+                                power = 1;
+                            }else if(power > 100) {
+                                power = 100;
+                            }
+                            try {
+                                var p = ctx.getWindow().getAttributes();
+                                if(typeof p.screenBrightness === "number") {
+                                    p.screenBrightness = power/100;
+                                    ctx.getWindow().setAttributes(p);
+                                    Gear.title_text.setText("밝기 " + power + "%");
+                                }else {
+                                    Gear.title_text.setText("지원안함");
+                                }
+                            }catch(e) {
+                                showError(e);
+                            }
+                            break;
+                        default:
+                            if(Math.abs(ry) > 20*DIP) {
+                                Gear.eventType = 0;
+                            }else if(Math.abs(rx) > 20*DIP) {
+                                Gear.eventType = 1;
+                            }
+                    }
+                    break;
 				case MotionEvent.ACTION_UP:
-				var x = event.getX();
-				var y = event.getY();
-				var rx = x - Gear.eventX;
-				var ry = y - Gear.eventY;
-				if(Gear.eventType === 0 && ry > 20) {
-					Gear.currentGear.changeMenu(Gear.currentGear.getIndexByName("Main"));
-					saveData(FILE_MAIN_DATA, Gear.currentGear.getName(), 0);
-				}else if(Gear.eventType === 0 && ry < -10 ) {
-					if(Gear.exit_q == false) {
-						Gear.title_text.setText("종료?");
-						Gear.exit_q = true;
-					}else {
-						showGear(false);
-						msg("포켓기어를 종료합니다");
-						msg("다시 켜실려면 '/gear' 를 입력하세요");
-						Gear.exit_q = false;
-						Gear.title_text.setText("Gear");
-					}
-					break;
-				}
-				Gear.title_text.setText("Gear");
-				Gear.exit_q = false;
-				break;
+                    x = event.getX();
+                    y = event.getY();
+                    rx = x - Gear.eventX;
+                    ry = y - Gear.eventY;
+                    if(Gear.eventType === 0 && ry > 20) {
+                        Gear.currentGear.changeMenu(Gear.currentGear.getIndexByName("Main"));
+                        saveData(FILE_MAIN_DATA, Gear.currentGear.getName(), 0);
+                    }else if(Gear.eventType === 0 && ry < -10 ) {
+                        if(Gear.exit_q == false) {
+                            Gear.title_text.setText("종료?");
+                            Gear.exit_q = true;
+                        }else {
+                            showGear(false);
+                            msg("포켓기어를 종료합니다");
+                            msg("다시 켜실려면 '/gear' 를 입력하세요");
+                            Gear.exit_q = false;
+                            Gear.title_text.setText("Gear");
+                        }
+                        break;
+                    }
+                    Gear.title_text.setText("Gear");
+                    Gear.exit_q = false;
+                    break;
 			}
 		}catch(e) {
 			showError(e);
@@ -1916,7 +1923,7 @@ Gear.mainGuiLoad = function() {try {
 	Gear.window = new PopupWindow(Gear.layout, w, h, false);
 }catch(e) {
 	showError(e);
-}}
+}};
 
 Gear.mainGuiLoad();
 
@@ -2072,12 +2079,8 @@ function modTick() {
 
 
 function parseBoolean(b) {
-	if(b == "true" || b == 1 || b == "yes") {
-		return true;
-	}else {
-		
-	}return false;
-}1
+	return (b == "true" || b == 1 || b == "yes");
+}
 
 
 
@@ -2339,9 +2342,7 @@ function ninePatch2(bitmap, top, left, bottom, right, width, height) {
 		return buffer;
 	};
 	var buffer = getByteBuffer(top, left, bottom, right);
-	var patch = new android.graphics.drawable.NinePatchDrawable(ctx.getResources(), bitmap, buffer.array(), new android.graphics.Rect(), "");
-	//var bm = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
-	return patch;
+	return new android.graphics.drawable.NinePatchDrawable(ctx.getResources(), bitmap, buffer.array(), new android.graphics.Rect(), "");
 }
 
 /**
@@ -2350,28 +2351,30 @@ function ninePatch2(bitmap, top, left, bottom, right, width, height) {
  * @since 2015-06
  * @author CodeInside
  *
- * @param (Array) arr1
- * @param (Array) arr2
- * @param (String) margeType <HORIZONTAL, VERTICAL>
- * @param (Int) width1
- * @param (Int) height1
- * @param (Int) width2
- * @param (Int) height2
- * @param (...) fillBlank
- * @return (Array) 
+ * @param {Array} arr1
+ * @param {Array} arr2
+ * @param {String} margeType <HORIZONTAL, VERTICAL>
+ * @param {Number} width1
+ * @param {Number} height1
+ * @param {Number} width2
+ * @param {Number} height2
+ * @param {...} fillBlank
+ * @return {Array} 
  */
 function margeArray(arr1, arr2, margeType, width1, height1, width2, height2, fillBlank) {
 	var arr = [];
+
+    var e, f;
 	switch(margeType) {
 		case "HORIZONTAL":
 			var maxHeight = height1 >= height2 ? height1 : height2;
-			for(var e = 0; e < maxHeight; e++) {
+			for(e = 0; e < maxHeight; e++) {
 				if(e < height1) {
-					for(var f = 0; f < width1; f++) {
+					for(f = 0; f < width1; f++) {
 						arr.push(arr1[(e*width1) + f]);
 					}
 				}else {
-					for(var f = 0; f < width1; f++) {
+					for(f = 0; f < width1; f++) {
 						if(fillBlank === null) {
 							arr.push(arr1[(width1*(height1-1)) + f]);
 						}else {
@@ -2380,11 +2383,11 @@ function margeArray(arr1, arr2, margeType, width1, height1, width2, height2, fil
 					}
 				}
 				if(e < height2) {
-					for(var f = 0; f < width2; f++) {
+					for(f = 0; f < width2; f++) {
 						arr.push(arr2[(e*width2) + f]);
 					}
 				}else {
-					for(var f = 0; f < width2; f++) {
+					for(f = 0; f < width2; f++) {
 						if(fillBlank === null) {
 							arr.push(arr2[(width2*(height2-1)) + f]);
 						}else {
@@ -2396,8 +2399,8 @@ function margeArray(arr1, arr2, margeType, width1, height1, width2, height2, fil
 			break;
 		case "VERTICAL":
 			var maxWidth = width1 >= width2 ? width1 : width2;
-			for(var e = 0; e < height1 + height2; e++) {
-				for(var f = 0; f < maxWidth; f++) {
+			for(e = 0; e < height1 + height2; e++) {
+				for(f = 0; f < maxWidth; f++) {
 					if(e < height1) {
 						if(f < width1) {
 							arr.push(arr1[(e*width1) + f]);
