@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-const className = "test";
-const VERSION = "SNAPSHOT_0.1";
+const className = "EasyChat";
+const VERSION = "Indev_0.1";
 const VERSION_CODE = 100;
 
 var TAG = "[" + className + " " + VERSION + "] ";
@@ -31,17 +31,6 @@ var FILE_TEST_DATA = new java.io.File(FILE_MAIN_DIR, "lastLog.txt");
 var FILE_NO_MEDIA = new java.io.File(FILE_MAIN_DIR, ".nomedia");
 function FILE_MAP_DIR() {return new java.io.File(FILE_SD_CARD, "games/com.mojang/minecraftWorlds/" + Level.getWorldDir() + "/mods")}
 function FILE_MAP_DATA() {return new java.io.File(FILE_MAP_DIR(), className + ".json")}
-if(!(FILE_MAIN_DIR.exists())) {
-	FILE_MAIN_DIR.mkdirs();
-	FILE_NO_MEDIA.createNewFile();
-}
-if(!(FILE_MAIN_DATA.exists())) {
-	FILE_MAIN_DATA.createNewFile();
-}
-var DIP = PIXEL * loadData(FILE_MAIN_DATA, "DIPS");
-if(DIP == null || DIP == 0){
-	DIP = PIXEL;
-}
 
 
 
@@ -64,6 +53,7 @@ var FrameLayout = android.widget.FrameLayout;
 var RelativeLayout = android.widget.RelativeLayout;
 var LinearLayout = android.widget.LinearLayout;
 var ScrollView = android.widget.ScrollView;
+var HorizontalScrollView = android.widget.HorizontalScrollView;
 var TextView = android.widget.TextView;
 var Button = android.widget.Button;
 var ImageView = android.widget.ImageView;
@@ -100,6 +90,14 @@ c.s = net.zhuoweizhang.mcpelauncher.ScriptManager;
 
 
 
+if(!FILE_FONT.exists()) {
+	if(!downloadFile(FILE_FONT, "https://www.dropbox.com/s/y1o46b2jkbxwl3o/minecraft.ttf?dl=1")) {
+		toast(TAG + "폰트 다운로드 실패 기본 폰트 적용됨.");
+	}
+}
+
+
+
 var Assets = {};
 //DO NOT USE(TEXTURE PACK MISSING)
 Assets.mcpeCPC = ctx.createPackageContext("com.mojang.minecraftpe", Context.CONTEXT_IGNORE_SECURITY);
@@ -127,28 +125,6 @@ Assets.fullBackground_9 = function() {return ninePatch1(Assets.fullBackground, P
 Assets.background_raw = Bitmap.createBitmap(Assets.mcpeSS_BF, 34, 43, 14, 14);
 Assets.background = Bitmap.createScaledBitmap(Assets.background_raw, PIXEL*28, PIXEL*28, false);
 Assets.background_9 = function() {return ninePatch1(Assets.background, PIXEL*12, PIXEL*12, PIXEL*22, PIXEL*22)}
-
-Assets.title_left_raw = Bitmap.createBitmap(Assets.mcpeTG_BF, 150, 26, 2, 25);
-Assets.title_left_pixel = new c.a(Int.TYPE, 50);
-Assets.title_right_raw = Bitmap.createBitmap(Assets.mcpeTG_BF, 162, 26, 2, 25);
-Assets.title_right_pixel = new c.a(Int.TYPE, 50);
-Assets.title_center_raw = Bitmap.createBitmap(Assets.mcpeTG_BF, 153, 26, 8, 25);
-Assets.title_center_pixel = new c.a(Int.TYPE, 200);
-Assets.title_bottom_raw = Bitmap.createBitmap(Assets.mcpeTG_BF, 153, 52, 8, 3);
-Assets.title_bottom_pixel = new c.a(Int.TYPE, 24);
-Assets.title_left_raw.getPixels(Assets.title_left_pixel, 0, 2, 0, 0, 2, 25);
-Assets.title_right_raw.getPixels(Assets.title_right_pixel, 0, 2, 0, 0, 2, 25);
-Assets.title_center_raw.getPixels(Assets.title_center_pixel, 0, 8, 0, 0, 8, 25);
-Assets.title_bottom_raw.getPixels(Assets.title_bottom_pixel, 0, 8, 0, 0, 8, 3);
-Assets.title_pixel = margeArray(Assets.title_left_pixel, Assets.title_center_pixel, "HORIZONTAL", 2, 25, 8, 25, null);
-Assets.title_pixel = margeArray(Assets.title_pixel, Assets.title_right_pixel, "HORIZONTAL", 10, 25, 2, 25, null);
-Assets.title_pixel = margeArray(Assets.title_pixel, Assets.title_bottom_pixel, "VERTICAL", 12, 25, 8, 3, null);
-Assets.title_raw = Bitmap.createBitmap(12, 28, Bitmap.Config.ARGB_8888);
-Assets.title_raw.setPixels(Assets.title_pixel, 0, 12, 0, 0, 12, 28);
-Assets.title = Bitmap.createScaledBitmap(Assets.title_raw, PIXEL*24, PIXEL*56, false);
-Assets.title_9 = function() {
-	return ninePatch1(Assets.title, PIXEL*5, PIXEL*5, PIXEL*46, PIXEL*20);
-}
 
 Assets.exit_raw = Bitmap.createBitmap(Assets.mcpeSS_BF, 60, 0, 18, 18);
 Assets.exit = Bitmap.createScaledBitmap(Assets.exit_raw, 18*PIXEL, 18*PIXEL, false);
@@ -195,10 +171,10 @@ function mcpeText(size, text, shadow) {
 	tv.setTransformationMethod(null);
 	tv.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null);
 	if(shadow) {
-		tv.setShadowLayer(1/0xffffffff, DIP*1.3, DIP*1.3, Color.DKGRAY);
+		tv.setShadowLayer(1/0xffffffff, PIXEL*1.3, PIXEL*1.3, Color.DKGRAY);
 	}
 	tv.setTextColor(Color.WHITE);
-	tv.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, DIP*size);
+	tv.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, size);
 	if(FILE_FONT.exists()) {
 		tv.setTypeface(android.graphics.Typeface.createFromFile(FILE_FONT));
 	};
@@ -211,11 +187,11 @@ function mcpeButton(size, text) {
 	var btn = new Button(ctx);
 	btn.setTransformationMethod(null);
 	btn.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-	btn.setPadding(DIP*8, DIP*8, DIP*8, DIP*8);
+	btn.setPadding(PIXEL*8, PIXEL*8, PIXEL*8, PIXEL*8);
 	btn.setText(text);
 	btn.setTextColor(Color.WHITE);
 	btn.setTextSize(c.p, size);
-	btn.setShadowLayer(1/0xffffffff, DIP*1.3, DIP*1.3, Color.DKGRAY);
+	btn.setShadowLayer(1/0xffffffff, PIXEL*1.3, PIXEL*1.3, Color.DKGRAY);
 	if(FILE_FONT.exists()) {
 		btn.setTypeface(android.graphics.Typeface.createFromFile(FILE_FONT));
 	}
@@ -226,13 +202,13 @@ function mcpeButton(size, text) {
 			case MotionEvent.ACTION_DOWN:
 			view.setBackgroundDrawable(Assets.buttonClick_9());
 			view.setTextColor(Color.parseColor("#ffff50"));
-			view.setPadding(DIP*8, DIP*12, DIP*8, DIP*8);
+			view.setPadding(PIXEL*8, PIXEL*12, PIXEL*8, PIXEL*8);
 			break;
 			case MotionEvent.ACTION_CANCEL:
 			case MotionEvent.ACTION_UP:
 			view.setBackgroundDrawable(Assets.button_9());
 			view.setTextColor(Color.WHITE);
-			view.setPadding(DIP*8, DIP*8, DIP*8, DIP*8);
+			view.setPadding(PIXEL*8, PIXEL*8, PIXEL*8, PIXEL*8);
 			break;
 		}
 		return false;
@@ -243,3 +219,522 @@ function mcpeButton(size, text) {
 	
 	return btn;
 }
+
+/**
+ * Error report
+ *
+ * @since 2015-04
+ * @author CodeInside
+ *
+ * @param {error} e
+ */
+
+function showError(e) {
+	if(Level.getWorldName() === null) {
+		ctx.runOnUiThread(new java.lang.Runnable({ run: function(){
+	android.widget.Toast.makeText(ctx, "[" + className + " ERROR LINE: " + e.lineNumber + "]" + "\n" + e, android.widget.Toast.LENGTH_LONG).show();
+		}}));
+	}else {
+		var t = (e + "").split(" ");
+		var c = "";
+		var temp = "";
+		for(var l = 0; l < t.length; l++) {
+			if(temp.split("").length > 30) {
+				c += ("\n" + ChatColor.DARK_RED);
+				temp = "";
+			}
+			c += t[l] + " ";
+			temp += t[l];
+		}
+		clientMessage(ChatColor.DARK_RED + "[" + className + " ERROR LINE: " + e.lineNumber + "]\n" + ChatColor.DARK_RED + c);
+	}
+}
+
+
+
+function toast(str) {
+	ctx.runOnUiThread(new java.lang.Runnable( {
+		run: function(){
+			try{
+				android.widget.Toast.makeText(ctx, str, android.widget.Toast.LENGTH_LONG).show();
+			}catch(e) {}
+		}
+	}
+	));
+}
+
+function toasts(str) {
+	ctx.runOnUiThread(new java.lang.Runnable( {
+		run: function(){
+			try{
+				android.widget.Toast.makeText(ctx, str, android.widget.Toast.LENGTH_SHORT).show();
+			}catch(e) {}
+		}
+	}
+	));
+}
+
+function broadcast(str){
+	net.zhuoweizhang.mcpelauncher.ScriptManager.nativeSendChat(str);
+	//clientMessage("<" + Player.getName(Player.getEntity()) + "> " + str);
+}
+
+function sleep(int){
+	java.lang.Thread.sleep(int);
+}
+
+function uiThread(fc) {
+	return ctx.runOnUiThread(new java.lang.Runnable({run: fc}))
+}
+function thread(fc) {
+	return new java.lang.Thread(new java.lang.Runnable( {run: fc}))
+}
+
+//==============================
+//-NinePatch JS
+//Copyright® 2015 affogatoman(colombia2)
+//==============================
+/**
+ * Nine Patch
+ *
+ * @since 2015
+ * @author affogatoman
+ */
+
+function ninePatch1(bitmap, top, left, bottom, right, width, height) {
+	var getByteBuffer = function(top, left, bottom, right) {
+		var NO_COLOR = 0x00000001;
+		var buffer = java.nio.ByteBuffer.allocate(84).order(java.nio.ByteOrder.nativeOrder());
+		buffer.put(0x01);
+		buffer.put(0x02);
+		buffer.put(0x02);
+		buffer.put(0x09);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(left);
+		buffer.putInt(right);
+		buffer.putInt(top);
+		buffer.putInt(bottom);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		return buffer;
+	};
+	var buffer = getByteBuffer(top, left, bottom, right);
+    return new android.graphics.drawable.NinePatchDrawable(ctx.getResources(), bitmap, buffer.array(), new android.graphics.Rect(), "");
+}
+function ninePatch2(bitmap, top, left, bottom, right, width, height) {
+	var getByteBuffer = function(top, left, bottom, right) {
+		var NO_COLOR = 0x00000001;
+		var buffer = java.nio.ByteBuffer.allocate(84).order(java.nio.ByteOrder.nativeOrder());
+		buffer.put(0x01);
+		buffer.put(0x02);
+		buffer.put(0x02);
+		buffer.put(0x09);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(left);
+		buffer.putInt(right);
+		buffer.putInt(top);
+		buffer.putInt(bottom);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		buffer.putInt(NO_COLOR);
+		return buffer;
+	};
+	var buffer = getByteBuffer(top, left, bottom, right);
+	var patch = new android.graphics.drawable.NinePatchDrawable(ctx.getResources(), bitmap, buffer.array(), new android.graphics.Rect(), "");
+	//var bm = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
+	return patch;
+}
+
+/**
+ * Download file
+ *
+ * @since 2015-01
+ * @author CodeInside
+ * 
+ * @param <File> path
+ * @param <String> url
+ * @param <ProgressBar|Null> progressBar
+ */
+
+function downloadFile(path, url, progressBar) {
+	try{
+		var tempApiUrl = new java.net.URL(url);
+		var tempApiUrlConn = tempApiUrl.openConnection();
+		tempApiUrlConn.connect();
+		var tempBis = new java.io.BufferedInputStream(tempApiUrl.openStream());
+		if(progressBar !== null) {
+			progressBar.setMax(tempApiUrlConn.getContentLength());
+		}
+		var tempFos = new java.io.FileOutputStream(path);
+		var tempData = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
+		var tempTotal = 0, tempCount;
+		while ((tempCount = tempBis.read(tempData)) != -1) {
+			tempFos.write(tempData, 0, tempCount);
+			tempTotal += tempCount;
+			if(progressBar !== null) {
+				progressBar.setProgress(tempTotal);
+			}
+		}
+		tempFos.flush();
+		tempFos.close();
+		tempBis.close();
+		return true;
+	}catch(e){
+		return false;
+	}
+}
+
+
+
+var ec = {};
+ec.isAlive = false;
+
+function loadMain() {try {
+	ec.btn = mcpeButton(PIXEL*8, "Chat");
+	ec.btn.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		showDialog();
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.btn.setOnLongClickListener(View.OnLongClickListener({onLongClick: function(view, event) {try {
+		hideAndShow();
+		return true;
+	}catch(e) {
+		showError(e);
+		return true;
+	}}}));
+	ec.window = new PopupWindow(ec.btn, PIXEL*40, PIXEL*40, false);
+}catch(e) {
+	showError(e);
+}}
+
+function showMain(vis) {try {
+	if(vis) {
+		if(ec.isAlive) return;
+		uiThread(function() {try {
+			ec.window.showAtLocation(ctx.getWindow().getDecorView(), Gravity.RIGHT|Gravity.TOP, 0, 0);
+			ec.isAlive = true;
+		}catch(e) {
+			showError(e);
+		}});
+	}else {
+		if(!ec.isAlive) return;
+		uiThread(function() {try {
+			ec.window.dismiss();
+			ec.isAlive = false
+		}catch(e) {
+			showError(e);
+		}});
+	}
+}catch(e) {
+	showError(e);
+}}
+
+
+function showDialog() {try {
+	ec.dialog = new AlertDialog.Builder(ctx);
+	ec.s = new ScrollView(ctx);
+	ec.l = new c.l(ctx);
+	ec.l.setOrientation(c.l.VERTICAL);
+	ec.et = new EditText(ctx);
+	ec.l.addView(ec.et);
+	ec.s2 = new HorizontalScrollView(ctx);
+	ec.l2 = new c.l(ctx);
+	ec.l2.setOrientation(c.l.HORIZONTAL);
+	
+	ec.cf = new Button(ctx);
+	ec.cf.setText("WHITE");
+	ec.cf.setTextColor(Color.parseColor("#ffffff"));
+
+ec.cf.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§f");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.cf);
+	
+	ec.c0 = new Button(ctx);
+	ec.c0.setText("BLACK");
+	ec.c0.setTextColor(Color.parseColor("#000000"));
+
+ec.c0.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§0");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.c0);
+	
+	ec.c1 = new Button(ctx);
+	ec.c1.setText("D_BLUE");
+	ec.c1.setTextColor(Color.parseColor("#0000aa"));
+
+ec.c1.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§1");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.c1);
+	
+	ec.c2 = new Button(ctx);
+	ec.c2.setText("D_GREEN");
+	ec.c2.setTextColor(Color.parseColor("#00aa00"));
+
+ec.c2.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§2");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.c2);
+	
+	ec.c3 = new Button(ctx);
+	ec.c3.setText("D_AQUA");
+	ec.c3.setTextColor(Color.parseColor("#00aaaa"));
+
+ec.c3.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§3");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.c3);
+	
+	ec.c4 = new Button(ctx);
+	ec.c4.setText("D_RED");
+	ec.c4.setTextColor(Color.parseColor("#aa0000"));
+
+ec.c4.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§4");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.c4);
+	
+	ec.c5 = new Button(ctx);
+	ec.c5.setText("D_PURPLE");
+	ec.c5.setTextColor(Color.parseColor("#aa00aa"));
+
+ec.c5.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§5");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.c5);
+	
+	ec.c6 = new Button(ctx);
+	ec.c6.setText("GOLD");
+	ec.c6.setTextColor(Color.parseColor("#ffaa00"));
+
+ec.c6.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§6");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.c6);
+	
+	ec.c7 = new Button(ctx);
+	ec.c7.setText("GRAY");
+	ec.c7.setTextColor(Color.parseColor("#aaaaaa"));
+
+ec.c7.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§7");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.c7);
+	
+	ec.c8 = new Button(ctx);
+	ec.c8.setText("D_GRAY");
+	ec.c8.setTextColor(Color.parseColor("#555555"));
+
+ec.c8.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§8");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.c8);
+	
+	ec.c9 = new Button(ctx);
+	ec.c9.setText("BLUE");
+	ec.c9.setTextColor(Color.parseColor("#5555ff"));
+
+ec.c9.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§9");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.c9);
+	
+	ec.ca = new Button(ctx);
+	ec.ca.setText("GREEN");
+	ec.ca.setTextColor(Color.parseColor("#55ff55"));
+
+ec.ca.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§a");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.ca);
+	
+	ec.cb = new Button(ctx);
+	ec.cb.setText("AQUA");
+	ec.cb.setTextColor(Color.parseColor("#55ffff"));
+
+ec.cb.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§b");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.cb);
+	
+	ec.cc = new Button(ctx);
+	ec.cc.setText("RED");
+	ec.cc.setTextColor(Color.parseColor("#ff5555"));
+
+ec.cc.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§c");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.cc);
+	
+	ec.cd = new Button(ctx);
+	ec.cd.setText("L_PURPLE");
+	ec.cd.setTextColor(Color.parseColor("#ff55ff"));
+
+ec.cd.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§d");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.cd);
+	
+	ec.ce = new Button(ctx);
+	ec.ce.setText("YELLOW");
+	ec.ce.setTextColor(Color.parseColor("#ffff55"));
+
+ec.ce.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§e");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.ce);
+	
+	ec.cl = new Button(ctx);
+	ec.cl.setText("굵게");
+	ec.cl.setTextColor(Color.WHITE);
+
+ec.cl.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§l");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.cl);
+	
+	ec.cm = new Button(ctx);
+	ec.cm.setText("취소선");
+	ec.cm.setTextColor(Color.WHITE);
+
+ec.cm.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§m");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.cm);
+	
+	ec.cn = new Button(ctx);
+	ec.cn.setText("밑줄");
+	ec.cn.setTextColor(Color.WHITE);
+
+ec.cn.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§n");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.cn);
+	
+	ec.co = new Button(ctx);
+	ec.co.setText("기울기");
+	ec.co.setTextColor(Color.WHITE);
+
+ec.co.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§o");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.co);
+	
+	ec.ck = new Button(ctx);
+	ec.ck.setText("RANDOM");
+	ec.ck.setTextColor(Color.WHITE);
+
+ec.ck.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§k");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.ck);
+	
+	ec.cr = new Button(ctx);
+	ec.cr.setText("RESET");
+	ec.cr.setTextColor(Color.WHITE);
+
+ec.cr.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
+		ec.et.setText(ec.et.getText() + "§r");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.l2.addView(ec.cr);
+	
+	ec.s2.addView(ec.l2);
+	ec.l.addView(ec.s2);
+	ec.s.addView(ec.l);
+	ec.dialog.setView(ec.s);
+	ec.dialog.setNegativeButton("Back", null);
+	ec.dialog.setPositiveButton("Send", new android.content.DialogInterface.OnClickListener({onClick: function() {try {
+		broadcast(ec.et.getText() + "");
+	}catch(e) {
+		showError(e);
+	}}}));
+	ec.dialog.create().show();
+}catch(e) {
+	showError(e);
+}}
+
+function hideAndShow() {try {
+	thread(function() {try {
+		showMain(false);
+		sleep(3000);
+		showMain(true);
+	}catch(e) {
+		showError(e);
+	}}).start();
+}catch(e) {
+	showError(e);
+}}
+
+loadMain();
+showMain(true);
