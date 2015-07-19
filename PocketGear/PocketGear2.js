@@ -29,6 +29,7 @@ var FILE_MOD_DIR = new java.io.File(FILE_SD_CARD, "games/com.mojang/minecraftpe/
 var FILE_MAIN_DIR = new java.io.File(FILE_MOD_DIR, className);
 var FILE_FONT = new java.io.File(FILE_MOD_DIR, "minecraft.ttf");
 var FILE_MAIN_DATA = new java.io.File(FILE_MAIN_DIR, "setting.json");
+var FILE_MUSIC_DATA = new java.io.File(FILE_MAIN_DIR, "music.json");
 var FILE_TEST_DATA = new java.io.File(FILE_MAIN_DIR, "lastLog.txt");
 var FILE_NO_MEDIA = new java.io.File(FILE_MAIN_DIR, ".nomedia");
 //현재 들어간 맵의 데이터 파일 위치
@@ -108,6 +109,7 @@ c.a = java.lang.reflect.Array.newInstance;
 c.r = RelativeLayout;
 c.l = LinearLayout;
 c.p = android.util.TypedValue.COMPLEX_UNIT_PX;
+c.s = net.zhuoweizhang.mcpelauncher.ScriptManager;
 
 
 
@@ -276,21 +278,237 @@ Assets.gearBtnC = Bitmap.createScaledBitmap(Assets.gearBtnC_raw, PIXEL*10, PIXEL
 Assets.gearBtnC_9 = function() {return ninePatch1(Assets.gearBtnC, PIXEL*3, PIXEL*5, PIXEL*4, PIXEL*6)};
 
 var w = Color.WHITE;
-var g = Color.parseColor("#797979");
 Assets.compass_pixel = [
 0,0,0,0,w,0,0,0,0,
 0,0,0,0,w,0,0,0,0,
 0,0,0,0,w,0,0,0,0,
-0,0,0,g,w,g,0,0,0,
-0,0,0,g,g,g,0,0,0,
-0,0,0,g,g,g,0,0,0,
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,
 ];
 Assets.compass_raw = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
 Assets.compass_raw.setPixels(Assets.compass_pixel, 0, 9, 0, 0, 9, 9);
-Assets.compass = Bitmap.createScaledBitmap(Assets.compass_raw, PIXEL*36, PIXEL*36, false);
+Assets.compass = Bitmap.createScaledBitmap(Assets.compass_raw, DIP*36, DIP*36, false);
+
+var w = Color.YELLOW;
+Assets.compassY_pixel = [
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+];
+Assets.compassY_raw = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
+Assets.compassY_raw.setPixels(Assets.compassY_pixel, 0, 9, 0, 0, 9, 9);
+Assets.compassY = Bitmap.createScaledBitmap(Assets.compassY_raw, DIP*36, DIP*36, false);
+
+var w = Color.parseColor("#ff5020");
+Assets.compassR_pixel = [
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+];
+Assets.compassR_raw = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
+Assets.compassR_raw.setPixels(Assets.compassR_pixel, 0, 9, 0, 0, 9, 9);
+Assets.compassR = Bitmap.createScaledBitmap(Assets.compassR_raw, DIP*36, DIP*36, false);
+
+var w = Color.parseColor("#a00000");
+Assets.compassDR_pixel = [
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,w,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+];
+Assets.compassDR_raw = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
+Assets.compassDR_raw.setPixels(Assets.compassDR_pixel, 0, 9, 0, 0, 9, 9);
+Assets.compassDR = Bitmap.createScaledBitmap(Assets.compassDR_raw, DIP*36, DIP*36, false);
+
+var g = Color.GRAY;
+Assets.compassN_pixel = [
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,g,g,g,0,0,0,
+0,0,0,g,g,g,0,0,0,
+0,0,0,g,g,g,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+];
+Assets.compassN_raw = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
+Assets.compassN_raw.setPixels(Assets.compassN_pixel, 0, 9, 0, 0, 9, 9);
+Assets.compassN = Bitmap.createScaledBitmap(Assets.compassN_raw, DIP*36, DIP*36, false);
+
+var g = Color.GRAY;
+var b = Color.BLACK;
+Assets.ledB_pixel = [
+0,0,0,0,0,0,0,0,0,
+0,0,g,g,g,g,g,0,0,
+0,g,b,b,b,b,b,g,0,
+0,g,b,b,b,b,b,g,0,
+0,g,b,b,b,b,b,g,0,
+0,g,b,b,b,b,b,g,0,
+0,g,b,b,b,b,b,g,0,
+0,0,g,g,g,g,g,0,0,
+0,0,0,0,0,0,0,0,0,
+];
+Assets.ledB_raw = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
+Assets.ledB_raw.setPixels(Assets.ledB_pixel, 0, 9, 0, 0, 9, 9);
+Assets.ledB = Bitmap.createScaledBitmap(Assets.ledB_raw, DIP*18, DIP*18, false);
+
+var g = Color.GRAY;
+var b = Color.GREEN;
+Assets.ledG_pixel = [
+0,0,0,0,0,0,0,0,0,
+0,0,g,g,g,g,g,0,0,
+0,g,b,b,b,b,b,g,0,
+0,g,b,b,b,b,b,g,0,
+0,g,b,b,b,b,b,g,0,
+0,g,b,b,b,b,b,g,0,
+0,g,b,b,b,b,b,g,0,
+0,0,g,g,g,g,g,0,0,
+0,0,0,0,0,0,0,0,0,
+];
+Assets.ledG_raw = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
+Assets.ledG_raw.setPixels(Assets.ledG_pixel, 0, 9, 0, 0, 9, 9);
+Assets.ledG = Bitmap.createScaledBitmap(Assets.ledG_raw, DIP*18, DIP*18, false);
+
+var g = Color.GRAY;
+var b = Color.YELLOW;
+Assets.ledY_pixel = [
+0,0,0,0,0,0,0,0,0,
+0,0,g,g,g,g,g,0,0,
+0,g,b,b,b,b,b,g,0,
+0,g,b,b,b,b,b,g,0,
+0,g,b,b,b,b,b,g,0,
+0,g,b,b,b,b,b,g,0,
+0,g,b,b,b,b,b,g,0,
+0,0,g,g,g,g,g,0,0,
+0,0,0,0,0,0,0,0,0,
+];
+Assets.ledY_raw = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
+Assets.ledY_raw.setPixels(Assets.ledY_pixel, 0, 9, 0, 0, 9, 9);
+Assets.ledY = Bitmap.createScaledBitmap(Assets.ledY_raw, DIP*18, DIP*18, false);
+
+var g = Color.GRAY;
+var b = Color.RED;
+Assets.ledR_pixel = [
+0,0,0,0,0,0,0,0,0,
+0,0,g,g,g,g,g,0,0,
+0,g,b,b,b,b,b,g,0,
+0,g,b,b,b,b,b,g,0,
+0,g,b,b,b,b,b,g,0,
+0,g,b,b,b,b,b,g,0,
+0,g,b,b,b,b,b,g,0,
+0,0,g,g,g,g,g,0,0,
+0,0,0,0,0,0,0,0,0,
+];
+Assets.ledR_raw = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
+Assets.ledR_raw.setPixels(Assets.ledR_pixel, 0, 9, 0, 0, 9, 9);
+Assets.ledR = Bitmap.createScaledBitmap(Assets.ledR_raw, DIP*18, DIP*18, false);
+
+var g = Color.GRAY;
+var w = Color.WHITE;
+Assets.up1_pixel = [
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,g,0,0,0,0,
+0,0,0,g,w,g,0,0,0,
+0,0,g,w,w,w,g,0,0,
+0,g,g,g,g,g,g,g,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+];
+Assets.up1_raw = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
+Assets.up1_raw.setPixels(Assets.up1_pixel, 0, 9, 0, 0, 9, 9);
+Assets.up1 = Bitmap.createScaledBitmap(Assets.up1_raw, DIP*18, DIP*18, false);
+
+var g = Color.GRAY;
+var w = Color.WHITE;
+Assets.up2_pixel = [
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,g,0,0,0,0,
+0,0,0,g,w,g,0,0,0,
+0,0,g,w,w,w,g,0,0,
+0,g,g,g,g,g,g,g,0,
+0,0,0,g,w,g,0,0,0,
+0,0,g,w,w,w,g,0,0,
+0,g,g,g,g,g,g,g,0,
+0,0,0,0,0,0,0,0,0,
+];
+Assets.up2_raw = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
+Assets.up2_raw.setPixels(Assets.up2_pixel, 0, 9, 0, 0, 9, 9);
+Assets.up2 = Bitmap.createScaledBitmap(Assets.up2_raw, DIP*18, DIP*18, false);
+
+var g = Color.GRAY;
+var w = Color.WHITE;
+Assets.down1_pixel = [
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,g,g,g,g,g,g,g,0,
+0,0,g,w,w,w,g,0,0,
+0,0,0,g,w,g,0,0,0,
+0,0,0,0,g,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+];
+Assets.down1_raw = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
+Assets.down1_raw.setPixels(Assets.down1_pixel, 0, 9, 0, 0, 9, 9);
+Assets.down1 = Bitmap.createScaledBitmap(Assets.down1_raw, DIP*18, DIP*18, false);
+
+var g = Color.GRAY;
+var w = Color.WHITE;
+Assets.down2_pixel = [
+0,0,0,0,0,0,0,0,0,
+0,g,g,g,g,g,g,g,0,
+0,0,g,w,w,w,g,0,0,
+0,0,0,g,w,g,0,0,0,
+0,g,g,g,g,g,g,g,0,
+0,0,g,w,w,w,g,0,0,
+0,0,0,g,w,g,0,0,0,
+0,0,0,0,g,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+];
+Assets.down2_raw = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
+Assets.down2_raw.setPixels(Assets.down2_pixel, 0, 9, 0, 0, 9, 9);
+Assets.down2 = Bitmap.createScaledBitmap(Assets.down2_raw, DIP*18, DIP*18, false);
+
+var g = Color.GRAY;
+var w = Color.WHITE;
+Assets.blank_pixel = [
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+];
+Assets.blank_raw = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
+Assets.blank_raw.setPixels(Assets.blank_pixel, 0, 9, 0, 0, 9, 9);
+Assets.blank = Bitmap.createScaledBitmap(Assets.blank_raw, DIP*18, DIP*18, false);
 
 //마인크래프트 글씨체의 텍스트뷰 생성
 function mcpeText(size, text, shadow) {
@@ -430,69 +648,91 @@ Gear.onChargeLevel = null;
 Gear.step = 0;
 Gear.stepLock = 0;
 Gear.autoSaveTick = 0;
+Gear.disconnectDelay = 100;
+Gear.noMediaScan = false;
+Gear.mediaFiles = 0;
+Gear.mediaDirs = 0;
 
 //modTick과는 별도로 움직이는 "비동기 Thread" 생성
 function AsynchronousModTick() {
 	Gear.thread = new Thread(new Runnable({run: function() {try { //noinspection InfiniteLoopJS
 		while(true) {
-		if(Gear.uiDelay > 0) {
-			Gear.uiDelay--;
-		}
-		/*
-		var m = java.lang.System.currentTimeMillis();
-		Gear.lastMillBuffer += (m - Gear.lastMill) - 50;
-		Gear.lastMill = m;
-		if(--Gear.lastMillBuffer < 0) {
-			Gear.lastMillBuffer = 0;
-		}
-		if(Gear.lastMillBuffer > 1) {
-			Gear.lastMillBuffer -= Math.ceil(Gear.lastMillBuffer/5);
-			uiThread(function() {try {
-				Gear.hdd_draw.mutate().setColor(Color.parseColor("#ffaf30"));
-			}catch(e) {
-			}});
-		}else {
-			uiThread(function() {try {
-				Gear.hdd_draw.mutate().setColor(Color.parseColor("#000000"));
-			}catch(e) {
-			}});
-		}
-		*/
-		
-		if(Gear.currentGear !== null && Gear.loading) {try {
-			Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].getTick();
-			var level = Battery.level();
-			var c = new GregorianCalendar();
-			var am_pm = c.get(Calendar.AM_PM) === Calendar.AM ? "오전" : "오후";
-			var hour = c.get(Calendar.HOUR);
-			var min = c.get(Calendar.MINUTE);
-			min = min < 10 ? "0" + min : min;
-			uiThread(function() {try {
-				Gear.info.setText(level + "%");
-				Gear.clock1.setText(am_pm);
-				Gear.clock2.setText(hour + ":" + min);
-				if(level <= 5) {
-					Gear.info.setTextColor(Color.RED);
-				}else if(level <= 15) {
-					Gear.info.setTextColor(Color.YELLOW);
-				}else {
-					Gear.info.setTextColor(Color.WHITE);
+			//gearChecker();
+			if(Gear.uiDelay > 0) {
+				Gear.uiDelay--;
+			}
+			
+			if(Gear.onMap) {
+				var x = Entity.getVelX(Player.getEntity());
+				var z = Entity.getVelZ(Player.getEntity());
+				if(x !== 0 || z !== 0) {
+					Gear.step += Math.sqrt(Math.pow(x, 2) + Math.pow(z, 2));
 				}
-			}catch(e) {
-				showError(e);
-			}});
-		}catch(e) {
-			toast("[ERROR] " + Gear.currentGear.toString() + "-" + Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].toString());
-			showError(e);
-		}}
+				if(!net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote) {
+					if(++Gear.autoSaveTick > 200) {
+						Gear.autoSaveTick = 0;
+						saveData(FILE_MAP_DATA(), "STEP", Math.floor(Gear.step) + "");
+					}
+				}
+			}
 		
-		sleep(50);
-	}}catch(e) {
+			if(Gear.currentGear !== null && Gear.loading) {try {
+				Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].getTick();
+				var level = Battery.level();
+				var c = new GregorianCalendar();
+				var am_pm = c.get(Calendar.AM_PM) === Calendar.AM ? "오전" : "오후";
+				var hour = c.get(Calendar.HOUR);
+				var min = c.get(Calendar.MINUTE);
+				min = min < 10 ? "0" + min : min;
+				uiThread(function() {try {
+					Gear.info.setText(level + "%");
+					Gear.clock1.setText(am_pm);
+					Gear.clock2.setText(hour + ":" + min);
+					if(level <= 5) {
+						Gear.info.setTextColor(Color.RED);
+					}else if(level <= 15) {
+						Gear.info.setTextColor(Color.YELLOW);
+					}else {
+						Gear.info.setTextColor(Color.WHITE);
+					}
+				}catch(e) {
+					showError(e);
+				}});
+			}catch(e) {
+				toast("[ERROR] " + Gear.currentGear.toString() + "-" + Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].toString());
+				showError(e);
+			}}
+		
+			sleep(50);
+		}
+	}catch(e) {
 		showError(e);
 	}}}));
 	Gear.thread.start();
 }
 AsynchronousModTick();
+
+var audioExtension = ["mp3", "wma", "ogg"];
+function mediaScanning(path, array) {
+	var list = path.listFiles();
+	for(var e = 0; e < list.length; e++) {
+		ModPE.showTipMessage("Dir: " + Gear.mediaDirs + " Files; " + Gear.mediaFiles);
+		if(list[e].isDirectory()) {
+			Gear.mediaDirs++;
+			if(Gear.noMediaScan || list[e].list().indexOf(".nomedia") === -1) {
+				array = mediaScanning(list[e], array);
+			}
+		}else {
+			Gear.mediaFiles++;
+			var extension = (list[e].getName() + "").split(".");
+			if(audioExtension.indexOf(extension[extension.length-1]) !== -1) {
+				array.push([list[e].getName(), list[e].getAbsolutePath()]);
+				clientMessage(list[e].getName() + "");
+			}
+		}
+	}
+	return array;
+}
 
 //기어를 모아두는 그룹
 function GearGroup(name) {
@@ -1239,14 +1479,41 @@ Gear.menu_nearPlayer.setLayout(function() {try {
 	l2.setOrientation(c.l.HORIZONTAL);
 	l2.setGravity(Gravity.CENTER);
 	
+	var l2_2 = new c.r(ctx);
+	
 	Gear.menu_ctn2 = new ImageView(ctx);
-	Gear.menu_ctn2.setImageBitmap(Assets.compass);
+	Gear.menu_ctn2.setImageBitmap(Assets.blank);
+	l2_2.addView(Gear.menu_ctn2);
 	
-	Gear.menu_set1 = new Matrix();
-	Gear.menu_set1.setRotate(123);
-	//Gear.menu_ctn2.setImageMatrix(Gear.menu_set1);
+	Gear.menu_ctn2_2 = new ImageView(ctx);
+	Gear.menu_ctn2_2.setImageBitmap(Assets.blank);
+	l2_2.addView(Gear.menu_ctn2_2);
 	
-	l.addView(Gear.menu_ctn2);
+	Gear.menu_ctn2_3 = new ImageView(ctx);
+	Gear.menu_ctn2_3.setImageBitmap(Assets.compassN);
+	l2_2.addView(Gear.menu_ctn2_3);
+	
+	l2.addView(l2_2);
+	
+	var l3 = new c.l(ctx);
+	l3.setOrientation(c.l.VERTICAL);
+	l3.setGravity(Gravity.CENTER);
+	
+	Gear.menu_ctn3 = new ImageView(ctx);
+	Gear.menu_ctn3.setImageBitmap(Assets.blank);
+	l3.addView(Gear.menu_ctn3);
+	
+	Gear.menu_ctn4 = new ImageView(ctx);
+	Gear.menu_ctn4.setImageBitmap(Assets.ledB);
+	l3.addView(Gear.menu_ctn4);
+	
+	l2.addView(l3);
+	
+	l.addView(l2);
+	
+	Gear.menu_ctn5 = mcpeText(10, "searching...");
+	Gear.menu_ctn5.setTextColor(Color.GRAY);
+	l.addView(Gear.menu_ctn5);
 	
 	return l;
 }catch(e) {
@@ -1257,17 +1524,47 @@ Gear.menu_nearPlayer.setTick(function() {try {
 	var l = EntityExtra.getNearPlayers();
 	if(l.length <= 0) {
 		l = null;
+		if(Gear.disconnectDelay < 100) {
+			Gear.disconnectDelay++;
+			uiThread(function() {try {
+				Gear.menu_ctn1.setTextColor(Color.RED);
+				Gear.menu_ctn2.setImageBitmap(Assets.compassR);
+				Gear.menu_ctn2_2.setImageBitmap(Assets.compassDR);
+			}catch(e) {
+				showError(e);
+			}});
+		}else {
+			uiThread(function() {try {
+				Gear.menu_ctn1.setTextColor(Color.GRAY);
+				Gear.menu_ctn1.setText("--m --hp");
+				Gear.menu_ctn5.setTextColor(Color.GRAY);
+				Gear.menu_ctn5.setText("searching...");
+				Gear.menu_ctn2.setRotation(0);
+				Gear.menu_ctn2.setImageBitmap(Assets.blank);
+				Gear.menu_ctn2_2.setImageBitmap(Assets.blank);
+				Gear.menu_ctn3.setImageBitmap(Assets.blank);
+				Gear.menu_ctn4.setImageBitmap(Assets.ledB);
+			}catch(e) {
+				showError(e);
+			}});
+		}
 	}else {
+		Gear.disconnectDelay = 0;
 		l = l[0];
 		var range = EntityExtra.getRange(l, Player.getEntity());
 		var health = Entity.getHealth(l);
 		
-		var relativeX = Entity.getX(l) - Entity.getX(Player.getEntity());
-		var relativeY = Entity.getY(l) - Entity.getY(Player.getEntity());
-		var relativeZ = Entity.getZ(l) - Entity.getZ(Player.getEntity());
+		var rX = Entity.getX(l) - Entity.getX(Player.getEntity());
+		var rY = Entity.getY(l) - Entity.getY(Player.getEntity());
+		var rZ = Entity.getZ(l) - Entity.getZ(Player.getEntity());
 		
-		var protoYaw = locToYaw(relativeX, relativeY, relativeZ);
-		var protoPitch = locToPitch(relativeX, relativeY, relativeZ);
+		var protoYaw = locToYaw(rX, rY, rZ);
+		var protoPitch = locToPitch(rX, rY, rZ);
+		
+		while(protoYaw < 0) {
+			protoYaw += 360;
+		}
+		protoYaw %= 360;
 		
 		var relativeYaw = protoYaw - Entity.getYaw(Player.getEntity());
 		var relativePitch = protoPitch - Entity.getPitch(Player.getEntity());
@@ -1277,15 +1574,74 @@ Gear.menu_nearPlayer.setTick(function() {try {
 		}
 		relativeYaw %= 360;
 		
+		var reverseProtoYaw = (protoYaw + 180) % 360;
+		var reverseProtoPitch = -protoPitch;
+		
 		var reverseRelativeYaw = (relativeYaw + 180) % 360;
 		var reverseRelativePitch = -relativePitch;
 		
-		var enemyRelativeViewYaw = Entity.getYaw(l) - reverseRelativeYaw;
-		var enemyRelativeViewPitch = Entity.getPitch(l) - reverseRelativePitch;
+		var enemyProtoViewYaw = Entity.getYaw(l) - reverseProtoYaw;
+		var enemyProtoViewPitch = Entity.getPitch(l) - reverseProtoPitch;
+		
+		if(enemyProtoViewYaw < 0) {
+			enemyProtoViewYaw += 360;
+		}
+		enemyProtoViewYaw %= 360;
+		
+		var enemyRelativeViewYaw = Entity.getYaw(l) - Entity.getYaw(Player.getEntity());
+		var enemyRelativeViewPitch = Entity.getPitch(l) - Entity.getPitch(Player.getEntity());;
+		
+		if(enemyRelativeViewYaw < 0) {
+			enemyRelativeViewYaw += 360;
+		}
+		enemyRelativeViewYaw %= 360;
+		
+		var block = false;
+		for(var e = 0; e < range; e++) {
+			var cX = Math.floor(Player.getX() + (absX(rX, rY, rZ) * e));
+			var cY = Math.floor(Player.getY() + (absY(rX, rY, rZ) * e));
+			var cZ = Math.floor(Player.getZ() + (absZ(rX, rY, rZ) * e));
+			if(Level.getTile(cX, cY, cZ) !== 0) {
+				block = true;
+				break;
+			}
+		}
 		
 		uiThread(function() {try {
+			Gear.menu_ctn1.setTextColor(Color.WHITE);
 			Gear.menu_ctn1.setText(Math.floor(range) + "m " + health + "hp");
+			
+			Gear.menu_ctn5.setTextColor(Color.WHITE);
+			Gear.menu_ctn5.setText(Player.getName(l));
+			
+			Gear.menu_ctn2.setImageBitmap(Assets.compass);
 			Gear.menu_ctn2.setRotation(parseInt(relativeYaw));
+			
+			if(enemyProtoViewYaw > 350 || enemyProtoViewYaw < 10) {
+				Gear.menu_ctn2_2.setImageBitmap(Assets.compassR);
+			}else {	
+				Gear.menu_ctn2_2.setImageBitmap(Assets.compassDR);
+			};
+			Gear.menu_ctn2_2.setRotation(parseInt(enemyRelativeViewYaw));
+			
+			if(range > 50 && (block || range > 100)) {
+				Gear.menu_ctn4.setImageBitmap(Assets.ledG);
+			}else if(range > 50) {
+				Gear.menu_ctn4.setImageBitmap(Assets.ledY);
+			}else {
+				Gear.menu_ctn4.setImageBitmap(Assets.ledR);
+			}
+			if(rY > 15) {
+				Gear.menu_ctn3.setImageBitmap(Assets.up2);
+			}else if(rY > 3) {
+				Gear.menu_ctn3.setImageBitmap(Assets.up1);
+			}else if(rY < -15) {
+				Gear.menu_ctn3.setImageBitmap(Assets.down2);
+			}else if(rY < -3) {
+				Gear.menu_ctn3.setImageBitmap(Assets.down1);
+			}else {
+				Gear.menu_ctn3.setImageBitmap(Assets.blank);
+			}
 		}catch(e) {
 			showError(e);
 		}});
@@ -1320,9 +1676,19 @@ Gear.group_inGame.addMenu(Gear.menu_main);
 Gear.group_inGame.addMenu(Gear.menu_clockM);
 Gear.group_inGame.addMenu(Gear.menu_loc);
 Gear.group_inGame.addMenu(Gear.menu_pedometer);
+Gear.group_inGame.addMenu(Gear.menu_nearPlayer);
 Gear.group_inGame.addMenu(Gear.menu_clock);
 Gear.group_inGame.addMenu(Gear.menu_battery);
-Gear.group_inGame.addMenu(Gear.menu_nearPlayer);
+
+Gear.group_inRemote = new GearGroup("Multi Play");
+Gear.group_inRemote.addMenu(Gear.menu_main);
+Gear.group_inRemote.addMenu(Gear.menu_clockM);
+Gear.group_inRemote.addMenu(Gear.menu_loc);
+Gear.group_inRemote.addMenu(Gear.menu_pedometer);
+Gear.group_inRemote.addMenu(Gear.menu_nearPlayer);
+Gear.group_inRemote.addMenu(Gear.menu_clock);
+Gear.group_inRemote.addMenu(Gear.menu_battery);
+
 
 
 //메인창 불러오기
@@ -1977,7 +2343,6 @@ gearFirstLoad();
 function gearChecker() {
 	if(net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote && !Gear.isRemote && Gear.allowRemote) {
 		net.zhuoweizhang.mcpelauncher.ScriptManager.handleMessagePacketCallback("", "BlockLauncher, enable scripts, please and thank you");
-		Gear.isRemote = true;
 		newLevel("multi");
 	}
 	if(!Gear.thread.isAlive) {
@@ -1987,10 +2352,13 @@ function gearChecker() {
 }
 
 function newLevel(str) {
-net.zhuoweizhang.mcpelauncher.ScriptManager.nativeCloseScreen();
 	Gear.onMap = true;
 	if(net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote) {
-		gearChecker();
+		Gear.isRemote = true;
+		msg("Enable on MultiPlay");
+		Gear.currentGear.changeMenu(0);
+		Gear.currentGear = Gear.group_inRemote;
+		Gear.currentGear.changeMenu(0);
 	}else {
 		Gear.currentGear.changeMenu(0);
 		Gear.currentGear = Gear.group_inGame;
@@ -2018,7 +2386,7 @@ net.zhuoweizhang.mcpelauncher.ScriptManager.nativeCloseScreen();
 }
 
 function leaveGame() {
-	if(!Gear.isRemote) {
+	if(!Gear.isRemote && Gear.onMap) {
 		saveData(FILE_MAP_DATA(), "STEP", Math.floor(Gear.step));
 	}
 	Gear.onMap = false;
@@ -2037,22 +2405,20 @@ function procCmd(str) {
 		case "gear":
 		showGear(true);
 		break;
+		case "test":
+		thread(function() {try {
+			var a = mediaScanning(FILE_SD_CARD, []);
+			FILE_MUSIC_DATA.createNewFile();
+			//saveData(FILE_MUSIC_DATA, "CACHE", JSON.stringify(a));
+			clientMessage("Done");
+		}catch(e) {
+			showError(e);
+		}}).start();
 	}
 }
 
 function modTick() {
-	try {
-		if(!net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote) {
-			var x = Entity.getVelX(Player.getEntity());
-			var z = Entity.getVelZ(Player.getEntity());
-			if(x !== 0 || z !== 0) {
-				Gear.step += Math.sqrt(Math.pow(x, 2) + Math.pow(z, 2));
-			}
-			if(++Gear.autoSaveTick > 200) {
-				Gear.autoSaveTick = 0;
-				saveData(FILE_MAP_DATA(), "STEP", Math.floor(Gear.step) + "");
-			}
-		}
+	try {		
 		var m = java.lang.System.currentTimeMillis();
 		Gear.lastMillBuffer += (m - Gear.lastMill) - 50;
 		Gear.lastMill = m;
@@ -2071,6 +2437,7 @@ function modTick() {
 			}catch(e) {
 			}});
 		}
+		
 	}catch(e) {
 		showError(e);
 	}
@@ -2438,13 +2805,22 @@ EntityFix.isEqual = function(obj1, obj2) {
 }
 
 EntityFix.findEnt = function(uniqId) {
-	var list = Entity.getAll();
+	var list = EntityFix.getAll();
 	var max = list.length;
 	for(var e = 0; e < max; e++) {
 		if(uniqId === Entity.getUniqueId(list[e])) {
 			return list[e];
 		}
 	}
+}
+
+EntityFix.getAll = function() {
+	var a = c.s.allentities;
+	var entities = new Array(a.size());
+		for(var n = 0; entities.length > n; n++){
+			entities[n] = a.get(n);
+		}
+		return entities;
 }
 
 
@@ -2458,7 +2834,7 @@ EntityExtra.getRange = function(obj1, obj2) {try {
 }};
 
 EntityExtra.getNearPlayers = function() {
-	var a = Entity.getAll();
+	var a = EntityFix.getAll();
 	var f = [];
 	var r = [];
 	var n = [];
