@@ -13,7 +13,9 @@ BlockTypes = {
     SNOW: 3,
     CARPET: 4,
     TRAPDOOR: 5,
-    FENCE: 6
+    FENCE: 6,
+    PATHGRASS: 7,
+    STONEWALL: 8
 };
 
 /**
@@ -113,6 +115,14 @@ BlockImageLoader.create = function(left, right, top, renderType, hasNoShadow) {
             
         case BlockTypes.FENCE:
             temp = BlockImageLoader.createFence(left, right, top, temp, hasNoShadow);
+            break;
+            
+        case BlockTypes.PATHGRASS:
+            temp = BlockImageLoader.createCube(left, right, top, temp, hasNoShadow, 30);
+            break;
+            
+        case BlockTypes.STONEWALL:
+            temp = BlockImageLoader.createWall(left, right, top, temp, hasNoShadow);
             break;
         
         default:
@@ -334,6 +344,91 @@ BlockImageLoader.createFence = function(left, right, top, temp, hasNoShadow) {
     canvas.drawBitmap(vert, temp.getWidth()-vert.getWidth()-10, temp.getHeight()-vert.getHeight()-5, null);
     canvas.drawBitmap(horz1, 8, 6, null);
     canvas.drawBitmap(horz2, 8, 21, null);
+    
+    return temp;
+};
+
+/**
+ * @param {Bitmap} left
+ * @param {Bitmap} right
+ * @param {Bitmap} top
+ * @param {Bitmap} temp
+ * @param {Boolean} hasNoShadow
+ * @returns {Bitmap}
+ */
+BlockImageLoader.createWall = function(left, right, top, temp, hasNoShadow) {
+    //13 26 6 32
+    var createVert = function(left, right, top) {
+        left = android.graphics.Bitmap.createBitmap(left, 8, 0, 16, 32);
+        left = android.graphics.Bitmap.createScaledBitmap(left, 13, 32, false);
+        var src = [0, 0, 13, 0, 13, 32, 0, 32];
+        var dst = [0, 0, 13, 6, 13, 38, 0, 32];
+        var mtrx = new android.graphics.Matrix();
+        mtrx.setPolyToPoly(src, 0, dst, 0, 4);
+        left = android.graphics.Bitmap.createBitmap(left, 0, 0, left.getWidth(), left.getHeight(), mtrx, false);
+        
+        right = android.graphics.Bitmap.createScaledBitmap(right, 13, 32, false);
+        src = [0, 0, 13, 0, 13, 32, 0, 32];
+        dst = [0, 6, 13, 0, 13, 32, 0, 38];
+        mtrx.setPolyToPoly(src, 0, dst, 0, 4);
+        right = android.graphics.Bitmap.createBitmap(right, 0, 0, right.getWidth(), right.getHeight(), mtrx, false);
+        
+        top = android.graphics.Bitmap.createBitmap(top, 8, 8, 16, 16);
+        top = android.graphics.Bitmap.createScaledBitmap(top, 13, 13, false);
+        src = [0, 0, 13, 0, 13, 13, 0, 13];
+        dst = [0, 6.5, 13.5, 0, 26, 6.5, 13.5, 13];
+        mtrx.setPolyToPoly(src, 0, dst, 0, 4);
+        top = android.graphics.Bitmap.createBitmap(top, 0, 0, top.getWidth(), top.getHeight(), mtrx, false);
+        
+        var temp = android.graphics.Bitmap.createBitmap(26, 44, android.graphics.Bitmap.Config.ARGB_8888);
+        var canvas = new android.graphics.Canvas(temp);
+        var p = new android.graphics.Paint();
+        if(hasNoShadow != false)
+            p.setColorFilter(new android.graphics.PorterDuffColorFilter(android.graphics.Color.rgb(255-65, 255-65, 255-65), android.graphics.PorterDuff.Mode.MULTIPLY));
+        canvas.drawBitmap(left, 0, 6, p);
+        if(hasNoShadow != false)
+            p.setColorFilter(new android.graphics.PorterDuffColorFilter(android.graphics.Color.rgb(255-130, 255-130, 255-130), android.graphics.PorterDuff.Mode.MULTIPLY));
+        canvas.drawBitmap(right, 13, 6, p);
+        canvas.drawBitmap(top, 0, 0, null);
+        
+        return temp;
+    };
+    
+    var createHorzRight = function(right) {
+        right = android.graphics.Bitmap.createBitmap(right, 8, 8, 16, 24);
+        right = android.graphics.Bitmap.createScaledBitmap(right, 11, 24, false);
+        var src = [0, 0, 11, 0, 11, 24, 0, 24];
+        var dst = [0, 6, 11, 0, 11, 24, 0, 30];
+        var mtrx = new android.graphics.Matrix();
+        mtrx.setPolyToPoly(src, 0, dst, 0, 4);
+        right = android.graphics.Bitmap.createBitmap(right, 0, 0, right.getWidth(), right.getHeight(), mtrx, false);
+        
+        return right;
+    };
+    
+    var createHorzTop = function(top) {
+        top = android.graphics.Bitmap.createBitmap(top, 8, 0, 16, 32);
+        var src = [0, 32, 0, 0, 16, 0, 16, 32];
+        var dst = [0, 6.5, 11, 0, 21, 5, 10, 11.5];
+        var mtrx = new android.graphics.Matrix();
+        mtrx.setPolyToPoly(src, 0, dst, 0, 4);
+        top = android.graphics.Bitmap.createBitmap(top, 0, 0, top.getWidth(), top.getHeight(), mtrx, false);
+        
+        return top;
+    };
+    
+    var vert = createVert(left, right, top);
+    var rightHorz = createHorzRight(right);
+    var topHorz = createHorzTop(top);
+    
+    var canvas = new android.graphics.Canvas(temp);
+    var p = new android.graphics.Paint();
+    canvas.drawBitmap(vert, temp.getWidth()-vert.getWidth(), 0, null);
+    if(hasNoShadow != false)
+        p.setColorFilter(new android.graphics.PorterDuffColorFilter(android.graphics.Color.rgb(255-130, 255-130, 255-130), android.graphics.PorterDuff.Mode.MULTIPLY));
+    canvas.drawBitmap(rightHorz, 26, 18, p);
+    canvas.drawBitmap(topHorz, 16, 13, null);
+    canvas.drawBitmap(vert, 0, temp.getHeight()-vert.getHeight(), null);
     
     return temp;
 };
