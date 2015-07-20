@@ -357,7 +357,6 @@ BlockImageLoader.createFence = function(left, right, top, temp, hasNoShadow) {
  * @returns {Bitmap}
  */
 BlockImageLoader.createWall = function(left, right, top, temp, hasNoShadow) {
-    //13 26 6 32
     var createVert = function(left, right, top) {
         left = android.graphics.Bitmap.createBitmap(left, 8, 0, 16, 32);
         left = android.graphics.Bitmap.createScaledBitmap(left, 13, 32, false);
