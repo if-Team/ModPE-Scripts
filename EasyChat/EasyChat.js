@@ -92,8 +92,13 @@ c.s = net.zhuoweizhang.mcpelauncher.ScriptManager;
 
 if(!FILE_FONT.exists()) {
 	if(!downloadFile(FILE_FONT, "https://www.dropbox.com/s/y1o46b2jkbxwl3o/minecraft.ttf?dl=1")) {
-		toast(TAG + "폰트 다운로드 실패 기본 폰트 적용됨.");
+		toast(TAG + "Font download fail. Setting default Font...");
 	}
+}
+
+var DIP = PIXEL * (loadSetting("gfx_dpadscale")-1+2);
+if(DIP == null || DIP == 0){
+	DIP = PIXEL;
 }
 
 
@@ -187,7 +192,7 @@ function mcpeButton(size, text) {
 	var btn = new Button(ctx);
 	btn.setTransformationMethod(null);
 	btn.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-	btn.setPadding(PIXEL*8, PIXEL*8, PIXEL*8, PIXEL*8);
+	btn.setPadding(PIXEL*2, PIXEL*2, PIXEL*2, PIXEL*2);
 	btn.setText(text);
 	btn.setTextColor(Color.WHITE);
 	btn.setTextSize(c.p, size);
@@ -202,13 +207,13 @@ function mcpeButton(size, text) {
 			case MotionEvent.ACTION_DOWN:
 			view.setBackgroundDrawable(Assets.buttonClick_9());
 			view.setTextColor(Color.parseColor("#ffff50"));
-			view.setPadding(PIXEL*8, PIXEL*12, PIXEL*8, PIXEL*8);
+			view.setPadding(PIXEL*2, PIXEL*3, PIXEL*2, PIXEL*2);
 			break;
 			case MotionEvent.ACTION_CANCEL:
 			case MotionEvent.ACTION_UP:
 			view.setBackgroundDrawable(Assets.button_9());
 			view.setTextColor(Color.WHITE);
-			view.setPadding(PIXEL*8, PIXEL*8, PIXEL*8, PIXEL*8);
+			view.setPadding(PIXEL*2, PIXEL*2, PIXEL*2, PIXEL*2);
 			break;
 		}
 		return false;
@@ -409,26 +414,50 @@ function downloadFile(path, url, progressBar) {
 	}
 }
 
+function loadSetting(article) {
+	var fileInputStream = new java.io.FileInputStream(new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/options.txt"));
+	var inputStreamReader = new java.io.InputStreamReader(fileInputStream);
+	var bufferedReader = new java.io.BufferedReader(inputStreamReader);
+	var tempRead, tempReadString;
+
+	while((tempRead = bufferedReader.readLine()) != null){
+		tempReadString = tempRead.toString();
+		if(tempReadString.split(":")[0] == article){
+			fileInputStream.close();
+			inputStreamReader.close();
+			bufferedReader.close();
+			return tempReadString.split(":")[1];
+		}
+	}
+	fileInputStream.close();
+	inputStreamReader.close();
+	bufferedReader.close();
+	return null;
+}
+
 
 
 var ec = {};
 ec.isAlive = false;
 
 function loadMain() {try {
-	ec.btn = mcpeButton(PIXEL*8, "Chat");
+	ec.btn = mcpeButton(DIP*4, "Chat");
 	ec.btn.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		showDialog();
 	}catch(e) {
 		showError(e);
 	}}}));
 	ec.btn.setOnLongClickListener(View.OnLongClickListener({onLongClick: function(view, event) {try {
+		view.setBackgroundDrawable(Assets.button_9());
+		view.setTextColor(Color.WHITE);
+		view.setPadding(PIXEL*2, PIXEL*2, PIXEL*2, PIXEL*2);
 		hideAndShow();
 		return true;
 	}catch(e) {
 		showError(e);
 		return true;
 	}}}));
-	ec.window = new PopupWindow(ec.btn, PIXEL*40, PIXEL*40, false);
+	ec.window = new PopupWindow(ec.btn, DIP*20, DIP*20, false);
 }catch(e) {
 	showError(e);
 }}
@@ -462,6 +491,9 @@ function showDialog() {try {
 	ec.l = new c.l(ctx);
 	ec.l.setOrientation(c.l.VERTICAL);
 	ec.et = new EditText(ctx);
+	//ec.et_w = android.text.TextWatcher.onTextChanged();
+	//ec.et.addTextChangedListener(ec.et_w);
+//android.view.accessibility.AccessibilityEvent
 	ec.l.addView(ec.et);
 	ec.s2 = new HorizontalScrollView(ctx);
 	ec.l2 = new c.l(ctx);
@@ -473,6 +505,7 @@ function showDialog() {try {
 
 ec.cf.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§f");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -484,6 +517,7 @@ ec.cf.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.c0.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§0");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -495,6 +529,7 @@ ec.c0.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.c1.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§1");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -506,6 +541,7 @@ ec.c1.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.c2.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§2");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -517,6 +553,7 @@ ec.c2.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.c3.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§3");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -528,6 +565,7 @@ ec.c3.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.c4.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§4");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -539,6 +577,7 @@ ec.c4.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.c5.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§5");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -550,6 +589,7 @@ ec.c5.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.c6.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§6");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -561,6 +601,7 @@ ec.c6.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.c7.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§7");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -572,6 +613,7 @@ ec.c7.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.c8.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§8");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -583,6 +625,7 @@ ec.c8.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.c9.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§9");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -594,6 +637,7 @@ ec.c9.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.ca.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§a");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -605,6 +649,7 @@ ec.ca.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.cb.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§b");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -616,6 +661,7 @@ ec.cb.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.cc.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§c");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -627,6 +673,7 @@ ec.cc.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.cd.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§d");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -638,6 +685,7 @@ ec.cd.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.ce.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§e");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -649,6 +697,7 @@ ec.ce.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.cl.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§l");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -660,6 +709,7 @@ ec.cl.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.cm.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§m");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -671,6 +721,7 @@ ec.cm.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.cn.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§n");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -682,6 +733,7 @@ ec.cn.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.co.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§o");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -693,6 +745,7 @@ ec.co.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.ck.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§k");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
@@ -704,6 +757,7 @@ ec.ck.setOnClickListener(View.OnClickListener({onClick: function(view, event) {t
 
 ec.cr.setOnClickListener(View.OnClickListener({onClick: function(view, event) {try {
 		ec.et.setText(ec.et.getText() + "§r");
+		ec.et.setSelection((ec.et.getText() + "").length);
 	}catch(e) {
 		showError(e);
 	}}}));
