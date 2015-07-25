@@ -25,6 +25,7 @@ var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var PIXEL = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, 1, ctx.getResources().getDisplayMetrics());
 //사용할 파일 함수들 선언
 var FILE_SD_CARD = android.os.Environment.getExternalStorageDirectory();
+var FILE_SD_CARD_MUSIC = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_MUSIC);
 var FILE_MOD_DIR = new java.io.File(FILE_SD_CARD, "games/com.mojang/minecraftpe/mods");
 var FILE_MAIN_DIR = new java.io.File(FILE_MOD_DIR, className);
 var FILE_FONT = new java.io.File(FILE_MOD_DIR, "minecraft.ttf");
@@ -68,6 +69,7 @@ var Short = java.lang.Short;
 var Context = android.content.Context;
 var Thread = java.lang.Thread;
 var Runnable = java.lang.Runnable;
+var Process = android.os.Process;
 var AlertDialog = android.app.AlertDialog;
 var View = android.view.View;
 var ViewGroup = android.view.ViewGroup;
@@ -77,9 +79,11 @@ var FrameLayout = android.widget.FrameLayout;
 var RelativeLayout = android.widget.RelativeLayout;
 var LinearLayout = android.widget.LinearLayout;
 var ScrollView = android.widget.ScrollView;
+var HorizontalScrollView = android.widget.HorizontalScrollView;
 var TextView = android.widget.TextView;
 var Button = android.widget.Button;
 var ImageView = android.widget.ImageView;
+var EditText = android.widget.EditText;
 var ProgressBar = android.widget.ProgressBar;
 var PopupWindow = android.widget.PopupWindow;
 var StateListDrawable = android.graphics.drawable.StateListDrawable;
@@ -656,6 +660,7 @@ Gear.mediaDirs = 0;
 //modTick과는 별도로 움직이는 "비동기 Thread" 생성
 function AsynchronousModTick() {
 	Gear.thread = new Thread(new Runnable({run: function() {try { //noinspection InfiniteLoopJS
+		Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 		while(true) {
 			//gearChecker();
 			if(Gear.uiDelay > 0) {
@@ -726,13 +731,73 @@ function mediaScanning(path, array) {
 			Gear.mediaFiles++;
 			var extension = (list[e].getName() + "").split(".");
 			if(audioExtension.indexOf(extension[extension.length-1]) !== -1) {
-				array.push([list[e].getName(), list[e].getAbsolutePath()]);
+				array.push([list[e].getName() + "", list[e].getAbsolutePath() + ""]);
 				clientMessage(list[e].getName() + "");
 			}
 		}
 	}
 	return array;
 }
+
+function mediaScan(path) {
+	var l = new c.l(ctx);
+	l.setBackgroundDrawable(Assets.background_9());
+	l.setOrientation(c.l.HORIZONTAL);
+	l.setGravity(Gravity.CENTER);
+	l.setPadding(DIP*8, DIP*8, DIP*8, DIP*8);
+	var l_p = new c.l.LayoutParams(DIP*400, DIP*100);
+	l.setLayoutParams(l_p);
+	
+	var down = new android.view.animation.TranslateAnimation(0, 0, DIP*100, 0);
+	down.setFillAfter(true);
+	down.setDuration(300);
+	var up = new android.view.animation.TranslateAnimation(android.view.animation.Animation.RELATIVE_TO_SELF, 0,
+															android.view.animation.Animation.RELATIVE_TO_SELF, 0,
+															android.view.animation.Animation.RELATIVE_TO_SELF, 0,
+															android.view.animation.Animation.RELATIVE_TO_SELF, -1);
+	up.setFillAfter(true);
+	up.setDuration(200);
+	l.setAnimation(down);
+	var w = new PopupWindow(l, DIP*400, DIP*100, false);
+	
+	uiThread(function() {try {
+		new android.os.Handler().postDelayed(new java.lang.Runnable({run: function() {try {
+			l.startAnimation(up);
+			new android.os.Handler().postDelayed(new java.lang.Runnable({run: function() {try {
+				w.dismiss();
+			}catch(e) {
+				showErrir(e);
+			}}}), 1200);
+		}catch(e) {
+			showError(e);
+		}}}), 2000);
+	}catch(e) {
+		showError(e);
+	}});
+	
+	uiThread(function() {try {
+		w.showAtLocation(ctx.getWindow().getDecorView(), Gravity.TOP|Gravity.CENTER, 0, 0);
+	}catch(e) {
+		showError(e);
+	}});
+	
+	if(FILE_MUSIC_DATA.exists()) {
+		FILE_MUSIC_DATA.delete();
+	}
+	FILE_MUSIC_DATA.createNewFile();
+	var list = mediaScanning(path, []);
+	var bw = new java.io.BufferedWriter(new java.io.FileWriter(FILE_MUSIC_DATA));
+	for(var e = 0; e < list.length; e++) {
+		bw.write(JSON.stringify(list[e]) + "\n");
+		sleep(10);
+	}
+	bw.close();
+}
+thread(function() {try {
+mediaScan(FILE_SD_CARD_MUSIC);
+}catch(e) {
+	showError(e);
+}});
 
 //기어를 모아두는 그룹
 function GearGroup(name) {
@@ -788,7 +853,6 @@ GearGroup.prototype = {
 			showError(e);
 		}});
 		Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].getHeader();
-		Gear.loading = true;
 	}catch(e) {
 		showError(e);
 		toast("[ERROR] " + Gear.currentGear.toString() + "-" + Gear.currentGear.getMenus()[Gear.currentGear.getCurrentIndex()].toString());
@@ -840,7 +904,7 @@ GearGroup.prototype = {
 //기어그룹에 들어가는 각각의 기능이 담긴 기어메뉴
 function GearMenu(name) {
 	this.name = name;
-	this.header = function() {};
+	this.header = function() {Gear.loading = true};
 	this.tick = function() {};
 	this.finish = function() {};
 	this.layout = null;
@@ -2407,9 +2471,11 @@ function procCmd(str) {
 		break;
 		case "test":
 		thread(function() {try {
-			var a = mediaScanning(FILE_SD_CARD, []);
+			Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+			/*var a = mediaScanning(FILE_SD_CARD, []);
 			FILE_MUSIC_DATA.createNewFile();
-			//saveData(FILE_MUSIC_DATA, "CACHE", JSON.stringify(a));
+			saveData(FILE_MUSIC_DATA, "CACHE", JSON.stringify(a));*/
+			mediaScan(FILE_SD_CARD_MUSIC);
 			clientMessage("Done");
 		}catch(e) {
 			showError(e);
