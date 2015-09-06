@@ -70,6 +70,32 @@ ArrayT.prototype.remove = function(index) {
     return this.splice(index, 1);
 };
 
+ArrayT.prototype.toArray = function() {
+    var arr = new Array();
+    Array.prototype.push.apply(arr, this);
+    return arr;
+};
+
+
+
+
+
+var Device = {
+    getContext: function() {
+        return com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
+    },
+    
+    getWidth: function() {
+        var context = Device.getContext();
+        return context.getScreenWidth();
+    },
+    
+    getHeight: function() {
+        var context = Device.getContext();
+        return context.getScreenHeight();
+    }
+};
+
 
 
 
@@ -167,7 +193,7 @@ GuiElementContainer.prototype.getChildren = function() {
     return this.children;
 };
 
-GuiElementContainer.prototype.getSize = function() {
+GuiElementContainer.prototype.getChildrenSize = function() {
     return this.children.length;
 };
 
@@ -183,6 +209,24 @@ ClassHelper.inherit(Header, Button);
 
 Header.prototype.toString = function() {
     return "Header("+this.x+", "+this.y+", "+this.width+", "+this.height+", \""+this.text.replace(/\"/g, "\\\"")+"\")";
+};
+
+
+
+
+
+function Screen() {
+    GuiElement.call(this, 0, 0, 0, 0);
+    
+    this.setSize(Device.getWidth(), Device.getHeight());
+    
+    this.viewList = new ArrayT(GuiElement);
+}
+
+ClassHelper.inherit(Screen, GuiElement);
+
+Screen.prototype.init = function() {
+    return;
 };
 
 
