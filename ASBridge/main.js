@@ -10,7 +10,7 @@ var Bridge = {
     recieveCallback: function(data) {},
     
     open: function(callback) {
-        if(Object.prototype.toString.call(x) == "[object Function]")
+        if(Object.prototype.toString.call(callback) == "[object Function]")
             Bridge.recieveCallback = callback;
         Bridge.openFile = Bridge.openFile || new java.io.File(Bridge.openFilePath);
         Bridge.dataFile = Bridge.dataFile || new java.io.File(Bridge.dataFilePath);
@@ -63,7 +63,7 @@ var Bridge = {
     },
     
     setRecieveCallback: function(callback) {
-        if(Object.prototype.toString.call(x) == "[object Function]")
+        if(Object.prototype.toString.call(callback) == "[object Function]")
             Bridge.recieveCallback = callback;
     }
 };
