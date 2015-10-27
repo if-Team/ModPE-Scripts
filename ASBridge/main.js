@@ -1,59 +1,73 @@
-var Bridge = {};
-
-Bridge.thread = null;
-Bridge.isThreadOpen = true;
-Bridge.openCheck = null;
-Bridge.openCheckPath = "/sdcard/scriptbridge.a_opened";
-Bridge.dataFile = null;
-Bridge.dataFilePath = "/sdcard/scriptbridge.bridge";
-
-Bridge.start = function() {
-    Bridge.openCheck = Bridge.openCheck || new java.io.File(Bridge.openCheckPath);
-    Bridge.dataFile = Bridge.dataFile || new java.io.File(Bridge.dataFilePath);
+var Bridge = {
+    thread: null,
+    isThreadOpen: true,
+    openFile: null,
+    openFilePath: "/sdcard/scriptbridge.a_opened",
+    dataFile: null,
+    dataFilePath: "/sdcard/scriptbridge.bridge",
+    sendFile: null,
+    sendFilePath: "/sdcard/scriptbridge.s_opened",
+    recieveCallback: function(data) {},
     
-    Bridge.thread = Bridge.thread || new java.lang.Thread(new java.lang.Runnable({
-        run: function() {
-            while(Bridge.isThreadOpen) {
-                java.lang.Thread.sleep(100);
-                
-                if(Bridge.openCheck.exists()) {
-                    var data = Bridge.readFile();
-                    Bridge.parseAndRun(data);
+    open: function(callback) {
+        if(Object.prototype.toString.call(x) == "[object Function]")
+            Bridge.recieveCallback = callback;
+        Bridge.openFile = Bridge.openFile || new java.io.File(Bridge.openFilePath);
+        Bridge.dataFile = Bridge.dataFile || new java.io.File(Bridge.dataFilePath);
+        Bridge.sendFile = Bridge.sendFile || new java.io.File(Bridge.sendFilePath);
+        Bridge.thread = Bridge.thread || new java.lang.Thread(new java.lang.Runnable({
+            run: function() {
+                while(Bridge.isThreadOpen) {
+                    java.lang.Thread.sleep(100);
                     
-                    Bridge.openCheck["delete"]();
+                    if(Bridge.openFile.exists()) {
+                        Bridge.parseAndRun(Bridge.readFile());
+                        
+                        Bridge.openFile["delete"]();
+                        Bridge.dataFile["delete"]();
+                    }
                 }
             }
+        }));
+        
+        Bridge.thread.start();
+    },
+    
+    close: function() {
+        Bridge.isThreadOpen = false;
+    },
+    
+    readFile: function() {
+        var file = Bridge.dataFile;
+        var br = new java.io.BufferedReader(new java.io.FileReader(file));
+        var result = br.readLine();
+        br.close();
+        
+        return result;
+    },
+    
+    parseAndRun: function(data) {
+        try {
+            Bridge.recieveCallback(data);
+        } catch(e) {
+            print(e);
         }
-    }));
+    },
     
-    Bridge.thread.start();
-};
-
-Bridge.close = function() {
-    Bridge.isThreadOpen = false;
-};
-
-Bridge.readFile = function() {
-    var file = Bridge.dataFile;
-    var br = new java.io.BufferedReader(new java.io.FileReader(file));
-    var result = br.readLine();
-    br.close();
+    send: function(dataStr) {
+        Bridge.sendFile.createNewFile();
+        
+        var bw = new java.io.BufferedWriter(new java.io.FileWriter(Bridge.dataFile));
+        bw.write(dataStr);
+        bw.close();
+    },
     
-    return result;
-};
-
-Bridge.parseAndRun = function(data) {
-    var args = data.split("@");
-    var funcName = args.shift();
-    try {
-        eval(funcName + "(" + args[0] + ");");
-    } catch(e) {
-        print(e);
+    setRecieveCallback: function(callback) {
+        if(Object.prototype.toString.call(x) == "[object Function]")
+            Bridge.recieveCallback = callback;
     }
 };
 
-Bridge.start();
-
-function test(a, b) {
-    print(a + b);
-}
+Bridge.open(function(data) {
+    print(data);
+});
