@@ -1,4 +1,5 @@
 var Bridge = {
+    bridgeid: "",
     thread: null,
     isThreadOpen: true,
     openFile: null,
@@ -9,22 +10,31 @@ var Bridge = {
     sendFilePath: "/sdcard/scriptbridge.s_opened",
     recieveCallback: function(data) {},
     
-    open: function(callback) {
-        if(Object.prototype.toString.call(callback) == "[object Function]")
+    open: function(bridgeid, callback) {
+        Bridge.bridgeid = bridgeid+"";
+        if(typeof callback === "function")
             Bridge.recieveCallback = callback;
-        Bridge.openFile = Bridge.openFile || new java.io.File(Bridge.openFilePath);
-        Bridge.dataFile = Bridge.dataFile || new java.io.File(Bridge.dataFilePath);
-        Bridge.sendFile = Bridge.sendFile || new java.io.File(Bridge.sendFilePath);
-        Bridge.thread = Bridge.thread || new java.lang.Thread(new java.lang.Runnable({
+            
+        //Initializing static variables
+        Bridge.openFile = Bridge.openFile || new java.io.File(Bridge.openFilePath+"_"+bridgeid);
+        Bridge.dataFile = Bridge.dataFile || new java.io.File(Bridge.dataFilePath+"_"+bridgeid);
+        Bridge.sendFile = Bridge.sendFile || new java.io.File(Bridge.sendFilePath+"_"+bridgeid);
+        
+        Bridge.openFile["delete"]();
+        Bridge.dataFile["delete"]();
+        Bridge.sendFile["delete"]();
+        
+        Bridge.thread   = Bridge.thread   || new java.lang.Thread(new java.lang.Runnable({
             run: function() {
                 while(Bridge.isThreadOpen) {
                     java.lang.Thread.sleep(100);
                     
-                    if(Bridge.openFile.exists()) {
+                    if(Bridge.openFile.exists()) {     //If open check file has been created
                         Bridge.parseAndRun(Bridge.readFile());
                         
                         Bridge.openFile["delete"]();
                         Bridge.dataFile["delete"]();
+                        //Deleting bridge files
                     }
                 }
             }
@@ -35,6 +45,10 @@ var Bridge = {
     
     close: function() {
         Bridge.isThreadOpen = false;
+        
+        Bridge.openFile["delete"]();
+        Bridge.dataFile["delete"]();
+        Bridge.sendFile["delete"]();
     },
     
     readFile: function() {
@@ -63,11 +77,22 @@ var Bridge = {
     },
     
     setRecieveCallback: function(callback) {
-        if(Object.prototype.toString.call(callback) == "[object Function]")
+        if(typeof callback === "function")
             Bridge.recieveCallback = callback;
+    },
+    
+    changeBridgeId: function(bridgeid) {
+        Bridge.bridgeid = bridgeid+"";
+        
+        Bridge.openFile = new java.io.File(Bridge.openFilePath+"_"+bridgeid);
+        Bridge.dataFile = new java.io.File(Bridge.dataFilePath+"_"+bridgeid);
+        Bridge.sendFile = new java.io.File(Bridge.sendFilePath+"_"+bridgeid);
     }
 };
 
-Bridge.open(function(data) {
+Bridge.open("bridgeexample", function(data) {
     print(data);
 });
+Bridge.send("heyhey");
+Bridge.changeBridgeId("anotherid");
+Bridge.send("hihi");
