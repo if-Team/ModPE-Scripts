@@ -87,10 +87,14 @@ var Bridge = {
         Bridge.openFile = new java.io.File(Bridge.openFilePath+"_"+bridgeid);
         Bridge.dataFile = new java.io.File(Bridge.dataFilePath+"_"+bridgeid);
         Bridge.sendFile = new java.io.File(Bridge.sendFilePath+"_"+bridgeid);
+        Bridge.openFile["delete"]();
+        Bridge.dataFile["delete"]();
+        Bridge.sendFile["delete"]();
     }
 };
 
-Bridge.open("bridgeexample", function(data) {
+Bridge.open("bridgeexample");
+Bridge.setRecieveCallback(function(data) {
     print(data);
 });
 Bridge.send("heyhey");
