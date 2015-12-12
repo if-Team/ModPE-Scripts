@@ -38,3 +38,4 @@ function construct(ctx){
 }
 
 construct(com.mojang.minecraftpe.MainActivity.currentMainActivity.get());
+
