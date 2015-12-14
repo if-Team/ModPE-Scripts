@@ -15,7 +15,11 @@ BlockTypes = {
     TRAPDOOR: 5,
     FENCE: 6,
     PATHGRASS: 7,
-    STONEWALL: 8
+    STONEWALL: 8,
+    ENDPORTAL: 9,
+    ENCHANTTABLE: 10,
+    DAYLIGHTSENSOR: 11,
+    BUTTON: 12
 };
 
 /**
@@ -124,7 +128,23 @@ BlockImageLoader.create = function(left, right, top, renderType, hasNoShadow) {
         case BlockTypes.STONEWALL:
             temp = BlockImageLoader.createWall(left, right, top, temp, hasNoShadow);
             break;
-        
+            
+        case BlockTypes.ENDPORTAL:
+            temp = BlockImageLoader.createCube(left, right, top, temp, hasNoShadow, 26);
+            break;
+            
+        case BlockTypes.ENCHANTTABLE:
+            temp = BlockImageLoader.createCube(left, right, top, temp, hasNoShadow, 24);
+            break;
+            
+        case BlockTypes.DAYLIGHTSENSOR:
+            temp = BlockImageLoader.createCube(left, right, top, temp, hasNoShadow, 12);
+            break;
+            
+        case BlockTypes.BUTTON:
+            temp = BlockImageLoader.createButton(left, right, top, temp, hasNoShadow);
+            break;
+            
         default:
             temp = android.graphics.Bitmap.createScaledBitmap(left, 64, 64, false);
             break;
@@ -432,6 +452,99 @@ BlockImageLoader.createWall = function(left, right, top, temp, hasNoShadow) {
     return temp;
 };
 
+/**
+ * @param {Bitmap} left
+ * @param {Bitmap} right
+ * @param {Bitmap} top
+ * @param {Bitmap} temp
+ * @param {Boolean} hasNoShadow
+ * @returns {Bitmap}
+ */
+BlockImageLoader.createButton = function(left, right, top, temp, hasNoShadow) {
+    var createLeft = function(left) {
+        left = android.graphics.Bitmap.createBitmap(left, 10, 12, 12, 8);
+        left = android.graphics.Bitmap.createScaledBitmap(left, 9, 8, false);
+        var src = [0, 0, 9, 0, 9, 8, 0, 9];
+        var dst = [0, 0, 9, 5, 9, 13, 0, 9];
+        var mtrx = new android.graphics.Matrix();
+        mtrx.setPolyToPoly(src, 0, dst, 0, 4);
+        left = android.graphics.Bitmap.createBitmap(left, 0, 0, left.getWidth(), left.getHeight(), mtrx, false);
+        
+        return left;
+    };
+    
+    var createRight = function(right) {
+        right = android.graphics.Bitmap.createBitmap(right, 30, 12, 2, 8);
+        right = android.graphics.Bitmap.createScaledBitmap(right, 4, 8, false);
+        var src = [0, 0, 4, 0, 4, 8, 0, 8];
+        var dst = [0, 2, 4, 0, 4, 8, 0, 10];
+        var mtrx = new android.graphics.Matrix();
+        mtrx.setPolyToPoly(src, 0, dst, 0, 4);
+        right = android.graphics.Bitmap.createBitmap(right, 0, 0, right.getWidth(), right.getHeight(), mtrx, false);
+        
+        return right;
+    };
+    
+    var createTop = function(top) {
+        top = android.graphics.Bitmap.createBitmap(top, 10, 0, 12, 4);
+        var src = [0, 0, 12, 0, 12, 4, 0, 4];
+        var dst = [3, 0, 13, 5, 9, 7, 0, 2];
+        var mtrx = new android.graphics.Matrix();
+        mtrx.setPolyToPoly(src, 0, dst, 0, 4);
+        top = android.graphics.Bitmap.createBitmap(top, 0, 0, top.getWidth(), top.getHeight(), mtrx, false);
+        
+        return top;
+    };
+    
+    left = createLeft(left);
+    right = createRight(right);
+    top = createTop(top);
+    
+    var canvas = new android.graphics.Canvas(temp);
+    var p = new android.graphics.Paint();
+    if(hasNoShadow != false)
+        p.setColorFilter(new android.graphics.PorterDuffColorFilter(android.graphics.Color.rgb(255-65, 255-65, 255-65), android.graphics.PorterDuff.Mode.MULTIPLY));
+    canvas.drawBitmap(left, 5, (temp.getHeight()-left.getHeight())/2+4, p);
+    if(hasNoShadow != false)
+        p.setColorFilter(new android.graphics.PorterDuffColorFilter(android.graphics.Color.rgb(255-130, 255-130, 255-130), android.graphics.PorterDuff.Mode.MULTIPLY));
+    canvas.drawBitmap(right, 14, (temp.getHeight()-left.getHeight())/2+8, p);
+    canvas.drawBitmap(top, 5, (temp.getHeight()-left.getHeight())/2+2, null);
+    
+    return temp;
+};
+
+/**
+ * @param {Bitmap} left
+ * @param {Bitmap} right
+ * @param {Bitmap} top
+ * @param {Boolean} hasNoShadow
+ * @returns {Bitmap}
+ */
+BlockImageLoader.createAnvil;
+
+
+
 
 
 BlockImageLoader.init();
+
+/** TESTING **/
+/*
+function useItem() {
+    var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
+    ctx.runOnUiThread(new java.lang.Runnable({
+        run: function() {
+            var but = BlockImageLoader.create(["stone", 0], ["stone", 0], ["stone", 0], BlockTypes.BUTTON, true);
+            but = android.graphics.Bitmap.createScaledBitmap(but, 510, 570, false);
+            var imgv = new android.widget.ImageView(ctx);
+            imgv.setImageBitmap(but);
+            var pop = new android.widget.PopupWindow(ctx);
+            pop.setWidth(510);
+            pop.setHeight(570);
+            pop.setFocusable(true);
+            pop.setContentView(imgv);
+            pop.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+        }
+    }));
+}
+*/
