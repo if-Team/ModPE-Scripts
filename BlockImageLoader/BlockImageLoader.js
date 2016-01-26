@@ -70,12 +70,10 @@ BlockImageLoader.getBlockBitmap = function(name, data) {
     if(BlockImageLoader.META_MAPPED.indexOf(name) < 0)
         return android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.RGB_565);
     var uvs = BlockImageLoader.META[BlockImageLoader.META_MAPPED.indexOf(name)].uvs[data];
-    var x = uvs[0]*BlockImageLoader.TGA.getWidth();
-    var y = uvs[1]*BlockImageLoader.TGA.getHeight();
-    var width = uvs[2]*BlockImageLoader.TGA.getWidth()-x;
-    width = Math.ceil(width);
-    var height = uvs[3]*BlockImageLoader.TGA.getHeight()-y;
-    height = Math.ceil(height);
+    var x = uvs[0];
+    var y = uvs[1];
+    var width = uvs[2]-x;
+    var height = uvs[3]-y;
     return android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(BlockImageLoader.TGA, x, y, width, height), 32, 32, false);
 };
 
