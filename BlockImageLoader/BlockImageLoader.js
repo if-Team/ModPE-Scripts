@@ -44,16 +44,8 @@ BlockImageLoader.init = function(tga) {
         BlockImageLoader.TGA = tga;
     
     if(BlockImageLoader.META == null)
-        BlockImageLoader.META = JSON.parse(new java.lang.String(ModPE.getBytesFromTexturePack("images/terrain.meta"))+'');
-        
-    if(BlockImageLoader.META_MAPPED == null)
-        BlockImageLoader.META_MAPPED = BlockImageLoader.META.map(function(e) {
-            return e.name;
-        });
-        
-    if(BlockImageLoader.TGA == null)
-        BlockImageLoader.TGA = net.zhuoweizhang.mcpelauncher.texture.tga.TGALoader.load(ModPE.openInputStreamFromTexturePack("images/terrain-atlas.tga"), false);
-        
+        BlockImageLoader.META = JSON.parse(new java.lang.String(ModPE.getBytesFromTexturePack("resource_packs/vanilla/textures/terrain_texture.json")));
+
     if(BlockImageLoader.MTRX == null)
         BlockImageLoader.MTRX = new android.graphics.Matrix();
         
@@ -67,14 +59,15 @@ BlockImageLoader.init = function(tga) {
  * @returns {Bitmap}
  */
 BlockImageLoader.getBlockBitmap = function(name, data) {
-    if(BlockImageLoader.META_MAPPED.indexOf(name) < 0)
+    if(BlockImageLoader.META.texture_data[name] == undefined)
         return android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.RGB_565);
-    var uvs = BlockImageLoader.META[BlockImageLoader.META_MAPPED.indexOf(name)].uvs[data];
-    var x = uvs[0];
-    var y = uvs[1];
-    var width = uvs[2]-x;
-    var height = uvs[3]-y;
-    return android.graphics.Bitmap.createScaledBitmap(android.graphics.Bitmap.createBitmap(BlockImageLoader.TGA, x, y, width, height), 32, 32, false);
+    var texture = BlockImageLoader.META.texture_data[name].textures;
+    var path = "resource_packs/vanilla/";
+    if (Array.isArray(texture)) path += typeof texture [data] == Object ? texture [data].path : texture [data];
+    else path += typeof texture == Object ? texture.path : texture;
+
+    var bitmap = android.graphics.BitmapFactory.decodeStream(ModPE.openInputStreamFromTexturePack(path + ".png"));
+    return android.graphics.Bitmap.createScaledBitmap(bitmap, 32, 32, false);
 };
 
 /**
@@ -88,7 +81,7 @@ BlockImageLoader.getBlockBitmap = function(name, data) {
  * @returns {Bitmap}
  */
 BlockImageLoader.create = function(left, right, top, renderType, hasNoShadow) {
-    if(BlockImageLoader.TGA == null || BlockImageLoader.META == null)
+    if(BlockImageLoader.META == null)
         throw new Error("BlockImageLoader hasn't been initialized");
     
     if(!Array.isArray(left) || !Array.isArray(right) || !Array.isArray(top))
